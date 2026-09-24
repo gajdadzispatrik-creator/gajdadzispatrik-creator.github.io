@@ -1,0 +1,321 @@
+---
+import HeroPhotoPlaceholder from './HeroPhotoPlaceholder.astro';
+---
+
+<section id="hero" class="hero">
+  <div class="hero__inner">
+    <h1 class="hero__title">
+      <span class="hero__title-line hero__title-line--1">Finance</span><br />
+      <span class="hero__title-line hero__title-line--2">se&nbsp;nemají řešit</span><br />
+      <span class="hero__title-line hero__title-line--3">po&nbsp;částech.</span>
+    </h1>
+
+    <p class="hero__subhead">
+      Bydlení, ochranu, investice a&nbsp;penzi propojuji do&nbsp;jednoho plánu.<br class="hero__subhead-break" />
+      Aby dával smysl dnes i&nbsp;za&nbsp;několik let.
+    </p>
+
+    <div class="hero__actions">
+      <a class="hero__cta" href="/#kontakt">Nezávazná konzultace</a>
+
+      <a class="hero__phone" href="tel:+420775217721">
+        <svg class="hero__phone-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+        <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+      </a>
+    </div>
+  </div>
+
+  <HeroPhotoPlaceholder />
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--navy);
+    min-height: 764px;
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 3;
+    padding-inline-start: clamp(24px, calc(24px + 0.036036 * (100vw - 390px)), 40px);
+    padding-inline-end: 32px;
+    padding-top: 340px;
+  }
+
+  /* --- Typografie --- */
+
+  .hero__title {
+    font-weight: 700;
+    line-height: .99;
+    letter-spacing: -.05em;
+    font-size: clamp(42px, calc(42px + 0.031532 * (100vw - 390px)), 56px);
+    max-width: 334px;
+    color: var(--white);
+  }
+
+  .hero__title-line {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: reveal-line var(--duration-reveal) var(--ease-out) forwards;
+  }
+
+  .hero__title-line--1 {
+    animation-delay: 60ms;
+  }
+
+  .hero__title-line--2 {
+    animation-delay: 150ms;
+  }
+
+  .hero__title-line--3 {
+    animation-delay: 240ms;
+  }
+
+  @keyframes reveal-line {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero__subhead {
+    margin-top: 24px;
+    max-width: 300px;
+    font-size: 16.5px;
+    line-height: 1.6;
+    font-weight: 400;
+    color: rgba(255, 255, 255, .78);
+  }
+
+  .hero__subhead-break {
+    display: none;
+  }
+
+  /* --- Akce --- */
+
+  .hero__actions {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hero__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    width: 100%;
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: var(--radius-btn);
+    transition: background-color var(--duration-hover) var(--ease-out), transform var(--duration-hover) var(--ease-out);
+  }
+
+  .hero__cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .hero__cta:active {
+    transform: translateY(1px);
+  }
+
+  .hero__phone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 52px;
+    font-weight: 600;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+    color: var(--white);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .hero__phone:hover {
+    color: var(--emerald-light);
+  }
+
+  .hero__phone-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* --- Fotografie (placeholder) --- */
+
+  .hero :global(.hero-photo) {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(
+      180deg,
+      rgba(120, 152, 193, 0) 0%,
+      rgba(92, 127, 172, .42) 16%,
+      rgba(58, 92, 138, .68) 40%,
+      rgba(32, 62, 104, .86) 62%,
+      rgba(19, 45, 80, .96) 80%,
+      #0f2747 94%,
+      #0f2747 100%
+    );
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 250px, black 250px);
+            mask-image: linear-gradient(180deg, transparent 0, transparent 250px, black 250px);
+    pointer-events: none;
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .hero {
+      min-height: clamp(656px, calc(656px + 0.255639 * (100vw - 834px)), 792px);
+      color: var(--navy);
+    }
+
+    .hero::after {
+      display: none;
+    }
+
+    .hero__inner {
+      padding-inline-end: clamp(40px, calc(40px + 0.105263 * (100vw - 834px)), 96px);
+      padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+    }
+
+    .hero__title {
+      color: var(--navy);
+      /* 470px zalamovalo „se nemají řešit“ na dva řádky těsně pod 1200px,
+         kde tabletový font-size vzorec dosahuje ~75px (přirozená šířka řádku
+         ~474px) — 490px dává bezpečnou rezervu při zachování jednoho řádku. */
+      max-width: 490px;
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+    }
+
+    .hero__subhead {
+      color: var(--text);
+      max-width: 520px;
+      margin-top: 60px;
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+
+    .hero__subhead-break {
+      display: inline;
+    }
+
+    .hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: clamp(32px, calc(32px + 0.007519 * (100vw - 834px)), 36px);
+      margin-top: 46px;
+    }
+
+    .hero__cta {
+      width: auto;
+      padding-inline: 28px;
+      height: 56px;
+    }
+
+    .hero__phone {
+      height: 56px;
+      color: var(--navy);
+    }
+
+    .hero__phone:hover {
+      color: var(--emerald);
+    }
+
+    .hero :global(.hero-photo) {
+      inset: auto;
+      top: clamp(72px, calc(72px + 0.060150 * (100vw - 834px)), 104px);
+      left: clamp(560px, calc(560px + 0.639098 * (100vw - 834px)), 900px);
+      width: clamp(312px, calc(312px + 0.289474 * (100vw - 834px)), 466px);
+      height: clamp(584px, calc(584px + 0.195489 * (100vw - 834px)), 688px);
+      border-radius: 0;
+    }
+  }
+
+  /* ============ Laptop/Desktop: 1200+ ============ */
+  @media (min-width: 1200px) {
+    .hero__inner {
+      padding-top: clamp(84px, calc(84px + 0.054054 * (100vw - 1366px)), 88px);
+    }
+
+    .hero__title {
+      max-width: 780px;
+      font-size: clamp(84px, calc(84px + 0.108108 * (100vw - 1366px)), 92px);
+    }
+
+    .hero__subhead {
+      max-width: 590px;
+      margin-top: 85px;
+      font-size: clamp(19px, calc(19px + 0.013514 * (100vw - 1366px)), 20px);
+    }
+
+    .hero__actions {
+      margin-top: 50px;
+      gap: clamp(36px, calc(36px + 0.054054 * (100vw - 1366px)), 40px);
+    }
+
+    .hero__cta {
+      height: clamp(56px, calc(56px + 0.027027 * (100vw - 1366px)), 58px);
+      padding-inline: 30px;
+    }
+
+    .hero__phone {
+      height: clamp(56px, calc(56px + 0.027027 * (100vw - 1366px)), 58px);
+    }
+
+    .hero :global(.hero-photo) {
+      top: 104px;
+      left: clamp(900px, calc(900px + 0.594595 * (100vw - 1366px)), 944px);
+      width: clamp(466px, calc(466px + 0.459459 * (100vw - 1366px)), 500px);
+      height: clamp(688px, calc(688px + 0.162162 * (100vw - 1366px)), 700px);
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .hero {
+      min-height: clamp(792px, calc(792px + 0.162162 * (100vw - 1366px)), 804px);
+      /* Wide desktop: centrované designové plátno (CLAUDE.md) — no-op pod
+         --stage-max, nad ní zastaví další roztahování obsahu s viewportem.
+         HeroLine.astro (dekorativní linka, sourozenec uvnitř .hero-group)
+         dostává STEJNÝ strop samostatně, aby zůstala navázaná na obsah. */
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .hero__inner {
+      padding-inline-start: clamp(96px, calc(96px + 0.324324 * (100vw - 1366px)), 120px);
+    }
+
+    .hero__subhead {
+      margin-top: 77px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__title-line {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

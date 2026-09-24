@@ -1,0 +1,1104 @@
+---
+/**
+ * Sekce „Případové studie a výsledky“ — Situace · řešení · výsledek (varianta 18b).
+ * Zdroj: úkol pro Claude Code „sekce Případové studie a výsledky
+ * (Situace · řešení · výsledek)“, §1–§14. Vkládá se MEZI BenefitsSection.astro
+ * (tmavá) a AboutSection.astro (světlá) — obě zůstávají beze změny.
+ *
+ * ODCHYLKA 1 (§2 — zadání samo tuto kontrolu vyžaduje):
+ * §8 předpokládal vstupní x na tabletu 500. Reálně změřeno (getPointAtLength
+ * na živých `.benefits__route-path` / `.about__route-path`): BenefitsSection
+ * na tabletu/mobilu KONČÍ přesně na ose x=40/24 — stejné číslo, jaké §7/§8
+ * dává vlastní ose této sekce. Vstup je tam tedy roven ose, žádný lom není
+ * potřeba (stejný princip jako u AboutSection/ReviewsSection/BenefitsSection
+ * navzájem na týchž šířkách). Desktop (940) a notebook (890) souhlasí s §6/§7
+ * beze změny.
+ *
+ * ODCHYLKA 2 (zásadní, uživatel odsouhlasil — viz konverzace):
+ * Na desktopu/notebooku §6/§7 chtějí trasu zalomit na osu u levého okraje
+ * (x=120/96) a NECHAT ji tam až po patu sekce. Jenže AboutSection pod touto
+ * sekcí očekává vstup na x=940/890 (reálně změřeno — shoduje se s tím, na
+ * čem reálně končí BenefitsSection nad touto sekcí), ne na 120/96. Trasa by
+ * tak na hranici s O mně udělala viditelný skok (~820/794 px). Aby zůstal
+ * jeden nepřerušený tah (klíčový princip celého webu) A ZÁROVEŇ osa u levého
+ * okraje pro zářezy/kotvy/odsazení textu přesně podle zadání, má trasa na
+ * desktopu/notebooku DVA lomy navíc: těsně pod CTA (mimo výšku veškerého
+ * textu) se vrací zpátky na x=940/890 pro zbytek sekce. Celkem tedy 4 lomy,
+ * ne 2 (bod §14/9 kontrolního seznamu se doslovně nesplní) — ale šev s O mně
+ * je přesně 0 px na celém rozsahu obou stupňů, což bylo vyhodnoceno jako
+ * důležitější. Návratový lom používá stejnou geometrii (sweep 0→1, svislice→
+ * vodorovná vpravo→svislice) jako police v ArticlesSection.astro.
+ *
+ * ODCHYLKA 3 (§12, technické požadavky — dokument to sám vyžaduje):
+ * Nadpis, úvod, trojice/řádky studií a CTA jsou jeden svislý tok (flex
+ * kolona s gap), ne bloky na pevných `top` ze §6–§9 (ty předpokládají
+ * konkrétní počet řádků nadpisu/úvodu). Lom trasy (u desktopu/notebooku)
+ * a Y souřadnice všech tří zářezů/kotev se proto po vykreslení přepočítávají
+ * ze skutečné pozice obsahu (`getBoundingClientRect`) — stejný princip jako
+ * `syncMarkers` v BenefitsSection.astro, tady navíc i pro lom a návratový lom.
+ */
+interface CaseStudy {
+  title: string;
+  expanded: boolean;
+  situation: string | null;
+  solution: string | null;
+  result: string | null;
+  // Krátký, sloučený popis situace/postupu/výsledku pro nerozbalené (řádkové)
+  // případy — na rozdíl od `situation`/`solution`/`result` výše (ty se
+  // zobrazují jen u `expanded: true` jako samostatná trojice).
+  summary?: string | null;
+}
+
+// 3 SKUTEČNÉ PŘÍPADY z praxe (doplněno 14. 9. 2026, zadání uživatele
+// „Doplnit sekci reálných klientských případů na homepage"). Bez jmen,
+// fotek a citlivých údajů — viz `docs/content-homepage.md` kapitola 8.
+const cases: CaseStudy[] = [
+  {
+    title: 'Když standardní postup nestačil',
+    expanded: true,
+    situation:
+      'Klient měl několik závazků a splátky už začínaly být nad jeho možnosti. Kvůli opožděným platbám měl navíc záznamy v registrech a jako OSVČ narážel i na posouzení příjmu. Řešení hledal několik měsíců, ale nikam se neposunul.',
+    solution:
+      'Nezkoušel jsem stejnou cestu znovu. Podíval jsem se na případ podle toho, jak jednotlivé instituce pracují s registry i příjmem podnikatele, a vybral variantu, která dávala v jeho situaci reálnou šanci projít.',
+    result:
+      'Během několika týdnů se podařilo refinancování schválit a dosavadní závazky sjednotit do jednoho řešení. Klient tak dostal své finance znovu pod kontrolu a nemusel dál každý měsíc řešit, kterou splátku zaplatí jako první.',
+  },
+  {
+    title: 'Stejná daňovka. Jiný výsledek.',
+    expanded: false,
+    situation: null,
+    solution: null,
+    result: null,
+    summary:
+      'Klient podnikal a chtěl hypotéku. V bankách mu ale z daňového přiznání vycházel příjem, který na požadovanou výši financování nestačil. U OSVČ totiž není důležité jen to, co je v daňovém přiznání, ale také jak konkrétní banka tato čísla vyhodnotí. Porovnal jsem proto různé metodiky a vybral banku, která jeho příjmy dokázala posoudit vhodněji. Ze stejného daňového přiznání vyšel výrazně jiný uznatelný příjem a klient se mohl dostat k financování, na které by podle původního výpočtu nedosáhl. Bez čekání na další daňové období nebo úpravy daňového přiznání.',
+  },
+  {
+    title: 'Přišli kvůli hypotéce. Nezůstalo jen u ní.',
+    expanded: false,
+    situation: null,
+    solution: null,
+    result: null,
+    summary:
+      'Klienti za mnou přišli kvůli hypotéce a stejně jako většina lidí se na začátku soustředili hlavně na úrokovou sazbu. Během řešení ale postupně viděli, že hypotéka je jen jedna část jejich financí. Vyřešili jsme nejen samotné financování, ale také ochranu příjmu, životní pojištění, pojištění nemovitosti a celý proces kolem smluv, úschovy a čerpání. U každého kroku jsem jim vysvětlil, proč ho řešíme a jak zapadá do ostatních financí. Po dokončení hypotéky už nechtěli skončit jen u bydlení. Sami chtějí pokračovat a podívat se také na investice a další finanční cíle. Z jednorázového řešení hypotéky tak vzniká dlouhodobější spolupráce nad jejich financemi jako celkem.',
+  },
+];
+---
+
+<section class="cases" aria-labelledby="pripadove-studie">
+  <div class="cases__inner">
+    <div class="cases__intro">
+      <h2 id="pripadove-studie" class="cases__heading cases__reveal-clip">Výsledky místo slibů.</h2>
+      <p class="cases__lead cases__reveal-up">
+        Každý klient přichází s&nbsp;jinou situací. Řešení proto vždy začíná pochopením jeho cílů.
+      </p>
+    </div>
+
+    <ol class="cases__list">
+      {cases.map((c) => (
+        <li class={`cases__item cases__reveal-item ${c.expanded ? 'cases__item--expanded' : 'cases__item--row'}`}>
+          <h3 class="cases__item-title">{c.title}</h3>
+          {c.expanded ? (
+            <dl class="cases__triad">
+              <dt class="cases__triad-label cases__triad-label--situation">Situace</dt>
+              <dd class="cases__triad-value">
+                <p>{c.situation}</p>
+              </dd>
+              <dt class="cases__triad-label cases__triad-label--solution">Řešení</dt>
+              <dd class="cases__triad-value">
+                <p>{c.solution}</p>
+              </dd>
+              <dt class="cases__triad-label cases__triad-label--result">Výsledek</dt>
+              <dd class="cases__triad-value">
+                <p>{c.result}</p>
+              </dd>
+            </dl>
+          ) : c.summary ? (
+            <p class="cases__row-desc">{c.summary}</p>
+          ) : (
+            <>
+              <span class="cases__row-label" aria-hidden="true">DOPLNÍ SE</span>
+              <span class="sr-only">Popis bude doplněn</span>
+            </>
+          )}
+        </li>
+      ))}
+    </ol>
+
+    <a class="cases__cta cases__reveal-up" href="/recenze">Přečíst recenze klientů</a>
+  </div>
+
+  <!--
+    Desktop 1400+ (kalibrace 1440). Vstup x=940 (= reálný výstup Benefits),
+    osa x=120, radius 28, návratový lom zpět na x=940 pod CTA (viz Odchylka 2).
+  -->
+  <svg
+    class="cases__route cases__route--desktop"
+    viewBox="0 0 1440 1300"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-bend="true"
+    data-entry="940"
+    data-axis="120"
+    data-radius="28"
+    data-notch-offset="44"
+  >
+    <path
+      class="cases__route-path"
+      d="M 940 -20 V 296 A 28 28 0 0 1 912 324 H 148 A 28 28 0 0 0 120 352 V 1000 A 28 28 0 0 0 148 1028 H 912 A 28 28 0 0 1 940 1056 V 1300"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="cases__notch" x1="120" y1="380" x2="164" y2="380"></line>
+    <line class="cases__notch" x1="120" y1="700" x2="164" y2="700"></line>
+    <line class="cases__notch" x1="120" y1="850" x2="164" y2="850"></line>
+    <circle class="cases__dot cases__dot--0" cx="164" cy="380" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="cases__dot cases__dot--1" cx="164" cy="700" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="cases__dot cases__dot--2" cx="164" cy="850" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!-- Notebook 1200–1399 (kalibrace 1366). Vstup x=890, osa x=96, radius 28 — stejná logika jako desktop výše. -->
+  <svg
+    class="cases__route cases__route--laptop"
+    viewBox="0 0 1366 1300"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-bend="true"
+    data-entry="890"
+    data-axis="96"
+    data-radius="28"
+    data-notch-offset="44"
+  >
+    <path
+      class="cases__route-path"
+      d="M 890 -20 V 252 A 28 28 0 0 1 862 280 H 124 A 28 28 0 0 0 96 308 V 950 A 28 28 0 0 0 124 978 H 862 A 28 28 0 0 1 890 1006 V 1300"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="cases__notch" x1="96" y1="364" x2="140" y2="364"></line>
+    <line class="cases__notch" x1="96" y1="664" x2="140" y2="664"></line>
+    <line class="cases__notch" x1="96" y1="806" x2="140" y2="806"></line>
+    <circle class="cases__dot cases__dot--0" cx="140" cy="364" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="cases__dot cases__dot--1" cx="140" cy="664" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="cases__dot cases__dot--2" cx="140" cy="806" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!--
+    Tablet 768–1199 (kalibrace 834). Vstup x=40 (viz Odchylka 1) = vlastní osa
+    (§7) — shoduje se s reálným výstupem BenefitsSection, žádný lom potřeba,
+    trasa jde rovně dolů (stejný princip jako AboutSection na tabletu).
+  -->
+  <svg
+    class="cases__route cases__route--tablet"
+    viewBox="0 0 834 1400"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-bend="false"
+    data-axis="40"
+    data-notch-offset="44"
+  >
+    <path
+      class="cases__route-path"
+      d="M 40 -20 V 1400"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <line class="cases__notch" x1="40" y1="320" x2="84" y2="320"></line>
+    <line class="cases__notch" x1="40" y1="700" x2="84" y2="700"></line>
+    <line class="cases__notch" x1="40" y1="830" x2="84" y2="830"></line>
+    <circle class="cases__dot cases__dot--0" cx="84" cy="320" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="cases__dot cases__dot--1" cx="84" cy="700" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="cases__dot cases__dot--2" cx="84" cy="830" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!-- Mobil <768 (kalibrace 390). Vstup x=24 = vlastní osa (§8/Odchylka 1) — stejný princip jako tablet výše. -->
+  <svg
+    class="cases__route cases__route--mobile"
+    viewBox="0 0 390 1400"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-bend="false"
+    data-axis="24"
+    data-notch-offset="22"
+  >
+    <path
+      class="cases__route-path"
+      d="M 24 -20 V 1400"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <line class="cases__notch" x1="24" y1="330" x2="46" y2="330"></line>
+    <line class="cases__notch" x1="24" y1="800" x2="46" y2="800"></line>
+    <line class="cases__notch" x1="24" y1="920" x2="46" y2="920"></line>
+    <circle class="cases__dot cases__dot--0" cx="46" cy="330" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="cases__dot cases__dot--1" cx="46" cy="800" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="cases__dot cases__dot--2" cx="46" cy="920" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+</section>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const section = document.querySelector('.cases');
+  if (section) {
+    const allSvgs = Array.from(section.querySelectorAll('.cases__route')) as SVGSVGElement[];
+    const lead = section.querySelector('.cases__lead') as HTMLElement | null;
+    const items = Array.from(section.querySelectorAll('.cases__item')) as HTMLElement[];
+    const titles = items.map((item) => item.querySelector('.cases__item-title') as HTMLElement | null);
+    const cta = section.querySelector('.cases__cta') as HTMLElement | null;
+
+    const getActiveSvg = (): SVGSVGElement | undefined =>
+      allSvgs.find((svg) => getComputedStyle(svg).display !== 'none');
+
+    let currentSvg: SVGSVGElement | undefined;
+    let path: SVGPathElement | null = null;
+    let notches: SVGLineElement[] = [];
+    let dots: SVGCircleElement[] = [];
+
+    const bindActiveSvg = (svg: SVGSVGElement) => {
+      currentSvg = svg;
+      path = svg.querySelector('.cases__route-path');
+      notches = Array.from(svg.querySelectorAll('.cases__notch'));
+      dots = Array.from(svg.querySelectorAll('.cases__dot'));
+    };
+
+    /*
+     * Zářezy/kotvy sedí na skutečné svislé pozici nadpisu příslušné studie
+     * (stejný princip jako `syncMarkers` v BenefitsSection.astro — kotva na
+     * středu `.benefits__name`). Lom (a u desktopu/notebooku i návratový
+     * lom, Odchylka 2) se dopočítává ze skutečné pozice úvodu / CTA, ne
+     * z pevného odhadu — výška sekce plyne z obsahu.
+     */
+    const syncRoute = () => {
+      const svg = getActiveSvg();
+      if (!svg) return;
+      if (svg !== currentSvg) bindActiveSvg(svg);
+      if (!lead) return;
+
+      const svgRect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox.baseVal;
+      // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
+      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
+      // (oprava 14. 9. 2026).
+      if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
+      const scaleY = svgRect.height / viewBox.height;
+      const scaleX = svgRect.width / viewBox.width;
+      svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+      /*
+       * Vodorovné odsazení zářezu/tečky od osy (`data-notch-offset`, reálné
+       * px) se dopočítává stejně jako svislá pozice, ne z pevných SVG
+       * jednotek v markupu — SVG se neuniformně roztahuje
+       * (`preserveAspectRatio="none"`), takže lokální offset (44/22) mimo
+       * kalibrační šířku rostl úměrně se šířkou okna, zatímco `.cases__list`
+       * má odsazení pevné v px (`calc(... + 68px)` apod.) — na 1920 px byla
+       * mezera zářez↔text jen ~10 px místo ~24 px. Stejná oprava jako
+       * `syncMarkers` v BenefitsSection.astro (viz CLAUDE.md bod 6).
+       */
+      const notchOffsetPx = parseFloat(svg.dataset.notchOffset ?? '0');
+      const axisLocal = parseFloat(svg.dataset.axis ?? '0');
+      const axisRealX = svgRect.left + axisLocal * scaleX;
+      const targetLocalX = notchOffsetPx > 0 ? (axisRealX + notchOffsetPx - svgRect.left) / scaleX : null;
+
+      titles.forEach((title, i) => {
+        const notch = notches[i];
+        const dot = dots[i];
+        if (!title || (!notch && !dot)) return;
+        const rect = title.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const localY = (centerY - svgRect.top) / scaleY;
+        if (notch) {
+          notch.setAttribute('y1', String(localY));
+          notch.setAttribute('y2', String(localY));
+          if (targetLocalX !== null) notch.setAttribute('x2', String(targetLocalX));
+        }
+        if (dot) {
+          dot.setAttribute('cy', String(localY));
+          if (targetLocalX !== null) dot.setAttribute('cx', String(targetLocalX));
+        }
+      });
+
+      if (svg.dataset.bend === 'true' && path && cta) {
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const axisX = parseFloat(svg.dataset.axis ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '28');
+
+        // Lom ≥ 60px pod úvodem (§14 bod 8) — 80px dává bezpečnou rezervu.
+        const leadRect = lead.getBoundingClientRect();
+        const bendY = (leadRect.bottom + 140 - svgRect.top) / scaleY;
+
+        // Návratový lom pod CTA — mimo výšku jakéhokoli textu (§14 bod 7/§12).
+        const ctaRect = cta.getBoundingClientRect();
+        const returnBendY = (ctaRect.bottom + 48 - svgRect.top) / scaleY;
+
+        const d =
+          `M ${entryX} -20 V ${bendY - r} A ${r} ${r} 0 0 1 ${entryX - r} ${bendY} ` +
+          `H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${bendY + r} ` +
+          `V ${returnBendY - r} A ${r} ${r} 0 0 0 ${axisX + r} ${returnBendY} ` +
+          `H ${entryX - r} A ${r} ${r} 0 0 1 ${entryX} ${returnBendY + r} V ${viewBox.height}`;
+        path.setAttribute('d', d);
+      }
+    };
+
+    const initialSvg = getActiveSvg();
+    if (initialSvg) bindActiveSvg(initialSvg);
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    // `font-display: swap` (fonts.css) — viz CLAUDE.md „Konvence: kontinuální
+    // linka, tečky a text“ bod 5.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(section);
+      items.forEach((item) => resizeObserver.observe(item));
+      if (lead) resizeObserver.observe(lead);
+    }
+
+    if (!disableAnimation) {
+      const heading = section.querySelector('.cases__reveal-clip');
+      const fadeUpEls = Array.from(section.querySelectorAll('.cases__reveal-up'));
+      const triadCols = Array.from(section.querySelectorAll('.cases__triad-col'));
+
+      if (heading) heading.classList.add('is-pending');
+      fadeUpEls.forEach((el) => el.classList.add('is-pending'));
+      items.forEach((item) => item.classList.add('is-pending'));
+      triadCols.forEach((col, i) => {
+        (col as HTMLElement).style.transitionDelay = `${i * 90}ms`;
+        col.classList.add('is-pending');
+      });
+
+      let contentRevealed = false;
+      const revealContent = () => {
+        if (contentRevealed) return;
+        contentRevealed = true;
+        if (heading) {
+          heading.classList.remove('is-pending');
+          heading.classList.add('is-visible');
+        }
+        fadeUpEls.forEach((el) => {
+          el.classList.remove('is-pending');
+          el.classList.add('is-visible');
+        });
+      };
+
+      const paths: SVGPathElement[] = path ? [path] : [];
+      const lengths = new Map<SVGPathElement, number>();
+      const dotThresholds: number[] = [];
+
+      const measure = () => {
+        syncRoute();
+        paths.forEach((p) => {
+          const length = p.getTotalLength();
+          lengths.set(p, length);
+          p.style.strokeDasharray = String(length);
+        });
+        const mainLength = path ? lengths.get(path) ?? 0 : 0;
+        dots.forEach((dot, i) => {
+          if (!path || mainLength === 0) return;
+          const cx = parseFloat(dot.getAttribute('cx') ?? '0');
+          const cy = parseFloat(dot.getAttribute('cy') ?? '0');
+          let best = Infinity;
+          let bestT = 1;
+          const steps = 1500;
+          for (let s = 0; s <= steps; s++) {
+            const l = (mainLength * s) / steps;
+            const pt = path.getPointAtLength(l);
+            const d = Math.hypot(pt.x - cx, pt.y - cy);
+            if (d < best) {
+              best = d;
+              bestT = l / mainLength;
+            }
+          }
+          dotThresholds[i] = bestT;
+        });
+      };
+      measure();
+      paths.forEach((p) => (p.style.strokeDashoffset = String(lengths.get(p) ?? 0)));
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+
+      let ticking = false;
+      const update = () => {
+        measure();
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+        paths.forEach((p) => {
+          const length = lengths.get(p) ?? 0;
+          p.style.strokeDashoffset = String(length * (1 - progress));
+        });
+
+        dots.forEach((dot, i) => {
+          if (progress >= (dotThresholds[i] ?? 1)) {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+            const item = items[i];
+            if (item) {
+              item.classList.remove('is-pending');
+              item.classList.add('is-visible');
+            }
+            if (i === 0) {
+              triadCols.forEach((col) => {
+                col.classList.remove('is-pending');
+                col.classList.add('is-visible');
+              });
+            }
+          }
+        });
+
+        if (rect.top < vh) revealContent();
+
+        ticking = false;
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    }
+  }
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .cases {
+    position: relative;
+    overflow: hidden;
+    background: #FFFFFF;
+  }
+
+  .cases__inner {
+    /*
+     * Jen svislý padding — žádný vodorovný. Levé/pravé odsazení dávají
+     * jednotlivé přímé děti (`.cases__intro`, `.cases__list`, `.cases__cta`)
+     * svým vlastním procentuálně kotveným marginem. Kdyby `.cases__inner`
+     * mělo i vodorovný padding, procenta v marginu vnořených dětí (např.
+     * `.cases__list`) by se počítala z JEHO content-boxu (menšího a jinak
+     * škálovaného než šířka viewportu), ne ze skutečné šířky viewportu —
+     * stejná chyba jako `grid-template-columns` s `%` ve FaqSection.astro
+     * (zjištěno auditem odsazení, viz CLAUDE.md).
+     */
+    padding: 104px 0 96px;
+  }
+
+  .cases__intro {
+    margin: 0 24px 0 calc(24 * 100% / 390 + 32px);
+  }
+
+  /* --- Nadpis / úvod --- */
+
+  .cases__heading {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -.045em;
+    font-size: 40px;
+    /* Strop šířky — bez něj h2 (block-level) vyplní celou dostupnou šířku
+       sloupce až k paddingu, ne jen šířku textu; na netriviálních šířkách
+       v rámci stupně to přesahovalo idealizovanou obsahovou linku. */
+    max-width: 480px;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .cases__reveal-clip.is-pending {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .cases__reveal-clip.is-visible {
+    clip-path: inset(0 0 0% 0);
+    transition: clip-path 700ms var(--ease-out);
+  }
+
+  .cases__lead {
+    margin: 14px 0 0;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 16px;
+    max-width: 340px;
+    color: var(--text-body);
+  }
+
+  .cases__reveal-up.is-pending {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .cases__reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  /* --- Seznam studií --- */
+
+  .cases__list {
+    margin: 40px 24px 0 calc(24 * 100% / 390 + 36px);
+    /* Strop šířky — bez něj (ol/li jsou block-level) seznam i řádkové
+       studie (flex, justify-content:space-between) vyplní celou dostupnou
+       šířku sloupce až k paddingu, ne jen šířku obsahové linky. */
+    max-width: 306px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .cases__item.is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .cases__item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  .cases__item-title {
+    margin: 0;
+    color: var(--navy);
+  }
+
+  .cases__item--expanded .cases__item-title {
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.03em;
+    font-size: 26px;
+  }
+
+  /* --- Trojice (rozložená studie) --- */
+
+  .cases__triad {
+    margin: 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cases__triad-col {
+    display: contents;
+  }
+
+  .cases__triad-col.is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .cases__triad-col.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 450ms var(--ease-out), transform 450ms var(--ease-out);
+  }
+
+  .cases__triad-label {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 10.5px;
+  }
+
+  .cases__triad-label--situation {
+    color: var(--emerald);
+  }
+
+  .cases__triad-label--solution,
+  .cases__triad-label--result {
+    color: var(--text-muted);
+  }
+
+  .cases__triad-value {
+    margin: 8px 0 0;
+  }
+
+  .cases__triad-value p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+
+  /* --- Řádkové studie --- */
+
+  .cases__item--row {
+    display: flex;
+    flex-direction: column;
+    /* 14px — konvence „nadpis → vysvětlující text" (CLAUDE.md), platí i pro
+       opakované položky v seznamu. Dřív 6px, kdy tu místo skutečného popisu
+       stál jen krátký status štítek „DOPLNÍ SE". */
+    gap: 14px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .cases__item--row .cases__item-title {
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -.02em;
+    font-size: 20px;
+  }
+
+  .cases__row-desc {
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.55;
+    font-size: 15px;
+    color: var(--text-body);
+  }
+
+  .cases__row-label {
+    flex: none;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 10px;
+    color: var(--text-faint);
+  }
+
+  /* --- CTA --- */
+
+  .cases__cta {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    min-height: 48px;
+    margin: 32px 24px 0 calc(24 * 100% / 390 + 36px);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .cases__cta:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+
+  .cases__cta:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  /* --- Trasa --- */
+
+  .cases__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .cases__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+
+  .cases__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .cases__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .cases__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .cases__route--tablet,
+  .cases__route--laptop,
+  .cases__route--desktop {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cases__heading,
+    .cases__reveal-up,
+    .cases__item,
+    .cases__triad-col {
+      opacity: 1;
+      clip-path: none;
+      transform: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .cases__route--mobile {
+      display: none;
+    }
+
+    .cases__route--tablet {
+      display: block;
+    }
+
+    .cases__inner {
+      padding: 96px 0 100px;
+    }
+
+    .cases__intro {
+      margin: 0 40px 0 calc(40 * 100% / 834 + 56px);
+    }
+
+    .cases__heading {
+      font-size: 52px;
+      max-width: 620px;
+      line-height: 1.06;
+    }
+
+    .cases__lead {
+      /* Sjednoceno na 14px napříč weby (1. 9. 2026) — viz .cases__lead base. */
+      margin-top: 14px;
+      font-size: 17px;
+      max-width: 420px;
+    }
+
+    .cases__list {
+      margin: 56px 40px 0 calc(40 * 100% / 834 + 70px);
+      max-width: 684px;
+      gap: 32px;
+    }
+
+    .cases__item--expanded .cases__item-title {
+      font-size: 30px;
+    }
+
+    .cases__triad {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 300px));
+      column-gap: 40px;
+      row-gap: 0;
+    }
+
+    .cases__triad-label,
+    .cases__triad-value {
+      grid-column: 1;
+    }
+
+    .cases__triad-label--solution,
+    .cases__triad-value:nth-of-type(2) {
+      grid-column: 2;
+    }
+
+    /* pořadí dětí dl: dt-situace, dd-situace, dt-reseni, dd-reseni, dt-vysledek, dd-vysledek */
+    .cases__triad > :nth-child(1) {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .cases__triad > :nth-child(2) {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .cases__triad > :nth-child(3) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .cases__triad > :nth-child(4) {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .cases__triad > :nth-child(5) {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(27, 74, 138, .14);
+    }
+
+    .cases__triad > :nth-child(6) {
+      grid-column: 1 / -1;
+      grid-row: 4;
+    }
+
+    .cases__row-desc {
+      max-width: 620px;
+    }
+
+    .cases__item--row {
+      padding-bottom: 26px;
+    }
+
+    .cases__item--row .cases__item-title {
+      font-size: 22px;
+    }
+
+    .cases__cta {
+      margin: 40px 40px 0 calc(40 * 100% / 834 + 70px);
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .cases__route--tablet {
+      display: none;
+    }
+
+    .cases__route--laptop {
+      display: block;
+    }
+
+    .cases__inner {
+      padding: 96px 0 100px;
+    }
+
+    .cases__intro {
+      margin: 0 96px 0 calc(96 * 100% / 1366 + 56px);
+    }
+
+    .cases__heading {
+      font-size: 64px;
+      max-width: 660px;
+    }
+
+    .cases__lead {
+      margin-top: 14px;
+      font-size: 19px;
+      max-width: 480px;
+    }
+
+    .cases__list {
+      margin: 190px 96px 0 calc(96 * 100% / 1366 + 68px);
+      max-width: 1106px;
+      gap: 40px;
+    }
+
+    .cases__item--expanded .cases__item-title {
+      font-size: 32px;
+      max-width: 700px;
+    }
+
+    .cases__triad {
+      grid-template-columns: repeat(3, minmax(0, 340px));
+      column-gap: 0;
+    }
+
+    .cases__triad > :nth-child(1),
+    .cases__triad > :nth-child(2) {
+      grid-column: 1;
+      padding-right: 40px;
+    }
+
+    .cases__triad > :nth-child(3),
+    .cases__triad > :nth-child(4) {
+      grid-column: 2;
+      padding: 0 40px;
+      border-left: 1px solid rgba(27, 74, 138, .14);
+    }
+
+    .cases__triad > :nth-child(5),
+    .cases__triad > :nth-child(6) {
+      grid-column: 3;
+      grid-row: unset;
+      margin-top: 0;
+      padding: 0 0 0 40px;
+      border-top: none;
+      border-left: 1px solid rgba(27, 74, 138, .14);
+    }
+
+    .cases__triad > :nth-child(1) {
+      grid-row: 1;
+    }
+
+    .cases__triad > :nth-child(2) {
+      grid-row: 2;
+    }
+
+    .cases__triad > :nth-child(3) {
+      grid-row: 1;
+    }
+
+    .cases__triad > :nth-child(4) {
+      grid-row: 2;
+    }
+
+    .cases__triad > :nth-child(5) {
+      grid-row: 1;
+    }
+
+    .cases__triad > :nth-child(6) {
+      grid-row: 2;
+    }
+
+    .cases__triad-label {
+      font-size: 11px;
+    }
+
+    .cases__triad-value p {
+      font-size: 16px;
+    }
+
+    .cases__row-desc {
+      max-width: 660px;
+    }
+
+    .cases__item--row .cases__item-title {
+      font-size: 24px;
+    }
+
+    .cases__cta {
+      margin: 48px 96px 0 calc(96 * 100% / 1366 + 68px);
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    /*
+     * OPRAVA 25. 8. 2026: `.cases` má vlastní `#FFFFFF` pozadí — VIDITELNĚ
+     * odlišné od `--bg` (#F8FAFC), na kterém stojí zbytek stránky/`<body>`
+     * (dřívější komentář tu mylně tvrdil, že jsou nerozlišitelné). Strop
+     * proto NESMÍ sedět na `.cases` (background layer, musí zůstat
+     * full-width) — patří na `.cases__inner` (obsahová stage vrstva,
+     * existuje už kvůli paddingu). Trasa (`.cases__route`, přímý sourozenec
+     * `.cases__inner`) dostává stejný strop nezávisle, stejný princip jako
+     * u RouterSection.astro/BenefitsSection.astro (CLAUDE.md „Konvence: wide
+     * desktop a centrované designové plátno“).
+     */
+    .cases__route--laptop {
+      display: none;
+    }
+
+    .cases__route--desktop {
+      display: block;
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .cases__inner {
+      padding: 104px 0 120px;
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .cases__intro {
+      margin: 0 120px 0 calc(120 * 100% / 1440 + 56px);
+    }
+
+    .cases__heading {
+      font-size: 72px;
+      max-width: 700px;
+      letter-spacing: -.05em;
+    }
+
+    .cases__lead {
+      margin-top: 14px;
+      font-size: 19px;
+      max-width: 520px;
+    }
+
+    .cases__list {
+      margin: 190px 120px 0 calc(120 * 100% / 1440 + 68px);
+      max-width: 1132px;
+      gap: 48px;
+    }
+
+    .cases__item--expanded .cases__item-title {
+      font-size: 36px;
+      line-height: 1.12;
+      max-width: 760px;
+    }
+
+    .cases__triad {
+      grid-template-columns: repeat(3, minmax(0, 376px));
+    }
+
+    .cases__triad > :nth-child(1),
+    .cases__triad > :nth-child(2) {
+      padding-right: 44px;
+    }
+
+    .cases__triad > :nth-child(3),
+    .cases__triad > :nth-child(4) {
+      padding: 0 44px;
+    }
+
+    .cases__triad > :nth-child(5),
+    .cases__triad > :nth-child(6) {
+      padding: 0 0 0 44px;
+    }
+
+    .cases__triad-label {
+      font-size: 11.5px;
+    }
+
+    .cases__triad-value p {
+      font-size: 15px;
+    }
+
+    .cases__row-desc {
+      max-width: 700px;
+    }
+
+    .cases__item--row .cases__item-title {
+      font-size: 26px;
+    }
+
+    .cases__cta {
+      margin: 56px 120px 0 calc(120 * 100% / 1440 + 68px);
+    }
+  }
+</style>

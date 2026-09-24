@@ -1,0 +1,147 @@
+---
+/**
+ * OPRAVA (úkol „Předspouštěcí P0 technické dotažení“): třetí položka
+ * (`Od 2020` / „Ve financích“) byla na výslovné přání uživatele odstraněna
+ * — na veřejném webu se nemá uvádět rok zahájení finanční praxe. Nenahrazeno
+ * žádnou vymyšlenou statistikou. `stats-band__list`/`stats-band__item` je
+ * plynulý flex layout (`flex:1` na položce), dva prvky ho beze změny
+ * rovnoměrně rozdělí — žádná další úprava layoutu nebyla potřeba.
+ */
+const stats = [
+  { number: '150+', label: 'osobních klientů' },
+  { number: '5,0', label: 'Google recenze' },
+];
+---
+
+<section class="stats-band" aria-label="Klíčové údaje">
+  <ul class="stats-band__list">
+    {stats.map((stat) => (
+      <li class="stats-band__item">
+        <span class="stats-band__number">
+          {stat.number}
+        </span>
+        <span class="stats-band__label">{stat.label}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .stats-band {
+    position: relative;
+    z-index: 2;
+    background: var(--navy);
+    box-shadow: var(--shadow-stats-mobile);
+  }
+
+  .stats-band__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stats-band__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 84px;
+    text-align: center;
+  }
+
+  .stats-band__item + .stats-band__item {
+    border-top: 1px solid rgba(255, 255, 255, .12);
+  }
+
+  .stats-band__number {
+    font-weight: 700;
+    letter-spacing: -.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--white);
+    font-size: 26px;
+  }
+
+  .stats-band__label {
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: rgba(255, 255, 255, .62);
+    font-size: 11.5px;
+  }
+
+  @media (min-width: 768px) {
+    .stats-band {
+      box-shadow: var(--shadow-stats-tablet);
+      padding-inline: 40px;
+    }
+
+    .stats-band__list {
+      flex-direction: row;
+    }
+
+    .stats-band__item {
+      flex: 1;
+      height: 100px;
+    }
+
+    .stats-band__item + .stats-band__item {
+      border-top: 0;
+    }
+
+    .stats-band__number {
+      font-size: 28px;
+    }
+
+    .stats-band__label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .46);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .stats-band {
+      padding-inline: 96px;
+    }
+
+    .stats-band__item {
+      height: 96px;
+    }
+
+    .stats-band__number {
+      font-size: 32px;
+    }
+
+    .stats-band__label {
+      font-size: 10.5px;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .stats-band {
+      box-shadow: var(--shadow-stats);
+      padding-inline: 120px;
+    }
+
+    /*
+     * Wide desktop: centrované designové plátno (CLAUDE.md). `.stats-band`
+     * zůstává full-width tmavý pás (§„1. Full-width layer“, sourozenec
+     * `.hero-line--desktop` v `.hero-group`, viz HeroLine.astro) — tři čísla
+     * uvnitř dřív rostla s celým viewportem (`padding-inline` samo o sobě
+     * strop netvoří). `max-width` počítaný jako `--stage-max` MÍNUS oba
+     * padding (240 = 120+120) capne jen samotný seznam a `margin-inline:
+     * auto` ho vystředí uvnitř zbylého (už odsazeného) prostoru — dřívější
+     * implementace tuhle sekci vůbec neřešila (nebyla to sekce s vlastní
+     * trasou/textem u tečky, proto unikla pozornosti).
+     */
+    .stats-band__list {
+      max-width: calc(var(--stage-max) - 240px);
+      margin-inline: auto;
+    }
+
+    .stats-band__number {
+      font-size: 34px;
+    }
+  }
+</style>

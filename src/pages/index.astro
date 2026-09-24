@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import HeroLine from '../components/HeroLine.astro';
+import StatsBand from '../components/StatsBand.astro';
+import ConnectionsSection from '../components/ConnectionsSection.astro';
+import RouterSection from '../components/RouterSection.astro';
+import ProcessSection from '../components/ProcessSection.astro';
+import ReviewsSection from '../components/ReviewsSection.astro';
+import BenefitsSection from '../components/BenefitsSection.astro';
+import CasesSection from '../components/CasesSection.astro';
+import AboutSection from '../components/AboutSection.astro';
+import ArticlesSection from '../components/ArticlesSection.astro';
+import FaqSection from '../components/FaqSection.astro';
+import ContactSection from '../components/ContactSection.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+
+<BaseLayout
+  title="Finanční poradce Ostrava | Patrik Gajdadzis"
+  description="Finance se nemají řešit po částech. Bydlení, ochranu, investice a penzi propojuji do jednoho plánu, který dává smysl dnes i za několik let."
+>
+  <Header />
+  <main>
+    <div class="hero-group">
+      <Hero />
+      <StatsBand />
+      <HeroLine />
+    </div>
+    <ConnectionsSection />
+    <RouterSection />
+    <ProcessSection />
+    <ReviewsSection />
+    <BenefitsSection />
+    <CasesSection />
+    <AboutSection />
+    <ArticlesSection />
+    <FaqSection />
+    <ContactSection />
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<style>
+  .hero-group {
+    position: relative;
+  }
+</style>

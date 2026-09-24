@@ -1,0 +1,324 @@
+---
+const navLinks = [
+  { label: 'Služby', href: '/sluzby' },
+  { label: 'Přístup', href: '/pristup' },
+  { label: 'Recenze', href: '/recenze' },
+  { label: 'O mně', href: '/o-mne' },
+];
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="/" aria-label="Patrik Gajdadzis - domů">
+      <span class="brand__mark">PG</span>
+      <span class="brand__divider" aria-hidden="true"></span>
+      <span class="brand__word">Patrik Gajdadzis</span>
+    </a>
+
+    <nav class="nav-primary" aria-label="Hlavní navigace">
+      <ul class="nav-primary__list">
+        {navLinks.map((link) => (
+          <li><a href={link.href}>{link.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <a class="nav-cta" href="/#kontakt">Konzultace</a>
+
+    <button
+      class="menu-toggle"
+      id="menu-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      aria-label="Otevřít menu"
+    >
+      <svg class="menu-toggle__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <line class="menu-toggle__line menu-toggle__line--top" x1="4" y1="8" x2="20" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></line>
+        <line class="menu-toggle__line menu-toggle__line--bottom" x1="4" y1="16" x2="14" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></line>
+      </svg>
+    </button>
+  </div>
+
+  <nav id="mobile-menu" class="mobile-nav" aria-label="Mobilní navigace">
+    <ul class="mobile-nav__list">
+      {navLinks.map((link) => (
+        <li><a href={link.href}>{link.label}</a></li>
+      ))}
+    </ul>
+    <a class="mobile-nav__cta" href="/#kontakt">Konzultace</a>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.getElementById('menu-toggle');
+  const menu = document.getElementById('mobile-menu');
+
+  if (toggle && menu) {
+    // Progressive enhancement: only collapse the menu once JS can drive it.
+    // Without JS, `hidden` is never set and the nav stays visible as a static list.
+    menu.hidden = true;
+
+    const close = () => {
+      menu.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    };
+
+    const open = () => {
+      menu.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+    };
+
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      if (isOpen) {
+        close();
+      } else {
+        open();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        close();
+        toggle.focus();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      const target = event.target as Node;
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      if (isOpen && !menu.contains(target) && !toggle.contains(target)) {
+        close();
+      }
+    });
+  }
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    box-shadow: var(--shadow-header-mobile);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: clamp(64px, calc(64px + 0.018018 * (100vw - 390px)), 72px);
+    padding-inline: clamp(24px, calc(24px + 0.036036 * (100vw - 390px)), 40px);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--navy);
+  }
+
+  .brand__mark {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: .14em;
+  }
+
+  .brand__divider {
+    width: 1px;
+    height: 14px;
+    background: var(--emerald);
+  }
+
+  .brand__word {
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .nav-primary__list {
+    display: none;
+  }
+
+  .nav-cta {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    color: var(--navy);
+    border-radius: var(--radius-tag);
+    transition: opacity var(--duration-hover) var(--ease-out);
+  }
+
+  .menu-toggle:hover {
+    opacity: .8;
+  }
+
+  .menu-toggle__icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mobile-nav {
+    background: var(--bg);
+    border-top: 1px solid var(--rule);
+    padding: 16px 24px 24px;
+  }
+
+  .mobile-nav__list li + li {
+    border-top: 1px solid var(--rule);
+  }
+
+  .mobile-nav__list a {
+    display: block;
+    padding: 14px 4px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-nav);
+  }
+
+  .mobile-nav__list a:hover {
+    color: var(--navy);
+  }
+
+  .mobile-nav__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 14px;
+    height: 52px;
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: var(--radius-btn);
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .mobile-nav__cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  /* Tablet: 768–1199 — nav links hidden, header-level CTA + menu toggle visible */
+  @media (min-width: 768px) {
+    .site-header {
+      box-shadow: var(--shadow-header-tablet);
+    }
+
+    .site-header__inner {
+      height: clamp(72px, calc(72px + 0.037594 * (100vw - 834px)), 92px);
+      padding-inline: clamp(40px, calc(40px + 0.105263 * (100vw - 834px)), 96px);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      height: 40px;
+      padding-inline: 16px;
+      background: transparent;
+      color: var(--emerald);
+      border: 1.5px solid var(--emerald);
+      font-weight: 600;
+      font-size: 15px;
+      border-radius: var(--radius-nav-cta);
+      transition: background-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+      margin-left: auto;
+      margin-right: 16px;
+    }
+
+    .nav-cta:hover {
+      background: var(--emerald);
+      color: var(--white);
+    }
+  }
+
+  /* Laptop/desktop: 1200+ — full nav links, no menu toggle, header-level CTA */
+  @media (min-width: 1200px) {
+    .site-header {
+      box-shadow: var(--shadow-header);
+    }
+
+    .site-header__inner {
+      height: clamp(92px, calc(92px + 0.054054 * (100vw - 1366px)), 96px);
+      padding-inline: clamp(96px, calc(96px + 0.324324 * (100vw - 1366px)), 120px);
+    }
+
+    .brand__mark {
+      font-size: 20px;
+    }
+
+    .brand__divider {
+      height: 16px;
+    }
+
+    .brand__word {
+      font-size: 13px;
+    }
+
+    .nav-primary {
+      margin-left: auto;
+    }
+
+    .nav-primary__list {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .nav-primary__list a {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-nav);
+      transition: color var(--duration-hover) var(--ease-out);
+    }
+
+    .nav-primary__list a:hover {
+      color: var(--navy);
+    }
+
+    .nav-cta {
+      height: 42px;
+      padding-inline: 20px;
+      margin-left: 38px;
+      margin-right: 0;
+      font-size: 16px;
+    }
+
+    .menu-toggle,
+    .mobile-nav {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .nav-cta {
+      font-size: 16px;
+    }
+
+    /*
+     * Wide desktop: centrované designové plátno (CLAUDE.md „Konvence: wide
+     * desktop a centrované designové plátno“). Header dřív používal
+     * `.container` (`--content-max: 1240px`, global.css) — jiný strop než
+     * zbytek webu (`--stage-max: 1760px`), takže hlavička byla mimo
+     * kalibrační šířky (1366/1440) posunutá vůči Hero/Connections o desítky
+     * px (viz CLAUDE.md, oprava 25. 8. 2026). `container` byl proto z
+     * markupu odstraněn — hlavička teď pod 1400 px drží jen svůj vlastní
+     * `padding-inline` (stejná hodnota jako Hero/Connections na téže šířce),
+     * nad 1400 px dostává STEJNÝ strop jako všechny ostatní sekce.
+     */
+    .site-header__inner {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+  }
+</style>

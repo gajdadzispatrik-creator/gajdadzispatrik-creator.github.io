@@ -1,0 +1,1834 @@
+---
+/**
+ * Stránka /sluzby/pojisteni — detail třetí služby. Zdroj pravdy pro
+ * rozvržení: úkol „Úkol pro Claude Code — podstránka /sluzby/pojisteni"
+ * (2. 9. 2026). Zdroj pravdy pro chování trasy a pro VŠECHNY hodnoty
+ * sdílené kostry (osa, pruh, zářez, vnitřní rozpad, hero padding, gap
+ * mezi pruhem a obsahem, velikost/barva kotev Průběhu, technika ohybu
+ * v hero): `src/pages/sluzby/hypoteky.astro` a
+ * `src/pages/sluzby/financni-plan.astro` — na výslovné přání uživatele
+ * („tyhle hodnoty už máš implementované v hypoteky.astro a
+ * financni-plan.astro — vezmi je odtud"), NE doslovná čísla ze zadání
+ * tam, kde se od skutečné (dřív už opravené) implementace sourozenců liší.
+ * Texty přesně podle `docs/content-subpages.md`, kapitola
+ * `/sluzby/pojisteni` — copy je STAV „NÁVRH K UŽIVATELSKÉMU SCHVÁLENÍ",
+ * NESMÍ jít do produkce bez potvrzení textů.
+ *
+ * Rozpory mezi zadáním a skutečnou implementací sourozenců, které jsem
+ * řešil ve prospěch sourozenců (nahlášeno v souhrnu úkolu, ne mlčky):
+ * 1) §2 zadání dává pruh kapitoly `width:180, gap:56` → obsah od `x=412`
+ *    a vnitřní rozpad `440+48→900`. Skutečná (opravená) implementace
+ *    `hypoteky.astro`/`financni-plan.astro` ale používá `width:240`
+ *    (bezpečné proti přetečení popisku), lead-col `540/600px` (notebook/
+ *    desktop) a `gap:60px` uvnitř dvousloupcových bloků — použito odtud.
+ *    Jednoslovné popisky téhle stránky (Dopad/Příjem/Majetek/Kontrola/
+ *    Průběh/Péče/Otázky) jsou navíc kratší než problémové „Souvislosti"/
+ *    „Rozhodnutí", takže i doslovných 180px by pravděpodobně stačilo —
+ *    přesto zvoleno 240px pro jednotnost napříč všemi třemi detailními
+ *    stránkami (ověřeno živě přes `Range.getBoundingClientRect`, žádné
+ *    slovo nepřeteklo ani při 180px).
+ * 2) Hero padding na desktopu (§5 zadání neuvádí explicitně, jen
+ *    „stejná kostra") — použito `120px 100px 90px` z `hypoteky.astro`/
+ *    aktuálního `financni-plan.astro` (ne dřívější, později opuštěná
+ *    verze `financni-plan.astro` s `176px` levým zarovnáním na osu —
+ *    ta byla na explicitní žádost uživatele vrácena zpět na standardní
+ *    zarovnání, aby hero nadpis seděl na stejné ose jako sourozenci).
+ * 3) Ohyb trasy v hero používá STEJNOU techniku jako oba sourozenci
+ *    (40px pod patou hero textu, clamp 260..heroBottom-20) — ne
+ *    dopočet „uprostřed mezery hero→první kapitola", který uživatel
+ *    u `financni-plan.astro` výslovně odmítl („linka nevede stejně
+ *    kolem tlačítek").
+ * 4) Kotvy/spojnice Průběhu (velikost, barva, gap, `top`/`bottom` vzorec)
+ *    převzaty 1:1 z `financni-plan.astro` (které je samo převzalo
+ *    z `hypoteky.astro`) — 5 kroků místo 6/5, jinak beze změny čísel.
+ *
+ * TRASA — stejná technika jako oba sourozenci: jedna souvislá cesta od
+ * hero až po tmavé závěrečné CTA, `axisScaled` procentuální přepočet pro
+ * wide-desktop stage (funguje automaticky i na 2048px+, žádný speciální
+ * kód navíc — §6 zadání popisuje chování MECHANISMU, který už existuje),
+ * nájezdový gradient v hero jen na desktopu/notebooku (tablet/mobil hero
+ * bez trasy vůbec, stejný důvod jako sourozenci — v hero není
+ * bezkolizní koridor), SEDM kotev (dopad/prijem/majetek/kontrola/
+ * prubeh/pece/otazky), tmavé CTA bez kotvy/zářezu.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import LineGradientDefs from '../../components/LineGradientDefs.astro';
+import { PERSON_ID, breadcrumbList } from '../../data/entity';
+
+const SERVICE_NAME = 'Pojištění příjmu, rodiny a majetku';
+const SERVICE_DESCRIPTION =
+  'Pomohu vám nastavit nebo zkontrolovat životní a majetkové pojištění podle skutečných finančních rizik. Osobně v Ostravě nebo online po celé ČR.';
+const pojisteniJsonLd = [
+  {
+    '@type': 'Service',
+    name: SERVICE_NAME,
+    description: SERVICE_DESCRIPTION,
+    url: 'https://patrikgajdadzis.cz/sluzby/pojisteni',
+    provider: { '@id': PERSON_ID },
+    areaServed: [
+      { '@type': 'City', name: 'Ostrava' },
+      { '@type': 'Country', name: 'Česko' },
+    ],
+  },
+  breadcrumbList([
+    { name: 'Domů', path: '/' },
+    { name: 'Služby', path: '/sluzby' },
+    { name: SERVICE_NAME, path: '/sluzby/pojisteni' },
+  ]),
+];
+
+interface RowItem {
+  name: string;
+  text: string;
+}
+
+const situations: RowItem[] = [
+  { name: 'Dlouhodobý výpadek příjmu', text: 'Pokud člověk nemůže delší dobu pracovat, mění se schopnost hradit běžné výdaje a splácet závazky.' },
+  { name: 'Invalidita', text: 'Invalidita má dlouhodobý dopad na příjem i soběstačnost — mění se, co klient nebo jeho rodina potřebují k běžnému fungování.' },
+  { name: 'Úmrtí živitele', text: 'Ztráta příjmu živitele dopadá na rodinu, na běžné výdaje, na závazky a na další finanční potřeby, které zůstávají.' },
+  { name: 'Vážná nemoc', text: 'Některá onemocnění znamenají zvýšené výdaje, omezení schopnosti pracovat nebo potřebu mít po ruce finanční rezervu.' },
+  { name: 'Škoda na nemovitosti', text: 'Významná škoda na majetku znamená náklady potřebné k jeho obnově.' },
+];
+
+const risks: RowItem[] = [
+  { name: 'Pracovní neschopnost', text: 'Řeší období, kdy člověk dočasně nemůže pracovat a přichází o běžný příjem.' },
+  { name: 'Invalidita', text: 'Řeší dlouhodobý nebo trvalý dopad na schopnost pracovat a na příjem rodiny.' },
+  { name: 'Úmrtí', text: 'Řeší zajištění rodiny a závazků v situaci, kdy by chyběl příjem živitele.' },
+  { name: 'Závažná onemocnění', text: 'Řeší zvýšené výdaje a omezení, která mohou taková onemocnění přinést.' },
+  { name: 'Trvalé následky úrazu', text: 'Řeší situace, kdy úraz dlouhodobě ovlivní zdraví, práci nebo běžný život.' },
+];
+
+const majetekItems: string[] = [
+  'rozdíl mezi pojištěním nemovitosti a domácnosti,',
+  'správnou pojistnou částku,',
+  'riziko podpojištění,',
+  'rozsah krytí,',
+  'limity a výluky,',
+  'spoluúčast,',
+  'odpovědnost,',
+  'potřebu aktualizace po rekonstrukci nebo jiné větší změně majetku.',
+];
+
+interface Step {
+  heading: string;
+  text: string;
+}
+
+const steps: Step[] = [
+  { heading: 'Projdeme vaši situaci', text: 'Příjmy, závazky, rodinu, majetek a současné pojištění.' },
+  { heading: 'Určíme důležitá rizika', text: 'Zjistíme, které situace by pro vás měly největší finanční dopad.' },
+  { heading: 'Nastavíme rozsah ochrany', text: 'Podle potřeb stanovíme pojistné částky, důležitá krytí a podmínky.' },
+  { heading: 'Porovnáme vhodné možnosti', text: 'Vysvětlím vám rozdíly mezi řešeními, které jsou pro vaše rozhodnutí podstatné.' },
+  { heading: 'Pomohu s realizací a další péčí', text: 'Pokud se rozhodnete pro změnu nebo nové sjednání, pomohu vám s postupem. Když se vaše situace změní, má smysl ochranu znovu projít.' },
+];
+
+interface Faq {
+  q: string;
+  a: string;
+}
+
+const faqs: Faq[] = [
+  { q: 'Jak poznám, jestli mám životní pojištění nastavené správně?', a: 'Záleží na vašem příjmu, závazcích, rodinné situaci, rezervě a rozsahu současného krytí. Při kontrole se podíváme, jaké finanční následky by pro vás měla jednotlivá rizika a zda jim nastavení odpovídá.' },
+  { q: 'Musím při kontrole pojištění rušit současnou smlouvu?', a: 'Ne. Nejdřív zjistíme, co máte nastavené dobře a zda vůbec existuje důvod něco měnit.' },
+  { q: 'Jak vysoké pojistné částky potřebuji?', a: 'Univerzální částka neexistuje. Vychází se z konkrétních finančních dopadů, závazků, rezervy a potřeb lidí, které chcete chránit.' },
+  { q: 'Řešíte také pojištění domu a domácnosti?', a: 'Ano. Podíváme se na hodnotu majetku, rozsah krytí, limity, spoluúčast i rizika, která potřebujete pokrýt.' },
+  { q: 'Co když jsem rekonstruoval nemovitost nebo se mi změnil příjem?', a: 'To jsou situace, kdy má smysl současné pojištění znovu zkontrolovat. Původní nastavení už nemusí odpovídat dnešní hodnotě majetku nebo finanční situaci.' },
+  { q: 'Pomůžete mi i při pojistné události?', a: 'Ano. Pomohu vám zorientovat se v postupu, potřebných podkladech a komunikaci s pojišťovnou. Samotné posouzení a plnění se řídí pojistnou smlouvou a příslušnými podmínkami.' },
+];
+---
+
+<BaseLayout
+  title="Pojištění příjmu, rodiny a majetku | Patrik Gajdadzis"
+  description={SERVICE_DESCRIPTION}
+  jsonLd={pojisteniJsonLd}
+>
+  <Header />
+  <main id="hero" class="poj">
+    <div class="poj__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`poj__route-svg poj__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2600`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                <LineGradientDefs id={`poj-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="poj__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="poj__route-path poj__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#poj-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="poj__route-path poj__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['dopad', 'prijem', 'majetek', 'kontrola', 'prubeh', 'pece', 'otazky'] as const).map((marker) => (
+              <g class="poj__marker" data-marker={marker}>
+                <line class="poj__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="poj__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="poj-hero" aria-labelledby="poj-hero-heading">
+      <nav class="poj-breadcrumb" aria-label="Drobečková navigace">
+        <ol>
+          <li><a href="/sluzby">Služby</a></li>
+          <li aria-current="page">Pojištění</li>
+        </ol>
+      </nav>
+
+      <div class="poj-hero__text">
+        <h1 id="poj-hero-heading" data-reveal>Pojištění má vycházet z&nbsp;toho, co by vás finančně ohrozilo.</h1>
+        <p class="poj-hero__lead" data-reveal>
+          Nejdřív zjistíme, jaké následky by pro&nbsp;vás nebo vaši rodinu měl výpadek příjmu, vážná nemoc, invalidita,
+          úmrtí nebo škoda na&nbsp;majetku. Podle toho nastavíme, co má smysl pojistit, na&nbsp;jaké částky
+          a&nbsp;za&nbsp;jakých podmínek.
+        </p>
+        <div class="poj-hero__actions" data-reveal>
+          <a class="poj-cta" href="/#kontakt">Nezávazná konzultace</a>
+          <a class="poj-phone" href="tel:+420775217721">
+            <svg class="poj-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="poj-chapter poj-chapter--dopad" aria-labelledby="dopad-heading">
+      <div class="poj-chapter__bar" data-reveal data-route-target="dopad">
+        <p>Dopad</p>
+      </div>
+
+      <div class="poj-chapter__content poj-chapter__content--dopad">
+        <div class="poj-chapter__top">
+          <div class="poj-chapter__lead-col" data-reveal>
+            <h2 id="dopad-heading" class="poj-h2--dominant">Nejdřív finanční dopad. Potom pojistná částka.</h2>
+          </div>
+          <div class="poj-chapter__support-col" data-reveal>
+            <p class="poj-support__text">
+              Dvěma lidem může stejná událost způsobit úplně jiný finanční problém. Záleží na&nbsp;příjmu, závazcích,
+              rezervě, rodině i&nbsp;majetku.
+            </p>
+            <p class="poj-support__text">
+              Proto nestačí vybrat riziko z&nbsp;nabídky pojišťovny. Potřebujeme vědět, co by se&nbsp;skutečně
+              změnilo ve&nbsp;vašem rozpočtu.
+            </p>
+          </div>
+        </div>
+
+        <ul class="poj-rows" data-reveal>
+          {
+            situations.map((s) => (
+              <li class="poj-rows__row">
+                <span class="poj-rows__name">{s.name}</span>
+                <span class="poj-rows__text">{s.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="poj-chapter__statement" data-reveal>
+          Až podle finančního dopadu má smysl určit, která rizika pojistit a&nbsp;na&nbsp;jaké částky.
+        </p>
+      </div>
+    </section>
+
+    <section class="poj-chapter poj-chapter--prijem" aria-labelledby="prijem-heading">
+      <div class="poj-chapter__bar" data-reveal data-route-target="prijem">
+        <p>Příjem</p>
+      </div>
+
+      <div class="poj-chapter__content poj-chapter__content--dopad">
+        <div class="poj-chapter__top">
+          <div class="poj-chapter__lead-col" data-reveal>
+            <h2 id="prijem-heading" class="poj-h2--std">Stejná pojistka nedává smysl každému.</h2>
+          </div>
+          <div class="poj-chapter__support-col" data-reveal>
+            <p class="poj-support__text">
+              Jinou ochranu potřebuje člověk bez závazků, jinou rodič s&nbsp;hypotékou a&nbsp;jinou podnikatel,
+              jehož příjem závisí na&nbsp;tom, že může pracovat.
+            </p>
+            <p class="poj-support__text poj-support__text--strong">
+              U&nbsp;životního pojištění proto nevycházím jen z&nbsp;přednastaveného balíčku pojišťovny.
+            </p>
+          </div>
+        </div>
+
+        <ul class="poj-rows" data-reveal>
+          {
+            risks.map((r) => (
+              <li class="poj-rows__row">
+                <span class="poj-rows__name">{r.name}</span>
+                <span class="poj-rows__text">{r.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="poj-chapter__statement" data-reveal>
+          Nejde o&nbsp;to pojistit všechno. Jde o&nbsp;to vědět, která rizika byste finančně zvládli sami
+          a&nbsp;která už by mohla zásadně změnit váš život.
+        </p>
+      </div>
+    </section>
+
+    <section class="poj-chapter poj-chapter--majetek" aria-labelledby="majetek-heading">
+      <div class="poj-chapter__bar" data-reveal data-route-target="majetek">
+        <p>Majetek</p>
+      </div>
+
+      <div class="poj-chapter__content poj-chapter__content--majetek">
+        <div class="poj-chapter__top">
+          <div class="poj-chapter__lead-col" data-reveal>
+            <h2 id="majetek-heading" class="poj-h2--std">Nestačí mít pojištěný dům. Důležité je, jak.</h2>
+          </div>
+          <div class="poj-chapter__support-col" data-reveal>
+            <div class="poj-support__body">
+              <p class="poj-support__text">
+                U&nbsp;pojištění nemovitosti, domácnosti nebo odpovědnosti nestačí porovnat cenu. Podstatné je,
+                na&nbsp;jakou hodnotu je majetek pojištěný, jaký je rozsah krytí, výluky, limity a&nbsp;spoluúčast.
+              </p>
+              <p class="poj-support__text poj-support__text--strong">
+                U&nbsp;majetku zase řešíme nejen cenu, ale také rozsah ochrany a&nbsp;situace, které skutečně
+                potřebujete pokrýt.
+              </p>
+            </div>
+            <div class="poj-majetek__list-block">
+              <p class="poj-eyebrow">Podíváme se&nbsp;na</p>
+              <ul class="poj-chapter__list">
+                {majetekItems.map((item) => <li>{item}</li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p class="poj-chapter__statement poj-chapter__statement--plain" data-reveal>
+          Pojištění má odpovídat tomu, co dnes vlastníte a&nbsp;jaká rizika potřebujete skutečně pokrýt.
+        </p>
+      </div>
+    </section>
+
+    <section class="poj-chapter poj-chapter--kontrola" aria-labelledby="kontrola-heading">
+      <div class="poj-chapter__bar" data-reveal data-route-target="kontrola">
+        <p>Kontrola</p>
+      </div>
+
+      <div class="poj-chapter__content">
+        <div class="poj-chapter__lead-col" data-reveal>
+          <h2 id="kontrola-heading" class="poj-h2--std">Nejdřív se&nbsp;podívám na&nbsp;to, co už máte sjednané.</h2>
+          <p class="poj-chapter__statement" data-reveal>Změna má mít důvod. Ne&nbsp;být cílem sama o&nbsp;sobě.</p>
+        </div>
+
+        <div class="poj-chapter__support-col" data-reveal>
+          <p class="poj-support__text">
+            Pokud už máte životní nebo majetkové pojištění, není důvod začínat automaticky novou smlouvou. Nejdřív
+            projdeme současné nastavení a&nbsp;zjistíme, jestli odpovídá vaší dnešní situaci.
+          </p>
+          <p class="poj-support__text">
+            Může se&nbsp;ukázat, že je všechno v&nbsp;pořádku. Někdy dává smysl upravit pojistné částky, rozsah
+            krytí nebo vyřešit konkrétní slabé místo.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="poj-chapter poj-chapter--prubeh" aria-labelledby="prubeh-heading">
+      <div class="poj-chapter__bar" data-reveal data-route-target="prubeh">
+        <p>Průběh</p>
+      </div>
+
+      <div class="poj-chapter__content poj-chapter__content--single">
+        <h2 id="prubeh-heading" class="poj-h2--std poj-h2--prubeh" data-reveal>Od&nbsp;současné situace ke&nbsp;konkrétnímu nastavení.</h2>
+
+        <ol class="poj-steps" data-reveal>
+          {
+            steps.map((step, i) => (
+              <li class={`poj-step${i === 0 ? ' poj-step--first' : ''}`}>
+                <span class="poj-step__marker" aria-hidden="true"></span>
+                {i < steps.length - 1 && <span class="poj-step__connector" aria-hidden="true"></span>}
+                <h3>{step.heading}</h3>
+                <p>{step.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="poj-chapter poj-chapter--pece" aria-labelledby="pece-heading">
+      <div class="poj-chapter__bar poj-chapter__bar--muted" data-reveal data-route-target="pece">
+        <p>Péče</p>
+      </div>
+
+      <div class="poj-chapter__content">
+        <div class="poj-chapter__lead-col" data-reveal>
+          <h2 id="pece-heading" class="poj-h2--pece">Když se&nbsp;něco změní, má se&nbsp;změnit i&nbsp;ochrana.</h2>
+        </div>
+
+        <div class="poj-chapter__support-col" data-reveal>
+          <p class="poj-support__text">
+            Nová hypotéka, narození dítěte, vyšší příjem, změna zaměstnání nebo rekonstrukce domu mohou změnit
+            i&nbsp;to, jaké pojištění dává smysl.
+          </p>
+          <p class="poj-support__text">
+            Proto má smysl se&nbsp;k&nbsp;nastavení vracet. A&nbsp;pokud nastane pojistná událost, pomohu vám
+            zorientovat se&nbsp;v&nbsp;dalším postupu a&nbsp;potřebných podkladech.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="poj-chapter poj-chapter--faq" aria-labelledby="otazky-heading">
+      <div class="poj-chapter__bar poj-chapter__bar--muted" data-reveal data-route-target="otazky">
+        <p id="otazky-heading">Otázky</p>
+      </div>
+
+      <div class="poj-chapter__content poj-chapter__content--single">
+        <dl class="poj-faq" data-reveal>
+          {
+            faqs.map((faq) => (
+              <div class="poj-faq__row">
+                <dt>{faq.q}</dt>
+                <dd>{faq.a}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="poj-closing" aria-labelledby="poj-closing-heading">
+      <div class="poj-closing__glow" aria-hidden="true"></div>
+
+      <div class="poj-closing__grid">
+        <h2 id="poj-closing-heading" data-reveal>Podívejme se, jestli vaše pojištění odpovídá tomu, co potřebujete chránit.</h2>
+
+        <div class="poj-closing__body" data-reveal>
+          <p>
+            Ať už chcete sjednat nové pojištění, zkontrolovat současné smlouvy nebo řešíte změnu své situace,
+            na&nbsp;první konzultaci si ujasníme, co má smysl udělat dál.
+          </p>
+
+          <div class="poj-closing__actions">
+            <a class="poj-cta poj-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="poj-phone poj-phone--dark" href="tel:+420775217721">
+              <svg class="poj-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.poj');
+  const routeWrap = document.querySelector('.poj__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.poj__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.poj-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.poj-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.poj-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.poj-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      dopad: main.querySelector('[data-route-target="dopad"]'),
+      prijem: main.querySelector('[data-route-target="prijem"]'),
+      majetek: main.querySelector('[data-route-target="majetek"]'),
+      kontrola: main.querySelector('[data-route-target="kontrola"]'),
+      prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      pece: main.querySelector('[data-route-target="pece"]'),
+      otazky: main.querySelector('[data-route-target="otazky"]'),
+    } as const;
+
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_LENGTH = 100;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${HERO_ENTRY_START_Y + HERO_ENTRY_LENGTH} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      // Stejná technika jako `hypoteky.astro`/`financni-plan.astro` — ohyb
+      // 40px pod patou hero textu (H1+lead+CTA), s ochranou 260..heroBottom-20.
+      let bendY = 260;
+      if (heroTextEl) {
+        const textRect = heroTextEl.getBoundingClientRect();
+        const textBottom = textRect.bottom - mainRect.top;
+        bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+      }
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.poj__route-path:not(.poj__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.poj__route-path--dark') as SVGPathElement | null;
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--poj-shift', `${shift}px`);
+        }
+
+        if (isHero) {
+          if (lightPath) lightPath.setAttribute('d', `${heroArcPath(entryX, axisScaled, r, bendY, closingTop)}`);
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.poj__notch');
+          const dot = group.querySelector('.poj__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.poj__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.poj__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+</script>
+
+<style>
+  .poj {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .poj__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .poj__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .poj__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .poj__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .poj__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .poj__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .poj__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .poj__route-svg--tablet,
+  .poj__route-svg--laptop,
+  .poj__route-svg--desktop {
+    display: none;
+  }
+
+  .poj :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .poj-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .poj-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .poj-cta:active {
+    transform: translateY(1px);
+  }
+
+  .poj-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .poj-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .poj-phone:hover {
+    color: var(--emerald);
+  }
+
+  .poj-phone--dark {
+    color: var(--white);
+  }
+
+  .poj-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Drobečková navigace ---------- */
+
+  .poj-breadcrumb {
+    margin-bottom: 20px;
+  }
+
+  .poj-breadcrumb ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .poj-breadcrumb li:not(:last-child)::after {
+    content: '/';
+    margin: 0 8px;
+    color: var(--text-faint);
+  }
+
+  .poj-breadcrumb a {
+    color: var(--text-quiet);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .poj-breadcrumb a:hover {
+    color: var(--navy);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .poj-hero {
+    padding: 64px 24px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .poj-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .poj-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .poj-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .poj-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .poj-hero__actions .poj-cta {
+    width: 100%;
+  }
+
+  .poj-hero__actions .poj-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .poj-chapter {
+    padding: 56px 24px;
+  }
+
+  .poj-chapter--dopad {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .poj-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .poj-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--poj-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .poj-chapter--dopad .poj-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .poj-chapter__bar--muted p {
+    font-weight: 700;
+    color: var(--text-nav);
+  }
+
+  .poj-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .poj-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .poj-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .poj-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Majetek: eyebrow+seznam sedí ve STEJNÉM sloupci jako úvodní odstavce
+     (ne osamoceně v levé koloně vedle H2, kde vizuálně "plavaly" daleko
+     od svého seznamu — nahlásil uživatel 2. 9. 2026, screenshot #1).
+     Odstavce mají vlastní těsný gap (8px, pokračující myšlenka). Přechod
+     na blok se seznamem je ale NOVÝ obsahový blok, ne pokračování stejné
+     věty — použit stejný gap jako mezi hlavními bloky uvnitř kapitoly
+     (`.poj-chapter__content`, 32/40px), ne těsných 14px, které po dvou
+     odstavcích působily „namačkaně" (nahlásil uživatel 2. 9. 2026,
+     screenshot #2). Jeden zdroj mezery na každé úrovni. */
+  .poj-support__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .poj-chapter--majetek .poj-chapter__support-col {
+    gap: 32px;
+  }
+
+  .poj-chapter__lead-col h2,
+  .poj-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .poj-h2--dominant {
+    font-size: 34px;
+  }
+
+  .poj-h2--std {
+    font-size: 30px;
+  }
+
+  .poj-h2--pece {
+    font-size: 28px;
+  }
+
+  .poj-support__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .poj-support__text--strong {
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .poj-eyebrow {
+    margin: 0 0 4px;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .poj-chapter__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .poj-chapter__list li {
+    font-weight: 600;
+    font-size: 16.5px;
+    color: var(--navy);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .poj-chapter__list li:last-child {
+    border-bottom: none;
+  }
+
+  /* Zadání dává pro VŠECHNY ohraničené výrazné věty na téhle stránce
+     (Dopad/Příjem/Kontrola) 30px na desktopu — jiná (větší) škála než
+     financni-plan.astro's výchozí `.fp-chapter__statement` (20→26px),
+     odpovídá spíš jeho `--propojeni` variantě (22→30px), použito odtud. */
+  .poj-chapter__statement {
+    margin: 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--emerald);
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* Bez svislice (§5 Majetek), ale STEJNÁ velikostní škála jako ostatní
+     výrazné věty (20/22/24/26) — dřívější zmenšená škála (18/19/20/22)
+     neodpovídala zadání, které pro tuhle větu na desktopu výslovně žádá
+     26px, ne 22px. Jediný rozdíl od `.poj-chapter__statement` je chybějící
+     ohraničení, ne menší písmo. */
+  .poj-chapter__statement--plain {
+    padding-left: 0;
+    border-left: none;
+    font-size: 20px;
+  }
+
+  /* ---------- Dopad/Příjem — plné řádky situací/rizik ---------- */
+
+  .poj-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .poj-rows__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .poj-rows__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .poj-rows__name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* Zadání: Dopad "název 26px" na desktopu, Příjem "název 24px" — jiné
+     číslo pro stejnou třídu podle kapitoly, řešeno modifikátorem níže
+     (`.poj-chapter--dopad .poj-rows__name`), základní škála pokrývá
+     Příjem (a zbytek stupňů, kde zadání nerozlišuje). */
+  .poj-rows__text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Průběh ---------- */
+
+  .poj-h2--prubeh {
+    max-width: 560px;
+  }
+
+  .poj-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 38px;
+  }
+
+  .poj-step {
+    position: relative;
+    padding-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .poj-step__marker {
+    position: absolute;
+    top: 13px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-quiet);
+    transform: translateY(-50%);
+  }
+
+  .poj-step--first .poj-step__marker {
+    width: 8px;
+    height: 8px;
+    background: var(--emerald);
+  }
+
+  .poj-step__connector {
+    position: absolute;
+    top: 13px;
+    bottom: -51px;
+    left: 3px;
+    width: 1px;
+    background: rgba(27, 74, 138, .18);
+  }
+
+  .poj-step--first .poj-step__connector {
+    left: 3.5px;
+  }
+
+  .poj-step h3 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--navy-ink);
+  }
+
+  .poj-step--first h3 {
+    font-size: 21px;
+  }
+
+  .poj-step p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ---------- Otázky ---------- */
+
+  .poj-faq {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .poj-faq__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .poj-faq__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .poj-faq dt {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .poj-faq dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .poj-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .poj-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .poj-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .poj-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .poj-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .poj-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .poj-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .poj-closing__actions .poj-cta {
+    width: 100%;
+  }
+
+  .poj-closing__actions .poj-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .poj__route-svg--mobile {
+      display: none;
+    }
+
+    .poj__route-svg--tablet {
+      display: block;
+    }
+
+    .poj-chapter__bar p {
+      padding-left: calc(64px + var(--poj-shift, 0px));
+    }
+
+    .poj-hero {
+      padding: 88px 40px 0;
+    }
+
+    .poj-hero__text {
+      gap: 20px;
+    }
+
+    .poj-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .poj-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .poj-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .poj-hero__actions .poj-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .poj-hero__actions .poj-phone {
+      height: auto;
+    }
+
+    .poj-chapter--dopad {
+      margin-top: 80px;
+      padding: 72px 40px;
+    }
+
+    .poj-chapter {
+      padding: 72px 40px;
+    }
+
+    .poj-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .poj-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .poj-h2--dominant {
+      font-size: 44px;
+    }
+
+    .poj-h2--std {
+      font-size: 40px;
+    }
+
+    .poj-h2--pece {
+      font-size: 36px;
+    }
+
+    .poj-support__text {
+      font-size: 18px;
+    }
+
+    .poj-chapter__list li {
+      font-size: 17px;
+    }
+
+    .poj-chapter__statement {
+      font-size: 24px;
+    }
+
+    .poj-chapter__statement--plain {
+      font-size: 22px;
+    }
+
+    .poj-rows__name {
+      font-size: 20px;
+    }
+
+    .poj-step h3 {
+      font-size: 22px;
+    }
+
+    .poj-step--first h3 {
+      font-size: 24px;
+    }
+
+    .poj-faq dt {
+      font-size: 19px;
+    }
+
+    /* Řádky situací/rizik zůstávají dvousloupcové s levou kolonou 250px —
+       stejný vzor jako `hypoteky.astro`'s Oblasti/Otázky v analogickém
+       rozsahu (mezisloupcová šířka přebraná ze sourozenců). */
+    .poj-rows__row {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      column-gap: 32px;
+      gap: 0;
+      align-items: baseline;
+    }
+
+    .poj-chapter__top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .poj-chapter--dopad .poj-chapter__lead-col,
+    .poj-chapter--prijem .poj-chapter__lead-col,
+    .poj-chapter--majetek .poj-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .poj-chapter--dopad .poj-chapter__support-col,
+    .poj-chapter--prijem .poj-chapter__support-col,
+    .poj-chapter--majetek .poj-chapter__support-col {
+      flex: 1;
+    }
+
+    .poj-chapter--majetek .poj-chapter__support-col {
+      gap: 40px;
+    }
+
+    .poj-steps {
+      gap: 44px;
+    }
+
+    .poj-step__marker {
+      display: block;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+    }
+
+    .poj-step--first .poj-step__marker {
+      width: 9px;
+      height: 9px;
+    }
+
+    .poj-step__connector {
+      display: block;
+      top: 14px;
+      bottom: -58px;
+      left: 3.5px;
+    }
+
+    .poj-step--first .poj-step__connector {
+      left: 4px;
+    }
+
+    .poj-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    .poj-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .poj-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .poj-closing__body p {
+      font-size: 17px;
+    }
+
+    .poj-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .poj-closing__actions .poj-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .poj-closing__actions .poj-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .poj__route-svg--tablet {
+      display: none;
+    }
+
+    .poj__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .poj-chapter__bar p {
+      padding-left: calc(56px + var(--poj-shift, 0px));
+    }
+
+    .poj-hero__text {
+      max-width: 580px;
+      gap: 18px;
+    }
+
+    .poj-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .poj-hero__lead {
+      font-size: 19px;
+    }
+
+    .poj-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .poj-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .poj-chapter--dopad {
+      margin-top: 100px;
+      padding: 88px 96px;
+    }
+
+    .poj-chapter {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 56px;
+    }
+
+    .poj-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .poj-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .poj-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .poj-chapter__content {
+      flex: 1;
+    }
+
+    .poj-chapter__content--single {
+      gap: 40px;
+    }
+
+    .poj-h2--dominant {
+      font-size: 50px;
+    }
+
+    .poj-h2--std {
+      font-size: 44px;
+    }
+
+    .poj-h2--pece {
+      font-size: 40px;
+    }
+
+    .poj-chapter__statement {
+      font-size: 28px;
+    }
+
+    .poj-chapter__statement--plain {
+      font-size: 24px;
+    }
+
+    .poj-chapter__top {
+      gap: 60px;
+    }
+
+    .poj-chapter--dopad .poj-chapter__lead-col,
+    .poj-chapter--prijem .poj-chapter__lead-col,
+    .poj-chapter--majetek .poj-chapter__lead-col {
+      width: 540px;
+    }
+
+    .poj-chapter--kontrola .poj-chapter__content,
+    .poj-chapter--pece .poj-chapter__content {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 60px;
+    }
+
+    .poj-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .poj-chapter__support-col {
+      flex: 1;
+    }
+
+    .poj-rows__row {
+      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px 0;
+    }
+
+    .poj-rows__name {
+      font-size: 22px;
+    }
+
+    /* Zadání "popis 17 px" — stejný skok jako `hypoteky.astro`'s
+       `.hyp-areas__text` (16 base/tablet → 17 notebook+desktop). */
+    .poj-rows__text {
+      font-size: 17px;
+    }
+
+    .poj-h2--prubeh {
+      max-width: 600px;
+    }
+
+    .poj-steps {
+      max-width: 600px;
+    }
+
+    .poj-step {
+      padding-left: 56px;
+    }
+
+    .poj-step__marker {
+      top: 15px;
+    }
+
+    .poj-step__connector {
+      top: 15px;
+      bottom: -59px;
+    }
+
+    .poj-step h3 {
+      font-size: 22px;
+    }
+
+    .poj-step--first h3 {
+      font-size: 24px;
+    }
+
+    .poj-faq {
+      max-width: 900px;
+    }
+
+    .poj-faq__row {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      column-gap: 56px;
+      align-items: baseline;
+    }
+
+    .poj-faq dt {
+      font-size: 22px;
+    }
+
+    .poj-faq dd {
+      font-size: 17px;
+    }
+
+    .poj-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .poj-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .poj-closing__glow {
+      height: 320px;
+    }
+
+    .poj-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .poj-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .poj__route-svg--laptop {
+      display: none;
+    }
+
+    .poj__route-svg--desktop {
+      display: block;
+    }
+
+    .poj__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .poj-hero,
+    .poj-chapter,
+    .poj-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .poj-chapter__bar p {
+      padding-left: calc(76px + var(--poj-shift, 0px));
+    }
+
+    .poj-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .poj-hero__text {
+      max-width: 640px;
+      gap: 18px;
+    }
+
+    .poj-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .poj-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .poj-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .poj-hero__actions .poj-cta {
+      height: 56px;
+    }
+
+    .poj-chapter--dopad {
+      margin-top: 120px;
+      padding: 88px 100px;
+    }
+
+    .poj-chapter {
+      padding: 88px 100px;
+      gap: 56px;
+    }
+
+    .poj-chapter__bar {
+      width: 240px;
+    }
+
+    .poj-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .poj-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .poj-h2--dominant {
+      font-size: 56px;
+    }
+
+    .poj-h2--std {
+      font-size: 48px;
+    }
+
+    .poj-h2--pece {
+      font-size: 44px;
+    }
+
+    .poj-chapter__statement {
+      font-size: 30px;
+    }
+
+    .poj-chapter__statement--plain {
+      font-size: 26px;
+    }
+
+    .poj-chapter--dopad .poj-chapter__lead-col,
+    .poj-chapter--prijem .poj-chapter__lead-col,
+    .poj-chapter--majetek .poj-chapter__lead-col,
+    .poj-chapter__lead-col {
+      width: 600px;
+    }
+
+    .poj-rows__name {
+      font-size: 24px;
+    }
+
+    /* Zadání: Dopad "název 26px" na desktopu — jiné číslo než Příjem
+       (24px, pokrývá základní škála výše), jediný rozdíl mezi kapitolami
+       v této třídě, proto řešeno modifikátorem jen na tomhle stupni. */
+    .poj-chapter--dopad .poj-rows__name {
+      font-size: 26px;
+    }
+
+    .poj-rows__text {
+      font-size: 17px;
+    }
+
+    .poj-h2--prubeh {
+      max-width: 640px;
+    }
+
+    .poj-steps {
+      max-width: 640px;
+    }
+
+    .poj-faq dt {
+      font-size: 22px;
+    }
+
+    .poj-closing {
+      padding-block: 96px;
+    }
+
+    .poj-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .poj-closing__glow {
+      height: 340px;
+    }
+
+    .poj-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+</style>

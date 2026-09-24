@@ -1,0 +1,2075 @@
+---
+/**
+ * Stránka /o-mne — nejosobnější stránka webu. Zdroj pravdy pro OBSAH, pořadí
+ * sekcí a role: úkol „Úkol pro Claude Code — podstránka /o-mne" (10. 9. 2026)
+ * + `docs/content-subpages.md`, kapitola `/o-mne` (NÁVRH K UŽIVATELSKÉMU
+ * SCHVÁLENÍ — copy převzata doslovně z masteru, beze změny/zkrácení).
+ * Zdroj pravdy pro VŠECHNY hodnoty sdílené kostry (osa, pruh, zářez, gap,
+ * lead-col/bar šířky, typografická škála): `src/pages/clanky.astro`,
+ * sekundárně `src/pages/pristup.astro` (fotografie) a ostatní service pages.
+ *
+ * COPY NENÍ SCHVÁLENÁ K PRODUKCI — stránka existuje jako implementace návrhu,
+ * ne jako spustitelný obsah. Nezveřejňovat bez výslovného schválení textů.
+ *
+ * BEZ DROBEČKOVÉ NAVIGACE — stejně jako `/pristup`/`/recenze`/`/clanky`,
+ * stránka první úrovně.
+ *
+ * FOTOGRAFIE — DVĚ MÍSTA, ŽÁDNÁ NEEXISTUJE. `photoSrc` prázdné = placeholder
+ * (stejný vzor jako `AboutSection.astro`/`pristup.astro`). Placeholder převzatý
+ * z `.about__photo-placeholder` (silueta hlava+ramena), rozšířený o tři tóny
+ * (`--about-photo-1/2/3` — pozadí/torzo/hlava, ne jeden plochý tón jako
+ * `/pristup`) a o silnější kontrast popisku (`--about-photo-label-strong`,
+ * nová hodnota — zadání §8 upozorňuje, že draftové `#4A5F79`/krytí .62 měly
+ * poměr pod 4,5:1 při 11px). Tmavá varianta (kapitola Důvěra) používá nové
+ * `--about-photo-dark-1/2` + existující `--router-grad-1` pro třetí tón a
+ * `rgba(255,255,255,.82)` pro popisek (zadání §8) — čtyři nové tokeny přidané
+ * do `tokens.css` v rámci tohoto úkolu, žádné jiné barvy/velikosti mimo ně.
+ *
+ * TRASA — DVĚ ODLIŠNÉ TECHNIKY NÁJEZDU PODLE STUPNĚ (zadání §9), OBĚ POPRVÉ
+ * NA TÉTO STRÁNCE (žádný sourozenec nemá fotografii v hero, takže žádný z
+ * nich tohle řešit nepotřeboval):
+ *
+ * 1) Notebook/desktop (`data-mode="hero"`): vstup zprava, ohyb POD hero —
+ *    1:1 STEJNÁ TECHNIKA JAKO SOUROZENCI (`heroArcPath`, pevný `y=40` start,
+ *    `HERO_ENTRY_GAP_BEFORE_BEND`, pevná tierová konstanta `data-entry`
+ *    1230/1300 — STEJNÁ hodnota jako `/pristup`), jediný rozdíl je `bendY`:
+ *    počítá se ze spodní hrany CELÉHO hero řádku (text i fotografie,
+ *    `.om-hero__row`), ne jen textového sloupce — fotografie je vyšší
+ *    (zadání §9 „Spodní hranu hero odvoď včetně fotografie").
+ *
+ *    OPRAVA 10. 9. 2026 (zpětná vazba po nasazení, se screenshotem): první
+ *    verze počítala `entryX` ŽIVĚ z pravé hrany fotografie
+ *    (`heroPhotoEl.getBoundingClientRect().right + 80px`) a navíc na
+ *    „wide" stupni (≥1760px) fotografii zvětšovala na 540×700 a přisouvala
+ *    k pravému okraji stage. Uživatel nahlásil, že linka v hero vypadá
+ *    jinak než na ostatních podstránkách — vizuálně to byl přesně stejný
+ *    problém, jaký CLAUDE.md už jednou zdokumentoval u `/sluzby` („dlouhý
+ *    vodorovný/svislý úsek trasy bez okolního obsahu ve velké prázdné
+ *    mezeře čte jako osamocený rám, ne jako plynulá linka") — živě počítaný
+ *    vstup položil svislý úsek trasy do izolovaného volného prostoru napravo
+ *    od velké fotografie, nápadněji než u sourozenců. Oprava: vstup je zpět
+ *    na pevné konstantě (1230/1300) a stupeň „wide" (fotografie 540×700,
+ *    přisunutí k okraji stage) byl ODSTRANĚN — fotografie má na notebooku
+ *    i desktopu konstantní velikost (400×520 / 460×600) a bezpečně se vejde
+ *    před pevný vstup se stejnou rezervou (>100px), jakou má `/pristup`.
+ *
+ * 2) Tablet/mobil (`data-mode="photo"`): 1:1 STEJNÁ TECHNIKA JAKO
+ *    SOUROZENCI — souvislá osa `M {axis} -20 V ...` od paty hlavičky, žádný
+ *    nájezd/gradient, žádný `<defs>`/entry path v markupu (`v.mode ===
+ *    'hero'` podmínka, přesně jako sourozenců `v.hero &&`).
+ *
+ *    OPRAVA 10. 9. 2026 (zpětná vazba po nasazení): první verze tohle
+ *    řešila NOVÝM nájezdem (gradient), který se vyhýbal fotografii pod hero
+ *    mezerou před prvním zářezem — funkčně to fotografii nekřížilo, ale
+ *    vypadalo to jinak než na sourozencích (žádný z nich nájezd na
+ *    tabletu/mobilu vůbec nemá) a uživatel to nahlásil jako „linka nevede
+ *    jako na ostatních podstránkách". Řešení: osa je teď STEJNÁ jako u
+ *    sourozenců (žádná výjimka), fotografie ji vizuálně překrývá díky
+ *    vyššímu z-indexu (`.om-hero__photo { z-index: 2 }` > `.om__route`'s
+ *    `z-index: 1`) — trasa „vede za fotkou" (schovaná pod neprůhlednou
+ *    fotografií) a pod ní pokračuje beze změny, místo aby se jí objížděla.
+ *
+ * TMAVÝ ÚSEK TRASY V KAPITOLE DŮVĚRA — nová situace (žádný sourozenec nemá
+ * tmavou kapitolu UPROSTŘED stránky, jen na úplném konci jako `.xxx-closing`).
+ * Trasa dostává DRUHÝ tmavý segment (`var(--line-on-dark)` @ .3, stejná
+ * barva jako existující segment pro closing) přesně na výšku
+ * `.om-chapter--duvera` (měřeno živě), hlavní světlá trasa se v tomhle
+ * rozsahu VYNECHÁVÁ (dvě `M...V` větve v jednom `d`, stejný mechanismus jako
+ * existující „mezera u nadpisu" v `sluzby.astro`/`darkPath`u zde) — jinak by
+ * `var(--line)` @ .18 na tmavém pozadí byla prakticky neviditelná/vypadala
+ * jako chyba vykreslení.
+ *
+ * ZAČÁTEK — JEDINÁ KAPITOLA S VNITŘNÍM ČLENĚNÍM (zadání §6). Dvě vyprávěcí
+ * části (`.om-zacatek__block`) se statementem MEZI nimi. Od notebooku výš
+ * (kde má kapitola dva sloupce) leží statement v LEVÉM sloupci vedle DRUHÉ
+ * části (CSS grid, explicitní `grid-row`/`grid-column`), ne pod první —
+ * přesně jak zadání žádá „v levé koloně vedle druhé části vyprávění, ne pod
+ * ním". Na tabletu/mobilu (jeden sloupec) jde o prostý tok v pořadí H2 →
+ * blok 1 → statement → blok 2, což se zadání nijak nevylučuje (na šířku,
+ * kde „levý sloupec" jako pojem neexistuje).
+ *
+ * VELKÝ STANDALONE STATEMENT mezi kapitolami Klienti a Souvislosti — bez
+ * `<section>`, bez pruhu, bez kotvy (zadání §6), proto NENÍ v poli
+ * `MARKERS`/`chapterBarChecks` níže ani v `scripts/audit-layout.mjs`. Text
+ * je stejný, jaký `docs/content-subpages.md` původně přiřadil kapitole
+ * Klienti jako její vlastní (na svislici) statement — zadání ho výslovně
+ * povyšuje na tenhle solitérní moment, Klienti proto žádný vlastní statement
+ * nemá.
+ *
+ * WIDE STUPEŇ (≥1760px) — zadání §11 původně žádalo zvětšení hero fotografie
+ * na 2048px (540×700) a přisunutí k pravému okraji stage. ODSTRANĚNO
+ * 10. 9. 2026 (zpětná vazba po nasazení) — kolidovalo to s pevnou vstupní
+ * konstantou trasy a vypadalo to jako osamocená linka v prázdném prostoru,
+ * viz vysvětlení u „TRASA" výše. Fotografie má teď konstantní velikost
+ * (460×600) na celém desktopovém stupni včetně wide — stejné chování jako
+ * `/pristup`, jehož fotografie se na wide taky nezvětšuje.
+ *
+ * ROZPOR „Od roku 2020" (zadání §4, jen nahlas, needitováno) —
+ * `src/components/StatsBand.astro:5` stále vykresluje `Od 2020 / Ve
+ * financích` na homepage (zdroj `docs/content-homepage.md:69-70`). Tahle
+ * stránka žádný rok zahájení praxe nikde neuvádí. Samostatný cílený úkol,
+ * viz `docs/content-subpages.md` kapitola `/o-mne`.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import LineGradientDefs from '../components/LineGradientDefs.astro';
+import { SITE_URL, PERSON_ID, breadcrumbList } from '../data/entity';
+
+// ProfilePage (ne AboutPage) + BreadcrumbList — viz úkol „Předspouštěcí P0
+// technické dotažení“, §12. `mainEntity` odkazuje na JEDINOU Person entitu
+// webu (`entity.ts`), žádná druhá Person entita se nevytváří.
+const oMneJsonLd = [
+  {
+    '@type': 'ProfilePage',
+    '@id': `${SITE_URL}/o-mne#profilepage`,
+    url: `${SITE_URL}/o-mne`,
+    name: 'O mně | Patrik Gajdadzis',
+    mainEntity: { '@id': PERSON_ID },
+  },
+  breadcrumbList([
+    { name: 'Domů', path: '/' },
+    { name: 'O mně', path: '/o-mne' },
+  ]),
+];
+
+// Prázdné = placeholder. Jediné místo pro vložení skutečné fotografie —
+// stejný vzor jako `photoSrc` v `AboutSection.astro`/`pristup.astro`. Použité
+// na DVOU místech (hero, kapitola Důvěra) beze změny rozvržení při doplnění.
+const photoSrc = '';
+
+const MARKERS = ['zacatek', 'mint', 'klienti', 'souvislosti', 'duvera', 'projekt', 'role', 'recenze'] as const;
+
+interface Tier {
+  tier: 'mobile' | 'tablet' | 'laptop' | 'desktop';
+  vb: number;
+  axis: number;
+  dotOffset: number;
+  mode: 'hero' | 'photo';
+  // Pro `mode:"hero"`: pevná tierová konstanta vstupu, 1:1 stejná technika
+  // jako sourozenci (`/pristup` atd.) — NE dopočítaná z pozice fotografie
+  // (viz hlavičkový komentář výše, oprava po zpětné vazbě 10. 9. 2026).
+  entry: number;
+  radius: number;
+}
+
+const TIERS: Tier[] = [
+  { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, mode: 'photo', entry: 24, radius: 0 },
+  { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, mode: 'photo', entry: 40, radius: 0 },
+  { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, mode: 'hero', entry: 1230, radius: 28 },
+  { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, mode: 'hero', entry: 1300, radius: 28 },
+];
+
+interface FactRow {
+  heading: string;
+  text: string;
+  pair?: [string, string];
+}
+
+const facts: FactRow[] = [
+  { heading: 'Vedu finanční část Mint reality & finance', text: 'Vedle vedení poradců dál osobně pracuji se svými klienty.' },
+  { heading: 'Stojím za projektem Hypotéka Ostrava', text: 'Články, kalkulačka a propojení s hypotečními specialisty.' },
+  { heading: 'Odborná způsobilost', text: 'Úvěry, pojištění a investice.' },
+  { heading: '', text: 'Google hodnocení.', pair: ['150+ klientů', '5,0'] },
+];
+---
+
+<!--
+  SEO title ZMĚNĚN oproti `docs/content-subpages.md` (tam schválený návrh
+  „Patrik Gajdadzis | Finanční poradce Ostrava“) — úkol „Předspouštěcí P0
+  technické dotažení“, §8, výslovně žádá „O mně | Patrik Gajdadzis“, aby
+  /o-mne nesoutěžila s homepage o hlavní dotaz „finanční poradce Ostrava“
+  (homepage title byl ve stejném úkolu změněn na přesně tuhle frázi).
+  Rozpor je záměrný a nahlášený v souhrnu úkolu, ne tichá odchylka.
+-->
+<BaseLayout
+  title="O mně | Patrik Gajdadzis"
+  description="Jsem finanční poradce z Ostravy. Vedu finanční část Mint reality & finance, stojím za projektem Hypotéka Ostrava a s klienty pracuji osobně."
+  ogType="profile"
+  jsonLd={oMneJsonLd}
+>
+  <Header />
+  <main id="hero" class="om">
+    <div class="om__route" aria-hidden="true">
+      {
+        TIERS.map((v) => (
+          <svg
+            class={`om__route-svg om__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2900`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-mode={v.mode}
+            data-entry={v.entry}
+            data-radius={v.radius}
+          >
+            {v.mode === 'hero' && (
+              <defs>
+                <LineGradientDefs
+                  id={`om-line-entry-${v.tier}`}
+                  tier={v.tier === 'desktop' ? 'desktop' : 'laptop'}
+                  x1={0}
+                  y1={0}
+                  x2={0}
+                  y2={0}
+                />
+              </defs>
+            )}
+            <path class="om__route-path" d={`M ${v.axis} -20 V 2900`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.mode === 'hero' && (
+              <path class="om__route-path om__route-entry" d="M 0 0 V 0" fill="none" stroke={`url(#om-line-entry-${v.tier})`} stroke-width="1" stroke-linecap="round" />
+            )}
+            <path class="om__route-path om__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {MARKERS.map((marker) => (
+              <g class="om__marker" data-marker={marker}>
+                <line class="om__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="om__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="om-hero" aria-labelledby="om-hero-heading">
+      <div class="om-hero__row">
+        <div class="om-hero__text">
+          <h1 id="om-hero-heading" data-reveal>Jsem&nbsp;Patrik Gajdadzis. Finanční poradce z&nbsp;Ostravy.</h1>
+          <p class="om-hero__lead" data-reveal>
+            Vedu finanční část Mint reality &amp;&nbsp;finance a&nbsp;zároveň dál osobně pracuji s&nbsp;klienty. Baví mě
+            hledat řešení, která dávají smysl nejen sama o&nbsp;sobě, ale i&nbsp;ve&nbsp;spojení s&nbsp;ostatními
+            financemi.
+          </p>
+          <div class="om-hero__actions" data-reveal>
+            <a class="om-cta" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="om-phone" href="tel:+420775217721">
+              <svg class="om-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="om-photo om-hero__photo" data-reveal>
+          {photoSrc ? (
+            <img src={photoSrc} alt="Patrik Gajdadzis" width="460" height="600" loading="lazy" decoding="async" />
+          ) : (
+            <div class="om-photo__placeholder" aria-hidden="true">
+              <div class="om-photo__bg"></div>
+              <div class="om-photo__figure">
+                <div class="om-photo__torso"></div>
+                <div class="om-photo__head"></div>
+              </div>
+              <span class="om-photo__label">Foto Patrika — placeholder</span>
+            </div>
+          )}
+          {!photoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
+        </div>
+      </div>
+    </section>
+
+    <section class="om-chapter om-chapter--zacatek" aria-labelledby="zacatek-heading">
+      <div class="om-chapter__inner">
+      <div class="om-chapter__bar" data-reveal data-route-target="zacatek">
+        <p>Začátek</p>
+      </div>
+
+      <div class="om-chapter__content">
+        <div class="om-zacatek__grid">
+          <h2 id="zacatek-heading" class="om-h2--dominant om-zacatek__heading" data-reveal>Nejdřív jsem&nbsp;chtěl pochopit vlastní peníze.</h2>
+
+          <div class="om-zacatek__block om-zacatek__block--1" data-reveal>
+            <p>Pět let jsem jezdil za&nbsp;prací do&nbsp;zahraničí. Časem jsem ale věděl, že takhle nechci pokračovat celý život.</p>
+            <p>
+              Začalo mi docházet, že většinu života strávíme prací a&nbsp;vyděláváním peněz, ale málokdo se&nbsp;skutečně
+              naučí, jak s&nbsp;nimi správně nakládat. Přišlo mi nesmyslné věnovat tolik času práci a&nbsp;potom
+              se&nbsp;pořád pohybovat ve&nbsp;stejném kole jen proto, že nevím, co s&nbsp;vydělanými penězi dělat dál.
+            </p>
+            <p>Začal jsem se&nbsp;proto o&nbsp;finance zajímat nejdřív sám pro&nbsp;sebe.</p>
+          </div>
+
+          <p class="om-chapter__statement om-zacatek__statement" data-reveal>
+            Nejdřív jsem chtěl pochopit, co&nbsp;dělat s&nbsp;vlastními penězi. Nakonec se&nbsp;z&nbsp;toho stala moje
+            práce.
+          </p>
+
+          <div class="om-zacatek__block om-zacatek__block--2" data-reveal>
+            <p>
+              Jeden můj známý tehdy pracoval jako ředitel v&nbsp;poradenské společnosti. Ozval jsem se&nbsp;mu
+              a&nbsp;domluvili jsme se, že za&nbsp;ním budu po&nbsp;práci chodit a&nbsp;učit se, jak finance
+              a&nbsp;finanční poradenství fungují v&nbsp;praxi.
+            </p>
+            <p>
+              Po&nbsp;pár týdnech se&nbsp;mě zeptal, jestli bych se&nbsp;tím nechtěl začít živit. Bavilo mě to,
+              připadalo mi&nbsp;to zajímavé a&nbsp;dávalo mi&nbsp;smysl pomáhat lidem řešit podobné otázky, které jsem
+              předtím začal řešit sám.
+            </p>
+            <p>Rozhodl jsem se&nbsp;proto začít ve&nbsp;finančním poradenství podnikat a&nbsp;dál se&nbsp;v&nbsp;oboru vzdělávat.</p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="om-chapter om-chapter--mint" aria-labelledby="mint-heading">
+      <div class="om-chapter__inner">
+      <div class="om-chapter__bar" data-reveal data-route-target="mint">
+        <p>Mint</p>
+      </div>
+
+      <div class="om-chapter__content">
+        <div class="om-chapter__top">
+          <div class="om-chapter__lead-col" data-reveal>
+            <h2 id="mint-heading" class="om-h2--std">Další krok byl postavit finanční část&nbsp;Mint reality &amp;&nbsp;finance.</h2>
+          </div>
+          <div class="om-chapter__support-col" data-reveal>
+            <p class="om-support__text">
+              Po&nbsp;čase mi přestaly vyhovovat prostředí a&nbsp;způsob fungování společnosti, ve&nbsp;které jsem
+              tehdy pracoval. Rozhodl jsem se&nbsp;proto pokračovat jinak.
+            </p>
+            <p class="om-support__text">
+              Dlouholetý kamarád, který stojí za&nbsp;Mint reality, mi&nbsp;nabídl možnost vybudovat v&nbsp;rámci
+              firmy finanční část. Když jsem svému tehdejšímu týmu oznámil, že odcházím, několik kluků se&nbsp;mě
+              zeptalo, jestli mohou jít se&nbsp;mnou.
+            </p>
+            <p class="om-support__text">
+              Tak vznikla finanční část Mint reality &amp;&nbsp;finance, kterou dnes vedu. Vedle vedení poradců ale dál
+              osobně pracuji se&nbsp;svými klienty.
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="om-chapter om-chapter--klienti" aria-labelledby="klienti-heading">
+      <div class="om-chapter__inner">
+      <div class="om-chapter__bar" data-reveal data-route-target="klienti">
+        <p>Klienti</p>
+      </div>
+
+      <div class="om-chapter__content">
+        <div class="om-chapter__top">
+          <div class="om-chapter__lead-col" data-reveal>
+            <h2 id="klienti-heading" class="om-h2--std">Vedení týmu mě od&nbsp;klientů neodvedlo.</h2>
+          </div>
+          <div class="om-chapter__support-col" data-reveal>
+            <p class="om-support__text">S&nbsp;klienty pracuji dál jednoduše proto, že mě to baví a&nbsp;naplňuje.</p>
+            <p class="om-support__text">
+              Každý člověk má jinou situaci, jiné cíle a&nbsp;jiné možnosti. Právě hledání řešení pro&nbsp;konkrétního
+              člověka je&nbsp;část práce, která mě baví nejvíc.
+            </p>
+            <p class="om-support__text">
+              Nechci rozhodovat za&nbsp;klienta. Chci mu&nbsp;ukázat možnosti, vysvětlit jejich výhody i&nbsp;nevýhody
+              a&nbsp;dát mu&nbsp;dostatek informací, aby věděl, do&nbsp;čeho jde a&nbsp;mohl se&nbsp;správně
+              rozhodnout.
+            </p>
+            <p class="om-support__text">
+              A&nbsp;nechci, aby spolupráce skončila jednou smlouvou. Mým cílem je, aby se&nbsp;na&nbsp;mě klient
+              mohl obracet i&nbsp;při dalších finančních rozhodnutích a&nbsp;aby jednotlivé kroky dlouhodobě dávaly
+              smysl jemu i&nbsp;jeho rodině.
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <div class="om-statement-big" data-reveal>
+      <p>Nechci za&nbsp;klienta rozhodovat. Chci, aby&nbsp;rozuměl tomu, pro&nbsp;co&nbsp;se&nbsp;rozhoduje.</p>
+    </div>
+
+    <section class="om-chapter om-chapter--souvislosti" aria-labelledby="souvislosti-heading">
+      <div class="om-chapter__inner">
+      <div class="om-chapter__bar" data-reveal data-route-target="souvislosti">
+        <p>Souvislosti</p>
+      </div>
+
+      <div class="om-chapter__content">
+        <div class="om-chapter__top">
+          <div class="om-chapter__lead-col" data-reveal>
+            <h2 id="souvislosti-heading" class="om-h2--std">Největší smysl mi&nbsp;dává spojovat věci dohromady.</h2>
+          </div>
+          <div class="om-chapter__support-col" data-reveal>
+            <p class="om-support__text">
+              Hypotéka, rezerva, pojištění, investice nebo penze nejsou oddělené světy. Jedno rozhodnutí často ovlivní
+              několik dalších.
+            </p>
+            <p class="om-support__text">
+              Za&nbsp;svou silnou stránku považuji schopnost kombinovat jednotlivé nástroje a&nbsp;možnosti tak,
+              aby&nbsp;společně dávaly smysl pro&nbsp;konkrétní situaci klienta.
+            </p>
+            <p class="om-support__text">
+              Setkávám se&nbsp;i&nbsp;s&nbsp;lidmi, kteří už&nbsp;svůj problém zkoušeli řešit v&nbsp;bance,
+              pojišťovně nebo s&nbsp;jiným poradcem, ale nenašli vhodný postup. Někdy se&nbsp;stačí podívat
+              na&nbsp;situaci z&nbsp;jiné strany a&nbsp;propojit možnosti, které byly předtím řešené odděleně.
+            </p>
+            <p class="om-support__text">
+              Právě v&nbsp;takových případech je&nbsp;podle mě nejvíc vidět rozdíl mezi prodejem jednoho produktu
+              a&nbsp;skutečným finančním plánováním.
+            </p>
+          </div>
+        </div>
+
+        <p class="om-chapter__statement" data-reveal>Produkt je&nbsp;nástroj. Důležité je, jak&nbsp;zapadne do&nbsp;celku.</p>
+      </div>
+      </div>
+    </section>
+
+    <section class="om-chapter om-chapter--duvera" aria-labelledby="duvera-heading">
+      <div class="om-chapter__inner">
+      <div class="om-chapter__bar" data-reveal data-route-target="duvera">
+        <p>Důvěra</p>
+      </div>
+
+      <div class="om-chapter__content">
+        <div class="om-chapter__top">
+          <div class="om-chapter__lead-col" data-reveal>
+            <h2 id="duvera-heading" class="om-h2--std">Chci, abyste věděli, proč vám něco doporučuji.</h2>
+
+            <div class="om-photo om-photo--dark om-duvera__photo" data-reveal>
+              {photoSrc ? (
+                <img src={photoSrc} alt="Patrik Gajdadzis" width="440" height="520" loading="lazy" decoding="async" />
+              ) : (
+                <div class="om-photo__placeholder" aria-hidden="true">
+                  <div class="om-photo__bg"></div>
+                  <div class="om-photo__figure">
+                    <div class="om-photo__torso"></div>
+                    <div class="om-photo__head"></div>
+                  </div>
+                  <span class="om-photo__label">Foto Patrika — placeholder</span>
+                </div>
+              )}
+              {!photoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
+            </div>
+          </div>
+          <div class="om-chapter__support-col" data-reveal>
+            <p class="om-support__text om-support__text--dark">
+              Důvěra je&nbsp;pro&nbsp;mě při spolupráci zásadní. Když klientovi něco doporučuji, chci, aby&nbsp;věděl,
+              proč to&nbsp;doporučuji, jaké má možnosti a&nbsp;jaké jsou jejich výhody i&nbsp;nevýhody.
+            </p>
+            <p class="om-support__text om-support__text--dark">
+              Nejde mi o&nbsp;to, aby ode&nbsp;mě člověk odešel s&nbsp;další smlouvou. Důležité je, aby jednotlivá
+              rozhodnutí dlouhodobě fungovala a&nbsp;aby se&nbsp;klient finančně posouval tam, kam chce.
+            </p>
+            <p class="om-support__text om-support__text--dark">
+              Když se&nbsp;později něco změní, chci, aby věděl, že má člověka, kterému může zavolat a&nbsp;navázat
+              na&nbsp;to, co jsme už&nbsp;společně řešili.
+            </p>
+            <p class="om-support__text om-support__text--dark">
+              Stejně tak chci, aby se&nbsp;na&nbsp;mě mohl v&nbsp;případě potřeby obrátit někdo z&nbsp;jeho rodiny.
+            </p>
+            <p class="om-chapter__statement om-chapter__statement--dark" data-reveal>
+              Dlouhodobá spolupráce pro&nbsp;mě znamená víc než&nbsp;další smlouva.
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="om-chapter om-chapter--projekt" aria-labelledby="projekt-heading">
+      <div class="om-chapter__inner">
+      <div class="om-chapter__bar" data-reveal data-route-target="projekt">
+        <p>Projekt</p>
+      </div>
+
+      <div class="om-chapter__content">
+        <div class="om-chapter__top">
+          <div class="om-chapter__lead-col" data-reveal>
+            <h2 id="projekt-heading" class="om-h2--std">Proto vznikla i&nbsp;Hypotéka Ostrava.</h2>
+          </div>
+          <div class="om-chapter__support-col" data-reveal>
+            <p class="om-support__text">
+              Chtěl jsem vytvořit místo, kde se&nbsp;lidé dokážou v&nbsp;hypotékách lépe zorientovat a&nbsp;dostanou
+              se&nbsp;k&nbsp;lidem, kteří je&nbsp;řeší každý den.
+            </p>
+            <p class="om-support__text">
+              Na&nbsp;portálu Hypotéka Ostrava proto vznikají články o&nbsp;financování bydlení, hypoteční kalkulačka
+              a&nbsp;možnost řešit konkrétní financování s&nbsp;hypotečními specialisty.
+            </p>
+            <p class="om-support__text">
+              Hypotéka totiž není jen úroková sazba. Důležité jsou podmínky jednotlivých bank, příjmy, vlastní
+              prostředky, nemovitost i&nbsp;další okolnosti konkrétního případu.
+            </p>
+            <p class="om-support__text">
+              Pro&nbsp;člověka, který hypotéku řeší jednou nebo několikrát za&nbsp;život, může být celý proces
+              zbytečně složitý a&nbsp;stresující. Cílem projektu je&nbsp;pomoct mu&nbsp;zorientovat se&nbsp;a
+              dostat se&nbsp;k&nbsp;člověku, který mu&nbsp;jednotlivé možnosti vysvětlí a&nbsp;pomůže financování
+              dotáhnout.
+            </p>
+            <a class="om-external-link" href="https://www.hypotekaostrava.cz/" target="_blank" rel="noopener noreferrer">
+              <span>Hypotéka Ostrava</span>
+              <svg class="om-external-link__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="sr-only">(externí web)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="om-chapter om-chapter--role" aria-labelledby="role-heading">
+      <div class="om-chapter__inner">
+      <div class="om-chapter__bar om-chapter__bar--muted" data-reveal data-route-target="role">
+        <p id="role-heading">Role</p>
+      </div>
+
+      <div class="om-chapter__content om-chapter__content--single">
+        <ul class="om-facts" data-reveal>
+          {
+            facts.map((fact) => (
+              <li class="om-facts__row">
+                {fact.pair ? (
+                  <h3 class="om-facts__pair">
+                    <span>{fact.pair[0]}</span>
+                    <span class="om-facts__divider" aria-hidden="true"></span>
+                    <span>{fact.pair[1]}</span>
+                  </h3>
+                ) : (
+                  <h3>{fact.heading}</h3>
+                )}
+                <p>{fact.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      </div>
+    </section>
+
+    <section class="om-chapter om-chapter--recenze" aria-labelledby="recenze-heading">
+      <div class="om-chapter__inner">
+      <div class="om-chapter__bar om-chapter__bar--muted" data-reveal data-route-target="recenze">
+        <p>Recenze</p>
+      </div>
+
+      <div class="om-chapter__content">
+        <div class="om-chapter__top">
+          <div class="om-chapter__lead-col" data-reveal>
+            <h2 id="recenze-heading" class="om-h2--std">Zkušenosti klientů si&nbsp;můžete přečíst sami.</h2>
+          </div>
+          <div class="om-chapter__support-col" data-reveal>
+            <p class="om-support__text">
+              Pokud vás zajímá, jak spolupráci hodnotí lidé, se&nbsp;kterými jsem už&nbsp;pracoval, podívejte
+              se&nbsp;na&nbsp;jejich recenze.
+            </p>
+            <a class="om-text-link" href="/recenze">Zobrazit recenze</a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="om-closing" aria-labelledby="om-closing-heading">
+      <div class="om-closing__glow" aria-hidden="true"></div>
+
+      <div class="om-closing__grid">
+        <h2 id="om-closing-heading" data-reveal>Pokud vám můj přístup dává smysl, pojďme se&nbsp;poznat.</h2>
+
+        <div class="om-closing__body" data-reveal>
+          <p>Na&nbsp;první konzultaci si&nbsp;projdeme, co&nbsp;právě řešíte, a&nbsp;zjistíme, jestli a&nbsp;jak vám můžu pomoct.</p>
+
+          <div class="om-closing__actions">
+            <a class="om-cta om-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="om-phone om-phone--dark" href="tel:+420775217721">
+              <svg class="om-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.om');
+  const routeWrap = document.querySelector('.om__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.om__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.om-hero') as HTMLElement | null;
+    const heroRowEl = main.querySelector('.om-hero__row') as HTMLElement | null;
+    const duveraSection = main.querySelector('.om-chapter--duvera') as HTMLElement | null;
+    const closingSection = main.querySelector('.om-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.om-closing__grid h2') as HTMLElement | null;
+
+    const MARKER_KEYS = ['zacatek', 'mint', 'klienti', 'souvislosti', 'duvera', 'projekt', 'role', 'recenze'] as const;
+    const markerTargets: Record<(typeof MARKER_KEYS)[number], Element | null> = {
+      zacatek: main.querySelector('[data-route-target="zacatek"]'),
+      mint: main.querySelector('[data-route-target="mint"]'),
+      klienti: main.querySelector('[data-route-target="klienti"]'),
+      souvislosti: main.querySelector('[data-route-target="souvislosti"]'),
+      duvera: main.querySelector('[data-route-target="duvera"]'),
+      projekt: main.querySelector('[data-route-target="projekt"]'),
+      role: main.querySelector('[data-route-target="role"]'),
+      recenze: main.querySelector('[data-route-target="recenze"]'),
+    };
+
+    // Hero (notebook/desktop) — stejná technika jako sourozenci.
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_MAX_LENGTH = 100;
+    const HERO_ENTRY_MIN_LENGTH = 40;
+    const HERO_ENTRY_GAP_BEFORE_BEND = 20;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, endY: number, entryEndY: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${entryEndY} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${endY}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      // Ohyb hero trasy — ze spodní hrany CELÉHO řádku (text i fotografie).
+      let bendY = 260;
+      if (heroRowEl) {
+        const rowBottom = heroRowEl.getBoundingClientRect().bottom - mainRect.top;
+        bendY = Math.min(Math.max(rowBottom + 40, 260), heroBottom - 20);
+      }
+
+      // Tmavý úsek trasy přesně na výšku kapitoly Důvěra.
+      const duveraRect = duveraSection ? duveraSection.getBoundingClientRect() : null;
+      const duveraTop = duveraRect ? duveraRect.top - mainRect.top : null;
+      const duveraBottom = duveraRect ? duveraRect.bottom - mainRect.top : null;
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const mode = svg.dataset.mode;
+        const entry = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.om__route-path:not(.om__route-path--dark):not(.om__route-entry)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.om__route-path--dark') as SVGPathElement | null;
+        const entryPath = svg.querySelector('.om__route-entry') as SVGPathElement | null;
+        const gradient = svg.querySelector('linearGradient');
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--om-shift', `${shift}px`);
+        }
+
+        const duveraEnd = duveraTop ?? closingTop;
+        let lightD: string;
+
+        if (mode === 'hero') {
+          const available = bendY - r - HERO_ENTRY_START_Y - HERO_ENTRY_GAP_BEFORE_BEND;
+          const entryLength = Math.min(HERO_ENTRY_MAX_LENGTH, Math.max(HERO_ENTRY_MIN_LENGTH, available));
+          const entryEndY = HERO_ENTRY_START_Y + entryLength;
+
+          if (gradient) {
+            gradient.setAttribute('x1', String(entry));
+            gradient.setAttribute('x2', String(entry));
+            gradient.setAttribute('y1', String(HERO_ENTRY_START_Y));
+            gradient.setAttribute('y2', String(entryEndY));
+          }
+          if (entryPath) entryPath.setAttribute('d', `M ${entry} ${HERO_ENTRY_START_Y} L ${entry} ${entryEndY}`);
+
+          lightD = heroArcPath(entry, axisScaled, r, bendY, duveraEnd, entryEndY);
+        } else {
+          // Tablet/mobil — 1:1 stejná technika jako sourozenci (`hero: false`):
+          // souvislá osa od paty hlavičky, žádný nájezd/gradient. Fotografie
+          // pod hero na plnou šířku ji na tomhle úseku vizuálně PŘEKRYJE
+          // (`.om-hero__photo` má vyšší z-index než `.om__route`, viz CSS) —
+          // trasa se pod fotografií "schová" a pokračuje dál pod ní, přesně
+          // jak zadání 10. 9. 2026 vyžádalo („linka má vést za fotkou").
+          lightD = `M ${axisScaled} -20 V ${duveraEnd}`;
+        }
+
+        if (duveraTop != null && duveraBottom != null) {
+          lightD += ` M ${axisScaled} ${duveraBottom} V ${closingTop}`;
+        }
+        if (lightPath) lightPath.setAttribute('d', lightD);
+
+        let closingTail = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - 20;
+            const gapBottom = hRect.bottom - mainRect.top + 20;
+            closingTail = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        let darkD = closingTail;
+        if (duveraTop != null && duveraBottom != null) {
+          darkD = `M ${axisScaled} ${duveraTop} V ${duveraBottom} ${closingTail}`;
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        MARKER_KEYS.forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.om__notch');
+          const dot = group.querySelector('.om__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.om__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.om__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section') ?? el.closest('.om-statement-big');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+      const bigStatement = main.querySelector('.om-statement-big');
+      if (bigStatement) observer.observe(bigStatement);
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .om {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .om__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .om__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .om__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .om__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  /* Kotva v kapitole Důvěra leží na tmavém pozadí — zářez dostává stejnou
+     barvu/opacitu jako tmavý úsek trasy, `var(--line)` @ .18 by tam byla
+     prakticky neviditelná. */
+  .om__marker[data-marker='duvera'] .om__notch {
+    stroke: var(--line-on-dark);
+    stroke-opacity: .3;
+  }
+
+  .om__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .om__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .om__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .om__route-svg--tablet,
+  .om__route-svg--laptop,
+  .om__route-svg--desktop {
+    display: none;
+  }
+
+  .om :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  /* Fotografie: `clip-path` odhalení místo fade — přebito generickým
+     `[data-reveal]` pravidlem výše vyšší specificitou (stejný vzor jako
+     `.pri-photo` v pristup.astro). */
+  .om-photo.is-pending {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .om-photo.is-visible {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 0% 0);
+    transition: clip-path 600ms var(--ease-out);
+  }
+
+  .om-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .om-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .om-cta:active {
+    transform: translateY(1px);
+  }
+
+  .om-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .om-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .om-phone:hover {
+    color: var(--emerald);
+  }
+
+  .om-phone--dark {
+    color: var(--white);
+  }
+
+  .om-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .om-hero {
+    padding: 64px 24px 0;
+  }
+
+  .om-hero__row {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .om-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .om-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .om-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .om-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .om-hero__actions .om-cta {
+    width: 100%;
+  }
+
+  .om-hero__actions .om-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* Fotografie na plnou šířku pod hero (tablet/mobil, §8) — "full-bleed"
+     kompenzací `.om-hero`'s vlastního horizontálního paddingu. */
+  /* z-index nad `.om__route` (z-index:1) — na tabletu/mobilu tak fotografie
+     vizuálně překryje osu trasy, která pod ní jinak souvisle pokračuje
+     (stejná technika jako sourozenci, jen "schovaná" za neprůhlednou
+     fotografií — zadání 10. 9. 2026, „linka má vést za fotkou"). */
+  .om-hero__photo {
+    position: relative;
+    z-index: 2;
+    width: calc(100% + 48px);
+    margin-inline: -24px;
+    aspect-ratio: 8 / 9;
+  }
+
+  /* ---------- Fotografie — placeholder (tři tóny, ne jeden plochý) ---------- */
+
+  .om-photo {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .om-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .om-photo__placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .om-photo__bg {
+    position: absolute;
+    inset: 0;
+    background: var(--about-photo-1);
+  }
+
+  .om-photo__figure {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    height: 100%;
+    width: auto;
+    aspect-ratio: 4 / 5;
+    max-width: 100%;
+  }
+
+  .om-photo__torso {
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    bottom: 0;
+    top: 38%;
+    background: var(--about-photo-2);
+    border-radius: 30% 30% 0 0;
+  }
+
+  .om-photo__head {
+    position: absolute;
+    left: 50%;
+    top: 8%;
+    height: 24%;
+    aspect-ratio: 1;
+    width: auto;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: var(--about-photo-3);
+  }
+
+  .om-photo__label {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--about-photo-label-strong);
+    white-space: nowrap;
+  }
+
+  .om-photo--dark .om-photo__bg {
+    background: var(--about-photo-dark-1);
+  }
+
+  .om-photo--dark .om-photo__torso {
+    background: var(--about-photo-dark-2);
+  }
+
+  .om-photo--dark .om-photo__head {
+    background: var(--router-grad-1);
+  }
+
+  .om-photo--dark .om-photo__label {
+    color: rgba(255, 255, 255, .82);
+  }
+
+  .om-duvera__photo {
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 4 / 5;
+    margin-top: 24px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  /*
+   * Kořen kapitoly (`.om-chapter`) nese jen pozadí a mezisekční `margin-top`
+   * — NIKDY vlastní `max-width`/padding/flex, ty patří obsahové vrstvě
+   * `.om-chapter__inner` (CLAUDE.md „Konvence: wide desktop a centrované
+   * designové plátno" — full-width background → centered content stage).
+   * Bez týhle vrstvy by capnutí kořene omezilo i pozadí, což je u tmavé
+   * kapitoly Důvěra vizuálně viditelné (na rozdíl od světlých kapitol, kde
+   * `background` splývá s `--bg`) — přesně nahlášeno jako chyba 10. 9. 2026.
+   */
+  .om-chapter {
+    position: relative;
+  }
+
+  .om-chapter--zacatek {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .om-chapter__inner {
+    padding: 56px 24px;
+  }
+
+  .om-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .om-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--om-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .om-chapter--zacatek .om-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .om-chapter__bar--muted p {
+    font-weight: 700;
+    color: var(--text-nav);
+  }
+
+  .om-chapter--duvera .om-chapter__bar p {
+    color: var(--white);
+  }
+
+  /* Nadpis na tmavé ploše — bez tohohle přebírá `.om-chapter__lead-col h2`
+     základní `var(--navy)`, prakticky nečitelné na tomhle gradientu
+     (nahlášeno jako vizuální chyba po nasazení, 10. 9. 2026). */
+  .om-chapter--duvera .om-chapter__lead-col h2 {
+    color: var(--white);
+  }
+
+  .om-chapter--duvera {
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .om-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .om-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .om-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .om-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .om-chapter__lead-col h2,
+  .om-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .om-h2--dominant {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+    font-size: 34px;
+  }
+
+  .om-h2--std {
+    font-size: 30px;
+  }
+
+  .om-support__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .om-support__text--dark {
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .om-text-link {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .om-text-link:hover {
+    color: var(--emerald-hover);
+  }
+
+  .om-external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .om-external-link:hover {
+    color: var(--emerald-hover);
+  }
+
+  .om-external-link__icon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+
+  .om-chapter__statement {
+    margin: 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--emerald);
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .om-chapter__statement--dark {
+    margin-top: 8px;
+    padding-left: 0;
+    border-left: none;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--white);
+  }
+
+  /* ---------- Začátek — vnitřní členění (jediná kapitola s ním) ---------- */
+
+  .om-zacatek__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .om-zacatek__block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .om-zacatek__block p {
+    margin: 0;
+  }
+
+  /* ---------- Velký standalone statement (mezi Klienti a Souvislosti) ---------- */
+
+  /* Levý padding = stejný odstup jako text pruhu kapitoly (osa + zářez +
+     mezera), i&nbsp;když tenhle blok sám žádný pruh/kotvu nemá — jinak by
+     text začínal na ose trasy nebo přes ni (zjištěno měřením při ověřování
+     tohoto úkolu: 24px base padding = přesně osa mobilu, tekst by ji
+     protínal). */
+  .om-statement-big {
+    padding-block: 56px;
+    padding-right: 24px;
+    padding-left: 60px;
+  }
+
+  .om-statement-big p {
+    margin: 0;
+    max-width: 720px;
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  /* ---------- Role — faktický blok ---------- */
+
+  .om-facts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .om-facts__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .om-facts__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .om-facts__row h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .om-facts__row p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .om-facts__pair {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .om-facts__divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--border);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .om-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .om-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .om-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .om-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .om-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .om-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .om-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .om-closing__actions .om-cta {
+    width: 100%;
+  }
+
+  .om-closing__actions .om-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+      clip-path: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .om__route-svg--mobile {
+      display: none;
+    }
+
+    .om__route-svg--tablet {
+      display: block;
+    }
+
+    .om-chapter__bar p {
+      padding-left: calc(64px + var(--om-shift, 0px));
+    }
+
+    .om-hero {
+      padding: 88px 40px 0;
+    }
+
+    .om-hero__text {
+      gap: 20px;
+    }
+
+    .om-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .om-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .om-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .om-hero__actions .om-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .om-hero__actions .om-phone {
+      height: auto;
+    }
+
+    .om-hero__photo {
+      width: calc(100% + 80px);
+      margin-inline: -40px;
+      aspect-ratio: 834 / 580;
+    }
+
+    .om-duvera__photo {
+      max-width: 360px;
+    }
+
+    .om-chapter--zacatek {
+      margin-top: 80px;
+    }
+
+    .om-chapter__inner {
+      padding: 72px 40px;
+    }
+
+    .om-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .om-h2--dominant {
+      font-size: 44px;
+    }
+
+    .om-h2--std {
+      font-size: 40px;
+    }
+
+    .om-support__text {
+      font-size: 18px;
+    }
+
+    .om-text-link,
+    .om-external-link {
+      font-size: 17px;
+    }
+
+    .om-chapter__statement {
+      font-size: 24px;
+    }
+
+    .om-chapter__statement--dark {
+      font-size: 26px;
+    }
+
+    .om-statement-big {
+      padding-block: 72px;
+      padding-right: 40px;
+      padding-left: 104px;
+    }
+
+    .om-statement-big p {
+      font-size: 36px;
+      max-width: 780px;
+    }
+
+    .om-chapter__top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .om-chapter--mint .om-chapter__lead-col,
+    .om-chapter--klienti .om-chapter__lead-col,
+    .om-chapter--souvislosti .om-chapter__lead-col,
+    .om-chapter--duvera .om-chapter__lead-col,
+    .om-chapter--projekt .om-chapter__lead-col,
+    .om-chapter--recenze .om-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .om-chapter--mint .om-chapter__support-col,
+    .om-chapter--klienti .om-chapter__support-col,
+    .om-chapter--souvislosti .om-chapter__support-col,
+    .om-chapter--duvera .om-chapter__support-col,
+    .om-chapter--projekt .om-chapter__support-col,
+    .om-chapter--recenze .om-chapter__support-col {
+      flex: 1;
+    }
+
+    .om-facts__row h3 {
+      font-size: 19px;
+    }
+
+    .om-closing__body p {
+      font-size: 17px;
+    }
+
+    .om-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .om-closing__actions .om-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .om-closing__actions .om-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .om__route-svg--tablet {
+      display: none;
+    }
+
+    .om__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .om-chapter__bar p {
+      padding-left: calc(56px + var(--om-shift, 0px));
+    }
+
+    .om-hero__row {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    /* Šířka 650px — nejmenší, na které se „Jsem Patrik Gajdadzis." vejde na
+       jeden řádek při 64px (ověřeno měřením, potřeba ~621px + rezerva),
+       viz zpětná vazba 10. 9. 2026. Fotografie proto na tomhle stupni ustoupí
+       na 300px (viz `.om-hero__photo` níže), aby se s pevnou vstupní
+       konstantou trasy (1230px) pořád bezpečně nepotkala. */
+    .om-hero__text {
+      max-width: 650px;
+      flex: none;
+      width: 650px;
+      gap: 18px;
+    }
+
+    .om-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .om-hero__lead {
+      font-size: 19px;
+    }
+
+    .om-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .om-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .om-hero__photo {
+      flex: none;
+      width: 300px;
+      height: 392px;
+      margin-inline: 0;
+      aspect-ratio: auto;
+    }
+
+    .om-chapter--zacatek {
+      margin-top: 100px;
+    }
+
+    .om-chapter__inner {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 56px;
+    }
+
+    .om-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .om-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .om-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .om-chapter__content {
+      flex: 1;
+    }
+
+    .om-chapter__content--single {
+      gap: 40px;
+    }
+
+    .om-h2--dominant {
+      font-size: 50px;
+      max-width: 700px;
+    }
+
+    .om-h2--std {
+      font-size: 44px;
+    }
+
+    .om-chapter__statement {
+      font-size: 28px;
+    }
+
+    .om-chapter__statement--dark {
+      font-size: 30px;
+    }
+
+    .om-statement-big {
+      padding-block: 88px;
+      padding-right: 96px;
+      padding-left: calc(152px + var(--om-shift, 0px));
+    }
+
+    .om-statement-big p {
+      font-size: 44px;
+      max-width: 900px;
+    }
+
+    .om-chapter__top {
+      gap: 60px;
+    }
+
+    .om-chapter--mint .om-chapter__lead-col,
+    .om-chapter--klienti .om-chapter__lead-col,
+    .om-chapter--souvislosti .om-chapter__lead-col,
+    .om-chapter--duvera .om-chapter__lead-col,
+    .om-chapter--projekt .om-chapter__lead-col,
+    .om-chapter--recenze .om-chapter__lead-col,
+    .om-chapter__lead-col {
+      width: 540px;
+    }
+
+    .om-chapter--mint .om-chapter__support-col,
+    .om-chapter--klienti .om-chapter__support-col,
+    .om-chapter--souvislosti .om-chapter__support-col,
+    .om-chapter--duvera .om-chapter__support-col,
+    .om-chapter--projekt .om-chapter__support-col,
+    .om-chapter--recenze .om-chapter__support-col {
+      flex: 1;
+    }
+
+    .om-duvera__photo {
+      width: 380px;
+      height: 450px;
+      max-width: none;
+      aspect-ratio: auto;
+    }
+
+    /* Začátek — dvousloupcová mřížka: H2+statement vlevo, dvě vyprávěcí
+       části vpravo. Statement sedí vedle DRUHÉ části, ne pod první
+       (zadání §6). */
+    .om-zacatek__grid {
+      display: grid;
+      grid-template-columns: 540px 1fr;
+      column-gap: 56px;
+      row-gap: 40px;
+    }
+
+    .om-zacatek__heading {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .om-zacatek__block--1 {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .om-zacatek__statement {
+      grid-column: 1;
+      grid-row: 2;
+      align-self: end;
+    }
+
+    .om-zacatek__block--2 {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .om-facts__row {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      column-gap: 32px;
+      gap: 0;
+      align-items: baseline;
+      padding: 22px 0;
+    }
+
+    .om-facts__row h3 {
+      font-size: 20px;
+    }
+
+    .om-facts__row p {
+      font-size: 16.5px;
+    }
+
+    .om-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .om-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .om-closing__glow {
+      height: 320px;
+    }
+
+    .om-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .om-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .om__route-svg--laptop {
+      display: none;
+    }
+
+    .om__route-svg--desktop {
+      display: block;
+    }
+
+    .om__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .om-hero,
+    .om-chapter__inner,
+    .om-statement-big,
+    .om-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .om-chapter__bar p {
+      padding-left: calc(76px + var(--om-shift, 0px));
+    }
+
+    .om-hero {
+      padding: 120px 100px 90px;
+    }
+
+    /* Šířka 730px — nejmenší, na které se „Jsem Patrik Gajdadzis." vejde na
+       jeden řádek při 72px (ověřeno měřením, potřeba ~699px + rezerva),
+       viz zpětná vazba 10. 9. 2026. Fotografie proto na tomhle stupni ustoupí
+       na 340px (viz `.om-hero__photo` níže) — se stejnou (100px) rezervou
+       před pevnou vstupní konstantou trasy (1300px), jakou má `/pristup`. */
+    .om-hero__text {
+      max-width: 730px;
+      width: 730px;
+      gap: 18px;
+    }
+
+    .om-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .om-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .om-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .om-hero__actions .om-cta {
+      height: 56px;
+    }
+
+    .om-hero__row {
+      gap: 40px;
+    }
+
+    .om-hero__photo {
+      flex: none;
+      width: 340px;
+      height: 444px;
+    }
+
+    .om-chapter--zacatek {
+      margin-top: 120px;
+    }
+
+    .om-chapter__inner {
+      padding: 88px 100px;
+      gap: 56px;
+    }
+
+    .om-chapter__bar {
+      width: 240px;
+    }
+
+    .om-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .om-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .om-h2--dominant {
+      font-size: 56px;
+    }
+
+    .om-h2--std {
+      font-size: 48px;
+    }
+
+    .om-chapter__statement {
+      font-size: 30px;
+    }
+
+    .om-chapter__statement--dark {
+      font-size: 32px;
+    }
+
+    .om-statement-big {
+      padding-block: 88px;
+      padding-right: 100px;
+      padding-left: calc(176px + var(--om-shift, 0px));
+    }
+
+    .om-statement-big p {
+      font-size: 50px;
+      max-width: 980px;
+    }
+
+    .om-chapter--mint .om-chapter__lead-col,
+    .om-chapter--klienti .om-chapter__lead-col,
+    .om-chapter--souvislosti .om-chapter__lead-col,
+    .om-chapter--duvera .om-chapter__lead-col,
+    .om-chapter--projekt .om-chapter__lead-col,
+    .om-chapter--recenze .om-chapter__lead-col,
+    .om-chapter__lead-col {
+      width: 600px;
+    }
+
+    .om-duvera__photo {
+      width: 440px;
+      height: 520px;
+    }
+
+    .om-zacatek__grid {
+      grid-template-columns: 600px 1fr;
+    }
+
+    .om-closing {
+      padding-block: 96px;
+    }
+
+    .om-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .om-closing__glow {
+      height: 340px;
+    }
+
+    .om-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+
+</style>

@@ -1,0 +1,10 @@
+# Jednotné LF konce řádků i na Windows — .htaccess a PHP běží na linuxovém
+# serveru (Wedos) a soubory v projektu už LF mají.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff2 binary
+*.docx binary

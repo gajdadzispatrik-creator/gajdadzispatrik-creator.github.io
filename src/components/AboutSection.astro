@@ -1,0 +1,863 @@
+---
+/**
+ * Sekce „O mně“ — nadpis přes celou šířku (varianta 12c).
+ * Zdroj: úkol pro Claude Code „sekce O mně (Nadpis přes celou šířku)“, §5–§8
+ * (geometrie), §9 (fotografie), §10 (pohyb), §11 (přístupnost).
+ *
+ * ODCHYLKA 1 (§2, krok 2 — zadání samo tuto kontrolu vyžaduje):
+ * §5–§8 počítají se vstupem trasy na x=1300/1250/794/366 (vzor Router/Process/
+ * Connections). Reálně změřeno v prohlížeči (getPointAtLength na živém
+ * .benefits__route-path) — BenefitsSection ale má stejný prostřední-dělítko
+ * layout jako Reviews, takže její trasa reálně KONČÍ na ose x=940 (desktop) /
+ * 890 (notebook) / 40 (tablet) / 24 (mobil) — ne na 1300/1250/794/366. Vstupní
+ * x této sekce je proto přepočítaný na 940/890/40/24. Protože vstup je i tak
+ * napravo od vlastní osy této sekce (120/96 na desktopu/notebooku), směr
+ * zákrutů zůstává STEJNÝ jako v zadání (jen jiné číslo, ne opačný sweep-flag,
+ * na rozdíl od BenefitsSection, kde vstup ležel nalevo od osy). Na tabletu a
+ * mobilu je reálný vstup (40/24) shodný s vlastní osou sekce (§7/§8) — trasa
+ * proto pokračuje rovně, žádný zákrut, stejně jako v ReviewsSection/
+ * BenefitsSection na týchž šířkách.
+ *
+ * ODCHYLKA 2 (pravidlo §12 dokumentu, technické požadavky):
+ * Zadání v §5–§8 dává nadpisu/textu/CTA/bodům pevné `top` v pixelech — ale
+ * stejný dokument to o pár řádků níž výslovně zakazuje („Nepiš prvky pod
+ * nadpisem na pevné top, které předpokládá počet řádků nadpisu... tato chyba
+ * dvakrát způsobila přetisk textů“). Novější, konkrétnější pravidlo má
+ * přednost před ilustrativními čísly výše v tomtéž dokumentu. Nadpis, text,
+ * CTA a doplňující body jsou proto v jednom normálním toku (žádné z nich
+ * position:absolute) — pevné hodnoty z §5–§8 posloužily jen jako reference
+ * pro odhad mezer (gap), ne jako doslovné souřadnice. Výška sekce tím pádem
+ * přirozeně plyne z obsahu, jak vyžaduje bod technických požadavků.
+ *
+ * ODCHYLKA 3 (fotografie na tabletu, §7):
+ * §7 dává textu max. šířku 560 px a fotce šířku 300 px vedle sebe — na
+ * dostupné šířce sloupce (834 − 40 − 110 ≈ 684 px) se to vedle sebe nevejde
+ * (560 + 300 = 860 > 684). Fotografie je proto na tabletu pod textovým
+ * blokem (stejně jako na mobilu), ne vedle něj — jediný způsob, jak
+ * dodržet zadanou šířku textu i fotky bez zúžení obou pod smysluplnou míru.
+ *
+ * Jediná smaragdová tečka a vodorovný „podtrhující“ úsek trasy (jen desktop/
+ * notebook) sedí na skutečné pozici začátku obsahového bloku pod nadpisem —
+ * dopočítáno v JS ze skutečné vykreslené pozice (stejný princip jako jedna
+ * tečka v ReviewsSection.astro), protože výška sekce plyne z obsahu a pevný
+ * viewBox je jen bezpečně velký odhad, ne skutečná výška.
+ *
+ * Tečka sedí PŘÍMO NA OSE (`data-dot-offset="0"`), ne posunutá k textu —
+ * stejná konvence jako `.reviews__dot` (vždy na ose, ne na začátku textu).
+ * Původně byla posunutá na stejné x jako text (offset 56/44/22 px podle
+ * zadání), což ale vytvořilo jinou mezeru tečka→text (~0 px) než v Reviews
+ * (56 px) — nekonzistence zjištěná při srovnání obou sekcí vedle sebe.
+ */
+interface Props {
+  photoSrc?: string;
+}
+
+const { photoSrc = '' } = Astro.props;
+---
+
+<section class="about" aria-labelledby="o-mne">
+  <div class="about__inner">
+    <h2 id="o-mne" class="about__heading about__reveal-clip">Za&nbsp;každým doporučením stojím osobně.</h2>
+
+    <div class="about__row">
+      <div class="about__text about__reveal-up">
+        <p>Jsem Patrik Gajdadzis. Finance řeším srozumitelně, v&nbsp;souvislostech a&nbsp;s&nbsp;důrazem na&nbsp;dlouhodobou péči.</p>
+        <p>Vedu finanční část Mint reality &amp;&nbsp;finance a stojím za projektem Hypotéka Ostrava.</p>
+        <a class="about__cta" href="/o-mne">Více o&nbsp;mně</a>
+        <ul class="about__facts">
+          <li class="about__reveal-up">Mint reality &amp;&nbsp;finance</li>
+          <li class="about__reveal-up">Hypotéka Ostrava</li>
+          <li class="about__reveal-up">Ostrava / online</li>
+        </ul>
+      </div>
+
+      <div class="about__photo about__reveal-mask">
+        {photoSrc ? (
+          <img src={photoSrc} alt="Patrik Gajdadzis" width="400" height="500" loading="lazy" decoding="async" />
+        ) : (
+          <div class="about__photo-placeholder" aria-hidden="true">
+            <div class="about__photo-figure">
+              <div class="about__photo-torso"></div>
+              <div class="about__photo-head"></div>
+            </div>
+            <span class="about__photo-label">FOTO PATRIKA - PLACEHOLDER</span>
+          </div>
+        )}
+        {!photoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop 1400+ (kalibrace 1440). Vstup x=940 (viz Odchylka 1), osa x=120, radius 28. -->
+  <svg
+    class="about__route about__route--desktop"
+    viewBox="0 0 1440 1300"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-bend="true"
+    data-entry="940"
+    data-axis="120"
+    data-radius="28"
+    data-underline-gap="48"
+    data-dot-offset="0"
+    data-gap="8"
+  >
+    <path
+      class="about__route-path"
+      d="M 940 -20 V 462 A 28 28 0 0 1 912 490 H 148 A 28 28 0 0 0 120 518 V 1300"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="about__dot" cx="120" cy="490" r="3.5" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!-- Notebook 1200–1399 (kalibrace 1366). Vstup x=890, osa x=96, radius 28 — stejná logika jako desktop výše. -->
+  <svg
+    class="about__route about__route--laptop"
+    viewBox="0 0 1366 1300"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-bend="true"
+    data-entry="890"
+    data-axis="96"
+    data-radius="28"
+    data-underline-gap="46"
+    data-dot-offset="0"
+    data-gap="8"
+  >
+    <path
+      class="about__route-path"
+      d="M 890 -20 V 402 A 28 28 0 0 1 862 430 H 124 A 28 28 0 0 0 96 458 V 1300"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="about__dot" cx="96" cy="430" r="3.5" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!--
+    Tablet 768–1199 (kalibrace 834). Vstup x=40 = vlastní osa této sekce
+    (§7) — shoduje se s reálným výstupem BenefitsSection (viz Odchylka 1),
+    žádný zákrut potřeba, trasa jde rovně dolů.
+  -->
+  <svg
+    class="about__route about__route--tablet"
+    viewBox="0 0 834 1400"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-bend="false"
+    data-axis="40"
+    data-dot-offset="0"
+    data-gap="8"
+  >
+    <path
+      class="about__route-path"
+      d="M 40 -20 V 1400"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="about__dot" cx="40" cy="280" r="3.2" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!-- Mobil <768 (kalibrace 390). Vstup x=24 = vlastní osa (§8) — stejný princip jako tablet výše. -->
+  <svg
+    class="about__route about__route--mobile"
+    viewBox="0 0 390 1400"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-bend="false"
+    data-axis="24"
+    data-dot-offset="0"
+    data-gap="8"
+  >
+    <path
+      class="about__route-path"
+      d="M 24 -20 V 1400"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="about__dot" cx="24" cy="320" r="3.2" fill="var(--emerald)"></circle>
+  </svg>
+</section>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const section = document.querySelector('.about');
+  if (section) {
+    const allSvgs = Array.from(section.querySelectorAll('.about__route')) as SVGSVGElement[];
+    const getActiveSvg = (): SVGSVGElement | undefined => allSvgs.find((svg) => getComputedStyle(svg).display !== 'none');
+
+    /*
+     * `activeSvg`/`path`/`dot` musí být PŘEVÁZANÉ na aktuálně viditelné SVG,
+     * ne zjištěné jednou při načtení skriptu — stejná chyba a stejná oprava
+     * jako `bindActiveSvg` v BenefitsSection.astro/CasesSection.astro
+     * (nalezeno tam 25. 8. 2026, doplněno sem 14. 9. 2026 po nahlášení
+     * zdeformovaných/neokrouhlých teček). Bez převázání skript po změně
+     * šířky okna přes hranici stupně (resize, ne jen reload) dál zapisoval
+     * `--dot-fix` do SKRYTÉHO SVG předchozího stupně.
+     */
+    let currentSvg: SVGSVGElement | undefined;
+    let path: SVGPathElement | null = null;
+    let dot: SVGCircleElement | null = null;
+    const bindActiveSvg = (svg: SVGSVGElement) => {
+      currentSvg = svg;
+      path = svg.querySelector('.about__route-path');
+      dot = svg.querySelector('.about__dot');
+    };
+    const initialSvg = getActiveSvg();
+    if (initialSvg) bindActiveSvg(initialSvg);
+    const getPath = (): SVGPathElement | null => path;
+    const getDot = (): SVGCircleElement | null => dot;
+    const row = section.querySelector('.about__row') as HTMLElement | null;
+
+    /*
+     * Jediná tečka musí sedět VE VÝŠCE prvního řádku textu (vedle něj), ne
+     * nad blokem s mezerou — stejná konvence jako `.reviews__dot`
+     * (`itemRect.top + 8`, viz ReviewsSection.astro). Výška sekce plyne
+     * z obsahu (Odchylka 2), takže svislé měřítko SVG (--dot-fix, scaleY)
+     * není známé předem — po vykreslení proto přepočítáváme cílovou
+     * souřadnici (dot cy, u zakřivených variant i lom trasy) na skutečnou
+     * pozici začátku `.about__row` + data-gap px (stejných 8 px jako
+     * v Reviews).
+     */
+    const syncRoute = () => {
+      const activeSvg = getActiveSvg();
+      if (!activeSvg || !row) return;
+      if (activeSvg !== currentSvg) bindActiveSvg(activeSvg);
+      const currentPath = getPath();
+      const currentDot = getDot();
+      const svgRect = activeSvg.getBoundingClientRect();
+      const viewBox = activeSvg.viewBox.baseVal;
+      // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
+      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
+      // (oprava 14. 9. 2026).
+      if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
+      const scaleY = svgRect.height / viewBox.height;
+      const scaleX = svgRect.width / viewBox.width;
+      activeSvg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+      const gapPx = parseFloat(activeSvg.dataset.gap ?? '8');
+      const dotOffset = parseFloat(activeSvg.dataset.dotOffset ?? '56');
+      const rowRect = row.getBoundingClientRect();
+      const dotY = (rowRect.top + gapPx - svgRect.top) / scaleY;
+
+      const hasBend = activeSvg.dataset.bend === 'true';
+      if (hasBend && currentPath) {
+        const entryX = parseFloat(activeSvg.dataset.entry ?? '0');
+        const axisX = parseFloat(activeSvg.dataset.axis ?? '0');
+        const r = parseFloat(activeSvg.dataset.radius ?? '28');
+        /*
+         * Zákrut (bendY) leží NAD tečkou, ne na její výšce — (axisX, dotY)
+         * by ležel v „uříznutém rohu“ mimo samotnou vykreslenou křivku
+         * (kruhový oblouk prochází jinými body), takže tečka vizuálně
+         * nesahala na linku. Zákrut proto počítáme o poloměr + odstup
+         * (data-underline-gap) výš, aby mezi vodorovným „podtržením“
+         * a textem zůstal viditelný svislý úsek — jinak by zákrut a text
+         * splývaly hned vedle sebe.
+         */
+        const underlineGap = parseFloat(activeSvg.dataset.underlineGap ?? '8');
+        const bendY = dotY - r - underlineGap;
+        const d = `M ${entryX} -20 V ${bendY - r} A ${r} ${r} 0 0 1 ${entryX - r} ${bendY} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${bendY + r} V ${viewBox.height}`;
+        currentPath.setAttribute('d', d);
+        if (currentDot) {
+          currentDot.setAttribute('cx', String(axisX + dotOffset));
+          currentDot.setAttribute('cy', String(dotY));
+        }
+      } else if (currentDot) {
+        const axisX = parseFloat(activeSvg.dataset.axis ?? '0');
+        currentDot.setAttribute('cx', String(axisX + dotOffset));
+        currentDot.setAttribute('cy', String(dotY));
+      }
+    };
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    // `font-display: swap` (fonts.css) — viz CLAUDE.md „Konvence: kontinuální
+    // linka, tečky a text“ bod 5.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if (row && 'ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(section);
+      resizeObserver.observe(row);
+    }
+
+    if (!disableAnimation) {
+      const heading = section.querySelector('.about__heading');
+      const revealUpEls = Array.from(section.querySelectorAll('.about__reveal-up'));
+      const photo = section.querySelector('.about__reveal-mask');
+
+      if (heading) heading.classList.add('is-pending');
+      revealUpEls.forEach((el, i) => {
+        (el as HTMLElement).style.transitionDelay = `${i * 70}ms`;
+        el.classList.add('is-pending');
+      });
+      if (photo) photo.classList.add('is-pending');
+
+      let pathLength = 0;
+      let dotThreshold = 1;
+      if (getPath()) {
+        // Přepočítá se znovu po syncRoute() dopočítání skutečné geometrie —
+        // čte aktuální `getPath()`/`getDot()`, ne zachycenou proměnnou, takže
+        // funguje i po převázání na jiný stupeň (viz `bindActiveSvg` výše).
+        const measure = () => {
+          const currentPath = getPath();
+          const currentDot = getDot();
+          if (!currentPath) return;
+          pathLength = currentPath.getTotalLength();
+          currentPath.style.strokeDasharray = String(pathLength);
+          currentPath.style.strokeDashoffset = String(pathLength);
+          if (currentDot) {
+            const cx = parseFloat(currentDot.getAttribute('cx') ?? '0');
+            const cy = parseFloat(currentDot.getAttribute('cy') ?? '0');
+            let best = Infinity;
+            const steps = 1500;
+            for (let i = 0; i <= steps; i++) {
+              const l = (pathLength * i) / steps;
+              const pt = currentPath.getPointAtLength(l);
+              const d = Math.hypot(pt.x - cx, pt.y - cy);
+              if (d < best) {
+                best = d;
+                dotThreshold = l / pathLength;
+              }
+            }
+          }
+        };
+        measure();
+        getDot()?.classList.add('is-pending');
+
+        let contentRevealed = false;
+        const revealContent = () => {
+          if (contentRevealed) return;
+          contentRevealed = true;
+          if (heading) {
+            heading.classList.remove('is-pending');
+            heading.classList.add('is-visible');
+          }
+          revealUpEls.forEach((el) => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          });
+          if (photo) {
+            photo.classList.remove('is-pending');
+            photo.classList.add('is-visible');
+          }
+        };
+
+        let ticking = false;
+        const update = () => {
+          measure();
+          const currentPath = getPath();
+          const currentDot = getDot();
+          const rect = section.getBoundingClientRect();
+          const vh = window.innerHeight;
+          const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+          if (currentPath) currentPath.style.strokeDashoffset = String(pathLength * (1 - progress));
+
+          if (currentDot && progress >= dotThreshold) {
+            currentDot.classList.remove('is-pending');
+            currentDot.classList.add('is-visible');
+          }
+
+          if (rect.top < vh) revealContent();
+
+          ticking = false;
+        };
+
+        const onScroll = () => {
+          if (!ticking) {
+            requestAnimationFrame(update);
+            ticking = true;
+          }
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        update();
+      }
+    }
+  }
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .about {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .about__inner {
+    /*
+     * Bez position/z-index záměrně — `.about__photo` uvnitř má vlastní
+     * position:relative (auto z-index), takže se v malování řadí podle
+     * pořadí v DOM přímo proti `.about__route` (position:absolute, auto
+     * z-index) na úrovni celé sekce. Kdyby `.about__inner` dostal vlastní
+     * z-index, založil by novou stacking context a fotka by se dostala NAD
+     * trasu bez ohledu na pořadí v DOM — trasa by ji pak nemohla „přecházet“.
+     */
+    padding-top: 104px;
+    padding-bottom: 64px;
+  }
+
+  /* --- Nadpis --- */
+  /* left/right jsou margin, ne position:absolute — nadpis je normální tokový
+     prvek (Odchylka 2), proto tu nejde použít `left`/`top`. */
+
+  .about__heading {
+    /*
+     * left je procentuální, ne pevný px — trasa (SVG) se neuniformně
+     * roztahuje (preserveAspectRatio="none"), takže skutečná poloha osy
+     * (x=24 na mobilu) mimo kalibrační šířku 390 roste s viewportem. Pevný
+     * px by se od reálné osy vzdaloval a text by přestal být spolehlivě
+     * vpravo od linky — stejná oprava jako u ReviewsSection/BenefitsSection.
+     */
+    margin: 0 24px 0 calc(24 * 100% / 390 + 32px);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -.05em;
+    font-size: 44px;
+    max-width: 340px;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .about__reveal-clip.is-pending {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .about__reveal-clip.is-visible {
+    clip-path: inset(0 0 0% 0);
+    transition: clip-path 700ms var(--ease-out);
+  }
+
+  /* --- Řádek text / fotografie --- */
+
+  .about__row {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    /* procentuální left — stejný důvod jako u nadpisu výše. */
+    margin: 32px 24px 0 calc(24 * 100% / 390 + 32px);
+  }
+
+  .about__text {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .about__text p {
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 17px;
+    color: var(--text);
+  }
+
+  .about__cta {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: fit-content;
+    margin-top: 4px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .about__cta:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+
+  .about__cta:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .about__facts {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .about__facts li {
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--text-muted);
+  }
+
+  /* --- Fotografie --- */
+
+  .about__photo {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 220px;
+  }
+
+  .about__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .about__reveal-mask.is-pending {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .about__reveal-mask.is-visible {
+    clip-path: inset(0 0 0% 0);
+    transition: clip-path 600ms var(--ease-out);
+  }
+
+  /*
+   * Jednoduchá plochá silueta (hlava + ramena), jeden tón, přímo na pozadí
+   * sekce — bez rámu, bez gradientového „boxu“, bez light efektů. Hlava a
+   * ramena se mírně překrývají (torso top posazen nad spodní okraj hlavy),
+   * aby nevznikla mezera/„plovoucí koule“ (dřívější verze s glow efektem).
+   */
+  .about__photo-placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .about__photo-figure {
+    position: absolute;
+    inset: 0;
+  }
+
+  .about__photo-torso {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    bottom: 0;
+    /* 31 % — mírně nad spodní hranou hlavy (6 %+28 % = 34 %), aby na sebe
+       hlava a ramena navazovaly bez mezery. */
+    top: 31%;
+    background: var(--about-photo-2);
+    border-radius: 26% 26% 0 0;
+  }
+
+  .about__photo-head {
+    position: absolute;
+    left: 50%;
+    top: 6%;
+    /* height (ne width) + aspect-ratio — hlava i ramena tak vychází ze
+       STEJNÉ osy (% výšky rámu), jinak se při jiném poměru stran rámu
+       (mobil vs. desktop) rozjíždí a mezi hlavou a rameny vzniká mezera. */
+    height: 28%;
+    aspect-ratio: 1;
+    width: auto;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: var(--about-photo-2);
+  }
+
+  .about__photo-label {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--about-photo-label);
+    white-space: nowrap;
+  }
+
+  /* --- Odhalení text/body při scrollu --- */
+
+  .about__reveal-up.is-pending {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .about__reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  /* --- Trasa --- */
+
+  .about__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .about__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .about__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .about__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .about__route--tablet,
+  .about__route--laptop,
+  .about__route--desktop {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about__heading,
+    .about__reveal-up,
+    .about__reveal-mask {
+      opacity: 1;
+      clip-path: none;
+      transform: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .about__route--mobile {
+      display: none;
+    }
+
+    .about__route--tablet {
+      display: block;
+    }
+
+    .about__inner {
+      padding-top: 104px;
+      padding-bottom: 88px;
+    }
+
+    .about__heading {
+      /* procentuální left — stejný důvod jako v base stupni výše (osa x=40, viewBox 834). */
+      margin: 0 40px 0 calc(40 * 100% / 834 + 56px);
+      max-width: 560px;
+      font-size: 66px;
+      line-height: 1.04;
+    }
+
+    .about__row {
+      margin: 40px 40px 0 calc(40 * 100% / 834 + 70px);
+      gap: 48px;
+    }
+
+    .about__text p {
+      font-size: 18px;
+      max-width: 560px;
+    }
+
+    .about__facts {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 0;
+    }
+
+    .about__facts li {
+      padding: 0 14px;
+      font-size: 13.5px;
+      white-space: nowrap;
+    }
+
+    .about__facts li:first-child {
+      padding-left: 0;
+    }
+
+    .about__facts li:not(:first-child) {
+      border-left: 1px solid rgba(27, 74, 138, .26);
+    }
+
+    .about__photo {
+      width: 300px;
+      height: 420px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .about__route--tablet {
+      display: none;
+    }
+
+    .about__route--laptop {
+      display: block;
+    }
+
+    .about__inner {
+      padding-top: 128px;
+      padding-bottom: 100px;
+    }
+
+    .about__heading {
+      /*
+       * procentuální left — osa x=96 (viewBox 1366) + 56px, stejná
+       * konvence jako u ostatních sekcí („Odsazení nadpisu od svislice
+       * trasy: desktop, notebook i tablet 56 px, mobil 32 px"). Dřívější
+       * verze měla nadpis přímo na ose (bez +56px) — nekonzistence zjištěná
+       * srovnáním s ArticlesSection, kde je +56px dodrženo.
+       */
+      margin: 0 0 0 calc(96 * 100% / 1366 + 56px);
+      /* 680→544 — o 56px užší než dřív, aby pravý okraj nadpisu zůstal na
+         stejné souřadnici jako před přidáním +56px odsazení zleva (odstup
+         od vstupní svislice trasy x≈890 tak zůstává stejný jako dřív). */
+      max-width: 544px;
+      font-size: 84px;
+      line-height: 1.02;
+      letter-spacing: -.055em;
+    }
+
+    .about__row {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin: 90px 96px 0 calc(96 * 100% / 1366 + 56px);
+      /* 1270 (obsahová linka) − 152 (levý inset řádku při kalibrační šířce)
+         — bez stropu by fotka na velmi širokých oknech ujížděla od textu
+         (space-between roztahuje mezeru neomezeně). */
+      max-width: 1118px;
+      gap: 32px;
+    }
+
+    .about__text {
+      max-width: 480px;
+      gap: 22px;
+    }
+
+    .about__text p {
+      font-size: 18px;
+      max-width: none;
+    }
+
+    .about__facts {
+      margin-top: 4px;
+    }
+
+    .about__photo {
+      flex: 0 0 370px;
+      width: 370px;
+      height: 470px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .about {
+      /* Wide desktop: centrované designové plátno (CLAUDE.md) — no-op pod
+         --stage-max; nad ní zastaví další roztahování obsahu i trasy
+         (`syncRoute` v JS měří skutečnou šířku `.about`, takže se
+         přizpůsobí automaticky beze změny kódu). */
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .about__route--laptop {
+      display: none;
+    }
+
+    .about__route--desktop {
+      display: block;
+    }
+
+    .about__inner {
+      padding-top: 140px;
+      padding-bottom: 120px;
+    }
+
+    .about__heading {
+      /*
+       * procentuální left — osa x=120 (viewBox 1440) + 56px, stejná
+       * konvence jako notebook výše a jako ArticlesSection/FaqSection —
+       * dřívější verze měla nadpis přímo na ose (bez +56px), nekonzistentní
+       * se zbytkem webu.
+       */
+      margin-left: calc(120 * 100% / 1440 + 56px);
+      /*
+       * Užší než dřív (780→620) — vstup trasy je na x≈940 (Odchylka 1), a
+       * při max-width 780 (pravý okraj nadpisu na x=900) zbývalo mezi
+       * nadpisem a svislým úsekem trasy jen ~30 px, takže linka vizuálně
+       * běžela těsně podél textu, ne zjevně „pod“ ním. 604 (přesná
+       * kompenzace +56px odsazení zleva) by ale zalomilo nadpis na čtyři
+       * řádky místo tří — 620 je nejužší hodnota, která zalomení na tři
+       * řádky ještě zachová (ověřeno přímo v prohlížeči), odstup od trasy
+       * zůstává i tak čitelný (~145 px).
+       */
+      max-width: 620px;
+      font-size: 96px;
+    }
+
+    .about__row {
+      margin: 92px 120px 0 calc(120 * 100% / 1440 + 56px);
+      /* 1320 (obsahová linka) − 176 (levý inset řádku při kalibrační šířce)
+         — stejný důvod jako v notebook stupni výše. */
+      max-width: 1144px;
+      gap: 40px;
+    }
+
+    .about__text {
+      max-width: 520px;
+    }
+
+    .about__photo {
+      flex: 0 0 400px;
+      width: 400px;
+      height: 500px;
+    }
+  }
+</style>

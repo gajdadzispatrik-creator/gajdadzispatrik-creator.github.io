@@ -1,0 +1,591 @@
+---
+/**
+ * Sdílená šablona tří právních podstránek (varianta 24a — „Osa s obsahem“).
+ * Zdroj: úkol pro Claude Code „právní podstránky“, §7–§11.
+ *
+ * Geometrie osy je VLASTNÍ tomuto souboru — žádné sdílené tokeny/CSS s
+ * homepage (route.css neexistuje, viz zadání §11). Princip škálování je ale
+ * stejný jako všude jinde na webu (SVG s `preserveAspectRatio="none"` +
+ * procentuální odsazení textu od osy, ne pevný px — viz CLAUDE.md „Konvence:
+ * kontinuální linka, tečky a text“, bod 4), protože jde o stejnou třídu
+ * chyby bez ohledu na to, který soubor CSS píše.
+ *
+ * Trasa má na desktopu a notebooku jeden lom (vstup zprava, dva oblouky,
+ * pak rovně dolů podél osy) — souřadnice lomu (72/188/216/244 desktop,
+ * 72/176/204/232 notebook) leží VŽDY před nadpisem dokumentu (heading top
+ * 270), takže jsou nezávislé na tom, na kolik řádků se nadpis zalomí, a
+ * mohou zůstat pevné konstanty. Jediná hodnota dopočítávaná za běhu je
+ * celková výška (`V {height}` na konci `d`, `viewBox` výška) — sekce
+ * nemá pevnou výšku, plyne z obsahu (§11). Tablet a mobil nemají vstupní
+ * lom (žádné „vstup x“ v zadání, §8) — stejný princip jako Odchylka 1
+ * v CasesSection.astro/ContactSection.astro: trasa jde od vstupu rovnou
+ * dolů po vlastní ose. Tečka na tabletu/mobilu neleží přímo na ose (dot-x
+ * ≠ axis-x), proto má vlastní vodorovný zářez (`.legal__notch`), stejná
+ * konvence jako `.faq__route-notches`/`.router__axis-notches` na homepage.
+ */
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import LegalBlock from '../components/legal/LegalBlock.astro';
+import type { LegalPageData } from '../data/legal/types';
+
+type Props = LegalPageData;
+
+const { metaTitle, metaDescription, heading, sections } = Astro.props;
+
+// Stejné datum na všech třech stránkách — jedno místo, ne opakováno v datech
+// každé stránky (úkol „doplnění právních stránek“, §1).
+const EFFECTIVE_DATE_ISO = '2026-09-01';
+const EFFECTIVE_DATE_LABEL = '1. 9. 2026';
+
+/*
+ * `dotOffset` = pevný odstup tečky od osy VE SKUTEČNÝCH px (56 desktop/
+ * notebook — shoduje se s odsazením nadpisu, viz §8 „Odsazení nadpisu od
+ * osy“; 44/22 tablet/mobil — jen tečka, ne nadpis). SVG má
+ * `preserveAspectRatio="none"`, takže se mimo kalibrační šířku
+ * (390/834/1366/1440) neuniformně roztahuje vodorovně — pevná souřadnice
+ * `dotX` v lokálních SVG jednotkách by se s tímto roztažením škálovala
+ * a tečka by se od osy/nadpisu vzdalovala nebo přibližovala (přesně třída
+ * chyby z CLAUDE.md „Konvence: kontinuální linka, tečky a text“, bod 6 —
+ * zjištěno v BenefitsSection.astro/CasesSection.astro). `dotX` níže je jen
+ * VÝCHOZÍ hodnota pro prvotní SSR vykreslení; skript v `syncRoute()` ji po
+ * načtení přepočítá ze skutečné (reálné) pozice osy + `dotOffset`, stejný
+ * vzorec jako tam.
+ */
+const routeVariants = [
+  {
+    tier: 'mobile',
+    vb: 390,
+    axis: 24,
+    dotOffset: 22,
+    dotX: 46,
+    dotY: 134,
+    bend: false,
+    pathBase: 'M 24 72 V ',
+  },
+  {
+    tier: 'tablet',
+    vb: 834,
+    axis: 40,
+    dotOffset: 44,
+    dotX: 84,
+    dotY: 180,
+    bend: false,
+    pathBase: 'M 40 72 V ',
+  },
+  {
+    tier: 'laptop',
+    vb: 1366,
+    axis: 96,
+    dotOffset: 56,
+    dotX: 152,
+    dotY: 204,
+    bend: true,
+    pathBase: 'M 1250 72 V 176 A 28 28 0 0 1 1222 204 H 124 A 28 28 0 0 0 96 232 V ',
+  },
+  {
+    tier: 'desktop',
+    vb: 1440,
+    axis: 120,
+    dotOffset: 56,
+    dotX: 176,
+    dotY: 216,
+    bend: true,
+    pathBase: 'M 1300 72 V 188 A 28 28 0 0 1 1272 216 H 148 A 28 28 0 0 0 120 244 V ',
+  },
+] as const;
+---
+
+<BaseLayout title={metaTitle} description={metaDescription}>
+  <Header />
+  <main id="hero" class="legal">
+    <div class="legal__route" aria-hidden="true">
+      {
+        routeVariants.map((variant) => (
+          <svg
+            class={`legal__route-svg legal__route-svg--${variant.tier}`}
+            viewBox={`0 0 ${variant.vb} 2000`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={variant.vb}
+            data-path-base={variant.pathBase}
+            data-axis={variant.axis}
+            data-dot-offset={variant.dotOffset}
+          >
+            <path
+              class="legal__route-path"
+              d={`${variant.pathBase}2000`}
+              fill="none"
+              stroke="var(--line)"
+              stroke-opacity=".18"
+              stroke-width="1"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            {!variant.bend && (
+              <line
+                class="legal__notch"
+                x1={variant.axis}
+                y1={variant.dotY}
+                x2={variant.dotX}
+                y2={variant.dotY}
+                stroke="var(--line)"
+                stroke-opacity=".18"
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <circle class="legal__dot" cx={variant.dotX} cy={variant.dotY} r="3.5" fill="var(--emerald)" />
+          </svg>
+        ))
+      }
+    </div>
+
+    <div class="legal__content">
+      <div class="legal__intro">
+        <h1 class="legal__heading">{heading}</h1>
+        <p class="legal__meta">
+          <time class="legal__meta-date" datetime={EFFECTIVE_DATE_ISO}>Účinné od&nbsp;{EFFECTIVE_DATE_LABEL}</time>
+        </p>
+      </div>
+
+      <div class="legal__body">
+        <nav class="legal__toc" aria-label="Obsah stránky">
+          <p class="legal__toc-label">Na&nbsp;této stránce</p>
+          <ol>
+            {
+              sections.map((section) => (
+                <li>
+                  <a href={`#${section.id}`} data-toc-link data-target={section.id}>
+                    {section.title}
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+
+        <article class="legal__article">
+          {
+            sections.map((section) => (
+              <section id={section.id} class="legal__section">
+                <h2 class="legal__section-heading">{section.title}</h2>
+                {section.blocks.map((block) => (
+                  <LegalBlock block={block} />
+                ))}
+              </section>
+            ))
+          }
+        </article>
+      </div>
+    </div>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const legal = document.querySelector('.legal') as HTMLElement | null;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (legal) {
+    const svgs = Array.from(legal.querySelectorAll('.legal__route-svg')) as SVGSVGElement[];
+
+    /*
+     * Sekce nemá pevnou výšku (§11) — jediná dynamická svislá část trasy je
+     * celková výška (viewBox + koncový bod `V`). Lom i svislá pozice tečky
+     * jsou pevné konstanty (leží před nadpisem, viz komentář v hlavičce
+     * souboru). Vodorovná pozice tečky (a zářezu na tabletu/mobilu) se ale
+     * MUSÍ dopočítávat ze skutečné (reálné) pozice osy — viz `dotOffset`
+     * komentář výše u `routeVariants`.
+     */
+    const syncRoute = () => {
+      const height = Math.max(legal.scrollHeight, 1);
+      svgs.forEach((svg) => {
+        const vb = svg.dataset.vb ?? '390';
+        const pathBase = svg.dataset.pathBase ?? '';
+        svg.setAttribute('viewBox', `0 0 ${vb} ${height}`);
+        const path = svg.querySelector('.legal__route-path');
+        if (path) path.setAttribute('d', `${pathBase}${height}`);
+
+        const svgRect = svg.getBoundingClientRect();
+        const viewBoxWidth = parseFloat(vb);
+        if (svgRect.width === 0 || viewBoxWidth === 0) return;
+        const scaleX = svgRect.width / viewBoxWidth;
+        const axisLocal = parseFloat(svg.dataset.axis ?? '0');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '0');
+        const axisRealX = svgRect.left + axisLocal * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        const dot = svg.querySelector('.legal__dot');
+        if (dot) dot.setAttribute('cx', String(targetLocalX));
+        const notch = svg.querySelector('.legal__notch');
+        if (notch) notch.setAttribute('x2', String(targetLocalX));
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(legal);
+    }
+
+    /*
+     * Jediný pohyb na stránce (§9): trasa se jednou při načtení dokreslí a
+     * tečka dosedne. Ne scroll-vázané — je to dokument, ne prezentace.
+     * `setTimeout`, ne `requestAnimationFrame` — rAF se v neaktivní/skryté
+     * záložce nespouští (prohlížeč ho pozastaví), stejný důvod jako
+     * `showBar()` v CookieConsent.astro.
+     */
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const path = activeSvg?.querySelector('.legal__route-path') as SVGPathElement | null;
+      const dot = activeSvg?.querySelector('.legal__dot') as SVGCircleElement | null;
+      if (path) {
+        const length = path.getTotalLength();
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+        dot?.classList.add('is-pending');
+        window.setTimeout(() => {
+          path.style.transition = `stroke-dashoffset var(--duration-line) var(--ease-out)`;
+          path.style.strokeDashoffset = '0';
+          window.setTimeout(() => {
+            dot?.classList.remove('is-pending');
+            dot?.classList.add('is-visible');
+          }, 450);
+        }, 20);
+      }
+    }
+
+    // --- Aktivní položka v obsahu stránky podle scrollu (IntersectionObserver, ne scrollY) ---
+    const tocLinks = Array.from(legal.querySelectorAll('[data-toc-link]')) as HTMLAnchorElement[];
+    const sectionEls = Array.from(legal.querySelectorAll('.legal__section')) as HTMLElement[];
+
+    if (tocLinks.length && sectionEls.length && 'IntersectionObserver' in window) {
+      const linkByTarget = new Map(tocLinks.map((link) => [link.dataset.target, link]));
+
+      const setActive = (id: string) => {
+        tocLinks.forEach((link) => link.classList.remove('is-active'));
+        linkByTarget.get(id)?.classList.add('is-active');
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries.filter((entry) => entry.isIntersecting);
+          if (visible.length === 0) return;
+          const topmost = visible.reduce((a, b) => (a.boundingClientRect.top < b.boundingClientRect.top ? a : b));
+          setActive(topmost.target.id);
+        },
+        { rootMargin: '-112px 0px -70% 0px', threshold: 0 }
+      );
+
+      sectionEls.forEach((section) => observer.observe(section));
+      setActive(sectionEls[0].id);
+    }
+
+    // --- Tlačítko „Nastavení cookies“ na stránce /cookies otevírá STEJNÝ panel
+    // jako ve footeru — simuluje klik na skutečný spouštěč (#footer-cookie-
+    // settings) z CookieConsent.astro, aniž by se ten soubor musel upravovat
+    // (mimo rozsah tohoto úkolu, viz zadání §12). ---
+    const cookieButtons = Array.from(legal.querySelectorAll('[data-open-cookie-settings]'));
+    if (cookieButtons.length) {
+      cookieButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const footerTrigger = document.getElementById('footer-cookie-settings');
+          footerTrigger?.click();
+        });
+      });
+    }
+  }
+</script>
+
+<style>
+  .legal {
+    position: relative;
+    background: var(--bg);
+    padding-bottom: 120px;
+  }
+
+  /*
+   * `overflow: hidden` sedí na `.legal__route` (jen na vrstvě s dekorativní
+   * trasou), NE na `.legal` samotném — `overflow: hidden`/`auto`/`scroll` na
+   * libovolném předkovi zneplatní `position: sticky` u obsahu stránky
+   * (`.legal__toc`) níže, protože sticky se pak počítá vůči téhle vrstvě
+   * (která nikdy nescrolluje), ne vůči viewportu. Zjištěno při testování —
+   * bez tohoto rozdělení by sticky obsah vůbec nedržel při scrollu.
+   */
+  .legal__route {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .legal__route-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .legal__dot.is-pending {
+    opacity: 0;
+    transform: scale(.4);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .legal__dot.is-visible {
+    opacity: 1;
+    transform: scale(1);
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .legal__route-svg--tablet,
+  .legal__route-svg--laptop,
+  .legal__route-svg--desktop {
+    display: none;
+  }
+
+  .legal__content {
+    position: relative;
+    margin-left: calc(24 * 100% / 390 + 32px);
+    margin-right: calc(24 * 100% / 390);
+  }
+
+  .legal__intro {
+    padding-top: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .legal__heading {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -.04em;
+    font-size: 34px;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .legal__meta {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .legal__meta-date {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  .legal__body {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .legal__toc {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .legal__toc-label {
+    margin: 0;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-quiet);
+  }
+
+  .legal__toc ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px 18px;
+  }
+
+  .legal__toc a {
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--text-muted);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .legal__toc a.is-active {
+    font-weight: 600;
+    color: var(--navy);
+    box-shadow: 0 1px 0 0 var(--emerald);
+    padding-bottom: 2px;
+  }
+
+  .legal__article {
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .legal__section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-margin-top: 112px;
+  }
+
+  .legal__section-heading {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    font-size: 21px;
+    color: var(--navy);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .legal__toc a {
+      transition: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .legal__route-svg--mobile {
+      display: none;
+    }
+
+    .legal__route-svg--tablet {
+      display: block;
+    }
+
+    .legal__content {
+      margin-left: calc(40 * 100% / 834 + 56px);
+      margin-right: calc(40 * 100% / 834);
+    }
+
+    .legal__intro {
+      padding-top: 220px;
+    }
+
+    .legal__heading {
+      font-size: 44px;
+    }
+
+    .legal__toc ol {
+      gap: 10px 24px;
+    }
+
+    .legal__article {
+      max-width: 620px;
+      gap: 44px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .legal__route-svg--tablet {
+      display: none;
+    }
+
+    .legal__route-svg--laptop {
+      display: block;
+    }
+
+    .legal__content {
+      margin-left: calc(96 * 100% / 1366 + 56px);
+      margin-right: calc(96 * 100% / 1366);
+    }
+
+    .legal__intro {
+      padding-top: 258px;
+      max-width: 700px;
+    }
+
+    .legal__heading {
+      font-size: 54px;
+    }
+
+    .legal__body {
+      margin-top: 42px;
+      grid-template-columns: 260px 1fr;
+      column-gap: 108px;
+      align-items: start;
+    }
+
+    .legal__toc {
+      padding-bottom: 0;
+      border-bottom: none;
+      position: sticky;
+      top: 104px;
+    }
+
+    .legal__toc ol {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      gap: 13px;
+    }
+
+    .legal__toc a.is-active {
+      box-shadow: none;
+      border-bottom: 1px solid var(--emerald);
+      padding-bottom: 1px;
+    }
+
+    .legal__article {
+      max-width: 620px;
+      gap: 46px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .legal__route-svg--laptop {
+      display: none;
+    }
+
+    .legal__route-svg--desktop {
+      display: block;
+    }
+
+    .legal__content {
+      margin-left: calc(120 * 100% / 1440 + 56px);
+      margin-right: calc(120 * 100% / 1440);
+    }
+
+    .legal__intro {
+      padding-top: 270px;
+      max-width: 820px;
+    }
+
+    .legal__heading {
+      font-size: 60px;
+      line-height: 1.06;
+      letter-spacing: -.045em;
+    }
+
+    .legal__body {
+      grid-template-columns: 280px 1fr;
+      column-gap: 104px;
+    }
+
+    .legal__article {
+      max-width: 640px;
+    }
+  }
+</style>

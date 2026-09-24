@@ -1,0 +1,1817 @@
+---
+/**
+ * Stránka /sluzby/investice — detail čtvrté služby. Zdroj pravdy pro
+ * OBSAH, pořadí sekcí a role: úkol „Úkol pro Claude Code — podstránka
+ * /sluzby/investice" (8. 9. 2026) + `docs/content-subpages.md`, kapitola
+ * `/sluzby/investice`. Zdroj pravdy pro VŠECHNY hodnoty sdílené kostry
+ * (osa, pruh, zářez, vnitřní rozpad, hero padding, gap mezi pruhem a
+ * obsahem, velikost/barva kotev, technika ohybu v hero, typografická
+ * škála): `src/pages/sluzby/pojisteni.astro` — na výslovné přání
+ * uživatele („veškerou typografii, rozteče a geometrii přebíráš ze
+ * sourozeneckých stránek"), sekundárně `hypoteky.astro` a
+ * `financni-plan.astro`. Texty jsou STAV „NÁVRH K UŽIVATELSKÉMU
+ * SCHVÁLENÍ", NESMÍ jít do produkce bez potvrzení textů.
+ *
+ * Mapování sedmi kapitol zadání na strukturní vzory `pojisteni.astro`
+ * (žádná nová kompozice, jen převzetí existujícího vzoru pro danou roli):
+ * 1) Cíl (dominantní) — vzor kapitoly „Majetek": `__top` řádek (lead-col
+ *    H2 + support-col se dvěma odstavci A eyebrow+seznamem ve STEJNÉM
+ *    sloupci), ale závěrečný statement je s emerald svislicí (jako
+ *    Dopad/Příjem), ne --plain jako Majetek — podle zadání §6.
+ * 2) Rozpočet — vzor kapitoly „Dopad/Příjem": `__top` řádek + `rows`
+ *    (název+popis, pět položek), ale závěrečná věta je BEZ svislice
+ *    (--plain škála), podle zadání §6 — hybrid, který v pojisteni
+ *    samostatně neexistuje, ale používá jen existující dílčí vzory.
+ * 3) Riziko — vzor kapitoly „Dopad/Příjem" 1:1 (jeden odstavec místo
+ *    dvou, pět rows, bordered statement).
+ * 4) Portfolio — vzor kapitoly „Kontrola" 1:1 (statement hned pod H2
+ *    v lead-col, dva odstavce v support-col, normální barva pruhu).
+ * 5) Průběh — vzor kapitoly „Průběh" 1:1, ale ŠEST kroků místo pěti
+ *    (o jeden víc, viz zadání §5) — stejná technika markeru/spojnice.
+ * 6) Souvislosti — vzor kapitoly „Kontrola" (statement hned pod H2), ale
+ *    s tlumenou barvou pruhu (`--muted`, jako Péče/Otázky) — hybrid podle
+ *    zadání §5/§6.
+ * 7) Otázky — vzor kapitoly „Otázky" 1:1 (tlumený pruh, FAQ dl/dt/dd,
+ *    šest otázek).
+ *
+ * NÁJEZDOVÝ GRADIENT V HERO — jediné místo, kde tahle stránka NEPŘEBÍRÁ
+ * pevnou konstantu ze sourozenců (zadání §7/§9: „y musí být vždy odvozené
+ * z reálného layoutu, nikdy pevně napsané nebo převzaté odjinud"). Délka
+ * nájezdu (`entryLength`) se dopočítává za běhu ze skutečné mezery mezi
+ * začátkem nájezdu (y=40, konvence z CLAUDE.md — odstup od hlavičky) a
+ * bodem ohybu trasy (`bendY - r`), ne z pevných 100px `pojisteni.astro`.
+ * Pokud je hero kratší (menší `bendY`), nájezd se zkrátí (min. 40px);
+ * pokud je dost místa, vyjde na stejných 100px jako u sourozenců — beze
+ * změny viditelného výsledku ve standardním případě, ale bez rizika, že
+ * gradient skončí uvnitř ohybu nebo za ním.
+ *
+ * TRASA — jinak stejná technika jako sourozenci: jedna souvislá cesta od
+ * hero až po tmavé závěrečné CTA, `axisScaled` procentuální přepočet pro
+ * wide-desktop stage, nájezdový gradient jen na desktopu/notebooku
+ * (tablet/mobil hero bez trasy vůbec), SEDM kotev (cil/rozpocet/riziko/
+ * portfolio/prubeh/souvislosti/otazky), tmavé CTA bez kotvy/zářezu.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import LineGradientDefs from '../../components/LineGradientDefs.astro';
+import { PERSON_ID, breadcrumbList } from '../../data/entity';
+
+const SERVICE_NAME = 'Investiční poradenství a plánování';
+const SERVICE_DESCRIPTION =
+  'Pomohu vám nastavit nebo zkontrolovat investice podle vašich cílů, času a rizika. Investiční poradenství osobně v Ostravě nebo online po celé ČR.';
+const investiceJsonLd = [
+  {
+    '@type': 'Service',
+    name: SERVICE_NAME,
+    description: SERVICE_DESCRIPTION,
+    url: 'https://patrikgajdadzis.cz/sluzby/investice',
+    provider: { '@id': PERSON_ID },
+    areaServed: [
+      { '@type': 'City', name: 'Ostrava' },
+      { '@type': 'Country', name: 'Česko' },
+    ],
+  },
+  breadcrumbList([
+    { name: 'Domů', path: '/' },
+    { name: 'Služby', path: '/sluzby' },
+    { name: SERVICE_NAME, path: '/sluzby/investice' },
+  ]),
+];
+
+interface RowItem {
+  name: string;
+  text: string;
+}
+
+const rozpocetRows: RowItem[] = [
+  { name: 'K čemu mají peníze sloužit', text: 'Jaký cíl chcete financovat a co pro vás bude znamenat jeho splnění.' },
+  { name: 'Kdy je budete potřebovat', text: 'Čas určuje, jaké kolísání a jakou dostupnost peněz si můžete dovolit.' },
+  { name: 'Jakou rezervu už máte', text: 'Peníze na běžné a nečekané výdaje nemají automaticky patřit do dlouhodobých investic.' },
+  { name: 'Kolik můžete pravidelně investovat', text: 'Částka má odpovídat vašemu rozpočtu a ostatním prioritám.' },
+  { name: 'Jaké kolísání jste schopni přijmout', text: 'Investice musí odpovídat nejen cíli, ale i tomu, jak budete reagovat na pokles její hodnoty.' },
+];
+
+const rizikoRows: RowItem[] = [
+  { name: 'Riziko a kolísání', text: 'Jak se může měnit hodnota investice a zda takový průběh odpovídá vašemu cíli a zkušenostem.' },
+  { name: 'Dostupnost peněz', text: 'Za jakých podmínek a v jakém čase můžete prostředky potřebovat nebo vybrat.' },
+  { name: 'Rozložení investic', text: 'Proč není vhodné stavět celý majetek na jedné investici nebo úzké skupině aktiv.' },
+  { name: 'Náklady', text: 'Jaké poplatky a další náklady jsou s investováním spojené a jak ovlivňují výsledek.' },
+  { name: 'Daňové souvislosti', text: 'Jaké daňové podmínky mohou být pro zvolený způsob investování relevantní.' },
+];
+
+const cilItems: string[] = [
+  'vlastní bydlení,',
+  'budoucí větší výdaje,',
+  'tvorba dlouhodobého majetku,',
+  'penze.',
+];
+
+interface Step {
+  heading: string;
+  text: string;
+}
+
+const steps: Step[] = [
+  { heading: 'Ujasníme si cíle', text: 'Co chcete financovat, kdy a jakou částku budete potřebovat.' },
+  { heading: 'Projdeme současnou situaci', text: 'Rezervu, závazky, dostupné prostředky a investice, které už máte.' },
+  { heading: 'Nastavíme čas a riziko', text: 'Určíme, jaký investiční horizont a míra kolísání odpovídají vašim potřebám a zkušenostem.' },
+  { heading: 'Porovnáme vhodné možnosti', text: 'Vysvětlím vám rozdíly v investičním přístupu, riziku, dostupnosti peněz a nákladech.' },
+  { heading: 'Pomohu s realizací', text: 'Pokud se rozhodnete investovat, pomohu vám s dalšími kroky a potřebnou dokumentací.' },
+  { heading: 'K plánu se budeme vracet', text: 'Když se změní vaše cíle, příjem nebo životní situace, má smysl zkontrolovat, zda investice stále odpovídají tomu, co potřebujete.' },
+];
+
+interface Faq {
+  q: string;
+  a: string;
+}
+
+const faqs: Faq[] = [
+  { q: 'Jakou částku potřebuji, abych mohl začít investovat?', a: 'Záleží na vašem cíli, rozpočtu a zvoleném způsobu investování. Důležitější než samotná počáteční částka je, aby investování odpovídalo vašim možnostem a neohrozilo potřebnou rezervu.' },
+  { q: 'Je lepší investovat pravidelně, nebo jednorázově?', a: 'Záleží na tom, kolik prostředků máte k dispozici, kdy je budete potřebovat a jaké riziko jste ochotni podstoupit. Oba způsoby mohou mít své místo a lze je také kombinovat.' },
+  { q: 'Můžu při investování přijít o peníze?', a: 'Ano. Investice nesou riziko a jejich hodnota může klesnout. Míra rizika závisí na konkrétním řešení. Proto je důležité rozumět možným ztrátám a neinvestovat peníze, které budete potřebovat v nevhodnou dobu.' },
+  { q: 'Musím kvůli vám převádět své současné investice?', a: 'Ne. Nejdřív se podíváme na to, co už máte. Pokud současné investice odpovídají vašim cílům a potřebám, není důvod je měnit jen kvůli změně poradce.' },
+  { q: 'Jak poznám, jaké investiční riziko je pro mě vhodné?', a: 'Posuzujeme váš cíl, investiční horizont, finanční situaci, zkušenosti a schopnost i ochotu nést ztráty. Podle toho lze určit, jaký způsob investování pro vás dává smysl.' },
+  { q: 'Pomůžete mi také s investicemi na penzi?', a: 'Ano. Nejdřív si ujasníme, jaký majetek a budoucí příjem chcete vytvořit. Potom můžeme řešit, jakou roli mají v plánu investice, penzijní produkty nebo další majetek.' },
+];
+---
+
+<BaseLayout
+  title="Investiční poradenství a plánování | Patrik Gajdadzis"
+  description={SERVICE_DESCRIPTION}
+  jsonLd={investiceJsonLd}
+>
+  <Header />
+  <main id="hero" class="inv">
+    <div class="inv__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`inv__route-svg inv__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2600`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                <LineGradientDefs id={`inv-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="inv__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="inv__route-path inv__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#inv-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="inv__route-path inv__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['cil', 'rozpocet', 'riziko', 'portfolio', 'prubeh', 'souvislosti', 'otazky'] as const).map((marker) => (
+              <g class="inv__marker" data-marker={marker}>
+                <line class="inv__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="inv__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="inv-hero" aria-labelledby="inv-hero-heading">
+      <nav class="inv-breadcrumb" aria-label="Drobečková navigace">
+        <ol>
+          <li><a href="/sluzby">Služby</a></li>
+          <li aria-current="page">Investice</li>
+        </ol>
+      </nav>
+
+      <div class="inv-hero__text">
+        <h1 id="inv-hero-heading" data-reveal>Investice mají vycházet z&nbsp;toho, na&nbsp;co a&nbsp;kdy peníze potřebujete.</h1>
+        <p class="inv-hero__lead" data-reveal>
+          Nejdřív si ujasníme, co chcete investováním získat, kdy budete peníze potřebovat a&nbsp;jaké riziko dává
+          smysl podstoupit. Potom nastavíme způsob investování, který odpovídá vašim cílům i&nbsp;ostatním financím.
+        </p>
+        <div class="inv-hero__actions" data-reveal>
+          <a class="inv-cta" href="/#kontakt">Nezávazná konzultace</a>
+          <a class="inv-phone" href="tel:+420775217721">
+            <svg class="inv-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="inv-chapter inv-chapter--cil" aria-labelledby="cil-heading">
+      <div class="inv-chapter__bar" data-reveal data-route-target="cil">
+        <p>Cíl</p>
+      </div>
+
+      <div class="inv-chapter__content">
+        <div class="inv-chapter__top">
+          <div class="inv-chapter__lead-col" data-reveal>
+            <h2 id="cil-heading" class="inv-h2--dominant">Jinak se&nbsp;investuje na&nbsp;několik let. Jinak na&nbsp;několik desetiletí.</h2>
+          </div>
+          <div class="inv-chapter__support-col" data-reveal>
+            <div class="inv-support__body">
+              <p class="inv-support__text">
+                Peníze na&nbsp;plánovanou koupi nemovitosti mají jiný účel než majetek, který vytváříte na&nbsp;penzi.
+                Rozdílný čas a&nbsp;cíl znamenají i&nbsp;rozdílné nároky na&nbsp;dostupnost peněz a&nbsp;přijatelné
+                riziko.
+              </p>
+              <p class="inv-support__text">
+                Proto nezačínám otázkou, který fond nebo investiční produkt vybrat. Nejdřív potřebujeme vědět, jakou
+                roli mají peníze ve&nbsp;vašem životě.
+              </p>
+            </div>
+            <div class="inv-cil__list-block">
+              <p class="inv-eyebrow">Peníze mohou mít jiný úkol</p>
+              <ul class="inv-chapter__list">
+                {cilItems.map((item) => <li>{item}</li>)}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p class="inv-chapter__statement" data-reveal>
+          Stejná investice nemusí dávat smysl pro&nbsp;dva různé cíle.
+        </p>
+      </div>
+    </section>
+
+    <section class="inv-chapter inv-chapter--rozpocet" aria-labelledby="rozpocet-heading">
+      <div class="inv-chapter__bar" data-reveal data-route-target="rozpocet">
+        <p>Rozpočet</p>
+      </div>
+
+      <div class="inv-chapter__content">
+        <div class="inv-chapter__top">
+          <div class="inv-chapter__lead-col" data-reveal>
+            <h2 id="rozpocet-heading" class="inv-h2--std">Nejdřív musí fungovat rozpočet a&nbsp;rezerva.</h2>
+          </div>
+          <div class="inv-chapter__support-col" data-reveal>
+            <p class="inv-support__text">
+              Investování nemá být na&nbsp;úkor peněz, které můžete potřebovat v&nbsp;nejbližší době. Proto
+              se&nbsp;nejdřív podíváme na&nbsp;příjmy, výdaje, závazky, rezervu a&nbsp;plánované větší výdaje.
+            </p>
+            <p class="inv-support__text">
+              Až potom dává smysl určit, kolik můžete investovat pravidelně nebo jednorázově.
+            </p>
+          </div>
+        </div>
+
+        <ul class="inv-rows" data-reveal>
+          {
+            rozpocetRows.map((r) => (
+              <li class="inv-rows__row">
+                <span class="inv-rows__name">{r.name}</span>
+                <span class="inv-rows__text">{r.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="inv-chapter__statement inv-chapter__statement--plain" data-reveal>
+          Až potom vybíráme způsob investování.
+        </p>
+      </div>
+    </section>
+
+    <section class="inv-chapter inv-chapter--riziko" aria-labelledby="riziko-heading">
+      <div class="inv-chapter__bar" data-reveal data-route-target="riziko">
+        <p>Riziko</p>
+      </div>
+
+      <div class="inv-chapter__content">
+        <div class="inv-chapter__top">
+          <div class="inv-chapter__lead-col" data-reveal>
+            <h2 id="riziko-heading" class="inv-h2--std">Důležité je vědět, jaké riziko podstupujete a&nbsp;za&nbsp;co platíte.</h2>
+          </div>
+          <div class="inv-chapter__support-col" data-reveal>
+            <p class="inv-support__text">
+              Vyšší očekávaný výnos bývá spojený s&nbsp;vyšším rizikem. Hodnota investice může kolísat a&nbsp;v&nbsp;některých
+              obdobích také výrazně klesnout. Proto je důležité rozumět nejen tomu, co může investice
+              přinést, ale i&nbsp;tomu, co se&nbsp;může stát cestou.
+            </p>
+          </div>
+        </div>
+
+        <ul class="inv-rows" data-reveal>
+          {
+            rizikoRows.map((r) => (
+              <li class="inv-rows__row">
+                <span class="inv-rows__name">{r.name}</span>
+                <span class="inv-rows__text">{r.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="inv-chapter__statement" data-reveal>
+          Investici máte rozumět i&nbsp;ve&nbsp;chvíli, kdy její hodnota klesá.
+        </p>
+      </div>
+    </section>
+
+    <section class="inv-chapter inv-chapter--portfolio" aria-labelledby="portfolio-heading">
+      <div class="inv-chapter__bar" data-reveal data-route-target="portfolio">
+        <p>Portfolio</p>
+      </div>
+
+      <div class="inv-chapter__content">
+        <div class="inv-chapter__lead-col" data-reveal>
+          <h2 id="portfolio-heading" class="inv-h2--std">Nejdřív se&nbsp;podívám na&nbsp;to, co už máte.</h2>
+          <p class="inv-chapter__statement" data-reveal>Změna portfolia má mít důvod. Ne&nbsp;být cílem sama o&nbsp;sobě.</p>
+        </div>
+
+        <div class="inv-chapter__support-col" data-reveal>
+          <p class="inv-support__text">
+            Pokud už máte investice, není důvod začínat od&nbsp;nuly. Projdeme jejich účel, složení, náklady, riziko
+            a&nbsp;to, jestli odpovídají vašim současným cílům.
+          </p>
+          <p class="inv-support__text">
+            Může se&nbsp;ukázat, že současné nastavení dává smysl. Pokud najdeme něco, co stojí za&nbsp;úpravu,
+            vysvětlím vám proč a&nbsp;jaké jsou možnosti.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="inv-chapter inv-chapter--prubeh" aria-labelledby="prubeh-heading">
+      <div class="inv-chapter__bar" data-reveal data-route-target="prubeh">
+        <p>Průběh</p>
+      </div>
+
+      <div class="inv-chapter__content inv-chapter__content--single">
+        <h2 id="prubeh-heading" class="inv-h2--std inv-h2--prubeh" data-reveal>Od&nbsp;cíle ke&nbsp;konkrétnímu způsobu investování.</h2>
+
+        <ol class="inv-steps" data-reveal>
+          {
+            steps.map((step, i) => (
+              <li class={`inv-step${i === 0 ? ' inv-step--first' : ''}`}>
+                <span class="inv-step__marker" aria-hidden="true"></span>
+                {i < steps.length - 1 && <span class="inv-step__connector" aria-hidden="true"></span>}
+                <h3>{step.heading}</h3>
+                <p>{step.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="inv-chapter inv-chapter--souvislosti" aria-labelledby="souvislosti-heading">
+      <div class="inv-chapter__bar inv-chapter__bar--muted" data-reveal data-route-target="souvislosti">
+        <p>Souvislosti</p>
+      </div>
+
+      <div class="inv-chapter__content">
+        <div class="inv-chapter__lead-col" data-reveal>
+          <h2 id="souvislosti-heading" class="inv-h2--muted">Investování nemá fungovat odděleně od&nbsp;zbytku vašeho života.</h2>
+          <p class="inv-chapter__statement" data-reveal>Začneme tím, co chcete vyřešit právě teď.</p>
+        </div>
+
+        <div class="inv-chapter__support-col" data-reveal>
+          <p class="inv-support__text">
+            Výše rezervy, hypotéka, ochrana příjmu nebo plánovaná koupě nemovitosti mohou ovlivnit, kolik peněz má
+            smysl investovat a&nbsp;na&nbsp;jak dlouho.
+          </p>
+          <p class="inv-support__text">
+            Proto se&nbsp;při investování dívám i&nbsp;na&nbsp;ostatní důležitá finanční rozhodnutí. Neznamená to
+            ale, že kvůli investici musíte automaticky řešit všechny své finance.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="inv-chapter inv-chapter--faq" aria-labelledby="otazky-heading">
+      <div class="inv-chapter__bar inv-chapter__bar--muted" data-reveal data-route-target="otazky">
+        <p id="otazky-heading">Otázky</p>
+      </div>
+
+      <div class="inv-chapter__content inv-chapter__content--single">
+        <dl class="inv-faq" data-reveal>
+          {
+            faqs.map((faq) => (
+              <div class="inv-faq__row">
+                <dt>{faq.q}</dt>
+                <dd>{faq.a}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="inv-closing" aria-labelledby="inv-closing-heading">
+      <div class="inv-closing__glow" aria-hidden="true"></div>
+
+      <div class="inv-closing__grid">
+        <h2 id="inv-closing-heading" data-reveal>Pojďme zjistit, jak mají vaše peníze pracovat pro&nbsp;vaše cíle.</h2>
+
+        <div class="inv-closing__body" data-reveal>
+          <p>
+            Ať chcete začít investovat, využít volné prostředky nebo zkontrolovat současné portfolio, na&nbsp;první
+            konzultaci si ujasníme vaši situaci a&nbsp;další postup.
+          </p>
+
+          <div class="inv-closing__actions">
+            <a class="inv-cta inv-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="inv-phone inv-phone--dark" href="tel:+420775217721">
+              <svg class="inv-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.inv');
+  const routeWrap = document.querySelector('.inv__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.inv__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.inv-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.inv-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.inv-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.inv-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      cil: main.querySelector('[data-route-target="cil"]'),
+      rozpocet: main.querySelector('[data-route-target="rozpocet"]'),
+      riziko: main.querySelector('[data-route-target="riziko"]'),
+      portfolio: main.querySelector('[data-route-target="portfolio"]'),
+      prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      souvislosti: main.querySelector('[data-route-target="souvislosti"]'),
+      otazky: main.querySelector('[data-route-target="otazky"]'),
+    } as const;
+
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_MAX_LENGTH = 100;
+    const HERO_ENTRY_MIN_LENGTH = 40;
+    const HERO_ENTRY_GAP_BEFORE_BEND = 20;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number, entryEndY: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${entryEndY} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      // Stejná technika jako sourozenci — ohyb 40px pod patou hero textu
+      // (H1+lead+CTA), s ochranou 260..heroBottom-20.
+      let bendY = 260;
+      if (heroTextEl) {
+        const textRect = heroTextEl.getBoundingClientRect();
+        const textBottom = textRect.bottom - mainRect.top;
+        bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+      }
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.inv__route-path:not(.inv__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.inv__route-path--dark') as SVGPathElement | null;
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--inv-shift', `${shift}px`);
+        }
+
+        if (isHero) {
+          // Nájezd: délka dopočítaná ze skutečné mezery mezi y=40 a bodem
+          // ohybu (bendY-r), ne převzatá jako pevná konstanta odjinud —
+          // viz hlavičkový komentář stránky.
+          const available = bendY - r - HERO_ENTRY_START_Y - HERO_ENTRY_GAP_BEFORE_BEND;
+          const entryLength = Math.min(HERO_ENTRY_MAX_LENGTH, Math.max(HERO_ENTRY_MIN_LENGTH, available));
+          const entryEndY = HERO_ENTRY_START_Y + entryLength;
+
+          const gradient = svg.querySelector('linearGradient');
+          if (gradient) gradient.setAttribute('y2', String(entryEndY));
+
+          const entryPath = svg.querySelector('.inv__route-entry') as SVGPathElement | null;
+          if (entryPath) entryPath.setAttribute('d', `M ${entryX} ${HERO_ENTRY_START_Y} L ${entryX} ${entryEndY}`);
+
+          if (lightPath) lightPath.setAttribute('d', heroArcPath(entryX, axisScaled, r, bendY, closingTop, entryEndY));
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.inv__notch');
+          const dot = group.querySelector('.inv__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.inv__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.inv__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+</script>
+
+<style>
+  .inv {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .inv__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .inv__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .inv__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .inv__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .inv__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .inv__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .inv__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .inv__route-svg--tablet,
+  .inv__route-svg--laptop,
+  .inv__route-svg--desktop {
+    display: none;
+  }
+
+  .inv :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .inv-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .inv-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .inv-cta:active {
+    transform: translateY(1px);
+  }
+
+  .inv-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .inv-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .inv-phone:hover {
+    color: var(--emerald);
+  }
+
+  .inv-phone--dark {
+    color: var(--white);
+  }
+
+  .inv-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Drobečková navigace ---------- */
+
+  .inv-breadcrumb {
+    margin-bottom: 20px;
+  }
+
+  .inv-breadcrumb ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .inv-breadcrumb li:not(:last-child)::after {
+    content: '/';
+    margin: 0 8px;
+    color: var(--text-faint);
+  }
+
+  .inv-breadcrumb a {
+    color: var(--text-quiet);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .inv-breadcrumb a:hover {
+    color: var(--navy);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .inv-hero {
+    padding: 64px 24px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .inv-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .inv-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .inv-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .inv-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .inv-hero__actions .inv-cta {
+    width: 100%;
+  }
+
+  .inv-hero__actions .inv-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .inv-chapter {
+    padding: 56px 24px;
+  }
+
+  .inv-chapter--cil {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .inv-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .inv-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--inv-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .inv-chapter--cil .inv-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .inv-chapter__bar--muted p {
+    font-weight: 700;
+    color: var(--text-nav);
+  }
+
+  .inv-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .inv-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .inv-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .inv-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Cíl: eyebrow+seznam sedí ve STEJNÉM sloupci jako úvodní odstavce —
+     stejný vzor jako Majetek na `/sluzby/pojisteni` (viz jeho hlavičkový
+     komentář a CLAUDE.md, „mezera MEZI BLOKY"). Odstavce mají vlastní
+     těsný gap (8px, pokračující myšlenka). Přechod na blok se seznamem
+     je NOVÝ obsahový blok, proto stejný gap jako mezi hlavními bloky
+     uvnitř kapitoly (32/40px), ne těsných 14px. */
+  .inv-support__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .inv-chapter--cil .inv-chapter__support-col {
+    gap: 32px;
+  }
+
+  .inv-chapter__lead-col h2,
+  .inv-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .inv-h2--dominant {
+    font-size: 34px;
+  }
+
+  .inv-h2--std {
+    font-size: 30px;
+  }
+
+  .inv-h2--muted {
+    font-size: 28px;
+  }
+
+  .inv-support__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .inv-eyebrow {
+    margin: 0 0 4px;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .inv-chapter__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .inv-chapter__list li {
+    font-weight: 600;
+    font-size: 16.5px;
+    color: var(--navy);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .inv-chapter__list li:last-child {
+    border-bottom: none;
+  }
+
+  /* Stejná škála pro VŠECHNY ohraničené výrazné věty na téhle stránce
+     (Cíl/Riziko/Portfolio/Souvislosti) jako `pojisteni.astro`'s
+     `--propojeni`-odvozená škála (22→30px na desktopu), ne jeho menší
+     výchozí škála. */
+  .inv-chapter__statement {
+    margin: 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--emerald);
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* Bez svislice (Rozpočet — zakončení výčtu, ne samostatný statement),
+     stejná velikostní škála jako `.poj-chapter__statement--plain`
+     (20/22/24/26). */
+  .inv-chapter__statement--plain {
+    padding-left: 0;
+    border-left: none;
+    font-size: 20px;
+  }
+
+  /* ---------- Rozpočet/Riziko — plné řádky s názvem+popisem ---------- */
+
+  .inv-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .inv-rows__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .inv-rows__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .inv-rows__name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .inv-rows__text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Průběh ---------- */
+
+  .inv-h2--prubeh {
+    max-width: 560px;
+  }
+
+  .inv-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 38px;
+  }
+
+  .inv-step {
+    position: relative;
+    padding-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .inv-step__marker {
+    position: absolute;
+    top: 13px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-quiet);
+    transform: translateY(-50%);
+  }
+
+  .inv-step--first .inv-step__marker {
+    width: 8px;
+    height: 8px;
+    background: var(--emerald);
+  }
+
+  .inv-step__connector {
+    position: absolute;
+    top: 13px;
+    bottom: -51px;
+    left: 3px;
+    width: 1px;
+    background: rgba(27, 74, 138, .18);
+  }
+
+  .inv-step--first .inv-step__connector {
+    left: 3.5px;
+  }
+
+  .inv-step h3 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--navy-ink);
+  }
+
+  .inv-step--first h3 {
+    font-size: 21px;
+  }
+
+  .inv-step p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ---------- Otázky ---------- */
+
+  .inv-faq {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .inv-faq__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .inv-faq__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .inv-faq dt {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .inv-faq dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .inv-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .inv-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .inv-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .inv-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .inv-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .inv-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .inv-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .inv-closing__actions .inv-cta {
+    width: 100%;
+  }
+
+  .inv-closing__actions .inv-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .inv__route-svg--mobile {
+      display: none;
+    }
+
+    .inv__route-svg--tablet {
+      display: block;
+    }
+
+    .inv-chapter__bar p {
+      padding-left: calc(64px + var(--inv-shift, 0px));
+    }
+
+    .inv-hero {
+      padding: 88px 40px 0;
+    }
+
+    .inv-hero__text {
+      gap: 20px;
+    }
+
+    .inv-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .inv-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .inv-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .inv-hero__actions .inv-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .inv-hero__actions .inv-phone {
+      height: auto;
+    }
+
+    .inv-chapter--cil {
+      margin-top: 80px;
+      padding: 72px 40px;
+    }
+
+    .inv-chapter {
+      padding: 72px 40px;
+    }
+
+    .inv-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .inv-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .inv-h2--dominant {
+      font-size: 44px;
+    }
+
+    .inv-h2--std {
+      font-size: 40px;
+    }
+
+    .inv-h2--muted {
+      font-size: 36px;
+    }
+
+    .inv-support__text {
+      font-size: 18px;
+    }
+
+    .inv-chapter__list li {
+      font-size: 17px;
+    }
+
+    .inv-chapter__statement {
+      font-size: 24px;
+    }
+
+    .inv-chapter__statement--plain {
+      font-size: 22px;
+    }
+
+    .inv-rows__name {
+      font-size: 20px;
+    }
+
+    .inv-step h3 {
+      font-size: 22px;
+    }
+
+    .inv-step--first h3 {
+      font-size: 24px;
+    }
+
+    .inv-faq dt {
+      font-size: 19px;
+    }
+
+    .inv-rows__row {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      column-gap: 32px;
+      gap: 0;
+      align-items: baseline;
+    }
+
+    .inv-chapter__top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .inv-chapter--cil .inv-chapter__lead-col,
+    .inv-chapter--rozpocet .inv-chapter__lead-col,
+    .inv-chapter--riziko .inv-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .inv-chapter--cil .inv-chapter__support-col,
+    .inv-chapter--rozpocet .inv-chapter__support-col,
+    .inv-chapter--riziko .inv-chapter__support-col {
+      flex: 1;
+    }
+
+    .inv-chapter--cil .inv-chapter__support-col {
+      gap: 40px;
+    }
+
+    .inv-steps {
+      gap: 44px;
+    }
+
+    .inv-step__marker {
+      display: block;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+    }
+
+    .inv-step--first .inv-step__marker {
+      width: 9px;
+      height: 9px;
+    }
+
+    .inv-step__connector {
+      display: block;
+      top: 14px;
+      bottom: -58px;
+      left: 3.5px;
+    }
+
+    .inv-step--first .inv-step__connector {
+      left: 4px;
+    }
+
+    .inv-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    .inv-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .inv-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .inv-closing__body p {
+      font-size: 17px;
+    }
+
+    .inv-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .inv-closing__actions .inv-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .inv-closing__actions .inv-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .inv__route-svg--tablet {
+      display: none;
+    }
+
+    .inv__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .inv-chapter__bar p {
+      padding-left: calc(56px + var(--inv-shift, 0px));
+    }
+
+    .inv-hero__text {
+      max-width: 580px;
+      gap: 18px;
+    }
+
+    .inv-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .inv-hero__lead {
+      font-size: 19px;
+    }
+
+    .inv-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .inv-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .inv-chapter--cil {
+      margin-top: 100px;
+      padding: 88px 96px;
+    }
+
+    .inv-chapter {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 56px;
+    }
+
+    .inv-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .inv-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .inv-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .inv-chapter__content {
+      flex: 1;
+    }
+
+    .inv-chapter__content--single {
+      gap: 40px;
+    }
+
+    .inv-h2--dominant {
+      font-size: 50px;
+    }
+
+    .inv-h2--std {
+      font-size: 44px;
+    }
+
+    .inv-h2--muted {
+      font-size: 40px;
+    }
+
+    .inv-chapter__statement {
+      font-size: 28px;
+    }
+
+    .inv-chapter__statement--plain {
+      font-size: 24px;
+    }
+
+    .inv-chapter__top {
+      gap: 60px;
+    }
+
+    .inv-chapter--cil .inv-chapter__lead-col,
+    .inv-chapter--rozpocet .inv-chapter__lead-col,
+    .inv-chapter--riziko .inv-chapter__lead-col {
+      width: 540px;
+    }
+
+    .inv-chapter--portfolio .inv-chapter__content,
+    .inv-chapter--souvislosti .inv-chapter__content {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 60px;
+    }
+
+    .inv-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .inv-chapter__support-col {
+      flex: 1;
+    }
+
+    .inv-rows__row {
+      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px 0;
+    }
+
+    .inv-rows__name {
+      font-size: 22px;
+    }
+
+    .inv-rows__text {
+      font-size: 17px;
+    }
+
+    .inv-h2--prubeh {
+      max-width: 600px;
+    }
+
+    .inv-steps {
+      max-width: 600px;
+    }
+
+    .inv-step {
+      padding-left: 56px;
+    }
+
+    .inv-step__marker {
+      top: 15px;
+    }
+
+    .inv-step__connector {
+      top: 15px;
+      bottom: -59px;
+    }
+
+    .inv-step h3 {
+      font-size: 22px;
+    }
+
+    .inv-step--first h3 {
+      font-size: 24px;
+    }
+
+    .inv-faq {
+      max-width: 900px;
+    }
+
+    .inv-faq__row {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      column-gap: 56px;
+      align-items: baseline;
+    }
+
+    .inv-faq dt {
+      font-size: 22px;
+    }
+
+    .inv-faq dd {
+      font-size: 17px;
+    }
+
+    .inv-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .inv-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .inv-closing__glow {
+      height: 320px;
+    }
+
+    .inv-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .inv-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .inv__route-svg--laptop {
+      display: none;
+    }
+
+    .inv__route-svg--desktop {
+      display: block;
+    }
+
+    .inv__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .inv-hero,
+    .inv-chapter,
+    .inv-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .inv-chapter__bar p {
+      padding-left: calc(76px + var(--inv-shift, 0px));
+    }
+
+    .inv-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .inv-hero__text {
+      max-width: 640px;
+      gap: 18px;
+    }
+
+    .inv-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .inv-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .inv-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .inv-hero__actions .inv-cta {
+      height: 56px;
+    }
+
+    .inv-chapter--cil {
+      margin-top: 120px;
+      padding: 88px 100px;
+    }
+
+    .inv-chapter {
+      padding: 88px 100px;
+      gap: 56px;
+    }
+
+    .inv-chapter__bar {
+      width: 240px;
+    }
+
+    .inv-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .inv-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .inv-h2--dominant {
+      font-size: 56px;
+    }
+
+    .inv-h2--std {
+      font-size: 48px;
+    }
+
+    .inv-h2--muted {
+      font-size: 44px;
+    }
+
+    .inv-chapter__statement {
+      font-size: 30px;
+    }
+
+    .inv-chapter__statement--plain {
+      font-size: 26px;
+    }
+
+    .inv-chapter--cil .inv-chapter__lead-col,
+    .inv-chapter--rozpocet .inv-chapter__lead-col,
+    .inv-chapter--riziko .inv-chapter__lead-col,
+    .inv-chapter__lead-col {
+      width: 600px;
+    }
+
+    .inv-rows__name {
+      font-size: 24px;
+    }
+
+    .inv-rows__text {
+      font-size: 17px;
+    }
+
+    .inv-h2--prubeh {
+      max-width: 640px;
+    }
+
+    .inv-steps {
+      max-width: 640px;
+    }
+
+    .inv-faq dt {
+      font-size: 22px;
+    }
+
+    .inv-closing {
+      padding-block: 96px;
+    }
+
+    .inv-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .inv-closing__glow {
+      height: 340px;
+    }
+
+    .inv-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+</style>

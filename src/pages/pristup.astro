@@ -1,0 +1,1798 @@
+---
+/**
+ * Stránka /pristup — způsob práce, napříč všemi službami. Zdroj pravdy pro
+ * OBSAH, pořadí sekcí a role: úkol „Úkol pro Claude Code — podstránka
+ * /pristup" (8. 9. 2026) + `docs/content-subpages.md`, kapitola `/pristup`
+ * (kompletní, NÁVRH K UŽIVATELSKÉMU SCHVÁLENÍ — copy převzata doslovně).
+ * Zdroj pravdy pro VŠECHNY hodnoty sdílené kostry (osa, pruh, zářez, vnitřní
+ * rozpad, gap mezi pruhem a obsahem, velikost/barva kotev, typografická
+ * škála): `src/pages/sluzby/penze.astro` — na výslovné přání uživatele,
+ * sekundárně ostatní service pages.
+ *
+ * BEZ DROBEČKOVÉ NAVIGACE — na rozdíl od service pages je `/pristup`
+ * stránka první úrovně (zadání §13).
+ *
+ * FOTOGRAFIE — jediné, čím se tahle stránka liší od služeb (zadání §6).
+ * Placeholder NENÍ nová komponenta ani nové tokeny — převzatý 1:1 vzor
+ * `AboutSection.astro`'s `.about__photo-placeholder` (plochá silueta
+ * hlava+ramena, jeden tón, `--about-photo-*` tokeny — „civilnější tón",
+ * přesně pro tenhle typ osobní stránky) a jeho `.about__reveal-mask`
+ * odhalení (`clip-path: inset()` zdola nahoru), místo hero-stylu
+ * `HeroPhotoPlaceholder.astro` (dramatičtější, s key/rim-light). `photoSrc`
+ * konstanta (prázdná = placeholder) — jediné místo pro vložení skutečné
+ * fotografie, beze změny rozvržení (stejný `photoSrc` vzor jako
+ * `AboutSection.astro`).
+ *
+ * ROZPOR MEZI ZADÁNÍM A SKUTEČNOU IMPLEMENTACÍ SOUROZENCŮ — explicitně
+ * dotázáno v tomto sezení, uživatel rozhodl:
+ * 1) §7 zmiňuje i „tablet fade 60px, mobil fade 50px" pro nájezd trasy v
+ *    hero — všech pět sourozenců ale na tabletu/mobilu hero ŽÁDNOU trasu
+ *    nemá (`hero: false`). Uživatel potvrdil ponechat sourozeneckou
+ *    konvenci — tablet/mobil beze změny bez trasy v hero, jen fotografie
+ *    se přesune pod hero (§10 zadání).
+ *
+ * NÁJEZD — DRUHÝ POKUS, PRVNÍ BYL VIZUÁLNĚ ŠPATNĚ (zdokumentováno pro
+ * dohledatelnost). První verze dala nájezd i ohyb POD celý hero blok
+ * (zdůvodnění: fotografie v hero sahá až k obsahové lince, takže
+ * standardní vstup hned pod hlavičkou — jako u sourozenců — by byl za
+ * fotografií schovaný). Po nasazení uživatel dvakrát nahlásil screenshotem,
+ * že to vypadá špatně — dlouhý vodorovný úsek trasy bez jakéhokoli
+ * okolního obsahu ve velké prázdné mezeře mezi hero a první kapitolou
+ * opticky čte jako osamocený zaoblený obdélníkový rám, ne jako plynulá
+ * linka (přesně proto, že sourozenci mají STEJNĚ dlouhý vodorovný úsek,
+ * ale schovaný uvnitř hero vedle textu, ne osamocený v prázdnotě).
+ *
+ * Oprava: ohyb zůstává UVNITŘ hero, přesně jako u všech pěti sourozenců
+ * (`bendY` z paty hero textu, `HERO_ENTRY_START_Y = 40` pod hlavičkou) —
+ * jediné, co se liší, je VODOROVNÁ pozice nájezdu (`entryX`). Sourozenci ji
+ * mají jako pevnou tierovou konstantu (prázdné místo napravo od textu),
+ * tady by to kolidovalo s fotografií, která to místo teď zabírá. `entryX`
+ * se proto počítá živě jako střed mezery MEZI pravým okrajem hero textu a
+ * levým okrajem fotografie (`heroTextEl`/`heroPhotoEl.getBoundingClientRect()`
+ * v `syncRoute()`) — žádná nová geometrie, jen jiný (měřený, ne pevný)
+ * vstupní bod do STEJNÉ techniky ohybu jako sourozenci.
+ *
+ * Mapování sedmi kapitol na strukturní vzory sourozenců (žádná nová
+ * kompozice, jen převzetí existujícího vzoru pro danou roli):
+ * 1) Začátek (dominantní) — H2 dominantní škála + emerald pruh/kotva
+ *    (jako „Cíl"/„Částka" u sourozenců) KOMBINOVANÉ s `__content--single`
+ *    + `steps` vzorem „Průběh" (tři kroky místo pěti/šesti) — obě dvě
+ *    existující kombinace modifikátorů použité spolu poprvé, žádná nová
+ *    geometrie. Doprovodný text o 30 minutách je čtvrtý blok pod kroky.
+ * 2) Vstup — vzor „Vstup"/„Portfolio"/„Riziko" bez rows: `__top` (lead H2
+ *    + support-col dva odstavce) + statement.
+ * 3) Doporučení — stejný vzor, tři odstavce.
+ * 4) Realizace — stejný vzor, tři odstavce.
+ * (Kapitola „Odměna" — samostatný pruh/kotva s badge „K ověření před
+ * publikací" — byla 14. 9. 2026 na přání uživatele z veřejné stránky
+ * odstraněna celá, viz `docs/content-subpages.md`. SEDM kotev v komentáři
+ * k trase níže je tím pádem ŠEST — zacatek/vstup/doporuceni/realizace/
+ * pece/otazky.)
+ * 6) Péče — stejný vzor (tři odstavce), statement je STEJNÁ škála jako
+ *    ostatní (žádná nová „větší" velikost — zadání říká jen že je to
+ *    „hlavní brandový moment", ne že má jiné číslo; zvětšit bez
+ *    konkrétního čísla by bylo vymýšlení), navíc DRUHÝ výskyt fotografie
+ *    vedle statementu — mizí pod `--photo-pece-min` šířkou (zadání §6).
+ * 7) Otázky — vzor „Otázky" 1:1 (tlumený pruh, FAQ dl/dt/dd, šest otázek,
+ *    jedna s badge „K ověření před publikací").
+ *
+ * TRASA — jinak stejná technika jako sourozenci: jedna souvislá cesta od
+ * hero (nájezd pod fotografií, viz výše) až po tmavé závěrečné CTA,
+ * `axisScaled` procentuální přepočet pro wide-desktop stage, ŠEST kotev
+ * (zacatek/vstup/doporuceni/realizace/pece/otazky — „odmena" odstraněna
+ * 14. 9. 2026), tmavé CTA bez kotvy/zářezu.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import LineGradientDefs from '../components/LineGradientDefs.astro';
+
+// Prázdné = placeholder. Jediné místo pro vložení skutečné fotografie —
+// stejný vzor jako `photoSrc` v `AboutSection.astro`.
+const photoSrc = '';
+
+interface Step {
+  heading: string;
+  text: string;
+}
+
+const steps: Step[] = [
+  { heading: 'Řeknete mi, co řešíte', text: 'Hypotéku, investice, pojištění nebo třeba jen otázku, jestli máte finance nastavené správně.' },
+  { heading: 'Projdeme současný stav', text: 'Podíváme se na důležité informace, cíle a případně i řešení, která už používáte.' },
+  { heading: 'Řeknu vám, co dává smysl udělat dál', text: 'Bez toho, abychom museli řešit všechno najednou.' },
+];
+
+interface Faq {
+  q: string;
+  a: string;
+  verify?: boolean;
+}
+
+const faqs: Faq[] = [
+  { q: 'Musím mít před první konzultací připravené všechny smlouvy?', a: 'Ne. Na začátku stačí vědět, co chcete řešit. Pokud budou pro další postup potřeba konkrétní dokumenty nebo informace, řeknu vám, co si připravit.' },
+  { q: 'Musím na schůzce něco sjednat?', a: 'Ne. Konzultace jsou nezávazné. Nejdřív si ujasníme vaši situaci a možnosti. O případném sjednání nebo změně se rozhodnete až podle konkrétního doporučení.' },
+  { q: 'Můžu přijít jen kvůli hypotéce nebo jedné smlouvě?', a: 'Ano. Začneme tím, co potřebujete vyřešit. Další oblasti má smysl otevírat pouze tehdy, pokud jsou pro vaši situaci relevantní.' },
+  { q: 'Jak dlouho trvá první konzultace a kde probíhá?', a: 'Přibližně 30 minut. Můžeme se potkat osobně v Ostravě-Porubě nebo online. Konkrétní termín a způsob si domluvíme předem.' },
+  { q: 'Kolik stojí spolupráce se mnou?', a: 'Konzultace jsou nezávazné a zdarma. Za mou práci mi nic přímo neplatíte.' },
+  { q: 'Končí spolupráce podpisem?', a: 'Ne. Podpisem pro mě spolupráce nekončí. Chci s klienty zůstávat v kontaktu dlouhodobě a být člověk, na kterého se mohou obrátit i při dalších finančních rozhodnutích. Když se jejich situace nebo cíle změní, navážeme na to, co už máme společně nastavené.' },
+];
+---
+
+<BaseLayout
+  title="Jak pracuji | Patrik Gajdadzis, finanční poradce"
+  description="Zjistěte, jak se mnou probíhá spolupráce. Od první konzultace přes doporučení a realizaci až po dlouhodobou péči. Ostrava i online."
+>
+  <Header />
+  <main id="hero" class="pri">
+    <div class="pri__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`pri__route-svg pri__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2600`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                <LineGradientDefs id={`pri-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={600} x2={v.entry} y2={700} />
+              </defs>
+            )}
+            <path class="pri__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="pri__route-path pri__route-entry"
+                d={`M ${v.entry} 600 L ${v.entry} 700`}
+                fill="none"
+                stroke={`url(#pri-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="pri__route-path pri__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['zacatek', 'vstup', 'doporuceni', 'realizace', 'pece', 'otazky'] as const).map((marker) => (
+              <g class="pri__marker" data-marker={marker}>
+                <line class="pri__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="pri__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="pri-hero" aria-labelledby="pri-hero-heading">
+      <div class="pri-hero__row">
+        <div class="pri-hero__text">
+          <h1 id="pri-hero-heading" data-reveal>Nejdřív potřebuji pochopit, co chcete vyřešit.</h1>
+          <p class="pri-hero__lead" data-reveal>
+            Můžete přijít s&nbsp;jednou konkrétní otázkou nebo s&nbsp;celými financemi. Nejdřív projdeme vaši situaci
+            a&nbsp;cíle. Potom vám vysvětlím, jaké možnosti dávají smysl a&nbsp;co bych doporučil řešit jako první.
+          </p>
+          <div class="pri-hero__actions" data-reveal>
+            <a class="pri-cta" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="pri-phone" href="tel:+420775217721">
+              <svg class="pri-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="pri-photo pri-hero__photo" data-reveal>
+          {photoSrc ? (
+            <img src={photoSrc} alt="Patrik Gajdadzis" width="600" height="700" loading="lazy" decoding="async" />
+          ) : (
+            <div class="pri-photo__placeholder" aria-hidden="true">
+              <div class="pri-photo__figure">
+                <div class="pri-photo__torso"></div>
+                <div class="pri-photo__head"></div>
+              </div>
+              <span class="pri-photo__label">Foto Patrika — placeholder</span>
+            </div>
+          )}
+          {!photoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
+        </div>
+      </div>
+    </section>
+
+    <section class="pri-chapter pri-chapter--zacatek" aria-labelledby="zacatek-heading">
+      <div class="pri-chapter__bar" data-reveal data-route-target="zacatek">
+        <p>Začátek</p>
+      </div>
+
+      <div class="pri-chapter__content pri-chapter__content--single">
+        <h2 id="zacatek-heading" class="pri-h2--dominant" data-reveal>Nejdřív potřebuji pochopit vaši situaci.</h2>
+
+        <ol class="pri-steps" data-reveal>
+          {
+            steps.map((step, i) => (
+              <li class={`pri-step${i === 0 ? ' pri-step--first' : ''}`}>
+                <span class="pri-step__marker" aria-hidden="true"></span>
+                {i < steps.length - 1 && <span class="pri-step__connector" aria-hidden="true"></span>}
+                <h3>{step.heading}</h3>
+                <p>{step.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+
+        <p class="pri-support__text pri-zacatek__note" data-reveal>
+          První konzultace trvá přibližně 30 minut a&nbsp;je nezávazná. Můžeme se&nbsp;potkat osobně
+          v&nbsp;Ostravě-Porubě nebo online.
+        </p>
+      </div>
+    </section>
+
+    <section class="pri-chapter pri-chapter--vstup" aria-labelledby="vstup-heading">
+      <div class="pri-chapter__bar" data-reveal data-route-target="vstup">
+        <p>Vstup</p>
+      </div>
+
+      <div class="pri-chapter__content">
+        <div class="pri-chapter__top">
+          <div class="pri-chapter__lead-col" data-reveal>
+            <h2 id="vstup-heading" class="pri-h2--std">Stačí vědět, co chcete vyřešit.</h2>
+          </div>
+          <div class="pri-chapter__support-col" data-reveal>
+            <p class="pri-support__text">
+              Někdo přichází s&nbsp;konkrétní hypotékou. Jiný chce zkontrolovat pojištění, začít investovat nebo
+              zjistit, jestli má finance nastavené rozumně.
+            </p>
+            <p class="pri-support__text">
+              Nemusíte předem vědět, jaké řešení potřebujete. Právě od&nbsp;toho je první konzultace. Společně si
+              ujasníme, co je pro&nbsp;vás důležité a&nbsp;jaký další postup dává smysl.
+            </p>
+          </div>
+        </div>
+
+        <p class="pri-chapter__statement" data-reveal>
+          Začneme vaším problémem. Ne&nbsp;nabídkou produktu.
+        </p>
+      </div>
+    </section>
+
+    <section class="pri-chapter pri-chapter--doporuceni" aria-labelledby="doporuceni-heading">
+      <div class="pri-chapter__bar" data-reveal data-route-target="doporuceni">
+        <p>Doporučení</p>
+      </div>
+
+      <div class="pri-chapter__content">
+        <div class="pri-chapter__top">
+          <div class="pri-chapter__lead-col" data-reveal>
+            <h2 id="doporuceni-heading" class="pri-h2--std">Máte vědět, co doporučuji a&nbsp;proč.</h2>
+          </div>
+          <div class="pri-chapter__support-col" data-reveal>
+            <p class="pri-support__text">
+              Když projdeme vaši situaci, vysvětlím vám, jaké možnosti připadají v&nbsp;úvahu, v&nbsp;čem
+              se&nbsp;liší a&nbsp;co bych doporučil řešit jako první.
+            </p>
+            <p class="pri-support__text">
+              Pokud bude dávat smysl něco změnit, řeknu vám proč a&nbsp;co by vám změna měla přinést. Stejně tak vám
+              řeknu, když podle mého posouzení není potřeba do&nbsp;současného nastavení zasahovat.
+            </p>
+            <p class="pri-support__text">
+              Nemusíte se&nbsp;rozhodnout hned na&nbsp;první schůzce. Důležité je, abyste rozuměli tomu, pro&nbsp;co
+              se&nbsp;rozhodujete.
+            </p>
+          </div>
+        </div>
+
+        <p class="pri-chapter__statement" data-reveal>
+          Doporučení má mít důvod. Rozhodnutí zůstává na&nbsp;vás.
+        </p>
+      </div>
+    </section>
+
+    <section class="pri-chapter pri-chapter--realizace" aria-labelledby="realizace-heading">
+      <div class="pri-chapter__bar" data-reveal data-route-target="realizace">
+        <p>Realizace</p>
+      </div>
+
+      <div class="pri-chapter__content">
+        <div class="pri-chapter__top">
+          <div class="pri-chapter__lead-col" data-reveal>
+            <h2 id="realizace-heading" class="pri-h2--std">Doporučením moje práce nekončí.</h2>
+          </div>
+          <div class="pri-chapter__support-col" data-reveal>
+            <p class="pri-support__text">
+              Pokud se&nbsp;rozhodnete pro&nbsp;navržený postup, pomohu vám s&nbsp;jeho realizací. Podle konkrétní
+              služby to může znamenat přípravu podkladů, porovnání vhodných možností, komunikaci
+              s&nbsp;příslušnými institucemi nebo vyřízení potřebných kroků.
+            </p>
+            <p class="pri-support__text">
+              U&nbsp;hypotéky řešíme celý proces až po&nbsp;čerpání. U&nbsp;pojištění nebo investic zase záleží
+              na&nbsp;tom, co potřebujete nastavit nebo změnit.
+            </p>
+            <p class="pri-support__text">
+              Průběžně vám vysvětlím, co se&nbsp;právě řeší a&nbsp;co bude potřeba z&nbsp;vaší strany.
+            </p>
+          </div>
+        </div>
+
+        <p class="pri-chapter__statement" data-reveal>
+          Máte vědět, co se&nbsp;děje. Ne&nbsp;jen čekat na&nbsp;výsledek.
+        </p>
+      </div>
+    </section>
+
+    <section class="pri-chapter pri-chapter--pece" aria-labelledby="pece-heading">
+      <div class="pri-chapter__bar" data-reveal data-route-target="pece">
+        <p>Péče</p>
+      </div>
+
+      <div class="pri-chapter__content">
+        <div class="pri-chapter__top">
+          <div class="pri-chapter__lead-col" data-reveal>
+            <h2 id="pece-heading" class="pri-h2--std">Finanční rozhodnutí nekončí podpisem smlouvy.</h2>
+          </div>
+          <div class="pri-chapter__support-col" data-reveal>
+            <p class="pri-support__text">
+              Hypotéka se&nbsp;časem dostane ke&nbsp;konci fixace. Změní se&nbsp;příjem, rodinná situace nebo
+              hodnota majetku. Investice a&nbsp;plán na&nbsp;penzi zase mohou potřebovat úpravu podle nových cílů.
+            </p>
+            <p class="pri-support__text">
+              Proto se&nbsp;s&nbsp;klienty vracím k&nbsp;tomu, co jsme společně nastavili. Když nastane důležitá
+              změna, podíváme se, jestli současné řešení stále dává smysl.
+            </p>
+            <p class="pri-support__text">
+              A&nbsp;pokud potřebujete řešit něco nového, nemusíte začínat s&nbsp;dalším poradcem od&nbsp;nuly.
+              Můžete se&nbsp;na&nbsp;mě obrátit a&nbsp;navážeme na&nbsp;to, co už o&nbsp;vaší situaci víme.
+            </p>
+          </div>
+        </div>
+
+        <div class="pri-pece__closing">
+          <p class="pri-chapter__statement" data-reveal>
+            Chci být člověk, kterému zavoláte i&nbsp;při dalším finančním rozhodnutí.
+          </p>
+
+          <div class="pri-photo pri-pece__photo" data-reveal>
+            {photoSrc ? (
+              <img src={photoSrc} alt="Patrik Gajdadzis" width="480" height="360" loading="lazy" decoding="async" />
+            ) : (
+              <div class="pri-photo__placeholder" aria-hidden="true">
+                <div class="pri-photo__figure">
+                  <div class="pri-photo__torso"></div>
+                  <div class="pri-photo__head"></div>
+                </div>
+                <span class="pri-photo__label">Foto Patrika — placeholder</span>
+              </div>
+            )}
+            {!photoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pri-chapter pri-chapter--faq" aria-labelledby="otazky-heading">
+      <div class="pri-chapter__bar pri-chapter__bar--muted" data-reveal data-route-target="otazky">
+        <p id="otazky-heading">Otázky</p>
+      </div>
+
+      <div class="pri-chapter__content pri-chapter__content--single">
+        <dl class="pri-faq" data-reveal>
+          {
+            faqs.map((faq) => (
+              <div class="pri-faq__row">
+                <dt>
+                  {faq.q}
+                  {faq.verify && <span class="pri-verify-badge pri-verify-badge--inline" aria-hidden="true">K&nbsp;ověření před publikací</span>}
+                </dt>
+                <dd>{faq.a}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="pri-closing" aria-labelledby="pri-closing-heading">
+      <div class="pri-closing__glow" aria-hidden="true"></div>
+
+      <div class="pri-closing__grid">
+        <h2 id="pri-closing-heading" data-reveal>Začneme tím, co potřebujete vyřešit teď.</h2>
+
+        <div class="pri-closing__body" data-reveal>
+          <p>
+            Na&nbsp;první konzultaci si ujasníme vaši situaci a&nbsp;další krok. Nemusíte předem vědět, jaký
+            produkt nebo službu potřebujete.
+          </p>
+
+          <div class="pri-closing__actions">
+            <a class="pri-cta pri-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="pri-phone pri-phone--dark" href="tel:+420775217721">
+              <svg class="pri-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.pri');
+  const routeWrap = document.querySelector('.pri__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.pri__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.pri-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.pri-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.pri-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.pri-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      zacatek: main.querySelector('[data-route-target="zacatek"]'),
+      vstup: main.querySelector('[data-route-target="vstup"]'),
+      doporuceni: main.querySelector('[data-route-target="doporuceni"]'),
+      realizace: main.querySelector('[data-route-target="realizace"]'),
+      pece: main.querySelector('[data-route-target="pece"]'),
+      otazky: main.querySelector('[data-route-target="otazky"]'),
+    } as const;
+
+    // NÁJEZD — NA VÝSLOVNÉ PŘÁNÍ UŽIVATELE 1:1 STEJNÝ JAKO SOUROZENCI, ŽÁDNÁ
+    // ODCHYLKA. `entryX` je stejná pevná tierová konstanta jako u
+    // hypoteky/financni-plan/pojisteni/investice/penze (`data-entry` v
+    // markupu, 1230 notebook / 1300 desktop), stejný pevný start y=40 pod
+    // hlavičkou, stejný `bendY` z paty hero textu. Fotografie je proto
+    // v hero rozměřená tak, aby na obou stupních zůstala celá VLEVO od
+    // téhle pevné pozice (ověřeno živě — notebook: pravý okraj fotografie
+    // 1104px vs. nájezd na 1230px, desktop: 1200px vs. 1300px, obojí s
+    // rezervou přes 100px) — tj. o layout fotografie se stará šířka
+    // `.pri-hero__photo` (viz CSS níže), ne úprava techniky trasy. Dva
+    // dřívější pokusy (nájezd POD celým hero blokem, pak nájezd v živě
+    // měřené mezeře mezi textem a fotografií) uživatel zamítl — trasa má
+    // vypadat přesně jako na service pages, beze změny.
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_MAX_LENGTH = 100;
+    const HERO_ENTRY_MIN_LENGTH = 40;
+    const HERO_ENTRY_GAP_BEFORE_BEND = 20;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number, entryEndY: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${entryEndY} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      let bendY = 260;
+      if (heroTextEl) {
+        const textRect = heroTextEl.getBoundingClientRect();
+        const textBottom = textRect.bottom - mainRect.top;
+        bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+      }
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.pri__route-path:not(.pri__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.pri__route-path--dark') as SVGPathElement | null;
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--pri-shift', `${shift}px`);
+        }
+
+        if (isHero) {
+          const available = bendY - r - HERO_ENTRY_START_Y - HERO_ENTRY_GAP_BEFORE_BEND;
+          const entryLength = Math.min(HERO_ENTRY_MAX_LENGTH, Math.max(HERO_ENTRY_MIN_LENGTH, available));
+          const entryEndY = HERO_ENTRY_START_Y + entryLength;
+
+          const gradient = svg.querySelector('linearGradient');
+          if (gradient) {
+            gradient.setAttribute('y1', String(HERO_ENTRY_START_Y));
+            gradient.setAttribute('y2', String(entryEndY));
+          }
+
+          const entryPath = svg.querySelector('.pri__route-entry') as SVGPathElement | null;
+          if (entryPath) entryPath.setAttribute('d', `M ${entryX} ${HERO_ENTRY_START_Y} L ${entryX} ${entryEndY}`);
+
+          if (lightPath) lightPath.setAttribute('d', heroArcPath(entryX, axisScaled, r, bendY, closingTop, entryEndY));
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.pri__notch');
+          const dot = group.querySelector('.pri__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.pri__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.pri__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+</script>
+
+<style>
+  .pri {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .pri__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .pri__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pri__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .pri__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .pri__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .pri__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .pri__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .pri__route-svg--tablet,
+  .pri__route-svg--laptop,
+  .pri__route-svg--desktop {
+    display: none;
+  }
+
+  .pri :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  /* Fotografie: `clip-path` odhalení místo fade — přebito `[data-reveal]`
+     generickým pravidlem výše vyšší specificitou. */
+  .pri-photo.is-pending {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .pri-photo.is-visible {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 0% 0);
+    transition: clip-path 600ms var(--ease-out);
+  }
+
+  .pri-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .pri-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .pri-cta:active {
+    transform: translateY(1px);
+  }
+
+  .pri-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .pri-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .pri-phone:hover {
+    color: var(--emerald);
+  }
+
+  .pri-phone--dark {
+    color: var(--white);
+  }
+
+  .pri-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .pri-hero {
+    padding: 64px 24px 0;
+  }
+
+  .pri-hero__row {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .pri-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .pri-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .pri-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .pri-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pri-hero__actions .pri-cta {
+    width: 100%;
+  }
+
+  .pri-hero__actions .pri-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Fotografie — placeholder (vzor AboutSection.astro) ---------- */
+
+  .pri-photo {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .pri-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pri-photo__placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  /*
+   * Figure drží PEVNÝ portrétní poměr stran (4:5) bez ohledu na tvar
+   * vlastního `.pri-photo` kontejneru — ten je na desktopu/notebooku užší
+   * (portrét vedle textu), na tabletu/mobilu ale celošířkový pás
+   * (landscape, zadání §10 „fotografie... na plnou šířku obsahu"). Bez
+   * tohoto omezení by se silueta v širokém pásu roztáhla do plochého
+   * obdélníku a hlava/ramena by vypadaly rozbitě — zjištěno a opraveno po
+   * kontrole živého renderu (uživatel: „ten placeholder nesedí jak má").
+   * `margin: auto` uvnitř `inset: 0` figuru vycentruje na obě osy.
+   */
+  .pri-photo__figure {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    height: 100%;
+    width: auto;
+    aspect-ratio: 4 / 5;
+    max-width: 100%;
+  }
+
+  .pri-photo__torso {
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    bottom: 0;
+    top: 38%;
+    background: var(--about-photo-2);
+    border-radius: 30% 30% 0 0;
+  }
+
+  .pri-photo__head {
+    position: absolute;
+    left: 50%;
+    top: 8%;
+    height: 24%;
+    aspect-ratio: 1;
+    width: auto;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: var(--about-photo-2);
+  }
+
+  .pri-photo__label {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--about-photo-label);
+    white-space: nowrap;
+  }
+
+  .pri-hero__photo {
+    height: 260px;
+  }
+
+  .pri-pece__photo {
+    display: none;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .pri-chapter {
+    padding: 56px 24px;
+  }
+
+  .pri-chapter--zacatek {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .pri-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .pri-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--pri-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .pri-chapter--zacatek .pri-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .pri-chapter__bar--muted p {
+    font-weight: 700;
+    color: var(--text-nav);
+  }
+
+  .pri-verify-badge {
+    display: inline-block;
+    width: fit-content;
+    padding: 3px 8px;
+    margin-left: calc(36px + var(--pri-shift, 0px));
+    border-radius: var(--radius-tag);
+    background: var(--pending-review-bg);
+    color: var(--pending-review);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+
+  .pri-verify-badge--inline {
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+
+  .pri-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .pri-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .pri-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pri-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pri-chapter__lead-col h2,
+  .pri-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .pri-h2--dominant {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+    font-size: 34px;
+  }
+
+  .pri-h2--std {
+    font-size: 30px;
+  }
+
+  .pri-support__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .pri-zacatek__note {
+    color: var(--text-muted);
+  }
+
+  .pri-chapter__statement {
+    margin: 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--emerald);
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ---------- Začátek — kroky (vzor „Průběh") ---------- */
+
+  .pri-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 38px;
+  }
+
+  .pri-step {
+    position: relative;
+    padding-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pri-step__marker {
+    position: absolute;
+    top: 13px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-quiet);
+    transform: translateY(-50%);
+  }
+
+  .pri-step--first .pri-step__marker {
+    width: 8px;
+    height: 8px;
+    background: var(--emerald);
+  }
+
+  .pri-step__connector {
+    position: absolute;
+    top: 13px;
+    bottom: -51px;
+    left: 3px;
+    width: 1px;
+    background: rgba(27, 74, 138, .18);
+  }
+
+  .pri-step--first .pri-step__connector {
+    left: 3.5px;
+  }
+
+  .pri-step h3 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--navy-ink);
+  }
+
+  .pri-step--first h3 {
+    font-size: 21px;
+  }
+
+  .pri-step p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ---------- Péče — statement + druhá fotografie ---------- */
+
+  .pri-pece__closing {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ---------- Otázky ---------- */
+
+  .pri-faq {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pri-faq__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pri-faq__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .pri-faq dt {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .pri-faq dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .pri-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .pri-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .pri-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .pri-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .pri-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .pri-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .pri-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pri-closing__actions .pri-cta {
+    width: 100%;
+  }
+
+  .pri-closing__actions .pri-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+      clip-path: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .pri__route-svg--mobile {
+      display: none;
+    }
+
+    .pri__route-svg--tablet {
+      display: block;
+    }
+
+    .pri-chapter__bar p {
+      padding-left: calc(64px + var(--pri-shift, 0px));
+    }
+
+    .pri-verify-badge {
+      margin-left: calc(64px + var(--pri-shift, 0px));
+    }
+
+    .pri-hero {
+      padding: 88px 40px 0;
+    }
+
+    .pri-hero__text {
+      gap: 20px;
+    }
+
+    .pri-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .pri-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .pri-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .pri-hero__actions .pri-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .pri-hero__actions .pri-phone {
+      height: auto;
+    }
+
+    .pri-hero__photo {
+      height: 360px;
+    }
+
+    .pri-chapter--zacatek {
+      margin-top: 80px;
+      padding: 72px 40px;
+    }
+
+    .pri-chapter {
+      padding: 72px 40px;
+    }
+
+    .pri-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .pri-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .pri-h2--dominant {
+      font-size: 44px;
+    }
+
+    .pri-h2--std {
+      font-size: 40px;
+    }
+
+    .pri-support__text {
+      font-size: 18px;
+    }
+
+    .pri-chapter__statement {
+      font-size: 24px;
+    }
+
+    .pri-chapter__top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .pri-chapter--vstup .pri-chapter__lead-col,
+    .pri-chapter--doporuceni .pri-chapter__lead-col,
+    .pri-chapter--realizace .pri-chapter__lead-col,
+    .pri-chapter--pece .pri-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .pri-chapter--vstup .pri-chapter__support-col,
+    .pri-chapter--doporuceni .pri-chapter__support-col,
+    .pri-chapter--realizace .pri-chapter__support-col,
+    .pri-chapter--pece .pri-chapter__support-col {
+      flex: 1;
+    }
+
+    .pri-steps {
+      gap: 44px;
+    }
+
+    .pri-step__marker {
+      display: block;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+    }
+
+    .pri-step--first .pri-step__marker {
+      width: 9px;
+      height: 9px;
+    }
+
+    .pri-step__connector {
+      display: block;
+      top: 14px;
+      bottom: -58px;
+      left: 3.5px;
+    }
+
+    .pri-step--first .pri-step__connector {
+      left: 4px;
+    }
+
+    .pri-faq dt {
+      font-size: 19px;
+    }
+
+    .pri-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    .pri-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .pri-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .pri-closing__body p {
+      font-size: 17px;
+    }
+
+    .pri-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .pri-closing__actions .pri-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .pri-closing__actions .pri-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .pri__route-svg--tablet {
+      display: none;
+    }
+
+    .pri__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .pri-chapter__bar p {
+      padding-left: calc(56px + var(--pri-shift, 0px));
+    }
+
+    .pri-verify-badge {
+      margin-left: calc(56px + var(--pri-shift, 0px));
+    }
+
+    .pri-hero__row {
+      flex-direction: row;
+      align-items: center;
+      gap: 60px;
+    }
+
+    .pri-hero__text {
+      max-width: 580px;
+      flex: none;
+      width: 580px;
+      gap: 18px;
+    }
+
+    .pri-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .pri-hero__lead {
+      font-size: 19px;
+    }
+
+    .pri-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .pri-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .pri-hero__photo {
+      flex: none;
+      width: 368px;
+      height: 460px;
+    }
+
+    .pri-chapter--zacatek {
+      margin-top: 100px;
+      padding: 88px 96px;
+    }
+
+    .pri-chapter {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 56px;
+    }
+
+    .pri-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .pri-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .pri-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .pri-chapter__content {
+      flex: 1;
+    }
+
+    .pri-chapter__content--single {
+      gap: 40px;
+    }
+
+    .pri-h2--dominant {
+      font-size: 50px;
+      max-width: 700px;
+    }
+
+    .pri-h2--std {
+      font-size: 44px;
+    }
+
+    .pri-chapter__statement {
+      font-size: 28px;
+    }
+
+    .pri-chapter__top {
+      gap: 60px;
+    }
+
+    .pri-chapter--vstup .pri-chapter__lead-col,
+    .pri-chapter--doporuceni .pri-chapter__lead-col,
+    .pri-chapter--realizace .pri-chapter__lead-col,
+    .pri-chapter--pece .pri-chapter__lead-col {
+      width: 540px;
+    }
+
+    .pri-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .pri-chapter__support-col {
+      flex: 1;
+    }
+
+    .pri-steps {
+      max-width: 600px;
+    }
+
+    .pri-step {
+      padding-left: 56px;
+    }
+
+    .pri-step__marker {
+      top: 15px;
+    }
+
+    .pri-step__connector {
+      top: 15px;
+      bottom: -59px;
+    }
+
+    .pri-step h3 {
+      font-size: 22px;
+    }
+
+    .pri-step--first h3 {
+      font-size: 24px;
+    }
+
+    .pri-zacatek__note {
+      max-width: 600px;
+    }
+
+    .pri-faq {
+      max-width: 900px;
+    }
+
+    .pri-faq__row {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      column-gap: 56px;
+      align-items: baseline;
+    }
+
+    .pri-faq dt {
+      font-size: 22px;
+    }
+
+    .pri-faq dd {
+      font-size: 17px;
+    }
+
+    .pri-pece__closing {
+      flex-direction: row;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .pri-pece__closing .pri-chapter__statement {
+      flex: 1;
+    }
+
+    .pri-pece__photo {
+      display: block;
+      flex: none;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+    }
+
+    .pri-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .pri-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .pri-closing__glow {
+      height: 320px;
+    }
+
+    .pri-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .pri-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .pri__route-svg--laptop {
+      display: none;
+    }
+
+    .pri__route-svg--desktop {
+      display: block;
+    }
+
+    .pri__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .pri-hero,
+    .pri-chapter,
+    .pri-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .pri-chapter__bar p {
+      padding-left: calc(76px + var(--pri-shift, 0px));
+    }
+
+    .pri-verify-badge {
+      margin-left: calc(76px + var(--pri-shift, 0px));
+    }
+
+    .pri-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .pri-hero__text {
+      max-width: 640px;
+      width: 640px;
+      gap: 18px;
+    }
+
+    .pri-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .pri-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .pri-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .pri-hero__actions .pri-cta {
+      height: 56px;
+    }
+
+    .pri-hero__photo {
+      flex: none;
+      width: 400px;
+      height: 500px;
+    }
+
+    .pri-chapter--zacatek {
+      margin-top: 120px;
+      padding: 88px 100px;
+    }
+
+    .pri-chapter {
+      padding: 88px 100px;
+      gap: 56px;
+    }
+
+    .pri-chapter__bar {
+      width: 240px;
+    }
+
+    .pri-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .pri-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .pri-h2--dominant {
+      font-size: 56px;
+    }
+
+    .pri-h2--std {
+      font-size: 48px;
+    }
+
+    .pri-chapter__statement {
+      font-size: 30px;
+    }
+
+    .pri-chapter--vstup .pri-chapter__lead-col,
+    .pri-chapter--doporuceni .pri-chapter__lead-col,
+    .pri-chapter--realizace .pri-chapter__lead-col,
+    .pri-chapter--pece .pri-chapter__lead-col,
+    .pri-chapter__lead-col {
+      width: 600px;
+    }
+
+    .pri-steps {
+      max-width: 640px;
+    }
+
+    .pri-zacatek__note {
+      max-width: 640px;
+    }
+
+    .pri-faq dt {
+      font-size: 22px;
+    }
+
+    .pri-pece__photo {
+      width: 240px;
+      height: 240px;
+    }
+
+    .pri-closing {
+      padding-block: 96px;
+    }
+
+    .pri-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .pri-closing__glow {
+      height: 340px;
+    }
+
+    .pri-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+</style>

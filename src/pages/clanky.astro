@@ -1,0 +1,1631 @@
+---
+/**
+ * Stránka /clanky — redakční hub. Zdroj pravdy pro OBSAH, pořadí sekcí a
+ * role: úkol „Úkol pro Claude Code — podstránka /clanky" (9. 9. 2026) +
+ * `docs/content-subpages.md`, kapitola `/clanky` (NÁVRH K UŽIVATELSKÉMU
+ * SCHVÁLENÍ — copy převzata doslovně, dvě výjimky viz níže). Zdroj pravdy
+ * pro VŠECHNY hodnoty sdílené kostry (osa, pruh, zářez, vnitřní rozpad,
+ * gap, velikost/barva kotev, typografická škála): `src/pages/recenze.astro`
+ * — na výslovné přání uživatele, sekundárně `pristup.astro`.
+ *
+ * BEZ DROBEČKOVÉ NAVIGACE — stejně jako `/pristup`/`/recenze`, stránka
+ * první úrovně.
+ *
+ * TRASA — 1:1 STEJNÁ TECHNIKA JAKO `/recenze` (fixní `data-entry`
+ * konstanta, `y=40` pod hlavičkou, `bendY` z paty hero textu, tablet/mobil
+ * BEZ trasy v hero). Zadání §8 popisuje „nájezd v mezeře mezi hero a prvním
+ * zářezem" se dvěma podmínkami a ilustrativními čísly — STEJNÁ formulace
+ * se objevila i v zadáních `/pristup` a `/recenze` a u `/pristup` ji
+ * uživatel po nasazení výslovně zamítl („ta linka ma jit uplně stejně jako
+ * v podstrankach služby") ve prospěch identické pevné techniky sourozenců.
+ * `/recenze` s touto pevnou technikou (bez jakékoli vlastní odchylky) byla
+ * dodána a schválena beze změny nájezdu. Tahle stránka nemá (na rozdíl od
+ * `/pristup`) žádný prvek, který by s fixní pozicí nájezdu kolidoval —
+ * použita je proto STEJNÁ fixní technika, ne vlastní „mezera mezi hero a
+ * zářezem" výpočet, v souladu se zadání §1 („kde by se lišily od tohoto
+ * dokumentu, platí sourozenci") a s už jednou uděleným rozhodnutím
+ * uživatele pro identickou situaci.
+ *
+ * ŽÁDNÝ ČLÁNEK ZATÍM NEEXISTUJE (ověřeno, viz `docs/content-subpages.md`).
+ * `articles` pole je PRÁZDNÉ — to je skutečný stav, ve kterém stránka
+ * spouští (zadání §7), proto se vykresluje „prázdný stav" (nadpis +
+ * vysvětlující věta + dva odkazy), NE řádky se štítkem
+ * „ČLÁNEK — PLACEHOLDER". Per-položkové placeholder vykreslování (§4) je
+ * v šabloně PŘIPRAVENÉ pro položky s `title: null` (stejný princip jako
+ * `ArticlesSection.astro` na homepage), ale s prázdným polem se nikdy
+ * neuplatní — mrtvý, ale funkční a strukturálně úplný kód, ne netestovaná
+ * díra. Stejně tak `featured` řádek (větší titulek přes obě kolony) je
+ * „vypnutá varianta" — CSS/markup existuje, žádná položka `featured: true`
+ * v poli není.
+ *
+ * NOVÁ COPY (dvě provozní stavy, §7 zadání) — dokument `content-subpages.md`
+ * ji NEOBSAHUJE, je označená inline komentářem a musí projít samostatným
+ * schválením (viz souhrn úkolu):
+ * 1) Prázdný stav (žádný článek) — nadpis, věta, dva odkazy.
+ * 2) Stav bez výsledku po výběru tématu — pojistka, filtr je postavený tak,
+ *    aby na ni běžný uživatel nenarazil (témata bez článků se do filtru
+ *    vůbec nepřidávají — viz `topics.filter(...)` níže).
+ *
+ * TAXONOMIE — 1:1 převzatá z `docs/content-homepage.md` §10 a živé
+ * `ArticlesSection.astro` (homepage), needitovaná, žádná nová kategorie.
+ *
+ * DATOVÝ MODEL — `Article` interface je `ArticlesSection.astro`'s
+ * existující tvar (`category`/`title`/`excerpt`/`href`/`lineWidths`)
+ * rozšířený o `publishedAt`/`featured`, přesně podle zadání §4 — NE
+ * paralelní systém. Až vznikne content collection, oba tvary (tenhle i
+ * `ArticlesSection.astro`'s) by měly čerpat ze stejného zdroje.
+ *
+ * FILTR TÉMAT — čistě klientský JS toggle viditelnosti (`hidden` atribut
+ * podle `data-category`), žádný fetch/navigace/query param. Bez JS by byl
+ * mrtvý — ale s prázdným `articles` polem se `<nav>` vůbec nevykresluje
+ * (zadání §7: „Filtr témat se v prázdném stavu nezobrazuje"), takže se
+ * tahle otázka dnes reálně netýká vydávaného stavu; kód je připravený na
+ * budoucí data.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import LineGradientDefs from '../components/LineGradientDefs.astro';
+
+interface Article {
+  category: string;
+  title: string | null;
+  excerpt: string | null;
+  href: string | null;
+  publishedAt: string | null;
+  featured: boolean;
+  titleLineWidth: number;
+  excerptLineWidths: number[];
+}
+
+// ŽÁDNÝ ČLÁNEK ZATÍM NEEXISTUJE — prázdné pole je SKUTEČNÝ stav, ve
+// kterém stránka spouští (viz hlavičkový komentář výše). Nevyplňuj
+// placeholder položkami jen aby výpis „vypadal naplněně" — zadání §4/§7
+// to výslovně zakazuje.
+const articles: Article[] = [];
+
+const topics = ['Hypotéky a bydlení', 'Finanční plánování', 'Pojištění', 'Investice', 'Penze'];
+const availableTopics = topics.filter((t) => articles.some((a) => a.category === t));
+
+const ARTICLES_PAGE_SIZE = 6;
+---
+
+<!--
+  robots="noindex, follow" — úkol „Předspouštěcí P0 technické dotažení“, §3.
+  Skutečné články zatím nejsou připravené; stránka zůstává technicky
+  dostupná (funkční prázdný stav), ale nemá se veřejně odkazovat ani
+  indexovat, dokud nebude mít reálný obsah. Zároveň vyřazena ze sitemap.xml
+  a odstraněna z Header/Footer/ArticlesSection navigace (viz report úkolu).
+-->
+<BaseLayout
+  title="Články o financích | Patrik Gajdadzis"
+  description="Praktické články o hypotékách, finančním plánování, pojištění, investicích a penzi. Píšu je srozumitelně, jako finanční poradce z Ostravy."
+  robots="noindex, follow"
+>
+  <Header />
+  <main id="hero" class="cla">
+    <div class="cla__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`cla__route-svg cla__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2600`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                <LineGradientDefs id={`cla-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="cla__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="cla__route-path cla__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#cla-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="cla__route-path cla__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['clanky', 'sluzby'] as const).map((marker) => (
+              <g class="cla__marker" data-marker={marker}>
+                <line class="cla__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="cla__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="cla-hero" aria-labelledby="cla-hero-heading">
+      <div class="cla-hero__text">
+        <h1 id="cla-hero-heading" data-reveal>Finance srozumitelně. A&nbsp;v&nbsp;souvislostech.</h1>
+        <p class="cla-hero__lead" data-reveal>
+          Píšu o&nbsp;hypotékách, finančním plánování, pojištění, investicích a&nbsp;penzi. Vysvětluji konkrétní
+          otázky, které lidé řeší při důležitých finančních rozhodnutích.
+        </p>
+        <div class="cla-hero__actions" data-reveal>
+          <a class="cla-cta" href="#clanky-vypis" data-scroll-target>Procházet články</a>
+          <a class="cla-phone" href="tel:+420775217721">
+            <svg class="cla-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="cla-chapter cla-chapter--clanky" aria-labelledby="clanky-heading">
+      <div class="cla-chapter__bar" data-reveal data-route-target="clanky">
+        <p>Články</p>
+      </div>
+
+      <div class="cla-chapter__content">
+        <div class="cla-chapter__top">
+          <div class="cla-chapter__lead-col" data-reveal>
+            <h2 id="clanky-heading" class="cla-h2--dominant">Články, které vám pomohou rozhodovat se&nbsp;s&nbsp;větším přehledem.</h2>
+          </div>
+          <div class="cla-chapter__support-col" data-reveal>
+            <p class="cla-support__text">
+              Vyberte si téma, které právě řešíte. U&nbsp;jednotlivých článků najdete vysvětlení, důležité
+              souvislosti a&nbsp;odkazy na&nbsp;další informace.
+            </p>
+          </div>
+        </div>
+
+        <div class="cla-articles" id="clanky-vypis" data-reveal>
+          {availableTopics.length > 0 && (
+            <nav class="cla-topics" aria-label="Témata článků">
+              <ul class="cla-topics__list">
+                <li>
+                  <button type="button" class="cla-topics__btn is-active" data-topic="" aria-current="true">
+                    Všechna témata
+                  </button>
+                </li>
+                {availableTopics.map((topic) => (
+                  <li>
+                    <button type="button" class="cla-topics__btn" data-topic={topic}>
+                      {topic}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
+
+          {articles.length > 0 ? (
+            <>
+              <ul class="cla-articles__list" data-articles-list>
+                {
+                  articles.map((article, i) => (
+                    <li>
+                      <article
+                        class={`cla-article${article.featured ? ' cla-article--featured' : ''}`}
+                        data-category={article.category}
+                        data-article-index={i}
+                        hidden={i >= ARTICLES_PAGE_SIZE}
+                      >
+                        <div class="cla-article__meta">
+                          <p class="cla-article__category">{article.category}</p>
+                          {article.publishedAt && <time datetime={article.publishedAt}>{article.publishedAt}</time>}
+                        </div>
+                        {article.title ? (
+                          <div class="cla-article__body">
+                            <h3 class="cla-article__title">
+                              <a href={article.href ?? '#'}>{article.title}</a>
+                            </h3>
+                            {article.excerpt && <p class="cla-article__excerpt">{article.excerpt}</p>}
+                          </div>
+                        ) : (
+                          <div class="cla-article__placeholder" aria-hidden="true">
+                            <span class="cla-verify-badge">ČLÁNEK — PLACEHOLDER</span>
+                            <span class="cla-article__line cla-article__line--title" style={`width:${article.titleLineWidth}%`} />
+                            <div class="cla-article__lines">
+                              {article.excerptLineWidths.map((w) => (
+                                <span class="cla-article__line" style={`width:${w}%`} />
+                              ))}
+                            </div>
+                            {!article.title && <span class="sr-only">Článek bude doplněn</span>}
+                          </div>
+                        )}
+                      </article>
+                    </li>
+                  ))
+                }
+              </ul>
+
+              {articles.length > ARTICLES_PAGE_SIZE && (
+                <button type="button" class="cla-articles__more" data-articles-more>
+                  Zobrazit další články
+                </button>
+              )}
+
+              {/* Stav bez výsledku po výběru tématu — pojistka (zadání §7).
+                  Témata bez článků se do filtru výše vůbec nepřidávají, takže
+                  na tenhle blok běžný uživatel nenarazí. */}
+              <div class="cla-empty cla-empty--filtered" data-empty-filtered hidden role="status">
+                {/* NOVÁ COPY — ČEKÁ NA SCHVÁLENÍ */}
+                <p class="cla-empty__heading">K&nbsp;tomuto tématu zatím žádný článek není.</p>
+                <p class="cla-empty__text">Zkuste jiné téma, nebo se&nbsp;podívejte na&nbsp;všechny publikované články.</p>
+                <button type="button" class="cla-text-link" data-reset-filter>
+                  Zobrazit všechny články
+                </button>
+              </div>
+            </>
+          ) : (
+            <div class="cla-empty" role="status">
+              {/* NOVÁ COPY — ČEKÁ NA SCHVÁLENÍ */}
+              <p class="cla-empty__heading">Články teprve připravuji.</p>
+              <p class="cla-empty__text">
+                První texty brzy přidám. Zatím si můžete prohlédnout služby nebo rovnou domluvit nezávaznou
+                konzultaci.
+              </p>
+              <div class="cla-empty__actions">
+                <a class="cla-text-link" href="/sluzby">Zobrazit služby</a>
+                <a class="cla-text-link" href="/#kontakt">Nezávazná konzultace</a>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <section class="cla-chapter cla-chapter--sluzby" aria-labelledby="sluzby-heading">
+      <div class="cla-chapter__bar cla-chapter__bar--muted" data-reveal data-route-target="sluzby">
+        <p>Služby</p>
+      </div>
+
+      <div class="cla-chapter__content">
+        <div class="cla-chapter__top">
+          <div class="cla-chapter__lead-col" data-reveal>
+            <h2 id="sluzby-heading" class="cla-h2--std">Potřebujete vyřešit konkrétní situaci?</h2>
+          </div>
+          <div class="cla-chapter__support-col" data-reveal>
+            <p class="cla-support__text">
+              Článek vám může pomoci zorientovat se. Pokud chcete propočítat vlastní možnosti, zkontrolovat
+              současné nastavení nebo připravit další postup, můžeme se&nbsp;podívat přímo na&nbsp;vaši situaci.
+            </p>
+            <a class="cla-text-link" href="/sluzby">Zobrazit služby</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cla-closing" aria-labelledby="cla-closing-heading">
+      <div class="cla-closing__glow" aria-hidden="true"></div>
+
+      <div class="cla-closing__grid">
+        <h2 id="cla-closing-heading" data-reveal>Pojďme se&nbsp;podívat na&nbsp;vaši konkrétní otázku.</h2>
+
+        <div class="cla-closing__body" data-reveal>
+          <p>
+            Ať už řešíte bydlení, současné smlouvy nebo další finanční rozhodnutí, na&nbsp;první konzultaci si
+            ujasníme vaši situaci a&nbsp;další postup.
+          </p>
+
+          <div class="cla-closing__actions">
+            <a class="cla-cta cla-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="cla-phone cla-phone--dark" href="tel:+420775217721">
+              <svg class="cla-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.cla');
+  const routeWrap = document.querySelector('.cla__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.cla__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.cla-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.cla-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.cla-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.cla-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      clanky: main.querySelector('[data-route-target="clanky"]'),
+      sluzby: main.querySelector('[data-route-target="sluzby"]'),
+    } as const;
+
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_MAX_LENGTH = 100;
+    const HERO_ENTRY_MIN_LENGTH = 40;
+    const HERO_ENTRY_GAP_BEFORE_BEND = 20;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number, entryEndY: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${entryEndY} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      let bendY = 260;
+      if (heroTextEl) {
+        const textRect = heroTextEl.getBoundingClientRect();
+        const textBottom = textRect.bottom - mainRect.top;
+        bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+      }
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.cla__route-path:not(.cla__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.cla__route-path--dark') as SVGPathElement | null;
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--cla-shift', `${shift}px`);
+        }
+
+        if (isHero) {
+          const available = bendY - r - HERO_ENTRY_START_Y - HERO_ENTRY_GAP_BEFORE_BEND;
+          const entryLength = Math.min(HERO_ENTRY_MAX_LENGTH, Math.max(HERO_ENTRY_MIN_LENGTH, available));
+          const entryEndY = HERO_ENTRY_START_Y + entryLength;
+
+          const gradient = svg.querySelector('linearGradient');
+          if (gradient) {
+            gradient.setAttribute('y1', String(HERO_ENTRY_START_Y));
+            gradient.setAttribute('y2', String(entryEndY));
+          }
+
+          const entryPath = svg.querySelector('.cla__route-entry') as SVGPathElement | null;
+          if (entryPath) entryPath.setAttribute('d', `M ${entryX} ${HERO_ENTRY_START_Y} L ${entryX} ${entryEndY}`);
+
+          if (lightPath) lightPath.setAttribute('d', heroArcPath(entryX, axisScaled, r, bendY, closingTop, entryEndY));
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.cla__notch');
+          const dot = group.querySelector('.cla__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.cla__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.cla__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+
+  // Hero CTA „Procházet články" — plynulý přesun na výpis na téže stránce.
+  const scrollCta = document.querySelector('[data-scroll-target]');
+  if (scrollCta) {
+    scrollCta.addEventListener('click', (e) => {
+      const href = scrollCta.getAttribute('href');
+      if (!href || !href.startsWith('#')) return;
+      const target = document.querySelector(href);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+  }
+
+  // Filtr témat — čistě klientský toggle viditelnosti podle `data-category`.
+  // Připraveno pro budoucí data (zadání §4/§15) — s prázdným `articles`
+  // polem se `<nav>` vůbec nevykresluje, takže se dnes reálně nespouští.
+  const topicsNav = document.querySelector('.cla-topics');
+  const articlesList = document.querySelector('[data-articles-list]');
+  const emptyFiltered = document.querySelector('[data-empty-filtered]');
+  if (topicsNav && articlesList) {
+    const buttons = Array.from(topicsNav.querySelectorAll('.cla-topics__btn')) as HTMLButtonElement[];
+    const items = Array.from(articlesList.querySelectorAll('.cla-article')) as HTMLElement[];
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const topic = btn.dataset.topic ?? '';
+        buttons.forEach((b) => {
+          const isActive = b === btn;
+          b.classList.toggle('is-active', isActive);
+          if (isActive) b.setAttribute('aria-current', 'true');
+          else b.removeAttribute('aria-current');
+        });
+
+        let visibleCount = 0;
+        items.forEach((item) => {
+          const matches = !topic || item.dataset.category === topic;
+          item.hidden = !matches;
+          if (matches) visibleCount += 1;
+        });
+
+        if (emptyFiltered) (emptyFiltered as HTMLElement).hidden = visibleCount > 0;
+      });
+    });
+  }
+
+  const resetFilterBtn = document.querySelector('[data-reset-filter]');
+  if (resetFilterBtn) {
+    resetFilterBtn.addEventListener('click', () => {
+      const allBtn = document.querySelector('.cla-topics__btn[data-topic=""]') as HTMLButtonElement | null;
+      if (allBtn) allBtn.click();
+    });
+  }
+
+  // „Zobrazit další články" — postupné odkrývání dalších (skutečných)
+  // položek stejného pole; se strukturou připravenou na budoucí obsah.
+  // Stejná hodnota jako `ARTICLES_PAGE_SIZE` ve frontmatteru — tenhle
+  // `<script>` běží v samostatném kontextu bez přístupu k frontmatter
+  // konstantám, proto zapsáno znovu, ne importováno.
+  const ARTICLES_INCREMENT = 6;
+  const moreBtn = document.querySelector('[data-articles-more]') as HTMLButtonElement | null;
+  if (moreBtn && articlesList) {
+    moreBtn.addEventListener('click', () => {
+      const hiddenItems = Array.from(articlesList.querySelectorAll('.cla-article[hidden]'));
+      hiddenItems.slice(0, ARTICLES_INCREMENT).forEach((el) => el.removeAttribute('hidden'));
+      const remaining = articlesList.querySelectorAll('.cla-article[hidden]').length;
+      if (remaining === 0) moreBtn.hidden = true;
+    });
+  }
+</script>
+
+<style>
+  .cla {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .cla__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .cla__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .cla__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .cla__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .cla__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .cla__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .cla__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .cla__route-svg--tablet,
+  .cla__route-svg--laptop,
+  .cla__route-svg--desktop {
+    display: none;
+  }
+
+  .cla :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .cla-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .cla-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .cla-cta:active {
+    transform: translateY(1px);
+  }
+
+  .cla-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .cla-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .cla-phone:hover {
+    color: var(--emerald);
+  }
+
+  .cla-phone--dark {
+    color: var(--white);
+  }
+
+  .cla-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .cla-hero {
+    padding: 64px 24px 0;
+  }
+
+  .cla-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 640px;
+  }
+
+  .cla-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .cla-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .cla-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cla-hero__actions .cla-cta {
+    width: 100%;
+  }
+
+  .cla-hero__actions .cla-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .cla-chapter {
+    padding: 56px 24px;
+  }
+
+  .cla-chapter--clanky {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .cla-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .cla-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--cla-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .cla-chapter--clanky .cla-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .cla-chapter__bar--muted p {
+    font-weight: 700;
+    color: var(--text-nav);
+  }
+
+  .cla-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .cla-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cla-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .cla-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cla-chapter__lead-col h2,
+  .cla-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .cla-h2--dominant {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+    font-size: 34px;
+  }
+
+  .cla-h2--std {
+    font-size: 30px;
+  }
+
+  .cla-support__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .cla-text-link {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .cla-text-link:hover {
+    color: var(--emerald-hover);
+  }
+
+  /* ---------- Badge „placeholder" (sdíleno se /recenze) ---------- */
+
+  .cla-verify-badge {
+    display: inline-block;
+    width: fit-content;
+    padding: 3px 8px;
+    border-radius: var(--radius-tag);
+    background: var(--pending-review-bg);
+    color: var(--pending-review);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Výpis článků ---------- */
+
+  .cla-articles {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* --- Filtr témat --- */
+
+  .cla-topics__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .cla-topics__btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius-nav-cta);
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: border-color var(--duration-hover) var(--ease-out), background-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+  }
+
+  .cla-topics__btn:hover {
+    border-color: var(--navy);
+  }
+
+  .cla-topics__btn.is-active {
+    border-color: var(--navy);
+    background: var(--navy);
+    color: var(--white);
+  }
+
+  /* --- Prázdné stavy --- */
+
+  .cla-empty {
+    padding: 32px 24px;
+    box-sizing: border-box;
+    border-radius: var(--radius-panel);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cla-empty__heading {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .cla-empty__text {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    max-width: 480px;
+  }
+
+  .cla-empty__actions {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* --- Řádky článků --- */
+
+  .cla-articles__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cla-article {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 22px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  li:first-child > .cla-article {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .cla-article__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cla-article__category {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .cla-article__meta time {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .cla-article__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cla-article__title {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .cla-article__title a {
+    color: var(--navy);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .cla-article__title a:hover {
+    color: var(--emerald-hover);
+  }
+
+  .cla-article__excerpt {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  /* Featured — vypnutá varianta (žádná položka `featured: true` v poli),
+     kompozice ale musí unést první, větší řádek s titulkem+perexem přes
+     obě kolony (zadání §4/§6). */
+  .cla-article--featured .cla-article__title {
+    font-size: 24px;
+  }
+
+  .cla-article--featured .cla-article__excerpt {
+    font-size: 17px;
+  }
+
+  .cla-article__placeholder {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cla-article__line {
+    display: block;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--rule);
+  }
+
+  .cla-article__line--title {
+    height: 16px;
+  }
+
+  .cla-article__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cla-articles__more {
+    align-self: flex-start;
+    height: 48px;
+    padding-inline: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-btn);
+    background: var(--white);
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+  }
+
+  .cla-articles__more:hover {
+    border-color: var(--emerald);
+    color: var(--emerald);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .cla-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .cla-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .cla-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .cla-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .cla-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .cla-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .cla-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cla-closing__actions .cla-cta {
+    width: 100%;
+  }
+
+  .cla-closing__actions .cla-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .cla__route-svg--mobile {
+      display: none;
+    }
+
+    .cla__route-svg--tablet {
+      display: block;
+    }
+
+    .cla-chapter__bar p {
+      padding-left: calc(64px + var(--cla-shift, 0px));
+    }
+
+    .cla-hero {
+      padding: 88px 40px 0;
+    }
+
+    .cla-hero__text {
+      gap: 20px;
+    }
+
+    .cla-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .cla-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .cla-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .cla-hero__actions .cla-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .cla-hero__actions .cla-phone {
+      height: auto;
+    }
+
+    .cla-chapter--clanky {
+      margin-top: 80px;
+      padding: 72px 40px;
+    }
+
+    .cla-chapter {
+      padding: 72px 40px;
+    }
+
+    .cla-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .cla-h2--dominant {
+      font-size: 44px;
+    }
+
+    .cla-h2--std {
+      font-size: 40px;
+    }
+
+    .cla-support__text {
+      font-size: 18px;
+    }
+
+    .cla-text-link {
+      font-size: 17px;
+    }
+
+    .cla-chapter__top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .cla-chapter--clanky .cla-chapter__lead-col,
+    .cla-chapter--sluzby .cla-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .cla-chapter--clanky .cla-chapter__support-col,
+    .cla-chapter--sluzby .cla-chapter__support-col {
+      flex: 1;
+    }
+
+    .cla-empty {
+      padding: 40px;
+    }
+
+    .cla-empty__heading {
+      font-size: 21px;
+    }
+
+    .cla-empty__text {
+      font-size: 16.5px;
+    }
+
+    .cla-empty__actions {
+      flex-direction: row;
+      gap: 28px;
+      margin-top: 8px;
+    }
+
+    .cla-article__title {
+      font-size: 20px;
+    }
+
+    .cla-article__excerpt {
+      font-size: 16.5px;
+    }
+
+    .cla-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    .cla-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .cla-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .cla-closing__body p {
+      font-size: 17px;
+    }
+
+    .cla-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .cla-closing__actions .cla-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .cla-closing__actions .cla-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .cla__route-svg--tablet {
+      display: none;
+    }
+
+    .cla__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .cla-chapter__bar p {
+      padding-left: calc(56px + var(--cla-shift, 0px));
+    }
+
+    .cla-hero__text {
+      max-width: 640px;
+      gap: 18px;
+    }
+
+    .cla-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .cla-hero__lead {
+      font-size: 19px;
+    }
+
+    .cla-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .cla-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .cla-chapter--clanky {
+      margin-top: 100px;
+      padding: 88px 96px;
+    }
+
+    .cla-chapter {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 56px;
+    }
+
+    .cla-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .cla-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .cla-chapter__content {
+      flex: 1;
+    }
+
+    .cla-h2--dominant {
+      font-size: 50px;
+    }
+
+    .cla-h2--std {
+      font-size: 44px;
+    }
+
+    .cla-chapter__top {
+      gap: 60px;
+    }
+
+    .cla-chapter--clanky .cla-chapter__lead-col,
+    .cla-chapter--sluzby .cla-chapter__lead-col {
+      width: 540px;
+    }
+
+    .cla-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .cla-chapter__support-col {
+      flex: 1;
+    }
+
+    /* Řádkový výpis: vlevo kategorie+datum, vpravo titulek+perex — stejný
+       vzor jako `.rec-review` na /recenze (pevný levý sloupec + 1fr),
+       stacked na tabletu/mobilu (pořadí titulek → perex → metadata,
+       zadání §11), přepnuto na dvousloupcový grid až tady. */
+    .cla-article {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      column-gap: 40px;
+      align-items: start;
+    }
+
+    .cla-article__meta {
+      grid-column: 1;
+      order: 2;
+    }
+
+    .cla-article__body,
+    .cla-article__placeholder {
+      grid-column: 2;
+      order: 1;
+    }
+
+    .cla-article--featured {
+      display: flex;
+    }
+
+    .cla-article--featured .cla-article__meta {
+      order: 1;
+    }
+
+    .cla-article--featured .cla-article__body,
+    .cla-article--featured .cla-article__placeholder {
+      order: 2;
+    }
+
+    .cla-empty__text {
+      max-width: 560px;
+    }
+
+    .cla-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .cla-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .cla-closing__glow {
+      height: 320px;
+    }
+
+    .cla-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .cla-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .cla__route-svg--laptop {
+      display: none;
+    }
+
+    .cla__route-svg--desktop {
+      display: block;
+    }
+
+    .cla__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .cla-hero,
+    .cla-chapter,
+    .cla-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .cla-chapter__bar p {
+      padding-left: calc(76px + var(--cla-shift, 0px));
+    }
+
+    .cla-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .cla-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .cla-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .cla-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .cla-hero__actions .cla-cta {
+      height: 56px;
+    }
+
+    .cla-chapter--clanky {
+      margin-top: 120px;
+      padding: 88px 100px;
+    }
+
+    .cla-chapter {
+      padding: 88px 100px;
+      gap: 56px;
+    }
+
+    .cla-chapter__bar {
+      width: 240px;
+    }
+
+    .cla-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .cla-h2--dominant {
+      font-size: 56px;
+    }
+
+    .cla-h2--std {
+      font-size: 48px;
+    }
+
+    .cla-chapter--clanky .cla-chapter__lead-col,
+    .cla-chapter--sluzby .cla-chapter__lead-col,
+    .cla-chapter__lead-col {
+      width: 600px;
+    }
+
+    .cla-article {
+      grid-template-columns: 240px 1fr;
+      column-gap: 48px;
+    }
+
+    .cla-closing {
+      padding-block: 96px;
+    }
+
+    .cla-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .cla-closing__glow {
+      height: 340px;
+    }
+
+    .cla-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+</style>

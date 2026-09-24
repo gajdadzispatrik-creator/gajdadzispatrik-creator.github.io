@@ -1,0 +1,1123 @@
+---
+/**
+ * Footer — Uzavření trasy (varianta 20a, po dvou úpravách viz §3 zadání).
+ * Zdroj: úkol pro Claude Code „Footer (Uzavření trasy)“, §1–§16. Poslední
+ * prvek stránky, řadí se pod ContactSection.astro.
+ *
+ * Dvě schválené úpravy proti content-homepage.md §13:
+ * 1) „BEplan finanční plánování“ v Projektech a profesních vazbách vynecháno
+ *    (jen tři položky).
+ * 2) Blok „Provozovatel webu“ (IČO, Hlavní třída) ve footeru není — patří na
+ *    samostatnou stránku s regulatorními informacemi.
+ * Navigace používá „Recenze“, ne „Reference“ (schváleno, §4 zadání).
+ *
+ * ODCHYLKA (technický požadavek, §13 zadání to sám vyžaduje — stejná třída
+ * chyby jako `Odchylka 2` v ContactSection.astro/CasesSection.astro):
+ * §6–§9 dávají konkrétní `top`/`left` souřadnice pro tři pásma. Sekce je
+ * postavená jako svislý tok (`margin`/`gap`, ne pevný `top`) — výška plyne
+ * z obsahu. Odsazení textové značky od osy trasy používá STEJNOU konvenci
+ * jako všude jinde na webu (56 px desktop/notebook/tablet, 32 px mobil),
+ * ne doslovný jednorázový výpočet ze zadání (212/186/118/96) — ten byl jen
+ * vedlejším produktem statického příkladu trasy v zadání. Zakončení trasy
+ * (lom, vodorovný segment, tečka) i obě dělicí linky se naopak POVINNĚ
+ * dopočítávají z REÁLNÉ pozice značky/pásem (`getBoundingClientRect`) — přesně
+ * podle §13 „Nejdůležitější technické pravidlo“ — takže na zvolení fixního
+ * odsazení značky nezáleží, geometrie trasy se mu vždy přizpůsobí.
+ *
+ * Stav URL adres (aktualizováno 24. 8. 2026 při kontrole odkazů na celém webu):
+ * - Tři právní stránky existují a jsou propojené: `/zpracovani-osobnich-udaju`,
+ *   `/cookies`, `/regulatorni-informace` (LegalLayout.astro + src/data/legal/).
+ * - Mint reality & finance, Hypotéka Ostrava a Registr ČNB ověřeny přímým
+ *   prohlížením webu a propojeny (`https://www.mintreality.cz/`,
+ *   `https://www.hypotekaostrava.cz/`, `https://www.cnb.cz/cnb/jerrs`).
+ * - „Kontakt“ v navigaci vede na `/#kontakt` (kotva `ContactSection.astro`
+ *   `id="kontakt"`), ne na neexistující `/kontakt`.
+ * - Facebook a Instagram doplněny (25. 8. 2026):
+ *   https://www.facebook.com/patrik.gajdadzis/, https://www.instagram.com/patrikgajdadzis/.
+ *   Google odkaz aktualizován na https://share.google/cjOKhgPI7p1vA2HI9.
+ * - AKTUALIZOVÁNO (úkol „Předspouštěcí P0 technické dotažení“): `serviceLinks`
+ *   propojeny na 5 hotových detailních stránek (`/sluzby/*`) — dřív `href:
+ *   null`, ačkoli stránky už existovaly (nalezeno auditem 9. 9. 2026).
+ * - `/clanky` dočasně odstraněna z `navLinks` (skutečné články zatím nejsou
+ *   připravené, viz zadání úkolu výše) — stránka samotná dál existuje
+ *   (`src/pages/clanky.astro`, `noindex`), jen bez veřejného odkazu odsud.
+ * - Pořád chybí: Kariéra — `href: null` u této položky je proto stále správně.
+ */
+interface LinkItem {
+  label: string;
+  href: string | null;
+  shortLabel?: string;
+}
+
+const navLinks: LinkItem[] = [
+  { label: 'Služby', href: '/sluzby' },
+  { label: 'Jak pracuji', href: '/pristup' },
+  { label: 'Recenze', href: '/recenze' },
+  { label: 'O mně', href: '/o-mne' },
+  { label: 'Kariéra', href: null },
+  { label: 'Kontakt', href: '/#kontakt' },
+];
+
+const serviceLinks: LinkItem[] = [
+  { label: 'Finanční plánování', href: '/sluzby/financni-plan' },
+  { label: 'Hypotéky', href: '/sluzby/hypoteky' },
+  { label: 'Investice', href: '/sluzby/investice' },
+  { label: 'Pojištění', href: '/sluzby/pojisteni' },
+  { label: 'Penze', href: '/sluzby/penze' },
+];
+
+const projectLinks: LinkItem[] = [
+  { label: 'Mint reality & finance', href: 'https://www.mintreality.cz/' },
+  { label: 'Hypotéka Ostrava', href: 'https://www.hypotekaostrava.cz/' },
+  { label: 'Registr České národní banky', shortLabel: 'Registr ČNB', href: 'https://www.cnb.cz/cnb/jerrs' },
+];
+
+const legalLinks = [
+  { label: 'Zpracování osobních údajů', href: '/zpracovani-osobnich-udaju' as string | null, isButton: false },
+  { label: 'Cookies', href: '/cookies' as string | null, isButton: false },
+  { label: 'Regulatorní informace', href: '/regulatorni-informace' as string | null, isButton: false },
+  { label: 'Nastavení cookies', href: null as string | null, isButton: true },
+];
+
+const socialLinks: LinkItem[] = [
+  { label: 'Google', href: 'https://share.google/cjOKhgPI7p1vA2HI9' },
+  { label: 'Facebook', href: 'https://www.facebook.com/patrik.gajdadzis/' },
+  { label: 'Instagram', href: 'https://www.instagram.com/patrikgajdadzis/' },
+];
+
+// Jednobarevné (currentColor) glyfy — žádná nová barva, jen bílá s
+// průhledností stejně jako zbytek footeru (§24 CLAUDE.md zakazuje nové barvy).
+const socialIcons: Record<string, string> = {
+  Google:
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M21.35 11.1h-9.18v2.98h5.4c-.23 1.5-1.7 4.4-5.4 4.4-3.25 0-5.9-2.7-5.9-6s2.65-6 5.9-6c1.85 0 3.09.79 3.8 1.47l2.6-2.5C17.05 3.9 14.7 2.9 12.17 2.9 6.9 2.9 2.65 7.1 2.65 12.34s4.25 9.44 9.52 9.44c5.5 0 9.14-3.86 9.14-9.3 0-.63-.07-1.1-.16-1.58z" fill="currentColor"/></svg>',
+  Facebook:
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M14.5 8.3h1.9V5.1c-.33-.05-1.47-.15-2.79-.15-2.76 0-4.65 1.73-4.65 4.9v2.5H6.1v3.6h2.86V22h3.72v-6.05h2.75l.44-3.6h-3.19V9.86c0-1.04.28-1.56 1.82-1.56z" fill="currentColor"/></svg>',
+  Instagram:
+    '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="3.3" y="3.3" width="17.4" height="17.4" rx="5" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4.1" stroke="currentColor" stroke-width="1.6"/><circle cx="17.15" cy="6.85" r="1.05" fill="currentColor"/></svg>',
+};
+---
+
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__band footer__top">
+      <div class="footer__identity">
+        <p class="footer__brand footer__reveal-up">Patrik Gajdadzis</p>
+        <p class="footer__desc footer__reveal-up">Osobní finanční partner pro&nbsp;důležitá rozhodnutí.</p>
+      </div>
+
+      <dl class="footer__contact footer__reveal-up">
+        <div class="footer__contact-item">
+          <dt>Telefon</dt>
+          <dd><a href="tel:+420775217721">+420 775 217 721</a></dd>
+        </div>
+        <div class="footer__contact-item">
+          <dt>E-mail</dt>
+          <dd><a href="mailto:patrik@mintfinance.cz">patrik@mintfinance.cz</a></dd>
+        </div>
+        <div class="footer__contact-item">
+          <dt>Konzultace</dt>
+          <dd><address>17. listopadu 599/30, Ostrava-Poruba</address></dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="footer__band footer__columns">
+      <nav class="footer__col footer__col--nav" aria-label="Navigace">
+        <p class="footer__col-label">Navigace</p>
+        <ul>
+          {navLinks.map((link) => (
+            <li>
+              {link.href ? (
+                <a href={link.href}>{link.label}</a>
+              ) : (
+                <>
+                  <span>{link.label}</span>
+                  <span class="sr-only">(odkaz bude doplněn)</span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <nav class="footer__col footer__col--services" aria-label="Služby">
+        <p class="footer__col-label">Služby</p>
+        <ul>
+          {serviceLinks.map((link) => (
+            <li>
+              {link.href ? (
+                <a href={link.href}>{link.label}</a>
+              ) : (
+                <>
+                  <span>{link.label}</span>
+                  <span class="sr-only">(odkaz bude doplněn)</span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <nav class="footer__col footer__col--projects" aria-label="Projekty a profesní vazby">
+        <p class="footer__col-label">Projekty a&nbsp;profesní vazby</p>
+        <ul>
+          {projectLinks.map((link) => (
+            <li>
+              {link.href ? (
+                <a class="footer__ext" href={link.href} target="_blank" rel="noopener noreferrer">
+                  <span class={link.shortLabel ? 'footer__col-full' : undefined}>{link.label}</span>
+                  {link.shortLabel && <span class="footer__col-short">{link.shortLabel}</span>}
+                  <svg class="footer__ext-icon" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+                    <path d="M4 2h6v6M10 2 2 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                  <span class="sr-only"> (externí web)</span>
+                </a>
+              ) : (
+                <>
+                  <span class="footer__ext">
+                    <span class={link.shortLabel ? 'footer__col-full' : undefined}>{link.label}</span>
+                    {link.shortLabel && <span class="footer__col-short">{link.shortLabel}</span>}
+                    <svg class="footer__ext-icon" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+                      <path d="M4 2h6v6M10 2 2 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                  </span>
+                  <span class="sr-only">(odkaz bude doplněn)</span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <nav class="footer__col footer__col--legal" aria-label="Právní odkazy">
+        <p class="footer__col-label">Právní odkazy</p>
+        <ul>
+          {legalLinks.map((link) => (
+            <li>
+              {link.isButton ? (
+                <button type="button" id="footer-cookie-settings">{link.label}</button>
+              ) : link.href ? (
+                <a href={link.href}>{link.label}</a>
+              ) : (
+                <>
+                  <span>{link.label}</span>
+                  <span class="sr-only">(odkaz bude doplněn)</span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+        <!-- „Nastavení cookies“ otevírá panel z CookieConsent.astro (viz jeho script — naslouchá click na #footer-cookie-settings). -->
+      </nav>
+    </div>
+
+    <div class="footer__band footer__bottom">
+      <nav class="footer__social" aria-label="Sociální profily">
+        <ul>
+          {socialLinks.map((link) => (
+            <li>
+              {link.href ? (
+                <a class="footer__social-link" href={link.href} target="_blank" rel="noopener noreferrer" aria-label={`${link.label} (externí web)`}>
+                  <span class="footer__social-icon" set:html={socialIcons[link.label]} />
+                </a>
+              ) : (
+                <span class="footer__social-link">
+                  <span class="footer__social-icon" set:html={socialIcons[link.label]} />
+                  <span class="sr-only">{link.label} (odkaz bude doplněn)</span>
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <p class="footer__copyright"><small>© Patrik Gajdadzis. Všechna práva vyhrazena.</small></p>
+    </div>
+  </div>
+
+  <!-- Desktop 1400+ (kalibrace 1440). Vstup x=120 (= reálný výstup ContactSection), radius 28. -->
+  <svg
+    class="footer__route footer__route--desktop"
+    viewBox="0 0 1440 700"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-entry="120"
+    data-radius="28"
+    data-gap="22"
+  >
+    <path
+      class="footer__route-path"
+      d="M 120 -20 V 156 A 28 28 0 0 0 148 184 H 190"
+      fill="none"
+      stroke="var(--line-on-dark)"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="footer__divider footer__divider--1" x1="120" y1="330" x2="1320" y2="330"></line>
+    <line class="footer__divider footer__divider--2" x1="120" y1="620" x2="1320" y2="620"></line>
+    <circle class="footer__dot" cx="190" cy="184" r="3.5" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!-- Notebook 1200–1399 (kalibrace 1366). Vstup x=96, radius 28 — stejná logika jako desktop. -->
+  <svg
+    class="footer__route footer__route--laptop"
+    viewBox="0 0 1366 700"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-entry="96"
+    data-radius="28"
+    data-gap="22"
+  >
+    <path
+      class="footer__route-path"
+      d="M 96 -20 V 146 A 28 28 0 0 0 124 174 H 164"
+      fill="none"
+      stroke="var(--line-on-dark)"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="footer__divider footer__divider--1" x1="96" y1="312" x2="1270" y2="312"></line>
+    <line class="footer__divider footer__divider--2" x1="96" y1="580" x2="1270" y2="580"></line>
+    <circle class="footer__dot" cx="164" cy="174" r="3.5" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!-- Tablet 768–1199 (kalibrace 834). Vstup x=40, radius 22. -->
+  <svg
+    class="footer__route footer__route--tablet"
+    viewBox="0 0 834 900"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-entry="40"
+    data-radius="22"
+    data-gap="22"
+  >
+    <path
+      class="footer__route-path"
+      d="M 40 -20 V 100 A 22 22 0 0 0 62 122 H 96"
+      fill="none"
+      stroke="var(--line-on-dark)"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="footer__divider footer__divider--1" x1="40" y1="270" x2="794" y2="270"></line>
+    <line class="footer__divider footer__divider--2" x1="40" y1="560" x2="794" y2="560"></line>
+    <circle class="footer__dot" cx="96" cy="122" r="3.2" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!-- Mobil <768 (kalibrace 390). Vstup x=24, radius 18, mezera značky 20 px. -->
+  <svg
+    class="footer__route footer__route--mobile"
+    viewBox="0 0 390 1200"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-entry="24"
+    data-radius="18"
+    data-gap="20"
+  >
+    <path
+      class="footer__route-path"
+      d="M 24 -20 V 92 A 18 18 0 0 0 42 110 H 76"
+      fill="none"
+      stroke="var(--line-on-dark)"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="footer__divider footer__divider--1" x1="24" y1="220" x2="366" y2="220"></line>
+    <line class="footer__divider footer__divider--2" x1="24" y1="480" x2="366" y2="480"></line>
+    <circle class="footer__dot" cx="76" cy="110" r="3.2" fill="var(--emerald)"></circle>
+  </svg>
+</footer>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const footer = document.querySelector('.footer');
+  if (footer) {
+    const allSvgs = Array.from(footer.querySelectorAll('.footer__route')) as SVGSVGElement[];
+    const brand = footer.querySelector('.footer__brand') as HTMLElement | null;
+    const top = footer.querySelector('.footer__top') as HTMLElement | null;
+    const columns = footer.querySelector('.footer__columns') as HTMLElement | null;
+
+    const getActiveSvg = (): SVGSVGElement | undefined =>
+      allSvgs.find((svg) => getComputedStyle(svg).display !== 'none');
+
+    let currentSvg: SVGSVGElement | undefined;
+    let path: SVGPathElement | null = null;
+    let dividers: SVGLineElement[] = [];
+    let dot: SVGCircleElement | null = null;
+
+    const bindActiveSvg = (svg: SVGSVGElement) => {
+      currentSvg = svg;
+      path = svg.querySelector('.footer__route-path');
+      dividers = Array.from(svg.querySelectorAll('.footer__divider'));
+      dot = svg.querySelector('.footer__dot');
+    };
+
+    // Getter funkce místo přímého čtení sdílených `let` v pozdějších closures
+    // — stejný důvod jako v ContactSection.astro (TS jinak zúží typ na `never`).
+    const getPath = (): SVGPathElement | null => path;
+    const getDot = (): SVGCircleElement | null => dot;
+
+    /*
+     * Nejdůležitější technické pravidlo zadání (§13): `x` zakončení trasy se
+     * počítá ze SKUTEČNÉ levé hrany značky (−22/−20 px), ne z pevného čísla;
+     * `y` obou dělicích linek ze skutečné spodní hrany pásma nad nimi (+ ≥
+     * 30 px). Lom (bendY) je zvolen tak, aby tečka vyšla na svislém středu
+     * značky.
+     */
+    const syncRoute = () => {
+      const svg = getActiveSvg();
+      if (!svg) return;
+      if (svg !== currentSvg) bindActiveSvg(svg);
+      if (!brand || !top || !columns) return;
+
+      const svgRect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox.baseVal;
+      // Chybějící `svgRect.width === 0` byla dlouho zdokumentovaná, neopravená
+      // chyba (CLAUDE.md „SiteFooter.astro — drobná chyba nalezená při
+      // testování CookieConsent"): při `scaleX === 0` (SVG má na některých
+      // načteních přechodně nulovou šířku, než se layout ustálí) dělení níž
+      // vyrobí `Infinity`/`NaN` v `d` i v souřadnicích tečky — trasa/tečka
+      // pak dočasně skončí na jiném místě, než kde linka reálně končí.
+      // Opraveno 14. 9. 2026 po nahlášení uživatelem.
+      if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
+      const scaleY = svgRect.height / viewBox.height;
+      const scaleX = svgRect.width / viewBox.width;
+      svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+      const entryX = parseFloat(svg.dataset.entry ?? '0');
+      const r = parseFloat(svg.dataset.radius ?? '28');
+      const gap = parseFloat(svg.dataset.gap ?? '22');
+
+      const brandRect = brand.getBoundingClientRect();
+      const endXReal = brandRect.left - gap;
+      const endX = (endXReal - svgRect.left) / scaleX;
+      const bendYReal = brandRect.top + brandRect.height / 2;
+      const bendY = (bendYReal - svgRect.top) / scaleY;
+
+      if (path) {
+        const d = `M ${entryX} -20 V ${bendY - r} A ${r} ${r} 0 0 0 ${entryX + r} ${bendY} H ${endX}`;
+        path.setAttribute('d', d);
+      }
+      if (dot) {
+        dot.setAttribute('cx', String(endX));
+        dot.setAttribute('cy', String(bendY));
+      }
+
+      const topRect = top.getBoundingClientRect();
+      const columnsRect = columns.getBoundingClientRect();
+      const divider1Y = (topRect.bottom + 40 - svgRect.top) / scaleY;
+      const divider2Y = (columnsRect.bottom + 40 - svgRect.top) / scaleY;
+      if (dividers[0]) {
+        dividers[0].setAttribute('y1', String(divider1Y));
+        dividers[0].setAttribute('y2', String(divider1Y));
+      }
+      if (dividers[1]) {
+        dividers[1].setAttribute('y1', String(divider2Y));
+        dividers[1].setAttribute('y2', String(divider2Y));
+      }
+    };
+
+    const initialSvg = getActiveSvg();
+    if (initialSvg) bindActiveSvg(initialSvg);
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    // `font-display: swap` (fonts.css) — viz CLAUDE.md „Konvence: kontinuální
+    // linka, tečky a text“ bod 5.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(footer);
+      if (top) resizeObserver.observe(top);
+      if (columns) resizeObserver.observe(columns);
+      if (brand) resizeObserver.observe(brand);
+    }
+
+    if (!disableAnimation) {
+      const fadeUpEls = Array.from(footer.querySelectorAll('.footer__reveal-up'));
+      fadeUpEls.forEach((el) => el.classList.add('is-pending'));
+
+      let contentRevealed = false;
+      const revealContent = () => {
+        if (contentRevealed) return;
+        contentRevealed = true;
+        fadeUpEls.forEach((el) => {
+          el.classList.remove('is-pending');
+          el.classList.add('is-visible');
+        });
+      };
+
+      let mainLength = 0;
+      const dividerLengths = new Map<SVGLineElement, number>();
+      let dotThreshold = 1;
+
+      const measure = () => {
+        syncRoute();
+        const p = getPath();
+        if (p) {
+          mainLength = p.getTotalLength();
+          p.style.strokeDasharray = String(mainLength);
+        }
+        dividers.forEach((line) => {
+          const x1 = parseFloat(line.getAttribute('x1') ?? '0');
+          const x2 = parseFloat(line.getAttribute('x2') ?? '0');
+          const len = Math.abs(x2 - x1);
+          dividerLengths.set(line, len);
+          line.style.strokeDasharray = String(len);
+        });
+        const d = getDot();
+        if (p && d && mainLength > 0) {
+          const cx = parseFloat(d.getAttribute('cx') ?? '0');
+          const cy = parseFloat(d.getAttribute('cy') ?? '0');
+          let best = Infinity;
+          const steps = 1500;
+          for (let s = 0; s <= steps; s++) {
+            const l = (mainLength * s) / steps;
+            const pt = p.getPointAtLength(l);
+            const dist = Math.hypot(pt.x - cx, pt.y - cy);
+            if (dist < best) {
+              best = dist;
+              dotThreshold = l / mainLength;
+            }
+          }
+        }
+      };
+      measure();
+      const initialPath = getPath();
+      if (initialPath) initialPath.style.strokeDashoffset = String(mainLength);
+      dividers.forEach((line) => {
+        line.style.strokeDashoffset = String(dividerLengths.get(line) ?? 0);
+      });
+      const initialDot = getDot();
+      if (initialDot) initialDot.classList.add('is-pending');
+
+      let ticking = false;
+      const update = () => {
+        measure();
+        const rect = footer.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+        const currentPath = getPath();
+        if (currentPath) {
+          currentPath.style.strokeDashoffset = String(mainLength * (1 - progress));
+        }
+        dividers.forEach((line) => {
+          const len = dividerLengths.get(line) ?? 0;
+          line.style.strokeDashoffset = String(len * (1 - progress));
+        });
+        const currentDot = getDot();
+        if (currentDot && progress >= dotThreshold) {
+          currentDot.classList.remove('is-pending');
+          currentDot.classList.add('is-visible');
+        }
+
+        if (rect.top < vh) revealContent();
+
+        ticking = false;
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    }
+  }
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .footer {
+    position: relative;
+    overflow: hidden;
+    /* Mobil má strmější gradient (§9) — přepsáno v @media (max-width: 767px) níže. */
+    background: linear-gradient(172deg, #16324F 0%, #0F2747 46%, #0B1D36 100%);
+  }
+
+  .footer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    /* Mobil má jiný tvar světla (§9) — přepsáno v @media (max-width: 767px) níže. */
+    background: radial-gradient(38% 62% at 22% 22%, rgba(46, 152, 115, .1) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .footer__inner {
+    position: relative;
+    z-index: 1;
+    padding: 72px 0 40px;
+  }
+
+  .footer__band {
+    margin: 0 24px 0 calc(24 * 100% / 390);
+  }
+
+  .footer__reveal-up.is-pending {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .footer__reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  /* --- Pásmo 1: značka + kontakt --- */
+
+  .footer__top {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer__identity {
+    margin-left: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer__brand {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.03em;
+    font-size: 26px;
+    color: #FFFFFF;
+  }
+
+  .footer__desc {
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.5;
+    font-size: 16px;
+    max-width: 320px;
+    color: rgba(255, 255, 255, .66);
+  }
+
+  .footer__contact {
+    margin: 24px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .footer__contact-item dt {
+    margin: 0 0 4px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, .44);
+  }
+
+  .footer__contact-item dd {
+    margin: 0;
+    font-weight: 500;
+    font-size: 16px;
+    color: rgba(255, 255, 255, .8);
+  }
+
+  .footer__contact-item a {
+    font-weight: 600;
+    font-size: 19px;
+    color: #FFFFFF;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .footer__contact-item a:hover {
+    color: var(--emerald-light);
+  }
+
+  .footer__contact-pending {
+    font-weight: 500;
+    font-size: 15px;
+    color: rgba(255, 255, 255, .44);
+  }
+
+  .footer__contact address {
+    font-style: normal;
+    line-height: 1.5;
+  }
+
+  /* --- Pásmo 2: kolony odkazů --- */
+
+  .footer__columns {
+    margin-top: 56px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    row-gap: 28px;
+  }
+
+  .footer__col-label {
+    margin: 0 0 18px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, .44);
+  }
+
+  .footer__col ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+
+  .footer__col a,
+  .footer__col span:not(.sr-only):not(.footer__col-short),
+  .footer__col button {
+    font-weight: 400;
+    font-size: 16px;
+    color: rgba(255, 255, 255, .82);
+  }
+
+  .footer__col button {
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-sans);
+  }
+
+  .footer__col a {
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .footer__col a:hover {
+    color: #FFFFFF;
+  }
+
+  .footer__ext {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    font-size: 16px;
+    color: rgba(255, 255, 255, .82);
+  }
+
+  .footer__ext-icon {
+    flex: none;
+    width: 11px;
+    height: 11px;
+    color: rgba(255, 255, 255, .42);
+  }
+
+  .footer__col-short {
+    display: none;
+  }
+
+  .footer__col--projects {
+    grid-column: 1 / -1;
+  }
+
+  .footer__col--legal {
+    grid-column: 1 / -1;
+  }
+
+  /* --- Pásmo 3: copyright + profily --- */
+
+  .footer__bottom {
+    margin-top: 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .footer__social ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    gap: 10px;
+  }
+
+  .footer__social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    color: #FFFFFF;
+    opacity: .82;
+  }
+
+  .footer__social-icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
+
+  a.footer__social-link {
+    transition: opacity var(--duration-hover) var(--ease-out);
+  }
+
+  a.footer__social-link:hover {
+    opacity: 1;
+  }
+
+  .footer__copyright {
+    margin: 0;
+  }
+
+  .footer__copyright small {
+    font-size: 13.5px;
+    color: rgba(255, 255, 255, .5);
+  }
+
+  .footer :is(a, button):focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  /* --- Trasa --- */
+
+  .footer__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .footer__divider {
+    stroke: var(--line-on-dark);
+    stroke-opacity: .3;
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+
+  .footer__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .footer__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .footer__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .footer__route--tablet,
+  .footer__route--laptop,
+  .footer__route--desktop {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer__reveal-up {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .footer__route--mobile {
+      display: none;
+    }
+
+    .footer__route--tablet {
+      display: block;
+    }
+
+    .footer__inner {
+      padding: 80px 0 48px;
+    }
+
+    .footer__band {
+      margin: 0 40px 0 calc(40 * 100% / 834);
+    }
+
+    .footer__identity {
+      margin-left: 56px;
+    }
+
+    .footer__brand {
+      font-size: 28px;
+    }
+
+    .footer__contact {
+      flex-direction: row;
+      gap: 48px;
+      margin-top: 28px;
+      margin-left: 56px;
+    }
+
+    .footer__columns {
+      margin-top: 72px;
+      grid-template-columns: 340px 340px;
+      column-gap: 40px;
+      row-gap: 48px;
+    }
+
+    .footer__col--nav {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .footer__col--services {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .footer__col--projects {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .footer__col--legal {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .footer__bottom {
+      margin-top: 64px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .footer__route--tablet {
+      display: none;
+    }
+
+    .footer__route--laptop {
+      display: block;
+    }
+
+    .footer__inner {
+      padding: 88px 0 56px;
+    }
+
+    .footer__band {
+      margin: 0 96px 0 calc(96 * 100% / 1366);
+    }
+
+    .footer__top {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .footer__identity {
+      margin-left: 56px;
+    }
+
+    .footer__brand {
+      font-size: 30px;
+    }
+
+    .footer__contact {
+      flex-direction: row;
+      gap: 56px;
+      margin: 0;
+    }
+
+    .footer__columns {
+      margin-top: 88px;
+      display: flex;
+      flex-direction: row;
+      column-gap: 70px;
+      row-gap: 0;
+    }
+
+    .footer__col--nav,
+    .footer__col--services {
+      flex: none;
+      width: 220px;
+    }
+
+    .footer__col--projects {
+      flex: none;
+      width: 270px;
+      grid-column: auto;
+    }
+
+    .footer__col--legal {
+      flex: none;
+      width: 250px;
+      grid-column: auto;
+    }
+
+    .footer__col-short {
+      display: none;
+    }
+
+    .footer__bottom {
+      margin-top: 88px;
+      flex-direction: row-reverse;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .footer__route--laptop {
+      display: none;
+    }
+
+    .footer__route--desktop {
+      display: block;
+      /* Wide desktop: centrované designové plátno (CLAUDE.md). Patička
+         zůstává full-width tmavý pás, ale její TRASA musí na švu navazovat
+         na ContactSection (capnutá) — stejná poznámka jako u
+         `.faq__route--desktop` v FaqSection.astro. `syncRoute()` ve
+         <script> níže měří skutečnou šířku SVG (`getBoundingClientRect`),
+         takže `data-entry` beze změny kódu sedí i po tomhle stropu. */
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    /*
+     * Wide desktop: centrované designové plátno (CLAUDE.md). `.footer`
+     * zůstává full-width tmavý pás — `.footer__inner` (obsahový wrapper,
+     * existoval už dřív pro padding) dostává STEJNÝ strop jako trasa výše,
+     * jinak by značka/kolony zůstaly fixované na viewport místo na stage
+     * (dřívější implementace capovala jen `.footer__route--desktop`, ne
+     * `.footer__inner` — zjištěno 25. 8. 2026). `syncRoute()` ve <script>
+     * výše měří skutečnou pozici `.footer__brand`/`.footer__top`/
+     * `.footer__columns` (`getBoundingClientRect`), takže se na tenhle strop
+     * přizpůsobí automaticky beze změny kódu.
+     */
+    .footer__inner {
+      padding: 96px 0 64px;
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .footer__band {
+      margin: 0 120px 0 calc(120 * 100% / 1440);
+    }
+
+    .footer__identity {
+      margin-left: 56px;
+    }
+
+    .footer__brand {
+      font-size: 34px;
+    }
+
+    .footer__desc {
+      font-size: 17px;
+      max-width: 400px;
+    }
+
+    .footer__contact {
+      gap: 72px;
+    }
+
+    .footer__contact-item dd {
+      font-size: 16px;
+    }
+
+    .footer__columns {
+      margin-top: 96px;
+      column-gap: 60px;
+    }
+
+    .footer__col--nav,
+    .footer__col--services {
+      width: 240px;
+    }
+
+    .footer__col--projects {
+      width: 280px;
+    }
+
+    .footer__col--legal {
+      width: 260px;
+    }
+
+    .footer__col-label {
+      font-size: 11.5px;
+    }
+
+    .footer__col a,
+    .footer__col span:not(.sr-only):not(.footer__col-short),
+    .footer__col button,
+    .footer__ext {
+      font-size: 16px;
+    }
+
+    .footer__bottom {
+      margin-top: 96px;
+    }
+  }
+
+  /* ============ Mobil: vlastní gradient, zkrácený Registr ČNB ============ */
+  @media (max-width: 767px) {
+    .footer {
+      background: linear-gradient(174deg, #16324F 0%, #0F2747 44%, #0B1D36 100%);
+    }
+
+    .footer::before {
+      background: radial-gradient(64% 48% at 26% 18%, rgba(46, 152, 115, .1) 0%, rgba(46, 152, 115, 0) 74%);
+    }
+
+    .footer__col-full {
+      display: none;
+    }
+
+    .footer__col-short {
+      display: inline;
+    }
+  }
+</style>

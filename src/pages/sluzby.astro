@@ -1,0 +1,1878 @@
+---
+/**
+ * Stránka /sluzby — rozcestník služeb (koncept SVC-07, zkrácená osnova,
+ * šest sekcí). Zdroj pravdy pro rozvržení: úkol „Úkol pro Claude Code —
+ * podstránka /sluzby" (25. 8. 2026). Texty přesně podle
+ * `docs/content-subpages.md`, kapitola `/sluzby`.
+ *
+ * Kompoziční princip (§4 zadání): stránku organizují především KAPITOLY.
+ * Levý pruh 200–240 px (desktop/notebook) otevírá kapitolu popiskem
+ * (`<p>`, ne nadpis); obsah je vpravo. Na tabletu se pruh překlopí nad
+ * obsah přes celou šířku. Dekorativní trasa PŮVODNĚ (§4 originálního
+ * zadání) byla jen uzavřený oblouk v hero — od 25. 8. 2026 je to jedna
+ * souvislá trasa přes celou stránku až do zápatí, viz poznámka níže.
+ *
+ * Rozpory/mezery v zadání, které jsem řešil vlastním úsudkem (nahlášeno
+ * v souhrnu úkolu, ne mlčky):
+ * 1) Zadání (§5) zmiňuje „Položka Služby je aktivní" v hlavičce, ale §12
+ *    zakazuje měnit Header.astro, který žádný mechanismus pro aktivní
+ *    stav nemá (na webu zatím nikde nepotřeba). Header.astro jsem
+ *    NEUPRAVOVAL — zákaz v §12 má přednost před poznámkou v §5.
+ * 2) Velikost „pruhu" (popisek) kapitol Hypotéky/Finanční plán/Další
+ *    oblasti je v §4 daná jen jednou tabulkou bez rozlišení tier. Tablet
+ *    dává explicitní hodnotu jen pro Hypotéky (24 px); mobil jen pro
+ *    Hypotéky (21 px) a Další oblasti (18 px). Chybějící kombinace
+ *    (Finanční plán na tabletu/mobilu, Další oblasti na tabletu) jsem
+ *    odvodil ze stejného vzoru (Finanční plán = stejná velikost popisku
+ *    jako Hypotéky). Ruční linky u popisků z původního zadání nahradila
+ *    25. 8. 2026 skutečná trasa — viz poznámka níže.
+ * 3) „Nadpisy se odhalí po řádcích" (§9) jsem zjednodušil na odhalení
+ *    nadpisu jako celku (fade + translateY), ne na per-řádkové dělení —
+ *    žádný nadpis na stránce nemá pevné vícelřádkové zalomení jako H1
+ *    homepage, per-řádkové dělení by vyžadovalo runtime měření zalomení.
+ *
+ * DOPLNĚNO 25. 8. 2026 (výslovné zadání uživatele): trasa je teď JEDNA
+ * souvislá cesta od hero až do zápatí, stejný princip jako na homepage
+ * (ConnectionsSection/RouterSection/…/SiteFooter) — ne uzavřený dekorativní
+ * oblouk jen v hero, jak žádalo původní zadání §4. Osa (skutečný px,
+ * nezávislý na `padding` obsahu): desktop 120 / notebook 96 / tablet 40 /
+ * mobil 24 — desktop záměrně NE 100 (vlastní `padding` této stránky), ale
+ * 120, aby se trasa na konci `<main>` beze zlomu napojila přesně na
+ * `data-entry="120"` v SiteFooter.astro (notebook/tablet/mobil se shodují
+ * s vlastním `padding` už samy od sebe). Čtyři tečky (Rozcestník/Hypotéky/
+ * Finanční plán/Další oblasti) sedí vedle příslušného „pruhu" — stejná
+ * konvence „text vedle tečky, odsazeno vpravo, svisle vycentrováno" jako
+ * jinde na webu (CLAUDE.md „Konvence: kontinuální linka, tečky a text").
+ * Délka zářezu (tečka od osy) je od 26. 8. 2026 sjednocená s
+ * BenefitsSection.astro na homepage (36/36/44/22 px desktop/notebook/
+ * tablet/mobil), místo dřívějších kratších 24/16/16/8 px — na výslovné
+ * přání uživatele, který porovnával obě stránky vedle sebe. Mezera
+ * tečka→text (`padding-left` popisku) narostla o stejnou deltu, takže
+ * zůstává na svém původním odstupu (20 px desktop/notebook/tablet,
+ * 14 px mobil — pořád nad závaznou hranicí ≥20 px z CLAUDE.md, mobil
+ * ~14 px). Trasa v hero se ohýbá
+ * k ose AŽ POD veškerým textem (vypočteno z reálné pozice `.sluzby-hero__text`
+ * za běhu), takže s H1/podnadpisem/CTA nikdy nekříží; na tabletu/mobilu proto
+ * zůstává hero i nadále bez trasy (§4 originálního zadání to zdůvodňuje —
+ * není tam koridor bez kolize) a trasa začíná až u Rozcestníku. V tmavé
+ * závěrečné sekci trasa mění barvu na `--line-on-dark` (stejná konvence jako
+ * BenefitsSection/RouterSection na tmavém pozadí).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import LineGradientDefs from '../components/LineGradientDefs.astro';
+
+interface Situation {
+  situation: string;
+  desc: string;
+  service: string;
+  href: string;
+}
+
+const situations: Situation[] = [
+  {
+    situation: 'Chci řešit bydlení',
+    desc: 'Zjistit, na jakou nemovitost dosáhnu, vyřídit hypotéku, financovat rekonstrukci nebo upravit stávající úvěr.',
+    service: 'Hypotéky a bydlení',
+    href: '/sluzby/hypoteky',
+  },
+  {
+    situation: 'Chci dát finance do pořádku',
+    desc: 'Zjistit, co už mám nastavené dobře, kde jsou slabá místa a co má smysl řešit jako první.',
+    service: 'Finanční plán',
+    href: '/sluzby/financni-plan',
+  },
+  {
+    situation: 'Chci ochránit příjem a rodinu',
+    desc: 'Nastavit pojištění podle skutečných finančních dopadů, ne jen podle nabídky pojišťovny.',
+    service: 'Pojištění',
+    href: '/sluzby/pojisteni',
+  },
+  {
+    situation: 'Chci investovat peníze',
+    desc: 'Nastavit investice podle cíle, času a rizika, které dává smysl podstoupit.',
+    service: 'Investice',
+    href: '/sluzby/investice',
+  },
+  {
+    situation: 'Chci se připravit na penzi',
+    desc: 'Spočítat, kolik bude potřeba vytvořit vlastního majetku a jak se k této částce postupně dostat.',
+    service: 'Penze',
+    href: '/sluzby/penze',
+  },
+];
+
+const mortgageList: string[] = [
+  'koupí bytu nebo domu',
+  'výstavbou',
+  'rekonstrukcí',
+  'refinancováním hypotéky',
+  'změnou nebo navýšením stávajícího úvěru',
+  'dalším financováním spojeným s bydlením',
+];
+
+interface Area {
+  heading: string;
+  text: string;
+  cta: string;
+  href: string;
+}
+
+const areas: Area[] = [
+  {
+    heading: 'Pojištění má chránit váš rozpočet. Ne sbírku smluv.',
+    text: 'Nejdřív řeším, co by pro vás nebo vaši rodinu znamenal dlouhodobý výpadek příjmu, invalidita, úmrtí nebo škoda na majetku.',
+    cta: 'Pojištění',
+    href: '/sluzby/pojisteni',
+  },
+  {
+    heading: 'Investice začínají cílem. Ne produktem.',
+    text: 'Jiné řešení dává smysl pro peníze, které můžete potřebovat za několik let, a jiné pro majetek, který budujete na několik desetiletí.',
+    cta: 'Investice',
+    href: '/sluzby/investice',
+  },
+  {
+    heading: 'Na penzi je důležitější částka než název produktu.',
+    text: 'Cílem není „mít penzijko“. Cílem je mít v budoucnu dost vlastních peněz.',
+    cta: 'Penze',
+    href: '/sluzby/penze',
+  },
+];
+---
+
+<BaseLayout
+  title="Hypotéky, investice, pojištění a finanční plán | Patrik Gajdadzis"
+  description="Pomohu vám s hypotékou, finančním plánem, pojištěním, investicemi a penzí. Osobně v Ostravě nebo online po celé ČR."
+>
+  <Header />
+  <main id="hero" class="sluzby">
+    <div class="sluzby__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`sluzby__route-svg sluzby__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2000`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                {/*
+                  Nájezdový gradient (smaragdová → modrá, sdílené barvy s
+                  HeroLine.astro přes LineGradientDefs.astro) — konvence
+                  „nájezd jen na skutečném začátku linky" v CLAUDE.md: `/sluzby`
+                  má vlastní hero, tedy vlastní začátek trasy, stejně jako
+                  homepage Hero. Svislý (ne vodorovný jako u Hero) gradient,
+                  protože trasa tady vstupuje shora dolů, ne vodorovně od H1.
+                  y1/y2 musí sedět s `HERO_ENTRY_START_Y` v <script> níže.
+                */}
+                <LineGradientDefs id={`sluzby-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="sluzby__route-path" d={`M ${v.axis} -20 V 2000`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="sluzby__route-path sluzby__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#sluzby-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="sluzby__route-path sluzby__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['rozcestnik', 'hypoteky', 'plan', 'areas'] as const).map((marker) => (
+              <g class="sluzby__marker" data-marker={marker}>
+                <line class="sluzby__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="sluzby__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="sluzby-hero" aria-labelledby="sluzby-hero-heading">
+      <div class="sluzby-hero__text">
+        <h1 id="sluzby-hero-heading" data-reveal>Co potřebujete vyřešit?</h1>
+        <p class="sluzby-hero__lead" data-reveal>
+          Můžete přijít s&nbsp;hypotékou, investicí nebo jednou konkrétní otázkou. Začneme tím, co potřebujete vyřešit
+          právě teď, a&nbsp;nastavíme další krok podle vaší situace.
+        </p>
+        <div class="sluzby-hero__actions" data-reveal>
+          <a class="sluzby-cta" href="/#kontakt">Nezávazná konzultace</a>
+          <a class="sluzby-phone" href="tel:+420775217721">
+            <svg class="sluzby-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="sluzby-router" aria-labelledby="rozcestnik">
+      <div class="sluzby-router__bar" data-reveal data-route-target="rozcestnik">
+        <h2 id="rozcestnik">Začněte tím, co právě řešíte.</h2>
+      </div>
+
+      <ul class="sluzby-router__list">
+        {
+          situations.map((s, i) => (
+            <li data-reveal>
+              <a class="sluzby-router__row" href={s.href} data-first={i === 0 ? 'true' : undefined}>
+                <span class="sluzby-router__situation">{s.situation}</span>
+                <span class="sluzby-router__desc">{s.desc}</span>
+                <span class="sluzby-router__target">{s.service}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="sluzby-chapter sluzby-chapter--dominant" aria-labelledby="hypoteky-heading">
+      <div class="sluzby-chapter__bar" data-reveal data-route-target="hypoteky">
+        <p>Hypotéky</p>
+      </div>
+
+      <div class="sluzby-chapter__content">
+        <div class="sluzby-chapter__lead-col" data-reveal>
+          <h2 id="hypoteky-heading">Bydlení začíná čísly, ne podpisem rezervace.</h2>
+          <p class="sluzby-chapter__lead">
+            Nejlepší chvíle začít řešit hypotéku je ještě před tím, než si vyberete konkrétní nemovitost.
+          </p>
+          <a class="sluzby-chapter__link" href="/sluzby/hypoteky">Zjistit více o&nbsp;hypotékách</a>
+        </div>
+
+        <div class="sluzby-chapter__list-col" data-reveal>
+          <p class="sluzby-chapter__list-label">Pomáhám například s</p>
+          <ul class="sluzby-chapter__list">
+            {mortgageList.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="sluzby-chapter sluzby-chapter--plan" aria-labelledby="plan-heading">
+      <div class="sluzby-chapter__bar" data-reveal data-route-target="plan">
+        <p>Finanční plán</p>
+      </div>
+
+      <div class="sluzby-chapter__content">
+        <div class="sluzby-chapter__lead-col" data-reveal>
+          <h2 id="plan-heading">Aby jedno rozhodnutí nerozbilo druhé.</h2>
+          <p class="sluzby-chapter__lead">
+            Hypotéka ovlivní rezervu. Výše rezervy ovlivní, kolik můžete investovat. Příjem zase určuje, jak velké
+            riziko by pro&nbsp;rodinu znamenala pracovní neschopnost nebo invalidita.
+          </p>
+          <a class="sluzby-chapter__link" href="/sluzby/financni-plan">Finanční plán</a>
+        </div>
+
+        <div class="sluzby-chapter__statement-col" data-reveal>
+          <p class="sluzby-chapter__statement-intro">Nemáte mít více produktů. Máte vědět:</p>
+          <p class="sluzby-chapter__statement">co řešit, proč to řešit a&nbsp;v&nbsp;jakém pořadí.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sluzby-areas" aria-label="Další oblasti">
+      <div class="sluzby-areas__bar" data-reveal data-route-target="areas">
+        <p>Další oblasti</p>
+      </div>
+
+      <div class="sluzby-areas__columns">
+        {
+          areas.map((area) => (
+            <div class="sluzby-areas__col" data-reveal>
+              <h2>{area.heading}</h2>
+              <p>{area.text}</p>
+              <a href={area.href}>{area.cta}</a>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="sluzby-closing" aria-labelledby="closing-heading">
+      <div class="sluzby-closing__glow" aria-hidden="true"></div>
+
+      <div class="sluzby-closing__grid">
+        <h2 id="closing-heading" data-reveal>Nemusíte řešit všechno najednou.</h2>
+
+        <div class="sluzby-closing__body" data-reveal>
+          <p>Přijdete-li kvůli hypotéce, vyřešíme nejdřív hypotéku.</p>
+          <p>
+            Když při tom zjistíme, že dává smysl upravit rezervu, ochranu příjmu nebo investice, vysvětlím vám proč
+            a&nbsp;co by změna přinesla.
+          </p>
+          <p class="sluzby-closing__statement">Co budete chtít řešit dál, je na&nbsp;vás.</p>
+
+          <div class="sluzby-closing__actions">
+            <a class="sluzby-cta sluzby-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="sluzby-phone sluzby-phone--dark" href="tel:+420775217721">
+              <svg class="sluzby-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.sluzby');
+  const routeWrap = document.querySelector('.sluzby__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.sluzby__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.sluzby-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.sluzby-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.sluzby-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.sluzby-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      rozcestnik: main.querySelector('[data-route-target="rozcestnik"]'),
+      hypoteky: main.querySelector('[data-route-target="hypoteky"]'),
+      plan: main.querySelector('[data-route-target="plan"]'),
+      areas: main.querySelector('[data-route-target="areas"]'),
+    } as const;
+
+    /*
+     * Trasa v hero nezačíná hned pod hlavičkou (dřív -20, tj. prakticky
+     * slepená na hranici hlavičky) — na výslovné přání uživatele (28. 8. 2026,
+     * srovnání s homepage) musí mít i tady nájezd viditelný odstup od
+     * hlavičky, ne začínat „úplně od záhlaví". Musí sedět se stejnou
+     * hodnotou v `<LineGradientDefs>`/entry overlay `d` v markupu výše.
+     */
+    const HERO_ENTRY_START_Y = 40;
+    // Délka nájezdového gradientu (entry overlay) — musí sedět s y2 - y1
+    // v <LineGradientDefs>/entry overlay `d` v markupu výše (140 - 40).
+    const HERO_ENTRY_LENGTH = 100;
+
+    /*
+     * Vytvoří `d` pro vstupní oblouk trasy v hero (jen desktop/notebook):
+     * svisle dolů z hlavičky, dva zaoblené lomy ZA (pod) veškerým textem
+     * hero (bendY se počítá ze skutečné pozice `.sluzby-hero__text`), pak
+     * rovně dolů na ose. Stejná konstrukce jako RouterSection/ProcessSection
+     * jinde na webu — jen s dynamickým `bendY` místo pevné konstanty, protože
+     * výška hero plyne z obsahu, ne z pevného rámu.
+     *
+     * Začíná AŽ na konci nájezdového gradientu (HERO_ENTRY_START_Y +
+     * HERO_ENTRY_LENGTH), ne na jeho začátku — samotný nájezd kreslí
+     * samostatná `.sluzby__route-entry` cesta. Opraveno 1. 9. 2026: dřív se
+     * obě cesty na úseku nájezdu PŘEKRÝVALY (tenhle oblouk kreslil i tenhle
+     * úsek, entry přes něj) — dva poloprůhledné tahy stejné barvy nad sebou
+     * (entry @ 100 % = `--line` @ .18, hlavní taky @ .18) se opticky sečtou
+     * na vyšší výsledné krytí, takže na konci nájezdu vznikal viditelný
+     * skok krytí/tloušťky („zub“ nahlášený uživatelem). Bez překryvu žádné
+     * sčítání není, přechod je hladký až do bodu, kde gradient skutečně
+     * končí na stejné barvě/opacitě jako hlavní trasa.
+     */
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${HERO_ENTRY_START_Y + HERO_ENTRY_LENGTH} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      // `main.scrollHeight` je zde nespolehlivý (main má `overflow-x: hidden`,
+      // což prohlížeč podle specifikace CSS Overflow počítá jako
+      // `overflow-y: auto` a scrollHeight pak neodpovídá spolehlivě reálné
+      // vykreslené výšce) — stejně jako zbytek trasy počítáme z reálné
+      // pozice posledního prvku (spodní hrana .sluzby-closing).
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        /*
+         * Obsahové sekce na této stránce NEMAJÍ `max-width` strop (viz
+         * poznámka u `.sluzby__route-svg--laptop`/`--desktop` výše) —
+         * odsazení od okraje je pevné v reálných px, ne procentuální.
+         * `viewBox` šířka proto musí sledovat SKUTEČNOU vykreslenou šířku
+         * SVG (ne nominální 1440/1366/834/390), jinak by se při neuniformním
+         * roztažení `viewBox` osa/tečky od pevně odsazeného textu vzdálily
+         * (zjištěno 25. 8. 2026 na 1920 px: 39 px mimo skutečný text) —
+         * stejná třída chyby jako v CLAUDE.md „Konvence: kontinuální linka,
+         * tečky a text“, bod 4/6, jen v opačném směru (tady text NENÍ
+         * procentuální, takže trasa nesmí být procentuální taky).
+         */
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.sluzby__route-path:not(.sluzby__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.sluzby__route-path--dark') as SVGPathElement | null;
+
+        /*
+         * OPRAVA 26. 8. 2026 (čtvrté a finální kolo — uživatel odmítl i
+         * krátký oblý zákrut jako nechtěný „zub"): žádný zákrut/úsečka
+         * NIKDE pod hero obloukem. Místo dopočtu cílového bodu jen na konci
+         * trasy se ROVNOU „axis" nahrazuje jeho procentuálně přepočítanou
+         * verzí (`axisScaled = axis / nominalVb * vb`) a používá se
+         * DŮSLEDNĚ všude — v cestě (hero oblouk i rovný úsek), v zářezech
+         * i tečkách. Pod `--stage-max` (do 1440px na desktopu) je to no-op
+         * (`axisScaled === axis`), nad ní se CELÁ trasa (od konce hero
+         * oblouku dolů) posune vpravo jako jeden celek — jediný ohyb na
+         * stránce zůstává ten existující v hero (tam, kde se trasa napojuje
+         * na hlavičku — beze změny, „nahoře se linka napojí tak jak je
+         * napojena").
+         *
+         * Aby zůstal zachovaný odstup tečka→text (CLAUDE.md, ≥20px), musí
+         * se o STEJNÝ posun (`shift = axisScaled - axis`) posunout i popisky
+         * u tras (`.sluzby-router__bar`/`.sluzby-chapter__bar`/`.sluzby-
+         * areas__bar`, viz `--sluzby-shift` níže a jejich `padding-left:
+         * calc(... + var(--sluzby-shift))` v CSS) — jinak by tečka se
+         * shiftem ujela textu vstříc a odstup by se scvrkl/otočil.
+         */
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        // OPRAVA 2. 9. 2026: bez tohoto strážce smyčka nad všemi čtyřmi
+        // tiery přepsala `--sluzby-shift` hodnotou z POSLEDNÍHO (vždy
+        // neaktivního, `display:none`) tieru, jehož `vb` padá zpět na
+        // `nominalVb`, tedy shift=0 — mezera tečka→text se tak scvrkávala
+        // mimo kalibrační šířku (390/834/1366/1440px), přesně
+        // třída chyby popsaná v komentáři výše. Stejná oprava už dřív
+        // proběhla v `hypoteky.astro`/`financni-plan.astro`; nalezeno
+        // automatizovaným auditem (`npm run check:layout`) 2. 9. 2026.
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--sluzby-shift', `${shift}px`);
+        }
+
+        if (isHero && heroTextEl) {
+          const textRect = heroTextEl.getBoundingClientRect();
+          const textBottom = textRect.bottom - mainRect.top;
+          const bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+          if (lightPath) lightPath.setAttribute('d', `${heroArcPath(entryX, axisScaled, r, bendY, closingTop)}`);
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+        /*
+         * Tmavý úsek pokračuje na STEJNÉ `axisScaled` — žádný zákrut, jedna
+         * svislice od hero oblouku až po patičku — S JEDNOU VÝJIMKOU:
+         * `axisScaled` leží uvnitř vodorovného rozsahu nadpisu „Nemusíte
+         * řešit všechno najednou." (změřeno 26. 8. 2026 — nadpis nemá vlastní
+         * odsazení od kraje, takže na desktopu např. začíná na x=100, zatímco
+         * osa je na x=120 — linka by procházela přímo přes první písmeno).
+         * Na výslovné přání uživatele se text NEPOSOUVÁ (na rozdíl od
+         * popisků tras výše) — místo toho se čára v rozsahu výšky nadpisu
+         * (+ 12px rezerva nahoře/dole) VYNECHÁ, dvě samostatná `M...V`
+         * v jednom `d` řetězci vytvoří skutečnou mezeru, ne jen vizuální
+         * překrytí přes z-index (to bylo řešení z předchozího kola — podle
+         * screenshotu uživatele se nechovalo spolehlivě).
+         */
+        // Stejný princip jako HeroLine.astro/StatsBand.astro (§ „Vede pod
+        // statistickým pásem — schovaná pod jeho neprůhledným pozadím, ne
+        // přes něj") — tam čáru schovává opaque pás (z-index), tady žádný
+        // pás není, takže mezera je skutečná (dva samostatné `M...V`), ne
+        // spoléhání na z-index nad textem. Odstup nad/pod textem 20px —
+        // stejná konvence jako „Odstup tečky/zářezu od textu" v CLAUDE.md.
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        // `axisScaled` (ne holé `axis`) — zářezy/tečky musí sedět na STEJNÉ ose
+        // jako trasa samotná (viz OPRAVA výše), jinak by tečka zůstala na staré
+        // pozici, zatímco čára i popisek (přes `--sluzby-shift`) se posunuly.
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.sluzby__notch');
+          const dot = group.querySelector('.sluzby__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    // Dokreslení trasy jednorázově při načtení (dokument, ne prezentace —
+    // stejný princip jako LegalLayout.astro), ne vázané na scroll.
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg
+        ? (Array.from(activeSvg.querySelectorAll('.sluzby__route-path')) as SVGPathElement[])
+        : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.sluzby__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    // Jemné odhalení kapitol/nadpisů při vstupu do viewportu — postupně,
+    // odstup 60 ms (§9 zadání). Bez JS/reduced-motion: obsah je vždy
+    // finálně viditelný (viz `.no-js`/`prefers-reduced-motion` v CSS).
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 60;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 60);
+        });
+        /*
+         * Odhalení posouvá prvek přes `transform: translateY(10px→0)`
+         * (500 ms, `--duration-reveal`) — dokud běží, `getBoundingClientRect()`
+         * v `syncRoute()` vrací POSUNUTOU (ne finální) pozici. Pokud
+         * `syncRoute()` proběhne zrovna v tu chvíli (typicky hned při
+         * načtení stránky pro sekce, které jsou od začátku ve viewportu —
+         * nejvíc vidět u Rozcestníku), tečka zůstane „zamrzlá“ na staré
+         * pozici, i když se text pak posune o 10 px jinam. Po doběhnutí
+         * přechodu proto trasu přepočítáme znovu (25. 8. 2026, nalezeno na
+         * screenshotu uživatele).
+         */
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+</script>
+
+<style>
+  .sluzby {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  /*
+   * OPRAVA 26. 8. 2026: bez `z-index` se `.sluzby__route` (position:absolute,
+   * z-index:auto) v malování řadilo PŘED `.sluzby-closing` (position:relative,
+   * pozdější v DOM), takže tmavá trasa (`.sluzby__route-path--dark`) mizela
+   * pod jejím neprůhledným pozadím — zjištěno na screenshotu uživatele
+   * (linka se ztrácela hned za „Další oblasti“, do zápatí vůbec
+   * nepokračovala). `z-index: 1` dostane trasu NAD `.sluzby-closing`'s
+   * pozadí/glow (oba zůstávají bez vlastního z-indexu, tedy pod ní) — text
+   * a CTA uvnitř `.sluzby-closing__grid` dostávají vlastní vyšší z-index
+   * (viz níže), aby zůstaly čitelné/klikatelné nad linkou.
+   */
+  .sluzby__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .sluzby__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /*
+   * DŮLEŽITÉ (opraveno 25. 8. 2026 — tenhle komentář byl zastaralý, viz
+   * CLAUDE.md „Konvence: wide desktop a centrované designové plátno“):
+   * VŠECHNY obsahové sekce dostávají na wide desktopu `max-width:
+   * var(--stage-max); margin-inline: auto;` — pět světlých sekcí přímo na
+   * sobě (`.sluzby-hero`, `.sluzby-router`, `.sluzby-chapter--*`,
+   * `.sluzby-areas`, viz jejich pravidlo v `@media (min-width: 1400px)`
+   * níže), tmavá `.sluzby-closing` na svém obsahovém wrapperu
+   * `.sluzby-closing__grid` (pozadí/glow zůstává full-width). `.sluzby__route`
+   * (wrapper trasy, sourozenec všech sekcí) dostává STEJNÝ strop nezávisle —
+   * jinak by se nad `--stage-max` rozjela od (capnutého) obsahu, přesně jako
+   * u HeroLine.astro/RouterSection.astro na homepage.
+   */
+
+  .sluzby__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .sluzby__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .sluzby__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .sluzby__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .sluzby__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .sluzby__route-svg--tablet,
+  .sluzby__route-svg--laptop,
+  .sluzby__route-svg--desktop {
+    display: none;
+  }
+
+  /* §9 zadání: focus-visible na této stránce smaragdový, ne navy jako
+     globální výchozí v global.css (ten se kvůli homepage/právním stránkám
+     neupravuje — jde o rozsahem omezené přepsání jen pro /sluzby). */
+  .sluzby :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  /*
+   * Čtyři „pruhy" s tečkou (`data-route-target`) NESMÍ mít posun
+   * (`translateY`) v odhalovací animaci — tečka se dopočítává ze
+   * skutečné pozice tohoto prvku a nepřepočítává se snímek po snímku
+   * během přechodu (jen jednou po jeho doběhnutí, viz `revealGroup` ve
+   * <script>). Dokud by se prvek při odhalení posouval, mohla by tečka
+   * zůstat vizuálně „pozadu" za textem v libovolném mezisnímku. Fade bez
+   * posunu (jen `opacity`) tohle riziko úplně vylučuje — zjištěno
+   * 25. 8. 2026 na screenshotu uživatele (Rozcestník).
+   */
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .sluzby-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .sluzby-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .sluzby-cta:active {
+    transform: translateY(1px);
+  }
+
+  .sluzby-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .sluzby-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .sluzby-phone:hover {
+    color: var(--emerald);
+  }
+
+  .sluzby-phone--dark {
+    color: var(--white);
+  }
+
+  .sluzby-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Hero ---------- */
+
+  /*
+   * OPRAVA 1. 9. 2026 (audit obsahu): `padding-bottom` byl na mobilu/
+   * tabletu 0, zatímco notebook/desktop (řádkový layout hero) mají
+   * symetrických 90px — CLAUDE.md „Konvence: mezera mezi sekcemi" žádá
+   * symetrický padding na KAŽDÉM stupni. Asymetrie dělala přechod
+   * Hero→Rozcestník nápadně užší (64px) než všechny ostatní přechody na
+   * stránce (112–128px na mobilu) — sjednoceno na symetrický padding.
+   */
+  .sluzby-hero {
+    padding: 64px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .sluzby-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .sluzby-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .sluzby-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .sluzby-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sluzby-hero__actions .sluzby-cta {
+    width: 100%;
+  }
+
+  .sluzby-hero__actions .sluzby-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Rozcestník ---------- */
+
+  .sluzby-router {
+    padding: 64px 24px 0;
+  }
+
+  .sluzby-router__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sluzby-router__bar h2 {
+    margin: 0;
+    padding-left: calc(36px + var(--sluzby-shift, 0px));
+    font-size: 21px;
+    line-height: 1.16;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+  }
+
+  .sluzby-router__list {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* OPRAVA 1. 9. 2026 (sjednocení řádkování napříč webem) — 8px bylo
+     nekonzistentní s 14px, které web jinde používá pro vztah nadpis→text.
+     Platí jen do notebooku — od 1200px `.sluzby-router__row` přechází na
+     dvousloupcový grid (viz níže), kde má `row-gap` jinou roli (mezera
+     situace→target v levém sloupci, ne heading→text). */
+  .sluzby-router__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas: 'situace' 'desc' 'target';
+    row-gap: 14px;
+    padding: 20px 0;
+  }
+
+  .sluzby-router__list li:not(:last-child) .sluzby-router__row {
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .sluzby-router__situation {
+    grid-area: situace;
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--navy-ink);
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .sluzby-router__row[data-first] .sluzby-router__situation {
+    font-size: 24px;
+    color: var(--navy);
+  }
+
+  .sluzby-router__desc {
+    grid-area: desc;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .sluzby-router__target {
+    grid-area: target;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--emerald);
+    transition: text-decoration-color var(--duration-hover) var(--ease-out);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+  }
+
+  .sluzby-router__row:hover .sluzby-router__situation {
+    transform: translateX(6px);
+  }
+
+  .sluzby-router__row:hover .sluzby-router__target {
+    text-decoration-color: currentColor;
+  }
+
+  /* ---------- Kapitoly (Hypotéky, Finanční plán) ---------- */
+
+  .sluzby-chapter {
+    padding: 56px 24px;
+  }
+
+  /*
+   * `margin-top` (ne `padding`) je tu VĚDOMÁ výjimka z „Konvence: mezera
+   * mezi sekcemi" (CLAUDE.md) — dává první „velké" kapitole (Hypotéky)
+   * záměrně větší odstup od Rozcestníku než mají ostatní přechody na
+   * stránce (128 vs. 112px na mobilu), aby vizuálně oddělila „výběr
+   * situace" od „obsahu kapitol". Ověřeno auditem 1. 9. 2026 — na
+   * desktopu/notebooku vypadá výsledný rytmus v pořádku, měnit jen
+   * mechanismus bez viditelné potřeby nebyl důvod.
+   */
+  .sluzby-chapter--dominant {
+    margin-top: 72px;
+    background: var(--bg);
+  }
+
+  /*
+   * OPRAVA 26. 8. 2026: `.sluzby-chapter--plan` dřív mělo `padding-bottom:0`
+   * na všech stupních (viz historii), zatímco `.sluzby-chapter--dominant`
+   * (a `.sluzby-areas` pod ním) mají symetrický padding. Sekce na sebe
+   * navazují bez marginu (mezera mezi nimi = jen součet jejich vlastních
+   * paddingů), takže přechod Hypotéky→Finanční plán měl dvojnásobnou mezeru
+   * (padding dominant dole + padding plan nahoře) oproti přechodu Finanční
+   * plán→Další oblasti (jen padding areas nahoře, protože plan dole měl 0) —
+   * působilo to namačkaně, zjištěno na screenshotu uživatele. `.sluzby-
+   * chapter--plan` teď nechává padding symetrický (zdědí ho z `.sluzby-
+   * chapter` výše, žádný vlastní zásah na tomto stupni potřeba).
+   */
+
+  .sluzby-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .sluzby-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--sluzby-shift, 0px));
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--navy);
+  }
+
+  .sluzby-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .sluzby-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .sluzby-chapter__lead-col h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .sluzby-chapter__lead {
+    margin: 0;
+    font-size: 17.5px;
+    line-height: 1.6;
+    font-weight: 600;
+    color: var(--navy);
+    max-width: 520px;
+  }
+
+  .sluzby-chapter__link {
+    display: inline-block;
+    width: fit-content;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+    padding-bottom: 1px;
+    border-bottom: 1px solid var(--emerald);
+    transition: color var(--duration-hover) var(--ease-out), border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .sluzby-chapter__link:hover {
+    color: var(--emerald-hover);
+    border-color: var(--emerald-hover);
+  }
+
+  .sluzby-chapter__list-label {
+    margin: 0 0 4px;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-quiet);
+  }
+
+  .sluzby-chapter__list li {
+    font-weight: 600;
+    font-size: 16.5px;
+    color: var(--navy);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .sluzby-chapter__list li:last-child {
+    border-bottom: none;
+  }
+
+  .sluzby-chapter__statement-col {
+    padding-top: 4px;
+  }
+
+  .sluzby-chapter__statement-intro {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+
+  .sluzby-chapter__statement {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.22;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+  }
+
+  /* ---------- Další oblasti ---------- */
+
+  .sluzby-areas {
+    padding: 56px 24px 0;
+  }
+
+  .sluzby-areas__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .sluzby-areas__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--sluzby-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    /* Sjednoceno s .sluzby-router__bar h2/.sluzby-chapter__bar p (26. 8. 2026,
+       na žádost uživatele) — dřív var(--text-nav), vizuálně nekonzistentní
+       tlumená barva oproti ostatním třem pruhům. Velikost (18/24/26/28px)
+       zůstává beze změny — odpovídá vlastním nadpisům karet Pojištění/
+       Investice/Penze (28px na desktopu), ne velikosti ostatních pruhů. */
+    color: var(--navy);
+  }
+
+  .sluzby-areas__columns {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* OPRAVA 1. 9. 2026 (sjednocení řádkování napříč webem) — 10px bylo
+     nekonzistentní s 14px, které web jinde používá pro vztah nadpis→text. */
+  .sluzby-areas__col {
+    padding: 24px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .sluzby-areas__col:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .sluzby-areas__col h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.18;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--navy);
+  }
+
+  .sluzby-areas__col p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .sluzby-areas__col a {
+    width: fit-content;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--emerald);
+    padding-bottom: 1px;
+    border-bottom: 1px solid var(--emerald);
+    transition: color var(--duration-hover) var(--ease-out), border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .sluzby-areas__col a:hover {
+    color: var(--emerald-hover);
+    border-color: var(--emerald-hover);
+  }
+
+  /* ---------- Závěr ---------- */
+
+  /*
+   * `margin-top` (ne `padding`) je tu NUTNÁ výjimka z „Konvence: mezera
+   * mezi sekcemi" (CLAUDE.md) — `.sluzby-closing` má vlastní tmavé pozadí
+   * (`background`, viz níže), takže `padding-top` by tmavou plochu
+   * natáhlo výš a smazalo světlou mezeru PŘED tmavým pásem. `margin-top`
+   * nechává tuhle mezeru viditelně světlou (barva `.sluzby`/`body`) — jen
+   * `margin` tohle dokáže. Ověřeno auditem 1. 9. 2026.
+   */
+  .sluzby-closing {
+    position: relative;
+    margin-top: 72px;
+    padding-block: 56px;
+    overflow: hidden;
+    /* Tokeny místo natvrdo zapsaných hex hodnot (audit obsahu 1. 9. 2026) —
+       stejný gradient jako RouterSection.astro na homepage. */
+    background: linear-gradient(174deg, var(--router-grad-1) 0%, var(--navy) 44%, var(--router-grad-2) 100%);
+  }
+
+  .sluzby-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(70% 50% at 78% 20%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  /*
+   * Vodorovný padding žije tady, ne na `.sluzby-closing` — na wide desktopu
+   * (viz `@media (min-width: 1400px)` níže) tenhle wrapper dostává
+   * `max-width: var(--stage-max)`, `.sluzby-closing` zůstává full-width
+   * (pozadí + glow). Stejný princip jako `.benefits__stage`/`.router__stage`
+   * na homepage (BenefitsSection.astro/RouterSection.astro).
+   */
+  .sluzby-closing__grid {
+    position: relative;
+    /* nad `.sluzby__route` (z-index:1) — text a CTA musí zůstat čitelné/
+       klikatelné i tam, kde by linka jinak procházela přes ně (viz komentář
+       u `.sluzby__route` výše). */
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .sluzby-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .sluzby-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sluzby-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .sluzby-closing__statement {
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--white) !important;
+  }
+
+  .sluzby-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sluzby-closing__actions .sluzby-cta {
+    width: 100%;
+  }
+
+  .sluzby-closing__actions .sluzby-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .sluzby-router__situation,
+    .sluzby-router__target {
+      transition: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .sluzby__route-svg--mobile {
+      display: none;
+    }
+
+    .sluzby__route-svg--tablet {
+      display: block;
+    }
+
+    .sluzby-router__bar h2,
+    .sluzby-chapter__bar p,
+    .sluzby-areas__bar p {
+      padding-left: calc(64px + var(--sluzby-shift, 0px));
+    }
+
+    .sluzby-hero {
+      padding: 88px 40px;
+    }
+
+    .sluzby-hero__text {
+      gap: 18px;
+    }
+
+    .sluzby-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .sluzby-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .sluzby-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .sluzby-hero__actions .sluzby-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .sluzby-hero__actions .sluzby-phone {
+      height: auto;
+    }
+
+    .sluzby-router {
+      padding: 80px 40px 0;
+    }
+
+    .sluzby-router__bar h2 {
+      font-size: 24px;
+    }
+
+    .sluzby-router__row {
+      padding: 22px 0;
+    }
+
+    .sluzby-router__situation {
+      font-size: 23px;
+    }
+
+    .sluzby-router__row[data-first] .sluzby-router__situation {
+      font-size: 27px;
+    }
+
+    .sluzby-chapter--dominant {
+      margin-top: 90px;
+      padding: 72px 40px;
+    }
+
+    .sluzby-chapter--plan {
+      padding: 72px 40px;
+    }
+
+    .sluzby-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .sluzby-chapter--dominant .sluzby-chapter__bar-line {
+      height: 2px;
+    }
+
+    .sluzby-chapter__lead-col h2 {
+      font-size: 44px;
+    }
+
+    .sluzby-chapter__lead {
+      font-size: 19px;
+      max-width: 560px;
+    }
+
+    .sluzby-chapter--plan .sluzby-chapter__content {
+      border-top: 1px solid rgba(27, 74, 138, .14);
+    }
+
+    .sluzby-chapter--plan .sluzby-chapter__statement-col {
+      padding-top: 24px;
+    }
+
+    .sluzby-chapter--plan .sluzby-chapter__lead-col h2 {
+      font-size: 40px;
+    }
+
+    .sluzby-chapter__statement {
+      font-size: 32px;
+    }
+
+    .sluzby-chapter__list li {
+      font-size: 17px;
+    }
+
+    .sluzby-areas {
+      padding: 72px 40px 0;
+    }
+
+    .sluzby-areas__bar p {
+      font-size: 24px;
+    }
+
+    .sluzby-areas__columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 36px;
+    }
+
+    .sluzby-areas__col:nth-child(1),
+    .sluzby-areas__col:nth-child(2) {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .sluzby-areas__col:nth-child(1) {
+      border-right: 1px solid rgba(27, 74, 138, .14);
+      padding-right: 36px;
+    }
+
+    .sluzby-areas__col:nth-child(2) {
+      padding-left: 0;
+    }
+
+    .sluzby-areas__col:nth-child(3) {
+      grid-column: 1 / -1;
+      max-width: 390px;
+    }
+
+    .sluzby-areas__col h2 {
+      font-size: 24px;
+    }
+
+    .sluzby-closing {
+      margin-top: 90px;
+      padding-block: 76px;
+    }
+
+    .sluzby-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .sluzby-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .sluzby-closing__body p {
+      font-size: 17px;
+    }
+
+    .sluzby-closing__statement {
+      font-size: 24px;
+    }
+
+    .sluzby-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .sluzby-closing__actions .sluzby-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .sluzby-closing__actions .sluzby-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .sluzby__route-svg--tablet {
+      display: none;
+    }
+
+    .sluzby__route-svg--laptop {
+      display: block;
+    }
+
+    /*
+     * Vlastní hodnota pro tenhle stupeň (ne zděděná z tabletu) — zářez
+     * na notebooku je kratší (36 px) než na tabletu (44 px), stejná
+     * nemonotónní kalibrace jako u BenefitsSection.astro na homepage
+     * (36/36/44/22 desktop/notebook/tablet/mobil). Mezera tečka→text
+     * zůstává 20 px (56 = axis 96 + zářez 36 + mezera 20 − section
+     * padding 96... viz `dotOffset` v <script> výše).
+     */
+    .sluzby-router__bar h2,
+    .sluzby-chapter__bar p,
+    .sluzby-areas__bar p {
+      padding-left: calc(56px + var(--sluzby-shift, 0px));
+    }
+
+    .sluzby-hero {
+      padding: 112px 96px 90px;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 48px;
+    }
+
+    .sluzby-hero__text {
+      max-width: 580px;
+      gap: 18px;
+    }
+
+    .sluzby-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .sluzby-hero__lead {
+      font-size: 19px;
+    }
+
+    .sluzby-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .sluzby-router {
+      padding: 80px 96px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+    }
+
+    .sluzby-router__bar {
+      flex: none;
+      width: 180px;
+    }
+
+    .sluzby-router__list {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    .sluzby-router__row {
+      grid-template-columns: 340px 1fr;
+      grid-template-areas: 'situace desc' 'target desc';
+      column-gap: 48px;
+      row-gap: 5px;
+      align-items: baseline;
+    }
+
+    /*
+     * Notebook+ (1200px): `.sluzby-router` je od tohoto stupně řádek vedle
+     * sebe (`.sluzby-router__bar` a `.sluzby-router__list`, `align-items:
+     * flex-start`) — beze zvláštního zásahu by první nadpis seznamu
+     * („Chci řešit bydlení“) seděl o `.sluzby-router__row`'s vlastní
+     * `padding-top` (22px) níž než nadpis pruhu („Začněte tím, co právě
+     * řešíte.“), přestože oba mají stejný horní okraj kontejneru — zjištěno
+     * 26. 8. 2026 na screenshotu uživatele. První řádek proto dostává
+     * `padding-top: 0`, aby jeho nadpis začínal na stejné výšce jako pruh;
+     * ostatní řádky pod ním pokračují v původním rozestupu beze změny.
+     */
+    .sluzby-router__list li:first-child .sluzby-router__row {
+      padding-top: 0;
+    }
+
+    .sluzby-router__situation {
+      font-size: 26px;
+    }
+
+    .sluzby-router__row[data-first] .sluzby-router__situation {
+      font-size: 30px;
+    }
+
+    .sluzby-router__desc {
+      font-size: 16.5px;
+    }
+
+    .sluzby-chapter--dominant {
+      margin-top: 110px;
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+    }
+
+    .sluzby-chapter--plan {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+    }
+
+    .sluzby-chapter__bar {
+      flex: none;
+      width: 180px;
+      margin-bottom: 0;
+    }
+
+    .sluzby-chapter__content {
+      flex: 1;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 60px;
+    }
+
+    .sluzby-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .sluzby-chapter__lead-col h2 {
+      font-size: 50px;
+    }
+
+    .sluzby-chapter--plan .sluzby-chapter__lead-col h2 {
+      font-size: 44px;
+    }
+
+    .sluzby-chapter__list-col {
+      flex: 1;
+    }
+
+    .sluzby-chapter--plan .sluzby-chapter__content {
+      border-top: none;
+    }
+
+    .sluzby-chapter--plan .sluzby-chapter__statement-col {
+      flex: 1;
+      padding-top: 8px;
+    }
+
+    .sluzby-chapter__statement {
+      font-size: 34px;
+    }
+
+    .sluzby-areas {
+      padding: 88px 96px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+    }
+
+    .sluzby-areas__bar {
+      flex: none;
+      width: 180px;
+      margin-bottom: 0;
+    }
+
+    .sluzby-areas__bar p {
+      font-size: 26px;
+    }
+
+    .sluzby-areas__columns {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      gap: 48px;
+    }
+
+    .sluzby-areas__col {
+      flex: 1;
+      border-top: none;
+      padding: 0;
+    }
+
+    .sluzby-areas__col:not(:last-child) {
+      border-right: 1px solid rgba(27, 74, 138, .14);
+      padding-right: 48px;
+    }
+
+    .sluzby-areas__col:nth-child(2) {
+      padding-left: 0;
+      border-right: 1px solid rgba(27, 74, 138, .14);
+    }
+
+    .sluzby-areas__col:nth-child(3) {
+      max-width: none;
+      padding-left: 0;
+    }
+
+    .sluzby-areas__col h2 {
+      font-size: 26px;
+    }
+
+    .sluzby-closing {
+      margin-top: 110px;
+      padding-block: 88px;
+    }
+
+    .sluzby-closing__grid {
+      padding-inline: 96px;
+    }
+
+    .sluzby-closing__glow {
+      height: 320px;
+    }
+
+    .sluzby-closing__grid {
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .sluzby-closing__grid h2 {
+      flex: none;
+      width: 500px;
+      font-size: 46px;
+    }
+
+    .sluzby-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .sluzby__route-svg--laptop {
+      display: none;
+    }
+
+    .sluzby__route-svg--desktop {
+      display: block;
+    }
+
+    /*
+     * Wide desktop: centrované designové plátno (CLAUDE.md „Konvence: wide
+     * desktop a centrované designové plátno“). Pět světlých sekcí dostávají
+     * strop přímo na sobě; `.sluzby-closing` (tmavá závěrečná sekce)
+     * zůstává full-width PÁS (pozadí + glow, CLAUDE.md „1. Full-width
+     * layer“), ale její OBSAH (`.sluzby-closing__grid`) dostává strop
+     * samostatně o pár řádků níž — stejný princip jako `.benefits__stage`/
+     * `.router__stage` na homepage (BenefitsSection.astro/RouterSection.astro):
+     * bez něj by nadpis/text zůstaly fixované na viewport, ne na stage
+     * (zjištěno 25. 8. 2026 — původní implementace tuhle sekci vůbec
+     * neřešila). `.sluzby__route` (wrapper trasy, jinak `width:100%` celého
+     * `<main>`) musí dostat STEJNÝ strop a vystředění samostatně (je to
+     * sourozenec sekcí, ne jejich potomek), jinak by trasa nad --stage-max
+     * nesledovala nově vystředěný obsah — stejný princip jako HeroLine.astro
+     * na homepage. JS `syncRoute()` v <script> výše měří skutečnou šířku SVG
+     * (`getBoundingClientRect`), takže se přizpůsobí automaticky beze
+     * změny kódu.
+     */
+    .sluzby__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .sluzby-hero,
+    .sluzby-router,
+    .sluzby-chapter--dominant,
+    .sluzby-chapter--plan,
+    .sluzby-areas,
+    .sluzby-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .sluzby-router__bar h2,
+    .sluzby-chapter__bar p,
+    .sluzby-areas__bar p {
+      /*
+       * 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100.
+       * Osa (120) je na desktopu o 20 px vpravo od skutečného okraje
+       * obsahu (100), viz poznámka u `data-axis`/`SiteFooter.astro` výše;
+       * zářez (36) sjednocen s BenefitsSection.astro na homepage
+       * 26. 8. 2026; mezera tečka→text (20) drží závaznou hranici
+       * z CLAUDE.md. Přesná kalibrace zářezu viz `dotOffset` v <script>
+       * výše.
+       */
+      padding-left: calc(76px + var(--sluzby-shift, 0px));
+    }
+
+    .sluzby-hero {
+      padding: 120px 100px 90px;
+      gap: 80px;
+    }
+
+    .sluzby-hero__text {
+      max-width: 640px;
+      gap: 18px;
+    }
+
+    .sluzby-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .sluzby-hero__lead {
+      font-size: 19px;
+    }
+
+    .sluzby-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .sluzby-hero__actions .sluzby-cta {
+      height: 58px;
+    }
+
+    .sluzby-router {
+      padding: 96px 100px 0;
+    }
+
+    .sluzby-router__bar {
+      width: 240px;
+    }
+
+    .sluzby-chapter--dominant {
+      padding: 88px 100px;
+    }
+
+    .sluzby-chapter--plan {
+      padding: 88px 100px;
+    }
+
+    .sluzby-chapter__bar {
+      width: 240px;
+    }
+
+    .sluzby-chapter__lead-col {
+      width: 600px;
+    }
+
+    .sluzby-chapter__lead-col h2 {
+      font-size: 56px;
+    }
+
+    .sluzby-chapter--plan .sluzby-chapter__lead-col h2 {
+      font-size: 48px;
+    }
+
+    .sluzby-areas {
+      padding: 88px 100px 0;
+    }
+
+    .sluzby-areas__bar {
+      width: 240px;
+    }
+
+    .sluzby-areas__bar p {
+      font-size: 28px;
+    }
+
+    .sluzby-areas__col h2 {
+      font-size: 28px;
+    }
+
+    .sluzby-closing {
+      padding-block: 96px;
+    }
+
+    .sluzby-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .sluzby-closing__glow {
+      height: 340px;
+    }
+
+    .sluzby-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+
+    .sluzby-closing__body {
+      max-width: 560px;
+    }
+  }
+</style>

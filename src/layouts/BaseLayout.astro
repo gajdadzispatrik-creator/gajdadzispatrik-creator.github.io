@@ -1,0 +1,81 @@
+---
+import '../styles/tokens.css';
+import '../styles/fonts.css';
+import '../styles/global.css';
+import CookieConsent from '../components/CookieConsent.astro';
+import { personEntity, websiteEntity } from '../data/entity';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Výchozí `index, follow`. Použij `noindex, follow` pro stránky, které
+   *  nemají být ve výsledcích vyhledávání (např. dočasně skrytý `/clanky`). */
+  robots?: string;
+  /** Open Graph typ — `website` pro většinu stránek, `profile` pro `/o-mne`. */
+  ogType?: string;
+  /** Doplňková strukturovaná data specifická pro danou stránku (Service,
+   *  ProfilePage, BreadcrumbList apod.) — sloučí se s globální Person/WebSite
+   *  entitou do jednoho `@graph`, Person/WebSite se NIKDY neduplikují. */
+  jsonLd?: Record<string, unknown>[];
+}
+
+const { title, description, robots = 'index, follow', ogType = 'website', jsonLd = [] } = Astro.props;
+
+// Canonical se počítá automaticky ze skutečné cesty stránky (žádná ruční
+// hodnota na 14 místech) — sjednoceno bez koncového lomítka (kromě domovské
+// stránky), stejná konvence jako všechny interní `href` na webu (viz
+// prelaunch audit, „Trailing slash“).
+const rawPath = Astro.url.pathname;
+const normalizedPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, -1) : rawPath;
+const canonicalURL = new URL(normalizedPath || '/', Astro.site).toString();
+
+const jsonLdGraph = {
+  '@context': 'https://schema.org',
+  '@graph': [websiteEntity, personEntity, ...jsonLd],
+};
+---
+
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonicalURL} />
+    <link
+      rel="preload"
+      href="/fonts/manrope/manrope-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <!-- ř, š, č, ž, ě, ů jsou v latin-ext — bez preloadu by v nadpisech probliklo náhradní písmo. -->
+    <link
+      rel="preload"
+      href="/fonts/manrope/manrope-latin-ext.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="Patrik Gajdadzis" />
+    <meta property="og:locale" content="cs_CZ" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLdGraph)} is:inline />
+  </head>
+  <body>
+    <a class="skip-link" href="#hero">Přeskočit na&nbsp;obsah</a>
+    <slot />
+    <CookieConsent />
+    <slot name="footer" />
+  </body>
+</html>

@@ -1,0 +1,48 @@
+---
+/**
+ * Sdílená definice barevného přechodu kontinuální linky — jediné místo,
+ * kde jsou zapsané hex hodnoty nájezdového gradientu (smaragdová → modrá).
+ * Používá HeroLine.astro i ConnectionsSection.astro, aby linka vypadala
+ * v obou místech vizuálně totožně. Mění se pouze geometrie (id, x1/y1/x2/y2)
+ * podle konkrétní trasy — barvy a zlomy gradientu se neduplikují jinam.
+ */
+interface Props {
+  id: string;
+  tier: 'desktop' | 'laptop' | 'tablet';
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+const { id, tier, x1, y1, x2, y2 } = Astro.props;
+
+const STOPS = {
+  desktop: [
+    { offset: '0%', color: '#1E7A5C', opacity: '0' },
+    { offset: '32%', color: '#1E7A5C', opacity: '.42' },
+    { offset: '68%', color: '#255E77', opacity: '.26' },
+    { offset: '100%', color: '#1B4A8A', opacity: '.18' },
+  ],
+  laptop: [
+    { offset: '0%', color: '#1E7A5C', opacity: '0' },
+    { offset: '32%', color: '#1E7A5C', opacity: '.39' },
+    { offset: '68%', color: '#255E77', opacity: '.25' },
+    { offset: '100%', color: '#1B4A8A', opacity: '.18' },
+  ],
+  tablet: [
+    { offset: '0%', color: '#1E7A5C', opacity: '0' },
+    { offset: '34%', color: '#1E7A5C', opacity: '.36' },
+    { offset: '70%', color: '#255E77', opacity: '.24' },
+    { offset: '100%', color: '#1B4A8A', opacity: '.18' },
+  ],
+} as const;
+
+const stops = STOPS[tier];
+---
+
+<linearGradient id={id} gradientUnits="userSpaceOnUse" x1={x1} y1={y1} x2={x2} y2={y2}>
+  {stops.map((stop) => (
+    <stop offset={stop.offset} stop-color={stop.color} stop-opacity={stop.opacity} />
+  ))}
+</linearGradient>

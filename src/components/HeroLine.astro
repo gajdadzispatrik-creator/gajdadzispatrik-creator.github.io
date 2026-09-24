@@ -1,0 +1,379 @@
+---
+import LineGradientDefs from './LineGradientDefs.astro';
+
+/**
+ * Kontinuální linka — dekorativní SVG, jedna varianta na breakpoint tier.
+ * Geometrie odpovídá souřadnicím z hero-implementation-spec.md §3 (přepočteno
+ * na souřadnice relativní k hero sekci, tj. bez výšky headeru).
+ * Zobrazení jednotlivých variant řeší CSS media queries v <style> níže.
+ *
+ * Barvy nájezdového gradientu jsou sdílené s ConnectionsSection.astro přes
+ * LineGradientDefs.astro — neduplikovat hex hodnoty zde.
+ *
+ * Hlavní linka je vrstevně pod fotografií (fotka ji může překrýt), ale nad
+ * statistickým pásem nesmí zmizet — pokračování do pásu (jen desktop a
+ * notebook) proto řeší samostatné SVG `hero-line-tail`, které leží nad
+ * pozadím pásu.
+ *
+ * Nájezdový gradient (LineGradientDefs) je definovaný vodorovně podle X
+ * (x1→x2 na stejném y), ne podle vzdálenosti po trase. Trasa se ale po
+ * velkém oblouku vrací zpátky doleva do STEJNÉHO rozsahu X (u desktopu
+ * 120–390), kterým už jednou prošla na začátku — takže by se gradient
+ * (včetně jeho průhledného začátku na x1) znovu aplikoval i na zpáteční
+ * úsek a finální svislici dolů k pásu, které by tak vyšly téměř neviditelné,
+ * i když geometricky správně na místě. Řešení: hlavní trasa (`--line` @ .18)
+ * kreslí jen úsek OD KONCE nájezdu dál (její `M` začíná na x2, ne na x1) a
+ * samostatná krátká `hero-line__entry` cesta (přesně délky nájezdu, stejné
+ * x1→x2 jako gradient) kreslí úsek PŘED ní — na sebe navazují bez překryvu.
+ * Opraveno 1. 9. 2026: dřív se obě cesty na úseku nájezdu PŘEKRÝVALY (hlavní
+ * trasa kreslila i tenhle úsek, entry přes ni) — dva poloprůhledné tahy
+ * stejné barvy nad sebou (entry @ 100 % = `--line` @ .18, hlavní taky @ .18)
+ * se opticky sečtou na vyšší výslednou krytí než samotných .18, takže na
+ * konci nájezdu vznikal viditelný skok krytí/tloušťky („zub“ nahlášený
+ * uživatelem — vypadalo to jako tučná linka měnící se na tenčí). Bez
+ * překryvu žádné sčítání není, přechod je matematicky hladký až do bodu,
+ * kde gradient skutečně končí na stejné barvě/opacitě jako hlavní trasa.
+ */
+---
+
+<svg
+  class="hero-line hero-line--desktop"
+  viewBox="0 0 1440 804"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <LineGradientDefs id="line-entry-desktop" tier="desktop" x1={120} y1={400} x2={390} y2={400} />
+  </defs>
+  <path
+    class="hero-line__path"
+    d="M390,400 L1152,400 Q1180,400 1180,428 L1180,616 Q1180,644 1152,644 L148,644 Q120,644 120,672 L120,804"
+    fill="none"
+    stroke="var(--line)"
+    stroke-opacity=".18"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+  <path
+    class="hero-line__path hero-line__entry"
+    d="M120,400 L390,400"
+    fill="none"
+    stroke="url(#line-entry-desktop)"
+    stroke-width="1"
+    stroke-linecap="round"
+  ></path>
+</svg>
+
+<svg
+  class="hero-line hero-line--laptop"
+  viewBox="0 0 1366 792"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <LineGradientDefs id="line-entry-laptop" tier="laptop" x1={96} y1={376} x2={346} y2={376} />
+  </defs>
+  <path
+    class="hero-line__path"
+    d="M346,376 L1096,376 Q1124,376 1124,404 L1124,604 Q1124,632 1096,632 L124,632 Q96,632 96,660 L96,792"
+    fill="none"
+    stroke="var(--line)"
+    stroke-opacity=".18"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+  <path
+    class="hero-line__path hero-line__entry"
+    d="M96,376 L346,376"
+    fill="none"
+    stroke="url(#line-entry-laptop)"
+    stroke-width="1"
+    stroke-linecap="round"
+  ></path>
+</svg>
+
+<svg
+  class="hero-line hero-line--tablet"
+  viewBox="0 0 834 656"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <LineGradientDefs id="line-entry-tablet" tier="tablet" x1={40} y1={246} x2={240} y2={246} />
+  </defs>
+  <path
+    class="hero-line__path"
+    d="M240,246 L662,246 Q684,246 684,268 L684,506 Q684,528 662,528 L62,528 Q40,528 40,550 L40,656"
+    fill="none"
+    stroke="var(--line)"
+    stroke-opacity=".18"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+  <path
+    class="hero-line__path hero-line__entry"
+    d="M40,246 L240,246"
+    fill="none"
+    stroke="url(#line-entry-tablet)"
+    stroke-width="1"
+    stroke-linecap="round"
+  ></path>
+</svg>
+
+<!--
+  Tablet 1000–1199: samostatný mezistupeň v rámci tabletového rozsahu.
+  Nadpis na tabletu roste font-sizem rychleji, než roste výška hero sekce
+  (fotkou tažená), takže jedna souřadnice roztažená přes celých 768–1199 px
+  by od ~1000 px zajížděla do nadpisu. Kalibrováno na střed tohoto podrozsahu
+  (1100 px), ne na jeho okraj, aby odchylka na obou koncích zůstala stejná
+  a nikde nepřesáhla mezeru mezi nadpisem a podnadpisem (viz ověření v
+  konverzaci — clearance min. ~20 px na 1000 i 1199 px).
+-->
+<svg
+  class="hero-line hero-line--tablet-wide"
+  viewBox="0 0 1100 724"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <LineGradientDefs id="line-entry-tablet-wide" tier="tablet" x1={40} y1={308} x2={240} y2={308} />
+  </defs>
+  <path
+    class="hero-line__path"
+    d="M240,308 L662,308 Q684,308 684,330 L684,572 Q684,594 662,594 L62,594 Q40,594 40,616 L40,724"
+    fill="none"
+    stroke="var(--line)"
+    stroke-opacity=".18"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+  <path
+    class="hero-line__path hero-line__entry"
+    d="M40,308 L240,308"
+    fill="none"
+    stroke="url(#line-entry-tablet-wide)"
+    stroke-width="1"
+    stroke-linecap="round"
+  ></path>
+</svg>
+
+<svg
+  class="hero-line hero-line--mobile"
+  viewBox="0 0 390 764"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path
+    class="hero-line__path hero-line__path--mobile"
+    d="M0,206 L360,206 Q378,206 378,224 L378,764"
+    fill="none"
+    stroke="var(--line-on-dark)"
+    stroke-opacity=".34"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+</svg>
+
+<!-- Pokračování linky do statistického pásu — jen desktop a notebook, viz spec §2.3 "Sestup linky pod pásem" -->
+<svg
+  class="hero-line-tail hero-line-tail--desktop"
+  viewBox="0 0 1440 96"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient id="line-tail-desktop" gradientUnits="userSpaceOnUse" x1="120" y1="0" x2="120" y2="96">
+      <stop offset="0%" stop-color="#9CB6D4" stop-opacity=".3" />
+      <stop offset="100%" stop-color="#9CB6D4" stop-opacity=".12" />
+    </linearGradient>
+  </defs>
+  <path
+    class="hero-line__path"
+    d="M120,0 L120,96"
+    fill="none"
+    stroke="url(#line-tail-desktop)"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+</svg>
+
+<svg
+  class="hero-line-tail hero-line-tail--laptop"
+  viewBox="0 0 1366 96"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient id="line-tail-laptop" gradientUnits="userSpaceOnUse" x1="96" y1="0" x2="96" y2="96">
+      <stop offset="0%" stop-color="#9CB6D4" stop-opacity=".3" />
+      <stop offset="100%" stop-color="#9CB6D4" stop-opacity=".12" />
+    </linearGradient>
+  </defs>
+  <path
+    class="hero-line__path"
+    d="M96,0 L96,96"
+    fill="none"
+    stroke="url(#line-tail-laptop)"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+</svg>
+
+<style>
+  .hero-line {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero-line__path {
+    stroke-dasharray: 2400;
+    stroke-dashoffset: 2400;
+    animation: draw-line var(--duration-line) var(--ease-out) 200ms forwards;
+  }
+
+  @keyframes draw-line {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .hero-line--desktop,
+  .hero-line--laptop,
+  .hero-line--tablet,
+  .hero-line--tablet-wide {
+    display: none;
+  }
+
+  .hero-line--mobile {
+    display: block;
+  }
+
+  /*
+   * .hero-line je sourozenec .hero uvnitř .hero-group (position:relative),
+   * takže height:100% se počítá vůči celé skupině (hero + statistický pás),
+   * ne vůči samotné hero sekci — bez explicitní výšky se linka svisle
+   * roztahovala a sjížděla níž, než odpovídá viewBoxu. Výška proto musí
+   * přesně sledovat stejný vzorec jako .hero { min-height } v Hero.astro.
+   */
+  .hero-line--mobile {
+    height: 764px;
+  }
+
+  .hero-line--tablet,
+  .hero-line--tablet-wide,
+  .hero-line--laptop {
+    height: clamp(656px, calc(656px + 0.255639 * (100vw - 834px)), 792px);
+  }
+
+  .hero-line--desktop {
+    height: clamp(792px, calc(792px + 0.162162 * (100vw - 1366px)), 804px);
+  }
+
+  /* Vede pod statistickým pásem — schovaná pod jeho neprůhledným pozadím (StatsBand.astro má z-index:2), ne přes něj. */
+  .hero-line-tail {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 96px;
+    pointer-events: none;
+    z-index: 1;
+    display: none;
+  }
+
+  .hero-line-tail--desktop {
+    top: clamp(792px, calc(792px + 0.162162 * (100vw - 1366px)), 804px);
+  }
+
+  .hero-line-tail--laptop {
+    top: clamp(656px, calc(656px + 0.255639 * (100vw - 834px)), 792px);
+  }
+
+  @media (min-width: 768px) {
+    .hero-line--mobile {
+      display: none;
+    }
+
+    .hero-line--tablet {
+      display: block;
+    }
+  }
+
+  @media (min-width: 1000px) {
+    .hero-line--tablet {
+      display: none;
+    }
+
+    .hero-line--tablet-wide {
+      display: block;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .hero-line--tablet-wide {
+      display: none;
+    }
+
+    .hero-line--laptop {
+      display: block;
+    }
+
+    .hero-line-tail--laptop {
+      display: block;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .hero-line--laptop {
+      display: none;
+    }
+
+    .hero-line--desktop {
+      display: block;
+    }
+
+    .hero-line-tail--laptop {
+      display: none;
+    }
+
+    .hero-line-tail--desktop {
+      display: block;
+    }
+
+    /*
+     * Wide desktop: centrované designové plátno (CLAUDE.md). `.hero-line`
+     * je sourozenec `.hero` uvnitř `.hero-group` (viz komentář výše), ne
+     * jeho potomek — vlastní `max-width`/centrování na `.hero` (Hero.astro)
+     * se sem NEPROMÍTNE automaticky. Musí dostat stejný strop samostatně,
+     * jinak by se nad --stage-max linka rozjela od nově vystředěného obsahu.
+     * `.stats-band` (taky sourozenec) strop záměrně NEDOSTÁVÁ — je to
+     * plnobarevný pás, který smí zůstat full-width (CLAUDE.md, „1. Full-width
+     * layer“).
+     */
+    .hero-line--desktop,
+    .hero-line-tail--desktop {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+  }
+</style>

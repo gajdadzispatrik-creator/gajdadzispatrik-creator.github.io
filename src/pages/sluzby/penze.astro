@@ -1,0 +1,1889 @@
+---
+/**
+ * Stránka /sluzby/penze — detail páté (poslední) služby. Zdroj pravdy pro
+ * OBSAH, pořadí sekcí a role: úkol „Úkol pro Claude Code — podstránka
+ * /sluzby/penze" (8. 9. 2026) + `docs/content-subpages.md`, kapitola
+ * `/sluzby/penze` (kompletní, NÁVRH K UŽIVATELSKÉMU SCHVÁLENÍ — copy
+ * převzata doslovně, beze změny). Zdroj pravdy pro VŠECHNY hodnoty
+ * sdílené kostry (osa, pruh, zářez, vnitřní rozpad, hero padding, gap
+ * mezi pruhem a obsahem, velikost/barva kotev, technika ohybu v hero,
+ * typografická škála): `src/pages/sluzby/investice.astro` — na výslovné
+ * přání uživatele, sekundárně `pojisteni.astro`/`financni-plan.astro`/
+ * `hypoteky.astro`.
+ *
+ * ROZPOR MEZI ZADÁNÍM A SKUTEČNOU IMPLEMENTACÍ SOUROZENCŮ (nahlášeno,
+ * ne mlčky vyřešeno) — §8 zadání „Nájezd trasy — dvě podmínky" popisuje
+ * nájezdový gradient i ohyb trasy umístěný v mezeře MEZI hero a první
+ * kapitolou (nájezd začíná pod spodní hranou hero). Žádná ze čtyř
+ * sourozeneckých stránek (hypoteky/financni-plan/pojisteni/investice)
+ * tuhle geometrii neimplementuje — všechny mají nájezd na OPAČNÉM konci
+ * hero (hned pod hlavičkou, y=40–140) a ohyb UVNITŘ hero (těsně pod
+ * textem/CTA). Explicitně dotázáno v tomto sezení — uživatel potvrdil
+ * ponechat techniku sourozenců beze změny (viz §1 zadání: „pokud pro
+ * nějakou roli v sourozencích nenajdeš vzor, zastav se a zeptej").
+ * `entryLength` se stejně jako v `investice.astro` dopočítává za běhu ze
+ * skutečné mezery mezi y=40 a bodem ohybu (`bendY - r`), ne z pevné
+ * konstanty — to je zavedená technika investice.astro, ne odchylka.
+ *
+ * Mapování osmi kapitol zadání na strukturní vzory `investice.astro`/
+ * `pojisteni.astro` (žádná nová kompozice, jen převzetí existujícího
+ * vzoru pro danou roli; nová je jen kapitola Zdroje, viz níže):
+ * 1) Částka (dominantní) — vzor „Cíl" na investice.astro MINUS
+ *    eyebrow+seznam (tady žádný není): `__top` řádek (lead-col H2 +
+ *    support-col se třemi odstavci, dva z nich přesunuté z `/sluzby`),
+ *    statement na smaragdové svislici.
+ * 2) Příjem — vzor „Cíl" 1:1 (eyebrow+seznam v support-col), ale
+ *    NAVÍC třetí blok — odstavec PO seznamu (podle zadání §7) — support-col
+ *    má tři bloky (odstavec, eyebrow+seznam, odstavec), každý oddělený
+ *    stejným větším gapem jako přechod na seznam u „Cíl".
+ * 3) Zdroje — NOVÝ prvek „významová návaznost" (zadání §6), který
+ *    v žádném sourozenci neexistuje. Postaven na vzoru `.fp-chain`
+ *    z `financni-plan.astro` (velká typografická sazba, ne diagram,
+ *    stejná škála 21/30/36/40px, `margin-top` jako jediný zdroj mezery
+ *    k `__top` nad ním — `gap` rodiče vypnutý stejnou technikou jako
+ *    `.fp-chapter__content--souvislosti`). Na mobilu/tabletu se šipky
+ *    (`aria-hidden`) skrývají a tři pojmy se skládají pod sebe na tiché
+ *    svislici (`--line`, ne emerald statement svislice) — jediné místo
+ *    na stránce, kde se mobilní kompozice liší od desktopu (zadání §6).
+ * 4) Role — vzor „Rozpočet"/„Riziko" na investice.astro (`__top` +
+ *    `rows` + statement), ale řádky nesou `<h3>` místo `<span>` (zadání
+ *    §12, přístupnostní požadavek pro tuhle konkrétní kapitolu — jen tři
+ *    položky, ne pět).
+ * 5) Kontrola — vzor „Portfolio" na investice.astro 1:1 (statement hned
+ *    pod H2 v lead-col, dva odstavce v support-col, normální barva pruhu)
+ *    — v zadání §5 výslovně potvrzeno jako stejný půdorys.
+ * 6) Průběh — vzor „Průběh" 1:1, šest kroků (stejně jako investice.astro).
+ * 7) Využití — vzor „Riziko" MINUS rows (jen `__top` + statement,
+ *    normální barva pruhu — zadání u ní na rozdíl od Otázek neuvádí
+ *    tlumenou barvu).
+ * 8) Otázky — vzor „Otázky" 1:1 (tlumený pruh, FAQ dl/dt/dd, šest otázek).
+ *
+ * TRASA — stejná technika jako investice.astro: jedna souvislá cesta od
+ * hero až po tmavé závěrečné CTA, `axisScaled` procentuální přepočet pro
+ * wide-desktop stage, nájezdový gradient s dynamicky dopočítanou délkou
+ * jen na desktopu/notebooku (tablet/mobil hero bez trasy vůbec), OSM
+ * kotev (castka/prijem/zdroje/role/kontrola/prubeh/vyuziti/otazky),
+ * tmavé CTA bez kotvy/zářezu.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import LineGradientDefs from '../../components/LineGradientDefs.astro';
+import { PERSON_ID, breadcrumbList } from '../../data/entity';
+
+const SERVICE_NAME = 'Plánování penze a důchodu';
+const SERVICE_DESCRIPTION =
+  'Pomohu vám spočítat, jaký majetek budete potřebovat na penzi a jak ho postupně vytvářet. Plánování penze v Ostravě nebo online po celé ČR.';
+const penzeJsonLd = [
+  {
+    '@type': 'Service',
+    name: SERVICE_NAME,
+    description: SERVICE_DESCRIPTION,
+    url: 'https://patrikgajdadzis.cz/sluzby/penze',
+    provider: { '@id': PERSON_ID },
+    areaServed: [
+      { '@type': 'City', name: 'Ostrava' },
+      { '@type': 'Country', name: 'Česko' },
+    ],
+  },
+  breadcrumbList([
+    { name: 'Domů', path: '/' },
+    { name: 'Služby', path: '/sluzby' },
+    { name: SERVICE_NAME, path: '/sluzby/penze' },
+  ]),
+];
+
+const prijemItems: string[] = [
+  'požadovaný měsíční příjem,',
+  'očekávané výdaje,',
+  'bydlení a závazky,',
+  'předpokládaný věk odchodu do penze,',
+  'dobu, po kterou má vlastní majetek sloužit.',
+];
+
+interface RowItem {
+  name: string;
+  text: string;
+}
+
+const roleItems: RowItem[] = [
+  { name: 'Penzijní produkty', text: 'Doplňkové penzijní spoření a dlouhodobý investiční produkt mohou mít v plánu svou roli — podrobnosti k jejich pravidlům a podmínkám patří do samostatných odborných článků, kde je lze průběžně aktualizovat.' },
+  { name: 'Dlouhodobé investice', text: 'Mohou sloužit k vytváření majetku pro budoucí příjem, ale nesou riziko a jejich vhodnost závisí na konkrétní situaci klienta.' },
+  { name: 'Další majetek', text: 'Součástí plánu může být i další majetek, pokud může v budoucnu přinášet příjem nebo být využit k financování penze.' },
+];
+
+interface Step {
+  heading: string;
+  text: string;
+}
+
+const steps: Step[] = [
+  { heading: 'Ujasníme si váš cíl', text: 'Jaký příjem budete chtít mít a kdy chcete začít využívat vytvořený majetek.' },
+  { heading: 'Projdeme současné zdroje', text: 'Státní důchod podle dostupných podkladů, úspory, investice, penzijní produkty a další relevantní majetek.' },
+  { heading: 'Spočítáme potřebný majetek', text: 'Odhadneme, kolik bude potřeba vytvořit a jakou část mohou pokrýt současné prostředky a budoucí pravidelné investice.' },
+  { heading: 'Nastavíme další postup', text: 'Podíváme se na vhodné možnosti podle času, rizika, dostupnosti peněz a vašich ostatních finančních priorit.' },
+  { heading: 'Pomohu s realizací', text: 'Pokud se rozhodnete doporučené kroky provést, pomohu vám s jejich nastavením.' },
+  { heading: 'K plánu se budeme vracet', text: 'Když se změní příjem, cíle, majetek nebo pravidla, má smysl plán znovu projít a případně upravit.' },
+];
+
+interface Faq {
+  q: string;
+  a: string;
+}
+
+const faqs: Faq[] = [
+  { q: 'Kdy je nejlepší začít řešit penzi?', a: 'Čím více času máte, tím větší prostor zpravidla získáte pro postupné vytváření majetku. Smysl ale má začít i později. Důležité je zjistit, jaká je vaše současná situace a jaké možnosti ještě máte.' },
+  { q: 'Kolik si mám měsíčně odkládat na penzi?', a: 'Záleží na požadovaném příjmu, době do penze, současném majetku a předpokladech použitého výpočtu. Univerzální částka proto neexistuje. Nejdřív potřebujeme spočítat váš konkrétní cíl.' },
+  { q: 'Stačí mi doplňkové penzijní spoření?', a: 'To záleží na tom, kolik odkládáte, jak dlouho, jak jsou prostředky investované a jaký majetek chcete vytvořit. Penzijní spoření může být užitečnou součástí plánu, ale samo o sobě nezaručuje, že budete mít v penzi dostatek peněz.' },
+  { q: 'Jaký je rozdíl mezi DPS a DIP?', a: 'Jde o odlišné způsoby dlouhodobého zajištění na stáří s různými pravidly a možnostmi investování. Při výběru je potřeba zohlednit konkrétní podmínky, náklady, riziko, dostupnost prostředků a případné daňové výhody. Aktuální pravidla projdeme podle vaší situace.' },
+  { q: 'Co když už mám penzijní spoření nebo investice?', a: 'Nejdřív se podíváme na současné nastavení. Pokud odpovídá vašemu cíli, není důvod ho měnit jen kvůli změně poradce.' },
+  { q: 'Můžu si naplánovat penzi dříve než ve státním důchodovém věku?', a: 'Ano. Pokud chcete přestat pracovat dříve nebo postupně omezit pracovní příjem, můžeme spočítat, jaký vlastní majetek byste k tomu potřebovali. Výsledek závisí na vašich cílech, současných prostředcích a použitých předpokladech.' },
+];
+---
+
+<BaseLayout
+  title="Plánování penze a důchodu | Patrik Gajdadzis"
+  description={SERVICE_DESCRIPTION}
+  jsonLd={penzeJsonLd}
+>
+  <Header />
+  <main id="hero" class="pen">
+    <div class="pen__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`pen__route-svg pen__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2600`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                <LineGradientDefs id={`pen-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="pen__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="pen__route-path pen__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#pen-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="pen__route-path pen__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['castka', 'prijem', 'zdroje', 'role', 'kontrola', 'prubeh', 'vyuziti', 'otazky'] as const).map((marker) => (
+              <g class="pen__marker" data-marker={marker}>
+                <line class="pen__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="pen__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="pen-hero" aria-labelledby="pen-hero-heading">
+      <nav class="pen-breadcrumb" aria-label="Drobečková navigace">
+        <ol>
+          <li><a href="/sluzby">Služby</a></li>
+          <li aria-current="page">Penze</li>
+        </ol>
+      </nav>
+
+      <div class="pen-hero__text">
+        <h1 id="pen-hero-heading" data-reveal>Na&nbsp;penzi potřebujete plán, ne jen penzijní produkt.</h1>
+        <p class="pen-hero__lead" data-reveal>
+          Nejdřív si ujasníme, jaký příjem budete chtít mít, kdy chcete přestat pracovat a&nbsp;jaký majetek už
+          vytváříte. Potom spočítáme, kolik bude potřeba postupně odkládat a&nbsp;jakou roli mohou mít ve&nbsp;vašem
+          plánu investice, penzijní produkty nebo další majetek.
+        </p>
+        <div class="pen-hero__actions" data-reveal>
+          <a class="pen-cta" href="/#kontakt">Nezávazná konzultace</a>
+          <a class="pen-phone" href="tel:+420775217721">
+            <svg class="pen-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="pen-chapter pen-chapter--castka" aria-labelledby="castka-heading">
+      <div class="pen-chapter__bar" data-reveal data-route-target="castka">
+        <p>Částka</p>
+      </div>
+
+      <div class="pen-chapter__content">
+        <div class="pen-chapter__top">
+          <div class="pen-chapter__lead-col" data-reveal>
+            <h2 id="castka-heading" class="pen-h2--dominant">Důležitější než název produktu je vědět, kolik budete potřebovat.</h2>
+          </div>
+          <div class="pen-chapter__support-col" data-reveal>
+            <p class="pen-support__text">
+              Mít penzijní spoření ještě neznamená mít vyřešenou penzi. Stejně tak samotná výše pravidelného
+              příspěvku neříká, jestli vám vytvořený majetek bude stačit.
+            </p>
+            <p class="pen-support__text">
+              Nejdřív potřebujeme vědět, jaký příjem budete chtít mít, kolik let zbývá do&nbsp;penze a&nbsp;jaký
+              majetek už vytváříte.
+            </p>
+            <p class="pen-support__text">
+              Z&nbsp;toho lze určit, kolik bude potřeba dlouhodobě odkládat a&nbsp;jakou roli mají ve&nbsp;vašem
+              plánu investice, penzijní produkty nebo další majetek.
+            </p>
+          </div>
+        </div>
+
+        <p class="pen-chapter__statement" data-reveal>
+          Cílem není mít penzijko. Cílem je mít z&nbsp;čeho žít.
+        </p>
+      </div>
+    </section>
+
+    <section class="pen-chapter pen-chapter--prijem" aria-labelledby="prijem-heading">
+      <div class="pen-chapter__bar" data-reveal data-route-target="prijem">
+        <p>Příjem</p>
+      </div>
+
+      <div class="pen-chapter__content">
+        <div class="pen-chapter__top">
+          <div class="pen-chapter__lead-col" data-reveal>
+            <h2 id="prijem-heading" class="pen-h2--std">Začněme tím, jak chcete v&nbsp;penzi žít.</h2>
+          </div>
+          <div class="pen-chapter__support-col" data-reveal>
+            <p class="pen-support__text">
+              Někdo chce po&nbsp;skončení kariéry výrazně omezit výdaje. Jiný chce cestovat, pomáhat dětem nebo
+              si zachovat podobnou životní úroveň jako dnes. Od&nbsp;toho se&nbsp;odvíjí i&nbsp;částka, kterou bude
+              potřeba vytvořit.
+            </p>
+            <div class="pen-prijem__list-block">
+              <p class="pen-eyebrow">Při plánování řešíme</p>
+              <ul class="pen-chapter__list">
+                {prijemItems.map((item) => <li>{item}</li>)}
+              </ul>
+            </div>
+            <p class="pen-support__text">
+              Důležité je počítat také s&nbsp;tím, že za&nbsp;několik desetiletí budou mít peníze jinou kupní sílu
+              než dnes.
+            </p>
+          </div>
+        </div>
+
+        <p class="pen-chapter__statement" data-reveal>
+          Nejdřív si určeme, jaký život má majetek financovat. Potom můžeme počítat, kolik ho bude potřeba.
+        </p>
+      </div>
+    </section>
+
+    <section class="pen-chapter pen-chapter--zdroje" aria-labelledby="zdroje-heading">
+      <div class="pen-chapter__bar" data-reveal data-route-target="zdroje">
+        <p>Zdroje</p>
+      </div>
+
+      <div class="pen-chapter__content">
+        <div class="pen-chapter__top">
+          <div class="pen-chapter__lead-col" data-reveal>
+            <h2 id="zdroje-heading" class="pen-h2--std">Možná už máte část penze vyřešenou. Možná zatím nevíte, jak velkou.</h2>
+          </div>
+          <div class="pen-chapter__support-col" data-reveal>
+            <p class="pen-support__text">
+              Při plánování se&nbsp;podíváme na&nbsp;dostupný odhad státního důchodu, současné úspory, investice,
+              penzijní produkty a&nbsp;další majetek, který může v&nbsp;budoucnu přinášet příjem nebo sloužit
+              k&nbsp;financování penze.
+            </p>
+            <p class="pen-support__text">
+              Potom můžeme odhadnout rozdíl mezi příjmem, který budete chtít mít, a&nbsp;prostředky, které už máte
+              nebo pravděpodobně vytvoříte.
+            </p>
+          </div>
+        </div>
+
+        <p class="pen-navaznost" data-reveal>
+          <span class="pen-navaznost__term">Požadovaný příjem</span>
+          <span class="pen-navaznost__sep" aria-hidden="true">→</span>
+          <span class="pen-navaznost__term">dostupné zdroje</span>
+          <span class="pen-navaznost__sep" aria-hidden="true">→</span>
+          <span class="pen-navaznost__term">částka, kterou je potřeba vytvořit.</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="pen-chapter pen-chapter--role" aria-labelledby="role-heading">
+      <div class="pen-chapter__bar" data-reveal data-route-target="role">
+        <p>Role</p>
+      </div>
+
+      <div class="pen-chapter__content">
+        <div class="pen-chapter__top">
+          <div class="pen-chapter__lead-col" data-reveal>
+            <h2 id="role-heading" class="pen-h2--std">Penzijní produkt je jedna z&nbsp;možností. Ne celý plán.</h2>
+          </div>
+          <div class="pen-chapter__support-col" data-reveal>
+            <p class="pen-support__text">
+              Doplňkové penzijní spoření, dlouhodobý investiční produkt, běžné investice nebo další majetek mohou
+              mít při přípravě na&nbsp;penzi různé role. Liší se&nbsp;pravidly, dostupností peněz, náklady,
+              rizikem i&nbsp;případnými daňovými výhodami nebo příspěvky zaměstnavatele.
+            </p>
+            <p class="pen-support__text">
+              Nejdřív proto potřebujeme vědět, co má konkrétní část majetku plnit. Až potom dává smysl vybírat
+              způsob, jakým ji budete vytvářet.
+            </p>
+          </div>
+        </div>
+
+        <ul class="pen-rows" data-reveal>
+          {
+            roleItems.map((r) => (
+              <li class="pen-rows__row">
+                <h3 class="pen-rows__name">{r.name}</h3>
+                <span class="pen-rows__text">{r.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p class="pen-chapter__statement" data-reveal>
+          Výhoda produktu má smysl jen tehdy, když zapadá do&nbsp;vašeho plánu.
+        </p>
+      </div>
+    </section>
+
+    <section class="pen-chapter pen-chapter--kontrola" aria-labelledby="kontrola-heading">
+      <div class="pen-chapter__bar" data-reveal data-route-target="kontrola">
+        <p>Kontrola</p>
+      </div>
+
+      <div class="pen-chapter__content">
+        <div class="pen-chapter__lead-col" data-reveal>
+          <h2 id="kontrola-heading" class="pen-h2--std">Nejdřív zjistíme, jestli vás současné nastavení vede k&nbsp;cíli.</h2>
+          <p class="pen-chapter__statement" data-reveal>Nejde o&nbsp;to změnit produkt. Jde o&nbsp;to zjistit, jestli vás současný plán dovede tam, kam chcete.</p>
+        </div>
+
+        <div class="pen-chapter__support-col" data-reveal>
+          <p class="pen-support__text">
+            Pokud už máte penzijní spoření, DIP nebo jiné investice na&nbsp;penzi, není důvod začínat automaticky
+            od&nbsp;nuly. Podíváme se, kolik odkládáte, jak jsou prostředky investované, jaké jsou náklady
+            a&nbsp;zda současný postup odpovídá vašemu cíli a&nbsp;času, který zbývá.
+          </p>
+          <p class="pen-support__text">
+            Může se&nbsp;ukázat, že není potřeba nic měnit. Pokud najdeme něco, co stojí za&nbsp;úpravu, vysvětlím
+            vám proč a&nbsp;jaké jsou možnosti.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="pen-chapter pen-chapter--prubeh" aria-labelledby="prubeh-heading">
+      <div class="pen-chapter__bar" data-reveal data-route-target="prubeh">
+        <p>Průběh</p>
+      </div>
+
+      <div class="pen-chapter__content pen-chapter__content--single">
+        <h2 id="prubeh-heading" class="pen-h2--std pen-h2--prubeh" data-reveal>Od&nbsp;představy o&nbsp;penzi ke&nbsp;konkrétnímu plánu.</h2>
+
+        <ol class="pen-steps" data-reveal>
+          {
+            steps.map((step, i) => (
+              <li class={`pen-step${i === 0 ? ' pen-step--first' : ''}`}>
+                <span class="pen-step__marker" aria-hidden="true"></span>
+                {i < steps.length - 1 && <span class="pen-step__connector" aria-hidden="true"></span>}
+                <h3>{step.heading}</h3>
+                <p>{step.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="pen-chapter pen-chapter--vyuziti" aria-labelledby="vyuziti-heading">
+      <div class="pen-chapter__bar" data-reveal data-route-target="vyuziti">
+        <p>Využití</p>
+      </div>
+
+      <div class="pen-chapter__content">
+        <div class="pen-chapter__top">
+          <div class="pen-chapter__lead-col" data-reveal>
+            <h2 id="vyuziti-heading" class="pen-h2--std">Důležité je i&nbsp;to, jak budete majetek později využívat.</h2>
+          </div>
+          <div class="pen-chapter__support-col" data-reveal>
+            <p class="pen-support__text">
+              Vytvořit majetek je jedna část plánu. Druhá je rozhodnout, jak z&nbsp;něj budete postupně financovat
+              svůj život, až přestanete pracovat nebo omezíte příjem.
+            </p>
+            <p class="pen-support__text">
+              Při plánování proto dává smysl přemýšlet také o&nbsp;dostupné rezervě, postupném výběru prostředků,
+              investičním riziku a&nbsp;o&nbsp;tom, jak se&nbsp;může měnit vaše potřeba peněz v&nbsp;různých
+              obdobích penze.
+            </p>
+          </div>
+        </div>
+
+        <p class="pen-chapter__statement" data-reveal>
+          Majetek nemá jen růst. Jednou má sloužit vám.
+        </p>
+      </div>
+    </section>
+
+    <section class="pen-chapter pen-chapter--faq" aria-labelledby="otazky-heading">
+      <div class="pen-chapter__bar pen-chapter__bar--muted" data-reveal data-route-target="otazky">
+        <p id="otazky-heading">Otázky</p>
+      </div>
+
+      <div class="pen-chapter__content pen-chapter__content--single">
+        <dl class="pen-faq" data-reveal>
+          {
+            faqs.map((faq) => (
+              <div class="pen-faq__row">
+                <dt>{faq.q}</dt>
+                <dd>{faq.a}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="pen-closing" aria-labelledby="pen-closing-heading">
+      <div class="pen-closing__glow" aria-hidden="true"></div>
+
+      <div class="pen-closing__grid">
+        <h2 id="pen-closing-heading" data-reveal>Pojďme zjistit, jak jste na&nbsp;tom s&nbsp;přípravou na&nbsp;penzi.</h2>
+
+        <div class="pen-closing__body" data-reveal>
+          <p>
+            Ať teprve začínáte, už si pravidelně odkládáte nebo chcete vědět, jestli vám současný plán bude stačit,
+            na&nbsp;první konzultaci si ujasníme vaši situaci a&nbsp;další postup.
+          </p>
+
+          <div class="pen-closing__actions">
+            <a class="pen-cta pen-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="pen-phone pen-phone--dark" href="tel:+420775217721">
+              <svg class="pen-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.pen');
+  const routeWrap = document.querySelector('.pen__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.pen__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.pen-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.pen-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.pen-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.pen-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      castka: main.querySelector('[data-route-target="castka"]'),
+      prijem: main.querySelector('[data-route-target="prijem"]'),
+      zdroje: main.querySelector('[data-route-target="zdroje"]'),
+      role: main.querySelector('[data-route-target="role"]'),
+      kontrola: main.querySelector('[data-route-target="kontrola"]'),
+      prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      vyuziti: main.querySelector('[data-route-target="vyuziti"]'),
+      otazky: main.querySelector('[data-route-target="otazky"]'),
+    } as const;
+
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_MAX_LENGTH = 100;
+    const HERO_ENTRY_MIN_LENGTH = 40;
+    const HERO_ENTRY_GAP_BEFORE_BEND = 20;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number, entryEndY: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${entryEndY} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      // Stejná technika jako sourozenci — ohyb 40px pod patou hero textu
+      // (H1+lead+CTA), s ochranou 260..heroBottom-20.
+      let bendY = 260;
+      if (heroTextEl) {
+        const textRect = heroTextEl.getBoundingClientRect();
+        const textBottom = textRect.bottom - mainRect.top;
+        bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+      }
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.pen__route-path:not(.pen__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.pen__route-path--dark') as SVGPathElement | null;
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--pen-shift', `${shift}px`);
+        }
+
+        if (isHero) {
+          // Nájezd: délka dopočítaná ze skutečné mezery mezi y=40 a bodem
+          // ohybu (bendY-r), ne převzatá jako pevná konstanta odjinud —
+          // viz hlavičkový komentář stránky.
+          const available = bendY - r - HERO_ENTRY_START_Y - HERO_ENTRY_GAP_BEFORE_BEND;
+          const entryLength = Math.min(HERO_ENTRY_MAX_LENGTH, Math.max(HERO_ENTRY_MIN_LENGTH, available));
+          const entryEndY = HERO_ENTRY_START_Y + entryLength;
+
+          const gradient = svg.querySelector('linearGradient');
+          if (gradient) gradient.setAttribute('y2', String(entryEndY));
+
+          const entryPath = svg.querySelector('.pen__route-entry') as SVGPathElement | null;
+          if (entryPath) entryPath.setAttribute('d', `M ${entryX} ${HERO_ENTRY_START_Y} L ${entryX} ${entryEndY}`);
+
+          if (lightPath) lightPath.setAttribute('d', heroArcPath(entryX, axisScaled, r, bendY, closingTop, entryEndY));
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.pen__notch');
+          const dot = group.querySelector('.pen__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.pen__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.pen__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+</script>
+
+<style>
+  .pen {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .pen__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .pen__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pen__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .pen__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .pen__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .pen__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .pen__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .pen__route-svg--tablet,
+  .pen__route-svg--laptop,
+  .pen__route-svg--desktop {
+    display: none;
+  }
+
+  .pen :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .pen-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .pen-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .pen-cta:active {
+    transform: translateY(1px);
+  }
+
+  .pen-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .pen-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .pen-phone:hover {
+    color: var(--emerald);
+  }
+
+  .pen-phone--dark {
+    color: var(--white);
+  }
+
+  .pen-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Drobečková navigace ---------- */
+
+  .pen-breadcrumb {
+    margin-bottom: 20px;
+  }
+
+  .pen-breadcrumb ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .pen-breadcrumb li:not(:last-child)::after {
+    content: '/';
+    margin: 0 8px;
+    color: var(--text-faint);
+  }
+
+  .pen-breadcrumb a {
+    color: var(--text-quiet);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .pen-breadcrumb a:hover {
+    color: var(--navy);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .pen-hero {
+    padding: 64px 24px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pen-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .pen-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .pen-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .pen-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pen-hero__actions .pen-cta {
+    width: 100%;
+  }
+
+  .pen-hero__actions .pen-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .pen-chapter {
+    padding: 56px 24px;
+  }
+
+  .pen-chapter--castka {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .pen-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .pen-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--pen-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .pen-chapter--castka .pen-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .pen-chapter__bar--muted p {
+    font-weight: 700;
+    color: var(--text-nav);
+  }
+
+  .pen-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .pen-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .pen-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pen-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Příjem: podle zadání §5/§7 má support-col TŘI bloky (odstavec,
+     eyebrow+seznam, odstavec) — každý přechod je NOVÝ obsahový blok
+     (ne pokračování stejné věty), proto stejný větší gap jako mezi
+     hlavními bloky uvnitř kapitoly (32/40px), stejná technika jako
+     „Cíl" na investice.astro (viz jeho hlavičkový komentář a CLAUDE.md,
+     „mezera MEZI BLOKY"), ne těsných 8px pro pokračující myšlenku. */
+  .pen-chapter--prijem .pen-chapter__support-col {
+    gap: 32px;
+  }
+
+  .pen-chapter__lead-col h2,
+  .pen-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .pen-h2--dominant {
+    font-size: 34px;
+  }
+
+  .pen-h2--std {
+    font-size: 30px;
+  }
+
+  .pen-support__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .pen-eyebrow {
+    margin: 0 0 4px;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .pen-chapter__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pen-chapter__list li {
+    font-weight: 600;
+    font-size: 16.5px;
+    color: var(--navy);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .pen-chapter__list li:last-child {
+    border-bottom: none;
+  }
+
+  /* Stejná škála pro VŠECHNY ohraničené výrazné věty na téhle stránce
+     (Částka/Příjem/Role/Kontrola/Využití) jako `investice.astro`'s
+     `.inv-chapter__statement` (22→30px na desktopu). */
+  .pen-chapter__statement {
+    margin: 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--emerald);
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ---------- Zdroje — významová návaznost (zadání §6, nový prvek) ----------
+     Postaveno na vzoru `.fp-chain` z `financni-plan.astro` (velká
+     typografická sazba, ne diagram; stejná škála 21/30/36/40px). Vlastní
+     `margin-top` je JEDINÝ zdroj mezery k `__top` nad ním — rodičovský
+     `gap` je proto u téhle kapitoly vypnutý (`.pen-chapter--zdroje
+     .pen-chapter__content{gap:0}` níže), stejná technika jako
+     `.fp-chapter__content--souvislosti`, jinak by se obě mezery sečetly
+     (CLAUDE.md „Konvence: mezera MEZI BLOKY"). Na mobilu/tabletu (§6:
+     „jediné místo, kde se mobil kompozičně liší od desktopu") se šipky
+     skrývají a tři pojmy se skládají pod sebe na tiché svislici — ne
+     emerald statement svislice, ale `--line` stejně tlumená jako notch
+     v trase. */
+  .pen-chapter--zdroje .pen-chapter__content {
+    gap: 0;
+  }
+
+  .pen-navaznost {
+    margin: 32px 0 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 21px;
+    line-height: 1.42;
+    font-weight: 500;
+    letter-spacing: -.02em;
+    color: var(--text-muted);
+  }
+
+  .pen-navaznost__term {
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .pen-navaznost__sep {
+    display: none;
+  }
+
+  /* ---------- Role — plné řádky s h3 názvem+popisem ---------- */
+
+  .pen-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pen-rows__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pen-rows__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .pen-rows__name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .pen-rows__text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Průběh ---------- */
+
+  .pen-h2--prubeh {
+    max-width: 560px;
+  }
+
+  .pen-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 38px;
+  }
+
+  .pen-step {
+    position: relative;
+    padding-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pen-step__marker {
+    position: absolute;
+    top: 13px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-quiet);
+    transform: translateY(-50%);
+  }
+
+  .pen-step--first .pen-step__marker {
+    width: 8px;
+    height: 8px;
+    background: var(--emerald);
+  }
+
+  .pen-step__connector {
+    position: absolute;
+    top: 13px;
+    bottom: -51px;
+    left: 3px;
+    width: 1px;
+    background: rgba(27, 74, 138, .18);
+  }
+
+  .pen-step--first .pen-step__connector {
+    left: 3.5px;
+  }
+
+  .pen-step h3 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--navy-ink);
+  }
+
+  .pen-step--first h3 {
+    font-size: 21px;
+  }
+
+  .pen-step p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ---------- Otázky ---------- */
+
+  .pen-faq {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pen-faq__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pen-faq__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .pen-faq dt {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .pen-faq dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .pen-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .pen-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .pen-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .pen-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .pen-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .pen-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .pen-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pen-closing__actions .pen-cta {
+    width: 100%;
+  }
+
+  .pen-closing__actions .pen-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .pen__route-svg--mobile {
+      display: none;
+    }
+
+    .pen__route-svg--tablet {
+      display: block;
+    }
+
+    .pen-chapter__bar p {
+      padding-left: calc(64px + var(--pen-shift, 0px));
+    }
+
+    .pen-hero {
+      padding: 88px 40px 0;
+    }
+
+    .pen-hero__text {
+      gap: 20px;
+    }
+
+    .pen-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .pen-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .pen-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .pen-hero__actions .pen-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .pen-hero__actions .pen-phone {
+      height: auto;
+    }
+
+    .pen-chapter--castka {
+      margin-top: 80px;
+      padding: 72px 40px;
+    }
+
+    .pen-chapter {
+      padding: 72px 40px;
+    }
+
+    .pen-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .pen-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .pen-h2--dominant {
+      font-size: 44px;
+    }
+
+    .pen-h2--std {
+      font-size: 40px;
+    }
+
+    .pen-support__text {
+      font-size: 18px;
+    }
+
+    .pen-chapter__list li {
+      font-size: 17px;
+    }
+
+    .pen-chapter__statement {
+      font-size: 24px;
+    }
+
+    .pen-rows__name {
+      font-size: 20px;
+    }
+
+    .pen-step h3 {
+      font-size: 22px;
+    }
+
+    .pen-step--first h3 {
+      font-size: 24px;
+    }
+
+    .pen-faq dt {
+      font-size: 19px;
+    }
+
+    .pen-navaznost {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0;
+      padding-left: 0;
+      border-left: none;
+      margin-top: 48px;
+      font-size: 30px;
+    }
+
+    .pen-navaznost__sep {
+      display: inline;
+      margin: 0 10px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .pen-rows__row {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      column-gap: 32px;
+      gap: 0;
+      align-items: baseline;
+    }
+
+    .pen-chapter__top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .pen-chapter--castka .pen-chapter__lead-col,
+    .pen-chapter--prijem .pen-chapter__lead-col,
+    .pen-chapter--zdroje .pen-chapter__lead-col,
+    .pen-chapter--role .pen-chapter__lead-col,
+    .pen-chapter--vyuziti .pen-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .pen-chapter--castka .pen-chapter__support-col,
+    .pen-chapter--prijem .pen-chapter__support-col,
+    .pen-chapter--zdroje .pen-chapter__support-col,
+    .pen-chapter--role .pen-chapter__support-col,
+    .pen-chapter--vyuziti .pen-chapter__support-col {
+      flex: 1;
+    }
+
+    .pen-chapter--prijem .pen-chapter__support-col {
+      gap: 40px;
+    }
+
+    .pen-steps {
+      gap: 44px;
+    }
+
+    .pen-step__marker {
+      display: block;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+    }
+
+    .pen-step--first .pen-step__marker {
+      width: 9px;
+      height: 9px;
+    }
+
+    .pen-step__connector {
+      display: block;
+      top: 14px;
+      bottom: -58px;
+      left: 3.5px;
+    }
+
+    .pen-step--first .pen-step__connector {
+      left: 4px;
+    }
+
+    .pen-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    .pen-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .pen-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .pen-closing__body p {
+      font-size: 17px;
+    }
+
+    .pen-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .pen-closing__actions .pen-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .pen-closing__actions .pen-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .pen__route-svg--tablet {
+      display: none;
+    }
+
+    .pen__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .pen-chapter__bar p {
+      padding-left: calc(56px + var(--pen-shift, 0px));
+    }
+
+    .pen-hero__text {
+      max-width: 580px;
+      gap: 18px;
+    }
+
+    .pen-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .pen-hero__lead {
+      font-size: 19px;
+    }
+
+    .pen-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .pen-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .pen-chapter--castka {
+      margin-top: 100px;
+      padding: 88px 96px;
+    }
+
+    .pen-chapter {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 56px;
+    }
+
+    .pen-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .pen-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .pen-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .pen-chapter__content {
+      flex: 1;
+    }
+
+    .pen-chapter__content--single {
+      gap: 40px;
+    }
+
+    .pen-h2--dominant {
+      font-size: 50px;
+    }
+
+    .pen-h2--std {
+      font-size: 44px;
+    }
+
+    .pen-chapter__statement {
+      font-size: 28px;
+    }
+
+    .pen-chapter__top {
+      gap: 60px;
+    }
+
+    .pen-chapter--castka .pen-chapter__lead-col,
+    .pen-chapter--prijem .pen-chapter__lead-col,
+    .pen-chapter--zdroje .pen-chapter__lead-col,
+    .pen-chapter--role .pen-chapter__lead-col,
+    .pen-chapter--vyuziti .pen-chapter__lead-col {
+      width: 540px;
+    }
+
+    .pen-chapter--kontrola .pen-chapter__content {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 60px;
+    }
+
+    .pen-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .pen-chapter__support-col {
+      flex: 1;
+    }
+
+    .pen-navaznost {
+      font-size: 36px;
+      margin-top: 48px;
+    }
+
+    .pen-rows__row {
+      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px 0;
+    }
+
+    .pen-rows__name {
+      font-size: 22px;
+    }
+
+    .pen-rows__text {
+      font-size: 17px;
+    }
+
+    .pen-h2--prubeh {
+      max-width: 600px;
+    }
+
+    .pen-steps {
+      max-width: 600px;
+    }
+
+    .pen-step {
+      padding-left: 56px;
+    }
+
+    .pen-step__marker {
+      top: 15px;
+    }
+
+    .pen-step__connector {
+      top: 15px;
+      bottom: -59px;
+    }
+
+    .pen-step h3 {
+      font-size: 22px;
+    }
+
+    .pen-step--first h3 {
+      font-size: 24px;
+    }
+
+    .pen-faq {
+      max-width: 900px;
+    }
+
+    .pen-faq__row {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      column-gap: 56px;
+      align-items: baseline;
+    }
+
+    .pen-faq dt {
+      font-size: 22px;
+    }
+
+    .pen-faq dd {
+      font-size: 17px;
+    }
+
+    .pen-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .pen-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .pen-closing__glow {
+      height: 320px;
+    }
+
+    .pen-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .pen-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .pen__route-svg--laptop {
+      display: none;
+    }
+
+    .pen__route-svg--desktop {
+      display: block;
+    }
+
+    .pen__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .pen-hero,
+    .pen-chapter,
+    .pen-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .pen-chapter__bar p {
+      padding-left: calc(76px + var(--pen-shift, 0px));
+    }
+
+    .pen-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .pen-hero__text {
+      max-width: 640px;
+      gap: 18px;
+    }
+
+    .pen-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .pen-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .pen-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .pen-hero__actions .pen-cta {
+      height: 56px;
+    }
+
+    .pen-chapter--castka {
+      margin-top: 120px;
+      padding: 88px 100px;
+    }
+
+    .pen-chapter {
+      padding: 88px 100px;
+      gap: 56px;
+    }
+
+    .pen-chapter__bar {
+      width: 240px;
+    }
+
+    .pen-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .pen-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .pen-h2--dominant {
+      font-size: 56px;
+    }
+
+    .pen-h2--std {
+      font-size: 48px;
+    }
+
+    .pen-chapter__statement {
+      font-size: 30px;
+    }
+
+    .pen-chapter--castka .pen-chapter__lead-col,
+    .pen-chapter--prijem .pen-chapter__lead-col,
+    .pen-chapter--zdroje .pen-chapter__lead-col,
+    .pen-chapter--role .pen-chapter__lead-col,
+    .pen-chapter--vyuziti .pen-chapter__lead-col,
+    .pen-chapter__lead-col {
+      width: 600px;
+    }
+
+    .pen-navaznost {
+      font-size: 40px;
+    }
+
+    .pen-rows__name {
+      font-size: 24px;
+    }
+
+    .pen-rows__text {
+      font-size: 17px;
+    }
+
+    .pen-h2--prubeh {
+      max-width: 640px;
+    }
+
+    .pen-steps {
+      max-width: 640px;
+    }
+
+    .pen-faq dt {
+      font-size: 22px;
+    }
+
+    .pen-closing {
+      padding-block: 96px;
+    }
+
+    .pen-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .pen-closing__glow {
+      height: 340px;
+    }
+
+    .pen-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+</style>

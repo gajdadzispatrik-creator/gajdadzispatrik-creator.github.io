@@ -1,0 +1,717 @@
+---
+/**
+ * S2 — „Neřeším produkty. Řeším souvislosti.“
+ * Zdroj: design-exploration/financial-architecture/section-connections/claude-code-task-s2.md
+ * + Revize 1 (nové pořadí/texty oblastí, sdílený gradient linky s hero).
+ * Souřadnice odpovídají variantě 5b. Notebook (1366) je proporčně odvozen
+ * z desktopové kompozice (§7 zadání) — přesné souřadnice pro 1366 nejsou
+ * v zadání dané, u ostatních tří šířek jsou exaktní.
+ *
+ * Pozice na trase (1 = nejvýš, 5 = nejníž) nesou souřadnice a typografickou
+ * váhu — dominance jde s pozicí (pos-1), ne se slovem. Text v jednotlivých
+ * pozicích se mění nezávisle na --x/--y.
+ */
+const areas = [
+  { name: 'Rezerva', pos: 'pos-1' },
+  { name: 'Ochrana', pos: 'pos-2' },
+  { name: 'Bydlení', pos: 'pos-3' },
+  { name: 'Investice', pos: 'pos-4' },
+  { name: 'Penze', pos: 'pos-5' },
+];
+---
+
+<section class="connections" aria-labelledby="souvislosti-nadpis">
+  <h2 id="souvislosti-nadpis" class="connections__heading">
+    <span class="connections__heading-line">Neřeším produkty.</span><br />
+    <span class="connections__heading-line">Řeším souvislosti.</span>
+  </h2>
+
+  <p class="connections__text">
+    Rezerva, ochrana, bydlení, investice a&nbsp;penze se&nbsp;navzájem ovlivňují. Proto se&nbsp;na&nbsp;vaše finance dívám jako na&nbsp;jeden
+    celek.
+  </p>
+
+  <ol class="connections__areas">
+    {areas.map((area) => (
+      <li class={`connections__area connections__area--${area.pos}`}>{area.name}</li>
+    ))}
+  </ol>
+
+  <p class="connections__end-label">Jeden plán</p>
+
+  <!--
+    Desktop + notebook: nájezd začíná na y=0 (samotná horní hrana sekce), ne
+    o kus níž — sekce navazuje přímo na statistický pás, za kterým mizí konec
+    Hero linky (HeroLine.astro `.hero-line-tail`). Nájezd proto musí naskočit
+    hned, jinak mezi koncem jedné linky a začátkem druhé vznikne prázdná
+    mezera a působí to jako přerušení, ne jako plynulý průchod za pásem.
+
+    Stejný princip na opačném konci trasy: zaoblený roh + svislice až na
+    úplně spodní hranu sekce (viewBox 940 = reálná výška 900 px), místo aby
+    trasa končila rovně u „Jeden plán" v půlce sekce. Roh je zaoblený stejným
+    poloměrem (28 desktop/notebook, 22 tablet) jako všechny ostatní zákruty
+    trasy — rovný pravoúhlý spoj by mezi zaoblenými oblouky trčel. Osa
+    RouterSection.astro („Co řešíte?") totiž začíná na stejném x (1300 /
+    1250 / 794), jen kousek nad svou vlastní sekcí (`M 1300 -20`) — bez
+    dotažení dolů by mezi koncem této trasy a začátkem té osy zůstala prázdná
+    mezera přes 200 px.
+  -->
+  <!-- Desktop 1440+ -->
+  <svg
+    class="connections__route connections__route--desktop"
+    viewBox="0 0 1440 940"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="connections__route-path"
+      d="M120,0 V210 A28,28 0 0 0 148,238 H520 A28,28 0 0 1 548,266 V430 A28,28 0 0 0 576,458 H940 A28,28 0 0 1 968,486 V640 A28,28 0 0 0 996,668 H1272 A28,28 0 0 1 1300,696 V940"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle cx="240" cy="238" r="3.5" fill="#1E7A5C"></circle>
+    <circle cx="548" cy="348" r="2.6" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="700" cy="458" r="2.6" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="968" cy="566" r="2.6" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="1100" cy="668" r="2.6" fill="#1B4A8A" fill-opacity=".5"></circle>
+  </svg>
+
+  <!-- Notebook 1200–1399, proporčně odvozeno z desktopu (§7) -->
+  <svg
+    class="connections__route connections__route--laptop"
+    viewBox="0 0 1366 940"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="connections__route-path"
+      d="M96,0 V210 A28,28 0 0 0 123,238 H487 A28,28 0 0 1 515,266 V430 A28,28 0 0 0 542,458 H898 A28,28 0 0 1 925,486 V640 A28,28 0 0 0 953,668 H1222 A28,28 0 0 1 1250,696 V940"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle cx="213" cy="238" r="3.5" fill="#1E7A5C"></circle>
+    <circle cx="515" cy="348" r="2.6" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="663" cy="458" r="2.6" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="925" cy="566" r="2.6" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="1054" cy="668" r="2.6" fill="#1B4A8A" fill-opacity=".5"></circle>
+  </svg>
+
+  <!-- Tablet 768–1199 -->
+  <svg
+    class="connections__route connections__route--tablet"
+    viewBox="0 0 834 900"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="connections__route-path"
+      d="M40,48 V170 A22,22 0 0 0 62,192 H410 A22,22 0 0 1 432,214 V452 A22,22 0 0 0 454,474 H772 A22,22 0 0 1 794,496 V900"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle cx="140" cy="192" r="3.2" fill="#1E7A5C"></circle>
+    <circle cx="432" cy="286" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="432" cy="392" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="560" cy="474" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="700" cy="474" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+  </svg>
+
+  <!--
+    Mobil <768: nájezd začíná na y=0 (horní hrana sekce), ne o 40 níž — stejný
+    důvod jako u desktopu/notebooku výše. Statistický pás na mobilu končí
+    přesně tam, kde tato sekce začíná (bez mezery), takže 40px "mrtvá zóna"
+    před nájezdem vytvářela viditelnou přerušenou čáru pod pásem.
+
+    Trasa jde až V900 (skutečná spodní hrana sekce), ne jen V828 — stejný
+    princip jako zaoblený roh na desktopu/tabletu výše ("bez dotažení dolů by
+    mezi koncem této trasy a začátkem té osy zůstala prázdná mezera").
+
+    Osa sjednocená na x=24 (oprava 14. 9. 2026) — RouterSection.astro na
+    mobilu má vlastní osu (dot/notch) TAKÉ na x=24 (§8), takže trasa teď
+    pokračuje z jedné sekce do druhé úplně rovně, bez zákrutu na vstupu do
+    RouterSection. Původní x=40 byl omylem převzatý ze vzoru tabletu/laptopu/
+    desktopu (tam Router vstupuje zprava, na jiné ose), na mobilu ale obě
+    sekce už sdílely stejnou levou osu — zákrut tak byl zbytečný a navíc
+    (kvůli krátkému spojovacímu úseku) vizuálně působil jako pokroucený uzel.
+  -->
+  <svg
+    class="connections__route connections__route--mobile"
+    viewBox="0 0 390 900"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="connections__route-path"
+      d="M24,0 V900"
+      fill="none"
+      stroke="#1B4A8A"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <path
+      class="connections__route-notches"
+      d="M24,400 H46 M24,484 H46 M24,568 H46 M24,652 H46 M24,736 H46"
+      fill="none"
+      stroke="#1B4A8A"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <circle cx="46" cy="400" r="3.2" fill="#1E7A5C"></circle>
+    <circle cx="46" cy="484" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="46" cy="568" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="46" cy="652" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="46" cy="736" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+  </svg>
+</section>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const section = document.querySelector('.connections');
+  if (section && !disableAnimation) {
+    const paths = Array.from(section.querySelectorAll('.connections__route-path'));
+    const lengths = new Map();
+    paths.forEach((path) => {
+      const length = (path as SVGPathElement).getTotalLength();
+      lengths.set(path, length);
+      (path as SVGPathElement).style.strokeDasharray = String(length);
+      (path as SVGPathElement).style.strokeDashoffset = String(length);
+    });
+
+    let ticking = false;
+    const updateProgress = () => {
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // Progress reaches 1 exactly when the section's bottom edge reaches the
+      // viewport's bottom edge — the natural end of scroll for a section that
+      // sits last on the page (it can never scroll fully past the viewport).
+      const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+      paths.forEach((path) => {
+        const length = lengths.get(path) ?? 0;
+        (path as SVGPathElement).style.strokeDashoffset = String(length * (1 - progress));
+      });
+
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateProgress);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    updateProgress();
+
+    const revealTargets = section.querySelectorAll('.connections__area, .connections__heading-line');
+    revealTargets.forEach((el) => el.classList.add('is-pending'));
+
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.remove('is-pending');
+            entry.target.classList.add('is-visible');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '0px 0px -15% 0px', threshold: 0.4 }
+    );
+
+    revealTargets.forEach((el) => revealObserver.observe(el));
+  }
+</script>
+
+<style>
+  .connections {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    height: 900px;
+    /*
+     * Šířka viewBoxu aktuální trasy (SVG i kotvy oblastí jsou definované ve
+     * stejném souřadném prostoru). Trasa se kreslí přes width:100% — roztahuje
+     * se plynule s viewportem stejně jako navazující linka v Hero sekci nad
+     * touto (HeroLine.astro), takže na sebe automaticky navazují na jakékoli
+     * šířce. Text oblastí proto musí sledovat STEJNÉ procentuální roztažení
+     * (viz --vb v .connections__area), ne pevné px — jinak by se při jiné než
+     * kalibrační šířce rozjel od tečky i od navazující linky nad sekcí.
+     */
+    --vb: 390;
+    /*
+     * Tečky na trase (<circle>) leží ve stejném neuniformně roztahovaném SVG
+     * jako trasa sama (preserveAspectRatio="none" — šířka roste s viewportem
+     * přes width:100%, výška sekce je na každém stupni pevná a přesně sedí
+     * s výškou viewBoxu, takže svislé měřítko je vždy 1). Vodorovné měřítko
+     * ale s viewportem roste, takže by z kruhu mimo kalibrační šířku
+     * (390/834/1366/1440) vyšla elipsa. --dot-fix dopočítá násobek, kterým
+     * se tečka doškáluje ve vodorovném směru zpět na kruh.
+     */
+    --dot-fix: calc(var(--vb) * 1px / 100vw);
+  }
+
+  .connections__route circle {
+    transform: scaleX(var(--dot-fix));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .connections__heading {
+    position: absolute;
+    left: 70px;
+    right: 24px;
+    top: 86px;
+    margin: 0;
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1.06;
+    letter-spacing: -.04em;
+    color: var(--navy);
+  }
+
+  .connections__text {
+    position: absolute;
+    left: 70px;
+    right: 24px;
+    /* 172 = konec nadpisu (86 + 2 řádky @ 34px/1.06 ≈ 72px) + 14px — konvence
+       „mezera nadpis → úvodní text“ v CLAUDE.md, sjednoceno na 14px napříč
+       webem (1. 9. 2026) stejně jako CasesSection/ArticlesSection/
+       ContactSection/podstránky; původní 222px byl reziduum z doby před
+       touto konvencí, 3–6× větší než ustálená hodnota. */
+    top: 172px;
+    margin: 0;
+    font-weight: 500;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .connections__areas {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /*
+   * Jedna kotva (--x, --y) na oblast = zdroj pravdy pro tečku i text.
+   * Text nikdy nemá vlastní absolutní pozici — odvozuje se z kotvy přes
+   * obecný offset (--ox, --oy, --tx, --ty), který se liší jen podle úseku
+   * trasy (vodorovný/svislý) a šířky, ne podle jednotlivé oblasti:
+   * - vodorovný úsek: text POD tečkou, zarovnaný na ni vlevo (stejná
+   *   konvence jako ProcessSection.astro/RouterSection.astro — žádné
+   *   translateX(-50%), levá hrana textu = x tečky),
+   * - svislý úsek: text VPRAVO od tečky, svisle na ni vycentrovaný.
+   */
+  .connections__area {
+    position: absolute;
+    left: calc((var(--x) + var(--ox)) * 100% / var(--vb));
+    top: calc((var(--y) + var(--oy)) * 1px);
+    transform: translate(var(--tx), var(--ty)) translateY(var(--reveal-y, 0px));
+    margin: 0;
+    letter-spacing: -.025em;
+    /* Mobil: text vždy vpravo od kotvy, vertikálně vycentrovaný (§4). */
+    text-align: left;
+    --ox: 12;
+    --oy: 0;
+    --tx: 0;
+    --ty: -50%;
+  }
+
+  /*
+   * Mobil (base) — kotvy §4 (shodné s tečkami). Všech pět pozic má stejnou
+   * typografickou váhu. --x posunuto z 62 na 46 (oprava 14. 9. 2026) — osa
+   * trasy na mobilu se sjednotila na x=24 (viz komentář u trasy níže), takže
+   * zářez/tečka teď končí na 46 (24+22), ne na 62 (40+22).
+   */
+  .connections__area--pos-1 {
+    --x: 46;
+    --y: 400;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy-ink);
+  }
+
+  .connections__area--pos-2 {
+    --x: 46;
+    --y: 484;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy-ink);
+  }
+
+  .connections__area--pos-3 {
+    --x: 46;
+    --y: 568;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy-ink);
+  }
+
+  .connections__area--pos-4 {
+    --x: 46;
+    --y: 652;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy-ink);
+  }
+
+  .connections__area--pos-5 {
+    --x: 46;
+    --y: 736;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy-ink);
+  }
+
+  .connections__end-label {
+    position: absolute;
+    left: 54px;
+    top: 824px;
+    margin: 0;
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .connections__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .connections__route--tablet,
+  .connections__route--laptop,
+  .connections__route--desktop {
+    display: none;
+  }
+
+  /* --- Pohyb --- */
+
+  .connections__heading-line {
+    display: inline-block;
+  }
+
+  .connections__heading-line.is-pending {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .connections__heading-line.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+  }
+
+  .connections__heading-line:nth-child(1).is-visible {
+    transition-delay: 0ms;
+  }
+
+  /*
+   * Odhalení (pending/visible) nesmí přepsat kotvící transform výše — skládá
+   * se s ním přes samostatnou custom property, jinak by po dokončení reveal
+   * animace text spadl zpět na neposunutou pozici (mimo tečku).
+   */
+  .connections__area.is-pending {
+    opacity: 0;
+    --reveal-y: 12px;
+  }
+
+  .connections__area.is-visible {
+    opacity: 1;
+    --reveal-y: 0px;
+    transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .connections__area,
+    .connections__heading-line {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .connections {
+      height: 900px;
+      --vb: 834;
+    }
+
+    .connections__heading {
+      left: 40px;
+      right: auto;
+      top: 556px;
+      width: 520px;
+      font-size: 44px;
+      line-height: 1.06;
+    }
+
+    .connections__text {
+      left: 40px;
+      right: auto;
+      /* 663 = konec nadpisu (556 + 2 řádky @ 44px/1.06 ≈ 93px) + 14px. */
+      top: 663px;
+      width: 440px;
+      font-size: 17px;
+    }
+
+    .connections__end-label {
+      display: none;
+    }
+
+    /* Tablet: h → text zarovnaný pod tečku vlevo (x+0, y+12, bez translateX — stejná konvence jako ProcessSection.astro/RouterSection.astro); v → vpravo od tečky, svisle vycentrovaný (x+16, translateY(-50%)). */
+    .connections__area--pos-1 {
+      --x: 140;
+      --y: 192;
+      --ox: 0;
+      --oy: 12;
+      --tx: 0;
+      --ty: 0;
+      text-align: left;
+      font-size: 19px;
+    }
+
+    .connections__area--pos-2 {
+      --x: 432;
+      --y: 286;
+      --ox: 16;
+      --oy: 0;
+      --ty: -50%;
+      font-size: 19px;
+    }
+
+    .connections__area--pos-3 {
+      --x: 432;
+      --y: 392;
+      --ox: 16;
+      --oy: 0;
+      --ty: -50%;
+      font-size: 19px;
+    }
+
+    .connections__area--pos-4 {
+      --x: 560;
+      --y: 474;
+      --ox: 0;
+      --oy: 12;
+      --tx: 0;
+      --ty: 0;
+      text-align: left;
+      font-size: 19px;
+    }
+
+    .connections__area--pos-5 {
+      --x: 700;
+      --y: 474;
+      --ox: 0;
+      --oy: 12;
+      --tx: 0;
+      --ty: 0;
+      text-align: left;
+      font-size: 19px;
+    }
+
+    .connections__route--mobile {
+      display: none;
+    }
+
+    .connections__route--tablet {
+      display: block;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .connections {
+      height: 940px;
+      --vb: 1366;
+    }
+
+    .connections__heading {
+      left: 96px;
+      top: 508px;
+      width: 587px;
+      font-size: 56px;
+      line-height: 1.05;
+      letter-spacing: -.045em;
+    }
+
+    .connections__text {
+      left: 96px;
+      /* 640 = konec nadpisu (508 + 2 řádky @ 56px/1.05 ≈ 118px) + 14px. */
+      top: 640px;
+      width: 411px;
+      font-size: 18px;
+      text-wrap: pretty;
+    }
+
+    /*
+     * Kotva vedle svislého úseku trasy na x=1250 notebook / 1300 desktop
+     * (stejný --vb procentuální systém jako u teček oblastí, aby popisek při
+     * libovolné šířce viewportu držel stejný odstup od trasy). Popisek stojí
+     * 24 px vpravo od čáry, ne vycentrovaný na ní — trasa tudy dál pokračuje
+     * dolů (viz komentář u SVG níže), takže vycentrování na ni by ji vedlo
+     * přes text.
+     */
+    .connections__end-label {
+      display: block;
+      left: calc(1250 * 100% / var(--vb) + 24px);
+      top: 760px;
+      font-size: 12px;
+    }
+
+    /* Notebook/desktop: h → text zarovnaný pod tečku vlevo (x+0, y+14, bez translateX — stejná konvence jako ProcessSection.astro/RouterSection.astro); v → vpravo od tečky, svisle vycentrovaný (x+20, translateY(-50%)). */
+    .connections__area--pos-1 {
+      --x: 213;
+      --y: 238;
+      --ox: 0;
+      --oy: 14;
+      --tx: 0;
+      --ty: 0;
+      text-align: left;
+      font-size: 21px;
+    }
+
+    .connections__area--pos-2 {
+      --x: 515;
+      --y: 348;
+      --ox: 20;
+      --oy: 0;
+      --ty: -50%;
+      font-size: 21px;
+    }
+
+    .connections__area--pos-3 {
+      --x: 663;
+      --y: 458;
+      --ox: 0;
+      --oy: 14;
+      --tx: 0;
+      --ty: 0;
+      text-align: left;
+      font-size: 21px;
+    }
+
+    .connections__area--pos-4 {
+      --x: 925;
+      --y: 566;
+      --ox: 20;
+      --oy: 0;
+      --tx: 0;
+      --ty: -50%;
+      text-align: left;
+      font-size: 21px;
+    }
+
+    .connections__area--pos-5 {
+      --x: 1054;
+      --y: 668;
+      --ox: 0;
+      --oy: 14;
+      --tx: 0;
+      --ty: 0;
+      text-align: left;
+      font-size: 21px;
+    }
+
+    .connections__route--tablet {
+      display: none;
+    }
+
+    .connections__route--laptop {
+      display: block;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .connections {
+      --vb: 1440;
+      /* Wide desktop: centrované designové plátno (CLAUDE.md) — no-op pod
+         --stage-max; nad ní `100%` uvnitř `calc(X * 100% / var(--vb))`
+         přestane růst s viewportem, protože se vztahuje k šířce téhle
+         (teď omezené) sekce, ne k reálnému viewportu. Beze změny jediného
+         `calc()` vzorce ani JS synchronizace trasy. */
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .connections__heading {
+      left: 120px;
+      width: 600px;
+      font-size: 60px;
+    }
+
+    /* Svislý úsek trasy je na desktopu na x=1300, ne 1250 jako na notebooku. */
+    .connections__end-label {
+      left: calc(1300 * 100% / var(--vb) + 24px);
+    }
+
+    .connections__text {
+      left: 120px;
+      /* 648 = konec nadpisu (508 + 2 řádky @ 60px/1.05 = 126px) + 14px —
+         nadpis samotný na desktopu top nemění, jen font-size (60px místo
+         56px), takže text potřebuje vlastní top, ne zdědit notebookových 640. */
+      top: 648px;
+      width: 420px;
+      font-size: 18px;
+    }
+
+    .connections__area--pos-1 {
+      --x: 240;
+    }
+
+    .connections__area--pos-2 {
+      --x: 548;
+    }
+
+    .connections__area--pos-3 {
+      --x: 700;
+    }
+
+    .connections__area--pos-4 {
+      --x: 968;
+    }
+
+    .connections__area--pos-5 {
+      --x: 1100;
+    }
+
+    .connections__route--laptop {
+      display: none;
+    }
+
+    .connections__route--desktop {
+      display: block;
+    }
+  }
+</style>

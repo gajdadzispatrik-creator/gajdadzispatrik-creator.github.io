@@ -1,0 +1,1100 @@
+---
+/**
+ * Sekce „Odborný obsah“ — Police článků (varianta 13c).
+ * Zdroj: úkol pro Claude Code „sekce Odborný obsah (Police článků)“, §1–§14.
+ * Navazuje na AboutSection.astro — trasa vstupuje ZLEVA (první sekce na webu
+ * s tímto směrem vstupu, viz §2 zadání).
+ *
+ * ODCHYLKA (§12 technických požadavků, stejný typ rozporu jako u AboutSection
+ * — viz ODCHYLKA 2 v AboutSection.astro):
+ * §6–§9 dávají prvkům pevné `top` v px (odvozené z fixního odhadu výšky
+ * sekce „Rám"), ale §12 ve stejném dokumentu to výslovně zakazuje — výška
+ * sekce má plynout z obsahu. Novější/konkrétnější pravidlo (§12) má přednost.
+ * Nadpis, úvod, výčet témat, police článků a akce jsou proto v normálním
+ * toku (gap/margin), ne na position:absolute. Čísla z §6–§9 posloužila jen
+ * jako reference pro odhad proporcí a poměru mezer, ne jako doslovné
+ * souřadnice. Trasa (dvojitý lom → police → lom) se stejně jako
+ * v AboutSection dopočítává v JS ze skutečné vykreslené pozice police
+ * (spodní hrana `.articles__list`, na které stojí obsah článků) —
+ * viz `syncRoute` níže.
+ *
+ * Vstupní x trasy (svislice zleva) na všech čtyřech šířkách odpovídá
+ * skutečnému výstupu AboutSection.astro (změřeno getPointAtLength na
+ * `.about__route-path` při 390/768/834/1024/1180/1200/1280/1366/1399/1400/
+ * 1440/1920 px) — desktop 120/1440, notebook 96/1366, tablet 40/834,
+ * mobil 24/390. Zadání §6–§9 uvádí stejná čísla, žádný přepočet tedy
+ * nebyl potřeba (viz tabulka švu v závěrečném hlášení).
+ *
+ * `hypotekaOstravaHref` ověřeno 24. 8. 2026 (kontrola všech odkazů na webu) —
+ * https://www.hypotekaostrava.cz/ je reálný, funkční web projektu, na kterém
+ * Patrik Gajdadzis vystupuje jako ředitel/hypoteční specialista.
+ */
+interface Article {
+  category: string;
+  title: string | null;
+  excerpt: string | null;
+  href: string | null;
+  lineWidths: number[];
+}
+
+const articles: Article[] = [
+  { category: 'Hypotéky a bydlení', title: null, excerpt: null, href: null, lineWidths: [100, 100, 62] },
+  { category: 'Finanční plánování', title: null, excerpt: null, href: null, lineWidths: [100, 56] },
+  { category: 'Investice', title: null, excerpt: null, href: null, lineWidths: [100, 100, 48] },
+];
+
+const topics = ['Hypotéky a bydlení', 'Finanční plánování', 'Investice', 'Pojištění', 'Penze'];
+
+const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
+---
+
+<section class="articles" aria-labelledby="clanky">
+  <div class="articles__inner">
+    <div class="articles__top">
+      <div class="articles__intro">
+        <h2 id="clanky" class="articles__heading articles__reveal-clip">Finance srozumitelně.</h2>
+        <p class="articles__lead articles__reveal-up">
+          Praktické články, zkušenosti a&nbsp;odpovědi na&nbsp;otázky, které klienti skutečně řeší.
+        </p>
+      </div>
+
+      <div class="articles__topics articles__reveal-up">
+        <p class="articles__topics-label">Témata</p>
+        <ul class="articles__topics-list">
+          {topics.map((topic) => (
+            <li>{topic}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <ul class="articles__list">
+      {articles.map((article, i) => (
+        <li class={`articles__item articles__reveal-item${i === 2 ? ' articles__item--off-shelf' : ''}`}>
+          <p class="articles__category">{article.category}</p>
+          {article.title ? (
+            <>
+              <h3 class="articles__title"><a href={article.href ?? '#'}>{article.title}</a></h3>
+              {article.excerpt && <p class="articles__excerpt">{article.excerpt}</p>}
+            </>
+          ) : (
+            <>
+              <div class="articles__placeholder" aria-hidden="true">
+                <span class="articles__placeholder-label">Titulek - placeholder</span>
+                {article.lineWidths.map((w) => (
+                  <span class="articles__placeholder-line" style={`width:${w}%`}></span>
+                ))}
+              </div>
+              <span class="sr-only">Článek bude doplněn</span>
+            </>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <div class="articles__actions">
+      <!-- „Všechny články“ CTA na /clanky dočasně odstraněno (úkol
+           „Předspouštěcí P0 technické dotažení“) — skutečné články zatím
+           nejsou připravené, /clanky se veřejně neodkazuje. -->
+      <p class="articles__external">
+        <span class="articles__external-lead">Hypoteční články také na&nbsp;</span><a class="articles__external-link" href={hypotekaOstravaHref} target="_blank" rel="noopener noreferrer">Hypotéka Ostrava
+          <svg class="articles__external-icon" viewBox="0 0 11 11" aria-hidden="true" focusable="false">
+            <path
+              d="M4 2H2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V7M6 1h4v4M10 1 5 6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></path>
+          </svg>
+          <span class="sr-only">(externí web)</span>
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Desktop 1400+ (kalibrace 1440). Vstup x=120 (= reálný výstup AboutSection), výstup x=1300, radius 28. -->
+  <svg
+    class="articles__route articles__route--desktop"
+    viewBox="0 0 1440 900"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-shelf="true"
+    data-entry="120"
+    data-exit="1300"
+    data-radius="28"
+    data-gap="22"
+  >
+    <path
+      class="articles__route-path"
+      d="M 120 -20 V 552 A 28 28 0 0 0 148 580 H 1272 A 28 28 0 0 1 1300 608 V 900"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="articles__dot articles__dot--lead" cx="240" cy="580" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="articles__dot" cx="720" cy="580" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="articles__dot" cx="1060" cy="580" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!-- Notebook 1200–1399 (kalibrace 1366). Vstup x=96, výstup x=1250, radius 28. -->
+  <svg
+    class="articles__route articles__route--laptop"
+    viewBox="0 0 1366 900"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-shelf="true"
+    data-entry="96"
+    data-exit="1250"
+    data-radius="28"
+    data-gap="22"
+  >
+    <path
+      class="articles__route-path"
+      d="M 96 -20 V 524 A 28 28 0 0 0 124 552 H 1222 A 28 28 0 0 1 1250 580 V 900"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="articles__dot articles__dot--lead" cx="216" cy="552" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="articles__dot" cx="660" cy="552" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="articles__dot" cx="980" cy="552" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!--
+    Tablet 768–1199 (kalibrace 834). Vstup x=40, police y dopočtená v JS,
+    radius 22, po polici svislice dolů (výstup x=794) a zářez pro třetí
+    (mimo policii stojící) článek na x=750 — viz §8 zadání.
+  -->
+  <svg
+    class="articles__route articles__route--tablet"
+    viewBox="0 0 834 1000"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-shelf="true"
+    data-off-shelf="true"
+    data-entry="40"
+    data-exit="794"
+    data-radius="22"
+    data-notch-x="750"
+    data-gap="22"
+  >
+    <path
+      class="articles__route-path"
+      d="M 40 -20 V 448 A 22 22 0 0 0 62 470 H 772 A 22 22 0 0 1 794 492 V 640"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <path
+      class="articles__route-notch"
+      d="M 794 640 H 750"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <path
+      class="articles__route-continue"
+      d="M 794 640 V 1000"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <circle class="articles__dot articles__dot--lead" cx="140" cy="470" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="articles__dot" cx="470" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="articles__dot" cx="750" cy="640" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!--
+    Mobil <768 (kalibrace 390). Police neexistuje — svislice u levého okraje
+    (x=24, shodné s AboutSection) se třemi zářezy vedoucími k tečkám vedle
+    textu jednotlivých článků (stejný princip jako ConnectionsSection mobil).
+  -->
+  <svg
+    class="articles__route articles__route--mobile"
+    viewBox="0 0 390 1200"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-shelf="false"
+    data-axis="24"
+    data-gap="22"
+  >
+    <path
+      class="articles__route-path"
+      d="M 24 -20 V 1200"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <path
+      class="articles__route-notches"
+      d="M 24 448 H 46 M 24 646 H 46 M 24 828 H 46"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <circle class="articles__dot articles__dot--lead" cx="46" cy="448" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="articles__dot" cx="46" cy="646" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="articles__dot" cx="46" cy="828" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+</section>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const section = document.querySelector('.articles');
+  if (section) {
+    const allSvgs = Array.from(section.querySelectorAll('.articles__route')) as SVGSVGElement[];
+    const list = section.querySelector('.articles__list') as HTMLElement | null;
+    const items = list ? (Array.from(list.querySelectorAll('.articles__item')) as HTMLElement[]) : [];
+    const thirdItem = section.querySelector('.articles__item--off-shelf') as HTMLElement | null;
+    const heading = section.querySelector('.articles__reveal-clip');
+    const fadeUpEls = Array.from(section.querySelectorAll('.articles__reveal-up'));
+    const itemEls = Array.from(section.querySelectorAll('.articles__reveal-item')) as HTMLElement[];
+
+    /*
+     * Aktivní SVG (podle breakpointu) se muselo dřív dohledávat jednou při
+     * načtení stránky — jenže při resize PŘES hranici stupně (např. z desktopu
+     * na tablet bez reloadu) by pak trasa/tečky patřily skryté SVG a nová
+     * viditelná SVG by zůstala na statických počátečních souřadnicích
+     * (nikdy nesynchronizovaná JS výpočtem). `getActiveSvg()` se proto volá
+     * znovu při každém resize/ResizeObserver callbacku, ne jen jednou.
+     */
+    const getActiveSvg = (): SVGSVGElement | undefined =>
+      allSvgs.find((svg) => getComputedStyle(svg).display !== 'none');
+
+    let currentSvg: SVGSVGElement | undefined;
+    let path: SVGPathElement | null = null;
+    let notchPath: SVGPathElement | null = null;
+    let continuePath: SVGPathElement | null = null;
+    let dots: SVGCircleElement[] = [];
+    let paths: SVGPathElement[] = [];
+    const lengths = new Map<SVGPathElement, number>();
+    // Prahy (0–1 progresu čtení trasy), při kterých se má odhalit článek u dané tečky.
+    const dotThresholds: number[] = [];
+
+    const bindActiveSvg = (svg: SVGSVGElement) => {
+      currentSvg = svg;
+      path = svg.querySelector('.articles__route-path');
+      notchPath = svg.querySelector('.articles__route-notch');
+      continuePath = svg.querySelector('.articles__route-continue');
+      dots = Array.from(svg.querySelectorAll('.articles__dot'));
+      paths = [path, notchPath, continuePath].filter(Boolean) as SVGPathElement[];
+      lengths.clear();
+      if (!disableAnimation) {
+        dots.forEach((dot) => {
+          dot.classList.remove('is-visible');
+          dot.classList.add('is-pending');
+        });
+        itemEls.forEach((el) => {
+          el.classList.remove('is-visible');
+          el.classList.add('is-pending');
+        });
+      }
+    };
+
+    /*
+     * Police (i mimopoliční třetí položka na tabletu) je content-driven —
+     * výška sekce plyne z obsahu (viz ODCHYLKA výše), takže reálná pozice
+     * spodní hrany `.articles__list` (na které "stojí" obsah článků) není
+     * známá předem. Stejný princip jako `syncRoute` v AboutSection.astro.
+     */
+    const syncRoute = () => {
+      const svg = getActiveSvg();
+      if (!svg) return;
+      if (svg !== currentSvg) bindActiveSvg(svg);
+      if (!path || !list) return;
+
+      const svgRect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox.baseVal;
+      // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
+      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
+      // (oprava 14. 9. 2026).
+      if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
+      const scaleX = svgRect.width / viewBox.width;
+      const scaleY = svgRect.height / viewBox.height;
+      svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+      const gapPx = parseFloat(svg.dataset.gap ?? '22');
+
+      if (svg.dataset.shelf !== 'true') {
+        const axisX = parseFloat(svg.dataset.axis ?? '0');
+        items.forEach((item, i) => {
+          const dot = dots[i];
+          if (!dot) return;
+          const r = item.getBoundingClientRect();
+          const y = (r.top + gapPx - svgRect.top) / scaleY;
+          dot.setAttribute('cx', String(axisX));
+          dot.setAttribute('cy', String(y));
+        });
+        return;
+      }
+
+      const entryX = parseFloat(svg.dataset.entry ?? '0');
+      const exitX = parseFloat(svg.dataset.exit ?? '0');
+      const r = parseFloat(svg.dataset.radius ?? '28');
+      const hasOffShelf = svg.dataset.offShelf === 'true';
+      const shelfItems = hasOffShelf ? items.slice(0, 2) : items;
+
+      const listRect = list.getBoundingClientRect();
+      const shelfY = (listRect.bottom + gapPx - svgRect.top) / scaleY;
+
+      let tailY = viewBox.height;
+      if (hasOffShelf && thirdItem) {
+        const tr = thirdItem.getBoundingClientRect();
+        tailY = (tr.top + gapPx - svgRect.top) / scaleY;
+      }
+
+      const d = `M ${entryX} -20 V ${shelfY - r} A ${r} ${r} 0 0 0 ${entryX + r} ${shelfY} H ${exitX - r} A ${r} ${r} 0 0 1 ${exitX} ${shelfY + r} V ${tailY}`;
+      path.setAttribute('d', d);
+
+      shelfItems.forEach((item, i) => {
+        const dot = dots[i];
+        if (!dot) return;
+        const ir = item.getBoundingClientRect();
+        const x = (ir.left - svgRect.left) / scaleX;
+        dot.setAttribute('cx', String(x));
+        dot.setAttribute('cy', String(shelfY));
+      });
+
+      if (hasOffShelf && thirdItem) {
+        const notchX = parseFloat(svg.dataset.notchX ?? String(exitX - 44));
+        if (notchPath) notchPath.setAttribute('d', `M ${exitX} ${tailY} H ${notchX}`);
+        if (continuePath) continuePath.setAttribute('d', `M ${exitX} ${tailY} V ${viewBox.height}`);
+        const dot3 = dots[2];
+        if (dot3) {
+          dot3.setAttribute('cx', String(notchX));
+          dot3.setAttribute('cy', String(tailY));
+        }
+      }
+    };
+
+    const initialSvg = getActiveSvg();
+    if (initialSvg) bindActiveSvg(initialSvg);
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    // `font-display: swap` (fonts.css) — viz CLAUDE.md „Konvence: kontinuální
+    // linka, tečky a text“ bod 5.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(section);
+      if (list) resizeObserver.observe(list);
+    }
+
+    if (!disableAnimation) {
+      if (heading) heading.classList.add('is-pending');
+      fadeUpEls.forEach((el) => el.classList.add('is-pending'));
+      itemEls.forEach((el) => el.classList.add('is-pending'));
+
+      let contentRevealed = false;
+      const revealContent = () => {
+        if (contentRevealed) return;
+        contentRevealed = true;
+        if (heading) {
+          heading.classList.remove('is-pending');
+          heading.classList.add('is-visible');
+        }
+        fadeUpEls.forEach((el) => {
+          el.classList.remove('is-pending');
+          el.classList.add('is-visible');
+        });
+      };
+
+      const measure = () => {
+        syncRoute();
+        paths.forEach((p) => {
+          const length = p.getTotalLength();
+          lengths.set(p, length);
+          p.style.strokeDasharray = String(length);
+        });
+        const mainLength = path ? lengths.get(path) ?? 0 : 0;
+        dots.forEach((dot, i) => {
+          if (!path || mainLength === 0) return;
+          const cx = parseFloat(dot.getAttribute('cx') ?? '0');
+          const cy = parseFloat(dot.getAttribute('cy') ?? '0');
+          let best = Infinity;
+          let bestT = 1;
+          const steps = 800;
+          for (let s = 0; s <= steps; s++) {
+            const l = (mainLength * s) / steps;
+            const pt = path.getPointAtLength(l);
+            const d = Math.hypot(pt.x - cx, pt.y - cy);
+            if (d < best) {
+              best = d;
+              bestT = l / mainLength;
+            }
+          }
+          dotThresholds[i] = bestT;
+        });
+      };
+      measure();
+      paths.forEach((p) => (p.style.strokeDashoffset = String(lengths.get(p) ?? 0)));
+
+      let ticking = false;
+      const update = () => {
+        measure();
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+        paths.forEach((p) => {
+          const length = lengths.get(p) ?? 0;
+          p.style.strokeDashoffset = String(length * (1 - progress));
+        });
+
+        dots.forEach((dot, i) => {
+          if (progress >= (dotThresholds[i] ?? 1)) {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+            const item = itemEls[i];
+            if (item) {
+              item.classList.remove('is-pending');
+              item.classList.add('is-visible');
+            }
+          }
+        });
+
+        if (rect.top < vh) revealContent();
+
+        ticking = false;
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    }
+  }
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .articles {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .articles__inner {
+    padding-top: 96px;
+    padding-bottom: 96px;
+  }
+
+  /* --- Nadpis / úvod / témata --- */
+
+  .articles__top {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    /* procentuální left — stejný důvod jako v AboutSection: trasa se
+       neuniformně roztahuje (preserveAspectRatio="none"), takže skutečná
+       poloha vstupní svislice (x=24 na mobilu) mimo kalibrační šířku 390
+       roste s viewportem. */
+    margin: 0 24px 0 calc(24 * 100% / 390 + 32px);
+  }
+
+  .articles__intro {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .articles__heading {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -.045em;
+    font-size: 40px;
+    max-width: 320px;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .articles__reveal-clip.is-pending {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .articles__reveal-clip.is-visible {
+    clip-path: inset(0 0 0% 0);
+    transition: clip-path 700ms var(--ease-out);
+  }
+
+  .articles__lead {
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 16px;
+    max-width: 340px;
+    color: var(--text);
+  }
+
+  .articles__topics {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .articles__topics-label {
+    margin: 0;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-quiet);
+  }
+
+  .articles__topics-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .articles__reveal-up.is-pending {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .articles__reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  /* --- Police článků --- */
+
+  .articles__list {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin: 40px 24px 0 calc(24 * 100% / 390 + 32px);
+    padding: 0;
+    list-style: none;
+  }
+
+  .articles__item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .articles__category {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .articles__item:first-child .articles__category {
+    color: var(--emerald);
+  }
+
+  .articles__title {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .articles__title a {
+    color: var(--navy);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .articles__title a:hover {
+    color: var(--emerald-hover);
+  }
+
+  .articles__title a:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .articles__excerpt {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  .articles__placeholder {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .articles__placeholder-label {
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .articles__placeholder-line {
+    display: block;
+    height: 1px;
+    background: var(--line);
+    opacity: .14;
+  }
+
+  .articles__item:first-child .articles__placeholder-line {
+    opacity: .16;
+  }
+
+  .articles__reveal-item.is-pending {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  .articles__reveal-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 450ms var(--ease-out), transform 450ms var(--ease-out);
+  }
+
+  /* --- Akce pod policí --- */
+
+  .articles__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin: 40px 24px 0 calc(24 * 100% / 390 + 32px);
+  }
+
+  .articles__cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .articles__cta:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+
+  .articles__cta:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .articles__divider {
+    display: none;
+  }
+
+  .articles__external {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .articles__external-lead {
+    display: none;
+  }
+
+  .articles__external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .articles__external-link:hover {
+    color: var(--emerald-hover);
+  }
+
+  .articles__external-link:hover .articles__external-icon {
+    color: var(--emerald-hover);
+  }
+
+  .articles__external-link:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .articles__external-icon {
+    width: 11px;
+    height: 11px;
+    color: var(--text-muted);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  /* --- Trasa --- */
+
+  .articles__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .articles__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .articles__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .articles__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .articles__route--tablet,
+  .articles__route--laptop,
+  .articles__route--desktop {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .articles__heading,
+    .articles__reveal-up,
+    .articles__reveal-item {
+      opacity: 1;
+      clip-path: none;
+      transform: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .articles__route--mobile {
+      display: none;
+    }
+
+    .articles__route--tablet {
+      display: block;
+    }
+
+    .articles__inner {
+      padding-top: 112px;
+      padding-bottom: 140px;
+    }
+
+    .articles__top {
+      margin: 0 40px 0 calc(40 * 100% / 834 + 56px);
+      gap: 48px;
+    }
+
+    .articles__heading {
+      max-width: 560px;
+      font-size: 56px;
+      line-height: 1.04;
+    }
+
+    .articles__lead {
+      font-size: 17px;
+      max-width: 440px;
+    }
+
+    .articles__topics-label {
+      font-size: 11.5px;
+    }
+
+    .articles__topics-list {
+      font-size: 15px;
+    }
+
+    .articles__list {
+      display: grid;
+      grid-template-columns: 300px 300px;
+      column-gap: 30px;
+      row-gap: 56px;
+      margin: 56px 40px 0 calc(40 * 100% / 834 + 56px);
+    }
+
+    .articles__item {
+      height: 216px;
+      justify-content: flex-end;
+    }
+
+    .articles__item:nth-child(1) {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .articles__item:nth-child(2) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .articles__item--off-shelf {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-self: end;
+      width: 300px;
+      height: auto;
+      justify-content: flex-start;
+    }
+
+    .articles__category {
+      font-size: 12px;
+    }
+
+    .articles__item:first-child .articles__category {
+      font-size: 13px;
+    }
+
+    .articles__placeholder-label {
+      font-size: 11px;
+    }
+
+    .articles__item:first-child .articles__placeholder-label {
+      font-size: 11.5px;
+    }
+
+    .articles__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 24px;
+      margin: 40px 40px 0 calc(40 * 100% / 834 + 56px);
+    }
+
+    .articles__divider {
+      display: block;
+      width: 1px;
+      height: 20px;
+      background: rgba(27, 74, 138, .26);
+    }
+
+    .articles__external-lead {
+      display: inline;
+      margin-right: 6px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .articles__route--tablet {
+      display: none;
+    }
+
+    .articles__route--laptop {
+      display: block;
+    }
+
+    .articles__inner {
+      padding-top: 128px;
+      padding-bottom: 120px;
+    }
+
+    .articles__top {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin: 0 96px 0 calc(96 * 100% / 1366 + 56px);
+      max-width: 1118px;
+      gap: 32px;
+    }
+
+    /* gap zůstává 14px (sjednoceno napříč weby 1. 9. 2026, viz base .articles__intro). */
+    .articles__intro {
+      max-width: 600px;
+    }
+
+    .articles__heading {
+      max-width: none;
+      font-size: 64px;
+    }
+
+    .articles__lead {
+      font-size: 19px;
+      max-width: 480px;
+    }
+
+    .articles__topics {
+      align-items: flex-end;
+      width: 280px;
+      flex: 0 0 280px;
+    }
+
+    .articles__topics-label {
+      font-size: 11.5px;
+    }
+
+    .articles__topics-list {
+      justify-content: flex-end;
+      text-align: right;
+      font-size: 14.5px;
+    }
+
+    .articles__list {
+      display: flex;
+      flex-direction: row;
+      gap: 0;
+      margin: 64px 96px 0 calc(96 * 100% / 1366 + 120px);
+    }
+
+    .articles__item {
+      height: 212px;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+    }
+
+    .articles__item:nth-child(1) {
+      width: 400px;
+    }
+
+    .articles__item:nth-child(2) {
+      width: 270px;
+      margin-left: 44px;
+    }
+
+    .articles__item:nth-child(3) {
+      width: 250px;
+      margin-left: 50px;
+    }
+
+    .articles__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 40px;
+      margin: 56px 96px 0 calc(96 * 100% / 1366 + 120px);
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .articles {
+      /* Wide desktop: centrované designové plátno (CLAUDE.md) — viz stejná
+         poznámka v AboutSection.astro. */
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .articles__route--laptop {
+      display: none;
+    }
+
+    .articles__route--desktop {
+      display: block;
+    }
+
+    .articles__inner {
+      padding-top: 140px;
+      padding-bottom: 132px;
+    }
+
+    .articles__top {
+      margin: 0 120px 0 calc(120 * 100% / 1440 + 56px);
+      max-width: 1144px;
+    }
+
+    .articles__intro {
+      max-width: 640px;
+    }
+
+    .articles__heading {
+      font-size: 72px;
+    }
+
+    .articles__lead {
+      font-size: 19px;
+      max-width: 520px;
+    }
+
+    .articles__topics {
+      width: 300px;
+      flex: 0 0 300px;
+    }
+
+    .articles__list {
+      margin: 96px 120px 0 calc(120 * 100% / 1440 + 120px);
+    }
+
+    .articles__item:nth-child(1) {
+      width: 420px;
+      margin-left: 0;
+    }
+
+    .articles__item:nth-child(2) {
+      width: 280px;
+      margin-left: 60px;
+    }
+
+    .articles__item:nth-child(3) {
+      width: 260px;
+      margin-left: 60px;
+    }
+
+    .articles__actions {
+      margin: 64px 120px 0 calc(120 * 100% / 1440 + 120px);
+    }
+  }
+</style>

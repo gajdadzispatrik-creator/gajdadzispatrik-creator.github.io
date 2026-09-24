@@ -1,0 +1,100 @@
+---
+/**
+ * Dočasný placeholder fotografie Patrika — hero-implementation-spec.md §4.
+ * Nepředstavuje žádnou konkrétní podobu: pouze tónová plocha s obrysem
+ * hlavy, šíje a ramen. Kontejner `.hero-photo` je jediné místo, kde se
+ * při dodání skutečné fotografie nahrazuje obsah za <picture>.
+ */
+---
+
+<div class="hero-photo" data-photo="placeholder" aria-hidden="true">
+  <div class="hero-photo__figure">
+    <div class="hero-photo__torso"></div>
+    <div class="hero-photo__neck"></div>
+    <div class="hero-photo__head"></div>
+    <div class="hero-photo__key-light"></div>
+    <div class="hero-photo__rim-light"></div>
+  </div>
+  <span class="hero-photo__label">FOTO PATRIKA - PLACEHOLDER</span>
+</div>
+
+<style>
+  .hero-photo {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-photo__figure {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-photo__torso {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 0;
+    top: 30%;
+    background: linear-gradient(155deg, var(--photo-torso-1), var(--photo-torso-2) 55%, var(--photo-torso-3));
+    clip-path: polygon(18% 9.5%, 82% 9.5%, 100% 100%, 0% 100%);
+  }
+
+  .hero-photo__neck {
+    position: absolute;
+    left: 50%;
+    top: 24%;
+    width: 16%;
+    height: 9%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, var(--photo-neck-1), var(--photo-neck-2));
+  }
+
+  .hero-photo__head {
+    position: absolute;
+    left: 50%;
+    top: 4%;
+    width: 34%;
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(120% 120% at 34% 26%, var(--photo-head-1), var(--photo-head-2) 55%, var(--photo-head-3));
+  }
+
+  .hero-photo__key-light {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(48% 38% at 30% 18%, var(--photo-key-light), transparent 70%);
+    mix-blend-mode: screen;
+  }
+
+  .hero-photo__rim-light {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(46% 60% at 84% 46%, var(--photo-rim-light), transparent 68%);
+    mix-blend-mode: screen;
+  }
+
+  .hero-photo__label {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  :global([data-photo-context='dark']) .hero-photo__label {
+    color: rgba(255, 255, 255, .72);
+  }
+
+  @media (max-width: 1023px) {
+    .hero-photo__label {
+      font-size: 10px;
+    }
+  }
+</style>

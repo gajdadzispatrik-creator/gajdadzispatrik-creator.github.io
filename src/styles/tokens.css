@@ -1,0 +1,112 @@
+/* Design tokens — hero-implementation-spec.md §2 */
+:root {
+  /* 2.1 Barvy */
+  --navy: #0F2747;
+  --navy-ink: #1C3555;
+  --bg: #F8FAFC;
+  --white: #FFFFFF;
+  --emerald: #1E7A5C;
+  --emerald-hover: #155F47;
+  --emerald-light: #8FD3B9;
+  --line: #1B4A8A;
+  --line-on-dark: #9CB6D4;
+  --router-grad-1: #16324F;
+  --router-grad-2: #0B1D36;
+  --router-grad-3: #15304C;
+  --text: #31445B;
+  --text-nav: #44586F;
+  --text-muted: #52657D;
+  --text-quiet: #7A8AA0;
+  --text-faint: #9AA9BC;
+  --border: #CBD5DF;
+  --rule: #E4E9EF;
+  --rule-soft: #DDE4EC;
+
+  /* placeholder fotografie */
+  --photo-head-1: #C4D2E4;
+  --photo-head-2: #A2B6CE;
+  --photo-head-3: #8AA1BF;
+  --photo-torso-1: #B6C7DC;
+  --photo-torso-2: #96ACC7;
+  --photo-torso-3: #7F97B7;
+  --photo-neck-1: #9CB1CB;
+  --photo-neck-2: #8299B9;
+  --photo-rim-light: rgba(143, 211, 185, .29);
+  --photo-key-light: rgba(255, 255, 255, .32);
+
+  /* placeholder fotografie — sekce O mně (AboutSection), civilnější tón */
+  --about-photo-1: #C8D6E6;
+  --about-photo-2: #B7C9DD;
+  --about-photo-3: #ADC0D6;
+  --about-photo-label: #8296AE;
+
+  /* placeholder fotografie — /o-mne, silnější kontrast popisku (§8 zadání
+     „Úkol pro Claude Code — podstránka /o-mne“) a tmavá varianta pro
+     placeholder na tmavé ploše kapitoly Důvěra. Světlé tóny výše
+     (--about-photo-1/2/3) se pro /o-mne používají beze změny. */
+  --about-photo-label-strong: #2E4260;
+  --about-photo-dark-1: #2A4568;
+  --about-photo-dark-2: #1E3B60;
+
+  /* přepínač cookie lišty (CookieConsent.astro) */
+  --toggle-off-track: #E3E9F0;
+  --toggle-locked-track: #C8D6E6;
+
+  /* zvýraznění chybějícího faktu na právních stránkách (LegalLayout.astro) — schválně nepříjemné, ne hezké */
+  --doplnit-bg: rgba(203, 86, 44, .1);
+  --doplnit-text: #8A4326;
+
+  /* interní štítek „K ověření před publikací“ (pristup.astro, kapitola
+     Odměna + FAQ o placení) — `aria-hidden`, návštěvník ho číst nemá, ale
+     musí zůstat vizuálně viditelný, dokud se věcný/compliance obsah
+     neověří. Amber, ne červená/oranžová `--doplnit-*` (ta je vyhrazená pro
+     doslova chybějící fakt na právních stránkách — tohle je jiný stav:
+     text existuje a je hotový, jen čeká na ověření). */
+  --pending-review: #9A6B12;
+  --pending-review-bg: rgba(154, 107, 18, .1);
+
+  /* 2.5 Radiusy */
+  --radius-tag: 8px;
+  --radius-field: 12px;
+  --radius-nav-cta: 13px;
+  --radius-btn: 14px;
+  --radius-panel: 21px;
+  --radius-line-desktop: 28px;
+  --radius-line-tablet: 22px;
+  --radius-line-mobile: 18px;
+
+  /* 2.4 Stíny */
+  --shadow-header: 0 12px 28px rgba(15, 39, 71, .08);
+  --shadow-header-tablet: 0 10px 24px rgba(15, 39, 71, .08);
+  --shadow-header-mobile: 0 10px 22px rgba(15, 39, 71, .08);
+  --shadow-stats: 0 18px 44px rgba(15, 39, 71, .16);
+  --shadow-stats-tablet: 0 16px 38px rgba(15, 39, 71, .16);
+  --shadow-stats-mobile: 0 16px 36px rgba(15, 39, 71, .16);
+
+  /* typografie */
+  --font-sans: 'Manrope', system-ui, sans-serif;
+
+  /* pohyb */
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --duration-hover: 180ms;
+  --duration-reveal: 500ms;
+  --duration-line: 650ms;
+
+  /* layout */
+  --content-max: 1240px;
+
+  /*
+   * Wide desktop: centrované designové plátno (CLAUDE.md „Konvence: wide
+   * desktop a centrované designové plátno“, 25. 8. 2026). Aplikuje se jako
+   * `max-width` na kořenový element sekce (spolu s `margin-inline: auto`)
+   * uvnitř existujícího desktopového stupně (`min-width: 1400px`) — ne jako
+   * nový breakpoint. Pod touto šířkou je hodnota no-op (sekce jsou užší),
+   * takže se 1366/1440 px vůbec nezmění. Nad ní se šířka sekce (a tím i
+   * `100%` uvnitř všech `calc(X * 100% / vb + Y)` výpočtů vázaných na trasu,
+   * ať počítaných v CSS nebo přes `getBoundingClientRect` v JS) zastaví na
+   * této hodnotě a zbylý prostor jde rovnoměrně do okrajů — beze změny
+   * jediného existujícího `calc()` vzorce, tokenu `--vb`/`--axis-x` nebo JS
+   * `syncRoute`/`syncMarkers` funkce. Ověřeno na 1920/2048 px.
+   */
+  --stage-max: 1760px;
+}

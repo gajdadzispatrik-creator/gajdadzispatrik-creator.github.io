@@ -1,0 +1,885 @@
+---
+/**
+ * Sekce „Recenze“ — sloupec citací.
+ * Zdroj: úkol pro Claude Code „sekce Recenze (Sloupec citací)“ §5–§8 (geometrie),
+ * §9 (interakce), §10 (přístupnost). Vizuální náhled mimo tento dokument
+ * neexistuje — veškerá geometrie níže odpovídá zadání beze změny.
+ *
+ * Recenze jsou reálné citace z Google (dodané uživatelem, zkrácené na
+ * nejsilnější 1–2 věty — sekce zobrazuje krátké redakční citace, ne celé
+ * recenze). Jméno u citace je jen křestní + první písmeno příjmení (na
+ * výslovné přání uživatele — původní zadání §4 chtělo bez jmen, dokud
+ * nebudou dodaná; teď dodaná jsou). Sémanticky jde o `<footer><cite>`
+ * uvnitř `<blockquote>`, standardní HTML vzor pro atribuci citace.
+ * Placeholder (vlasové řádky) se vykresluje jen když je `text` `null` —
+ * zůstává v `lineWidths` polí níže jako neaktivní fallback pro budoucí
+ * položky bez textu.
+ *
+ * Pozice hodnocení a odkazu na desktopu/notebooku/mobilu nejsou v zadání
+ * dané absolutním číslem, jen vztahem k sousednímu prvku („gap: 40px“,
+ * „pod nadpisem“, „pod citacemi“) — dopočítány z reálné vykreslené výšky
+ * (ověřeno v prohlížeči), ne odhadem. Tam, kde zadání dává přímé číslo
+ * (nadpis, dělítko, tečka, obsahová linka, tablet/mobil pozice hodnocení,
+ * mobil pozice odkazu), je použito beze změny.
+ */
+interface Review {
+  text: string | null;
+  author: string | null;
+  lineWidths: number[];
+}
+
+const reviews: Review[] = [
+  {
+    text: 'Konečně jsme měli pocit, že se někdo skutečně zajímá o naši situaci a bere naše potřeby vážně. Vše nám srozumitelně vysvětlil a udělal maximum pro to, aby nám pomohl.',
+    author: 'Sandra K.',
+    lineWidths: [100, 100, 100, 54],
+  },
+  {
+    text: 'Líbí se mi, že se na něj můžu obrátit jak v oblasti financí, tak pojištění a v dalších záležitostech. Je fajn mít jednoho člověka, kterému důvěřuji a s kterým můžu vše řešit na jednom místě.',
+    author: 'Denis I.',
+    lineWidths: [100, 100, 40],
+  },
+  {
+    text: 'Po zhodnocení mé konkrétní situace nabídne produkt, který dává největší smysl i do budoucna, bez spěchu a nátlaku. Změnilo to můj názor, že finanční poradce je jen prodavač produktů.',
+    author: 'Karel V.',
+    lineWidths: [100, 100, 68],
+  },
+];
+
+const googleReviewUrl = 'https://share.google/XnAx2GCl6M1bOtfto';
+---
+
+<section class="reviews" aria-labelledby="recenze">
+  <h2 id="recenze" class="reviews__heading reviews__intro-item">Recenze</h2>
+
+  <div class="reviews__rating reviews__intro-item">
+    <p class="reviews__rating-visible">
+      <span class="reviews__rating-top">
+        <span class="reviews__rating-number">5,0</span><span class="reviews__rating-star" aria-hidden="true">★</span>
+      </span>
+      <span class="reviews__rating-meta">
+        <span class="reviews__rating-source">Google hodnocení</span>
+      </span>
+    </p>
+    <span class="sr-only">Hodnocení 5,0 z&nbsp;5 na&nbsp;Google</span>
+  </div>
+
+  <ul class="reviews__list">
+    {reviews.map((review) => (
+      <li class="reviews__item">
+        {review.text ? (
+          <blockquote class="reviews__quote">
+            <div class="reviews__quote-meta">
+              {review.author && <cite class="reviews__quote-author">{review.author}</cite>}
+              <div class="reviews__quote-stars" aria-hidden="true">★★★★★</div>
+              <span class="sr-only">Hodnocení 5 z 5</span>
+            </div>
+            <p>{review.text}</p>
+          </blockquote>
+        ) : (
+          <Fragment>
+            <div class="reviews__placeholder" aria-hidden="true">
+              <span class="reviews__placeholder-label">RECENZE - PLACEHOLDER</span>
+              <div class="reviews__placeholder-lines">
+                {review.lineWidths.map((width) => (
+                  <span class="reviews__placeholder-line" style={`width:${width}%`} />
+                ))}
+              </div>
+            </div>
+            <span class="sr-only">Text recenze bude doplněn</span>
+          </Fragment>
+        )}
+      </li>
+    ))}
+  </ul>
+
+  <a
+    class="reviews__link reviews__intro-item"
+    href={googleReviewUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <svg class="reviews__link-icon" viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"></path>
+      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"></path>
+      <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.348 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"></path>
+      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"></path>
+    </svg>
+    Zobrazit na&nbsp;Google
+  </a>
+
+  <!-- Desktop 1400+ (kalibrace 1440) -->
+  <svg
+    class="reviews__route reviews__route--desktop"
+    viewBox="0 0 1440 980"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="reviews__route-path"
+      d="M 1300 -20 V 88 A 28 28 0 0 1 1272 116 H 668 A 28 28 0 0 0 640 144 V 980"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="reviews__dot" cx="640" cy="264" r="3.5" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!--
+    Notebook 1200–1399 (kalibrace 1366): stejná kompozice jako desktop, jen
+    užší (§7) — okraje 96, obsahová linka vpravo 1270, vstup/výstup x=1250,
+    dělítko x=600. Zadání pro tento mezistupeň nedává celý řetězec trasy,
+    jen kotevní souřadnice (1250, 600) a poloměr zůstává 28 stejně jako na
+    desktopu — mezilehlý zlomový bod (H) proto dopočítán stejnou +28 offset
+    logikou, jakou používá geometrie desktopu (668 = 640 + poloměr), ne
+    přibližnou afinní transformací z předchozích sekcí.
+  -->
+  <svg
+    class="reviews__route reviews__route--laptop"
+    viewBox="0 0 1366 980"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="reviews__route-path"
+      d="M 1250 -20 V 88 A 28 28 0 0 1 1222 116 H 628 A 28 28 0 0 0 600 144 V 980"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="reviews__dot" cx="600" cy="240" r="3.5" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!--
+    Tablet 768–1199 (kalibrace 834): zadání dávalo nájezd `M 794 -20 ...` se
+    zákrutem na osu x=40 (stejný tvar jako vstup do RouterSection/ProcessSection).
+    Ve skutečnosti ale ProcessSection na tabletu KONČÍ na x=40, ne na 794 —
+    nájezd na 794 by proto vytvořil mezeru přes 700 px místo návaznosti.
+    Reálný konec ProcessSection (svislice x=40) i vlastní osa této sekce
+    (§8: "osa x=40") jsou stejná souřadnice, takže žádný zákrut není potřeba —
+    trasa jen pokračuje rovně dolů (ověřeno v prohlížeči proti .process__route-path).
+  -->
+  <svg
+    class="reviews__route reviews__route--tablet"
+    viewBox="0 0 834 1000"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="reviews__route-path"
+      d="M 40 -20 V 1000"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="reviews__dot" cx="40" cy="300" r="3.2" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!-- Mobil <768 (kalibrace 390): stejný důvod jako u tabletu výše — ProcessSection na mobilu končí na x=24, což je i vlastní osa této sekce (§8: "osa x=24"), takže trasa pokračuje rovně, bez zákrutu z 366. -->
+  <svg
+    class="reviews__route reviews__route--mobile"
+    viewBox="0 0 390 1000"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="reviews__route-path"
+      d="M 24 -20 V 1000"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="reviews__dot" cx="24" cy="286" r="3.2" fill="var(--emerald)"></circle>
+  </svg>
+</section>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const section = document.querySelector('.reviews');
+  if (section) {
+    const allSvgs = Array.from(section.querySelectorAll('.reviews__route')) as SVGSVGElement[];
+    const getActiveSvg = (): SVGSVGElement | undefined => allSvgs.find((svg) => getComputedStyle(svg).display !== 'none');
+
+    /*
+     * `activeSvg`/`path`/`dot` musí být PŘEVÁZANÉ na aktuálně viditelné SVG,
+     * ne zjištěné jednou při načtení skriptu — stejná chyba a stejná oprava
+     * jako `bindActiveSvg` v BenefitsSection.astro/CasesSection.astro
+     * (nalezeno tam 25. 8. 2026, doplněno sem 14. 9. 2026 po nahlášení
+     * zdeformovaných/neokrouhlých teček). Bez převázání skript po změně
+     * šířky okna přes hranici stupně (resize, ne jen reload) dál zapisoval
+     * `--dot-fix` do SKRYTÉHO SVG předchozího stupně — nově zobrazené SVG
+     * tak zůstalo na výchozí hodnotě `--dot-fix: 1`, což tečku při
+     * neuniformním roztažení (`preserveAspectRatio="none"`) zplošťuje do
+     * elipsy.
+     */
+    let currentSvg: SVGSVGElement | undefined;
+    let path: SVGPathElement | null = null;
+    let dot: SVGCircleElement | null = null;
+    const bindActiveSvg = (svg: SVGSVGElement) => {
+      currentSvg = svg;
+      path = svg.querySelector('.reviews__route-path');
+      dot = svg.querySelector('.reviews__dot');
+    };
+    const initialSvg = getActiveSvg();
+    if (initialSvg) bindActiveSvg(initialSvg);
+    const getPath = (): SVGPathElement | null => path;
+    const getDot = (): SVGCircleElement | null => dot;
+    const firstItem = section.querySelector('.reviews__item') as HTMLElement | null;
+
+    /*
+     * Tečka musí sedět na úrovni popisku prvního bloku citací — ale výška
+     * sekce (a tím i svislé měřítko SVG) teď plyne z reálného obsahu, ne z
+     * pevného rámu. Pevné `cy` v markupu by při jiné výšce obsahu (kratší
+     * placeholder vs. delší skutečný text) sjelo z místa. `cy` proto po
+     * vykreslení přepočítáváme na skutečnou pozici prvního bloku — funguje
+     * to i bez ohledu na prefers-reduced-motion, protože jde o opravu
+     * rozvržení, ne o animaci.
+     */
+    const syncDotPosition = () => {
+      const activeSvg = getActiveSvg();
+      if (!activeSvg || !firstItem) return;
+      if (activeSvg !== currentSvg) bindActiveSvg(activeSvg);
+      const currentDot = getDot();
+      if (!currentDot) return;
+      const svgRect = activeSvg.getBoundingClientRect();
+      const viewBox = activeSvg.viewBox.baseVal;
+      // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
+      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
+      // (oprava 14. 9. 2026).
+      if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
+      const scaleY = svgRect.height / viewBox.height;
+      const scaleX = svgRect.width / viewBox.width;
+      const itemRect = firstItem.getBoundingClientRect();
+      const localY = (itemRect.top + 8 - svgRect.top) / scaleY;
+      currentDot.setAttribute('cy', String(localY));
+      currentDot.style.setProperty('--dot-fix', String(scaleY / scaleX));
+    };
+    syncDotPosition();
+    window.addEventListener('resize', syncDotPosition);
+    /*
+     * Samotné volání syncDotPosition() hned po načtení skriptu nestačí —
+     * layout sekce (výška plyne z reálné délky textu citací) v tu chvíli
+     * ještě nemusí být definitivní (např. self-hosted font se dokreslí až
+     * po prvním výpočtu). ResizeObserver na sekci zaručí přepočet znovu,
+     * jakmile se její skutečná výška ustálí, bez ohledu na to, kdy přesně
+     * se to stane. `document.fonts.ready` je doplňková jistota pro tentýž
+     * důvod — BenefitsSection.astro ukázala, že se na samotný ResizeObserver
+     * nedá spoléhat bezvýhradně (viz CLAUDE.md bod 5).
+     */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncDotPosition());
+    }
+
+    if (firstItem && 'ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncDotPosition());
+      resizeObserver.observe(section);
+      resizeObserver.observe(firstItem);
+    }
+
+    if (!disableAnimation) {
+    const introItems = Array.from(section.querySelectorAll('.reviews__intro-item'));
+    const items = Array.from(section.querySelectorAll('.reviews__item'));
+
+    const currentPath = getPath();
+    if (currentPath) {
+      const currentDot = getDot();
+      const length = currentPath.getTotalLength();
+      currentPath.style.strokeDasharray = String(length);
+      currentPath.style.strokeDashoffset = String(length);
+
+      let dotThreshold = 1;
+      if (currentDot) {
+        currentDot.classList.add('is-pending');
+        const cx = parseFloat(currentDot.getAttribute('cx') ?? '0');
+        const cy = parseFloat(currentDot.getAttribute('cy') ?? '0');
+        let best = Infinity;
+        const steps = 2000;
+        for (let i = 0; i <= steps; i++) {
+          const l = (length * i) / steps;
+          const pt = currentPath.getPointAtLength(l);
+          const d = Math.hypot(pt.x - cx, pt.y - cy);
+          if (d < best) {
+            best = d;
+            dotThreshold = l / length;
+          }
+        }
+      }
+
+      let ticking = false;
+      const update = () => {
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+        currentPath.style.strokeDashoffset = String(length * (1 - progress));
+
+        if (currentDot && progress >= dotThreshold) {
+          currentDot.classList.remove('is-pending');
+          currentDot.classList.add('is-visible');
+        }
+
+        ticking = false;
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    }
+
+    introItems.forEach((el) => el.classList.add('is-pending'));
+    items.forEach((item) => item.classList.add('is-pending'));
+
+    const revealIntro = () => {
+      introItems.forEach((el) => {
+        el.classList.remove('is-pending');
+        el.classList.add('is-visible');
+      });
+    };
+
+    const introObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            revealIntro();
+            introObserver.disconnect();
+          }
+        });
+      },
+      { rootMargin: '0px 0px -15% 0px', threshold: 0.4 }
+    );
+    const introTrigger = section.querySelector('.reviews__heading');
+    if (introTrigger) introObserver.observe(introTrigger);
+
+    const itemObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.remove('is-pending');
+            entry.target.classList.add('is-visible');
+            itemObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '0px 0px -15% 0px', threshold: 0.4 }
+    );
+    items.forEach((item, i) => {
+      (item as HTMLElement).style.transitionDelay = `${i * 60}ms`;
+      itemObserver.observe(item);
+    });
+    }
+  }
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /*
+   * Výška sekce NENÍ pevná — vyplývá z reálné výšky sloupce citací (jediný
+   * prvek v normálním tokovém layoutu; nadpis/hodnocení/odkaz jsou
+   * position:absolute, do výšky se nepočítají). padding-top drží citace na
+   * stejné souřadnici jako dřív `top`, padding-bottom je mezera pod nimi.
+   * Až placeholder nahradí delší skutečný text, sekce se prodlouží sama —
+   * bez toho by při krátkém placeholderu vznikla stovky pixelů prázdného
+   * prostoru pod poslední recenzí (revize 1, bod 5).
+   */
+  .reviews {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    padding-top: 330px;
+    padding-bottom: 72px;
+    --reviews-divider-x: 24;
+  }
+
+  .reviews__intro-item.is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .reviews__intro-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  /* --- Nadpis --- */
+
+  .reviews__heading {
+    position: absolute;
+    left: 56px;
+    right: 24px;
+    top: 112px;
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -.05em;
+    font-size: 40px;
+    color: var(--navy);
+  }
+
+  /* --- Hodnocení --- */
+
+  .reviews__rating {
+    position: absolute;
+    left: 56px;
+    right: 24px;
+    top: 179px;
+  }
+
+  .reviews__rating-visible {
+    margin: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .reviews__rating-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .reviews__rating-number {
+    font-weight: 700;
+    letter-spacing: -.05em;
+    font-variant-numeric: tabular-nums;
+    color: var(--navy);
+    font-size: 52px;
+  }
+
+  .reviews__rating-star {
+    font-weight: 600;
+    color: var(--emerald);
+    font-size: 20px;
+  }
+
+  .reviews__rating-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .reviews__rating-source {
+    font-weight: 500;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  /*
+   * --- Odkaz ---
+   * Base a tablet: citace jsou nad odkazem v normálním toku (viz .reviews__list
+   * níže) a jejich výška je proměnlivá (placeholder vs. skutečný text), takže
+   * odkaz nemůže mít pevné `top` — natvrdo dané `top:920` z původního zadání
+   * by při kratším obsahu (aktuální placeholder) odkaz posunulo pod spodní
+   * hranu sekce a `overflow:hidden` by ho oříznul. Odkaz proto na těchto
+   * šířkách plyne hned za seznamem citací s pevnou mezerou (`margin-top`).
+   * Notebook a desktop odkaz nechávají position:absolute — tam sedí v levém
+   * sloupci vedle hodnocení, ne pod citacemi, takže konflikt nevzniká
+   * (viz přepis v příslušných @media blocích níže).
+   */
+  .reviews__link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    margin: 40px 0 0 56px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .reviews__link-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .reviews__link:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+
+  .reviews__link:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  /* --- Citace --- */
+
+  /*
+   * left je procentuální, ne pevný px — SVG trasy se neuniformně roztahuje
+   * (preserveAspectRatio="none"), takže skutečná poloha dělítka (x=24) mimo
+   * kalibrační šířku 390 roste s viewportem. Pevných 56px (dřívější verze)
+   * se od reálného dělítka mimo 390px vzdalovalo — zjištěno auditem odsazení
+   * po celém webu, stejná chyba jako u BenefitsSection a dřívější notebook/
+   * desktop verze této sekce (viz komentář u notebook stupně níže).
+   */
+  .reviews__list {
+    margin: 0 24px 0 calc(var(--reviews-divider-x) * 100% / 390 + 32px);
+  }
+
+  .reviews__item.is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .reviews__item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  .reviews__item:first-child {
+    padding: 0 0 30px;
+  }
+
+  .reviews__item:not(:first-child) {
+    padding: 30px 0 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .reviews__quote-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+  }
+
+  .reviews__quote-stars {
+    font-size: 12px;
+    letter-spacing: .15em;
+    color: var(--emerald);
+  }
+
+  .reviews__quote-author {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .reviews__quote p {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .reviews__placeholder-label {
+    display: block;
+    font-weight: 700;
+    letter-spacing: .16em;
+    color: var(--text-faint);
+    font-size: 11px;
+  }
+
+  .reviews__placeholder-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .reviews__placeholder-line {
+    height: 1px;
+    background: var(--line);
+    opacity: .14;
+  }
+
+  /* --- Trasa --- */
+
+  .reviews__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /*
+   * --dot-fix (nastaveno v JS, viz syncDotPosition) doškáluje tečku ve
+   * vodorovném směru zpět na kruh — SVG trasy je neuniformně roztahované
+   * (preserveAspectRatio="none") a výška téhle sekce plyne z obsahu, ne z
+   * pevného vzorce, takže poměr vodorovného a svislého měřítka nejde
+   * spočítat čistě v CSS jako u ostatních sekcí. Kombinuje se v jedné
+   * transform hodnotě s reveal škálou (.4 → 1), aby se navzájem nepřepisovaly.
+   */
+  .reviews__dot {
+    --dot-fix: 1;
+    transform: scaleX(var(--dot-fix));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .reviews__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix)) scale(.4);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .reviews__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .reviews__route--tablet,
+  .reviews__route--laptop,
+  .reviews__route--desktop {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reviews__intro-item,
+    .reviews__item {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .reviews {
+      padding-top: 350px;
+      padding-bottom: 80px;
+      --reviews-divider-x: 40;
+    }
+
+    .reviews__route--mobile {
+      display: none;
+    }
+
+    .reviews__route--tablet {
+      display: block;
+    }
+
+    .reviews__heading {
+      left: 96px;
+      right: 40px;
+      top: 120px;
+      font-size: 52px;
+    }
+
+    .reviews__rating {
+      left: 96px;
+      right: 40px;
+      top: 210px;
+    }
+
+    .reviews__rating-visible {
+      align-items: center;
+      gap: 16px;
+    }
+
+    .reviews__rating-number {
+      font-size: 56px;
+    }
+
+    .reviews__rating-star {
+      font-size: 22px;
+    }
+
+    .reviews__rating-source {
+      font-size: 16px;
+    }
+
+    .reviews__link {
+      margin: 40px 0 0 110px;
+    }
+
+    /* left procentuální — stejný důvod jako v base stupni výše (dělítko x=40, viewBox 834). */
+    .reviews__list {
+      margin: 0 40px 0 calc(var(--reviews-divider-x) * 100% / 834 + 70px);
+    }
+
+    .reviews__item:first-child {
+      padding: 0 0 34px;
+    }
+
+    .reviews__item:not(:first-child) {
+      padding: 34px 0 0;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .reviews {
+      padding-top: 190px;
+      padding-bottom: 100px;
+      --reviews-divider-x: 600;
+    }
+
+    .reviews__route--tablet {
+      display: none;
+    }
+
+    .reviews__route--laptop {
+      display: block;
+    }
+
+    .reviews__heading {
+      left: 96px;
+      right: auto;
+      top: 190px;
+      max-width: 400px;
+      font-size: 58px;
+    }
+
+    .reviews__rating {
+      left: 96px;
+      right: auto;
+      top: 289px;
+      width: 400px;
+    }
+
+    .reviews__rating-visible {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .reviews__rating-number {
+      font-size: 58px;
+    }
+
+    .reviews__rating-star {
+      font-size: 26px;
+    }
+
+    .reviews__rating-source {
+      font-size: 17px;
+    }
+
+    .reviews__link {
+      position: absolute;
+      left: 96px;
+      top: 466px;
+      margin: 0;
+      width: auto;
+    }
+
+    /*
+     * left je procentuální, ne pevný px — SVG trasy se neuniformně
+     * roztahuje (preserveAspectRatio="none"), takže skutečná poloha
+     * dělítka (x=600) mimo kalibrační šířku 1366 roste s viewportem.
+     * Pevný px (dřívější `calc(var(--reviews-divider-x) * 1px + 56px)`)
+     * se od reálného dělítka postupně vzdaloval a text mohl skončit
+     * přes linku místo vpravo od ní.
+     */
+    .reviews__list {
+      margin: 0 96px 0 calc(var(--reviews-divider-x) * 100% / 1366 + 56px);
+      max-width: 614px;
+    }
+
+    .reviews__item:first-child {
+      padding: 0 0 40px;
+    }
+
+    .reviews__item:not(:first-child) {
+      padding: 40px 0 0;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .reviews {
+      padding-top: 216px;
+      padding-bottom: 120px;
+      --reviews-divider-x: 640;
+      /* Wide desktop: centrované designové plátno (CLAUDE.md) — viz stejná
+         poznámka v ConnectionsSection.astro. */
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .reviews__route--laptop {
+      display: none;
+    }
+
+    .reviews__route--desktop {
+      display: block;
+    }
+
+    .reviews__heading {
+      left: 120px;
+      top: 216px;
+      max-width: 420px;
+      font-size: 64px;
+    }
+
+    .reviews__rating {
+      left: 120px;
+      top: 322px;
+      width: 420px;
+    }
+
+    .reviews__rating-number {
+      font-size: 64px;
+    }
+
+    .reviews__link {
+      position: absolute;
+      left: 120px;
+      top: 507px;
+      margin: 0;
+      width: auto;
+    }
+
+    /* left procentuální — stejný důvod jako v notebook stupni výše. */
+    .reviews__list {
+      margin: 0 120px 0 calc(var(--reviews-divider-x) * 100% / 1440 + 56px);
+      max-width: 624px;
+    }
+
+    .reviews__item:first-child {
+      padding: 0 0 44px;
+    }
+
+    .reviews__item:not(:first-child) {
+      padding: 44px 0 0;
+    }
+  }
+</style>

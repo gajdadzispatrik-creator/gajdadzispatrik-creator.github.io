@@ -1,0 +1,722 @@
+---
+/**
+ * Sekce „Časté otázky“ — otevřený seznam, modrá (varianta 17a).
+ * Zdroj: úkol pro Claude Code „sekce Časté otázky (Otevřený seznam, modrá)“,
+ * §1–§14. Tmavé prostředí (gradient, smaragdové světlo, barvy) přebráno beze
+ * změny z BenefitsSection.astro. Kompozice levá kolona / dělítko / pravá
+ * kolona vychází ze stejného principu jako ReviewsSection.astro (jediná
+ * tečka na úrovni prvního prvku, JS dopočet cy, žádné zářezy).
+ *
+ * ODCHYLKA (§2, krok 2 — zadání samo tuto kontrolu vyžaduje):
+ * §6–§9 počítají se vstupem trasy na x=1300/1250/794/366 podle vzoru
+ * Router/Process/Connections/Articles. Reálně změřeno v prohlížeči
+ * (getPointAtLength na živých `.articles__route-path` větvích) na všech
+ * 12 required šířkách:
+ * - desktop (1400+): reálný výstup ArticlesSection = 1300 ✓ odpovídá zadání
+ * - notebook (1200–1399): reálný výstup = 1250 ✓ odpovídá zadání
+ * - tablet (768–1199): reálný výstup = 794 ✓ odpovídá zadání (police
+ *   pokračuje svislicí dolů za mimopoliční třetí článek, viz
+ *   `.articles__route-continue` v ArticlesSection.astro)
+ * - mobil (<768): ArticlesSection na mobilu NEMÁ policii ani pravostrannou
+ *   větev trasy — je to jen svislice u LEVÉHO okraje na x=24 (stejná osa,
+ *   která pokračuje z AboutSection přes celý mobilní řetězec). Reálný
+ *   výstup je tedy 24, ne 366. Protože 24 je zároveň vlastní osa této
+ *   sekce na mobilu (§9), trasa na mobilu proto NEPOKRAČUJE zákrutem
+ *   z pravé strany, ale jde rovně dolů bez lomu — stejný princip jako
+ *   u ReviewsSection.astro/BenefitsSection.astro na tabletu/mobilu, kde
+ *   vstup = vlastní osa.
+ *
+ * Barva trasy se mění přesně na hranici sekcí: `var(--line)` .18 (světlé
+ * ArticlesSection) → `var(--line-on-dark)` .3 (tato sekce, tmavá) — token
+ * `--line-on-dark: #9CB6D4` už v tokens.css existuje. `--emerald-light:
+ * #8FD3B9` použit na hover odkazu. `#16324F`/`#0B1D36` (gradientové stopy)
+ * nemají v tokens.css vyhrazený token ani v BenefitsSection.astro, která
+ * je zavedla — píšou se tam přímo jako literál; stejný postup zachován
+ * i zde kvůli konzistenci s existující sekcí, ne kvůli chybějícímu tokenu.
+ */
+interface Faq {
+  q: string;
+  a: string;
+}
+
+const faqs: Faq[] = [
+  {
+    q: 'Kolik stojí spolupráce se mnou?',
+    a: 'Konzultace jsou nezávazné a zdarma. Za mou práci mi nic přímo neplatíte.',
+  },
+  { q: 'Jak dlouho konzultace trvá?', a: 'Úvodní konzultace trvá přibližně 30 minut.' },
+  {
+    q: 'Musím měnit své současné smlouvy?',
+    a: 'Ne. Nejdřív zjistíme, co je nastavené dobře a co má smysl upravit.',
+  },
+  { q: 'Můžeme vše vyřešit online?', a: 'Ano. Konzultace může proběhnout osobně v Ostravě nebo online.' },
+  { q: 'Pomáháte také podnikatelům?', a: 'Ano. Osobní a podnikatelské finance je často potřeba řešit společně.' },
+  { q: 'Co si mám připravit?', a: 'Na první konzultaci stačí základní informace o vaší situaci a cílech.' },
+];
+---
+
+<section class="faq" aria-labelledby="faq">
+  <div class="faq__inner">
+    <h2 id="faq" class="faq__heading faq__reveal-clip">Na&nbsp;co se&nbsp;často ptáte</h2>
+
+    <dl class="faq__list">
+      {faqs.map((item) => (
+        <>
+          <dt class="faq__question faq__reveal-item">{item.q}</dt>
+          <dd class="faq__answer faq__reveal-item">{item.a}</dd>
+        </>
+      ))}
+    </dl>
+
+    <div class="faq__offer faq__reveal-up">
+      <p class="faq__offer-text">Nenašli jste svou otázku?</p>
+      <a class="faq__offer-link" href="#kontakt">Nezávazná konzultace</a>
+    </div>
+  </div>
+
+  <!-- Desktop 1400+ (kalibrace 1440). Vstup x=1300 (= reálný výstup ArticlesSection), dělítko x=640, radius 28. -->
+  <svg
+    class="faq__route faq__route--desktop"
+    viewBox="0 0 1440 900"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="faq__route-path"
+      d="M 1300 -20 V 92 A 28 28 0 0 1 1272 120 H 668 A 28 28 0 0 0 640 148 V 900"
+      fill="none"
+      stroke="var(--line-on-dark)"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="faq__dot" cx="640" cy="292" r="3.5" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!-- Notebook 1200–1399 (kalibrace 1366). Vstup x=1250, dělítko x=600, stejné y-milníky jako desktop (radius 28). -->
+  <svg
+    class="faq__route faq__route--laptop"
+    viewBox="0 0 1366 900"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="faq__route-path"
+      d="M 1250 -20 V 92 A 28 28 0 0 1 1222 120 H 628 A 28 28 0 0 0 600 148 V 900"
+      fill="none"
+      stroke="var(--line-on-dark)"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="faq__dot" cx="600" cy="272" r="3.5" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!-- Tablet 768–1199 (kalibrace 834). Vstup x=794 (= reálný výstup ArticlesSection), osa x=40, radius 22. -->
+  <svg
+    class="faq__route faq__route--tablet"
+    viewBox="0 0 834 1000"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="faq__route-path"
+      d="M 794 -20 V 48 A 22 22 0 0 1 772 70 H 62 A 22 22 0 0 0 40 92 V 1000"
+      fill="none"
+      stroke="var(--line-on-dark)"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="faq__dot" cx="40" cy="300" r="3.2" fill="var(--emerald)"></circle>
+  </svg>
+
+  <!--
+    Mobil <768 (kalibrace 390). ODCHYLKA (viz komentář nahoře): reálný výstup
+    ArticlesSection na mobilu je x=24 (vlastní osa této sekce), ne 366 — trasa
+    proto jde rovně dolů bez zákrutu, stejný princip jako u ReviewsSection/
+    BenefitsSection na tabletu a mobilu.
+  -->
+  <svg
+    class="faq__route faq__route--mobile"
+    viewBox="0 0 390 1400"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="faq__route-path"
+      d="M 24 -20 V 1400"
+      fill="none"
+      stroke="var(--line-on-dark)"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <circle class="faq__dot" cx="24" cy="286" r="3.2" fill="var(--emerald)"></circle>
+  </svg>
+</section>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const section = document.querySelector('.faq');
+  if (section) {
+    const allSvgs = Array.from(section.querySelectorAll('.faq__route')) as SVGSVGElement[];
+    const getActiveSvg = (): SVGSVGElement | undefined => allSvgs.find((svg) => getComputedStyle(svg).display !== 'none');
+
+    /*
+     * `activeSvg`/`path`/`dot` musí být PŘEVÁZANÉ na aktuálně viditelné SVG,
+     * ne zjištěné jednou při načtení skriptu — stejná chyba a stejná oprava
+     * jako `bindActiveSvg` v BenefitsSection.astro/CasesSection.astro
+     * (nalezeno tam 25. 8. 2026, doplněno sem 14. 9. 2026 po nahlášení
+     * zdeformovaných/neokrouhlých teček). Bez převázání skript po změně
+     * šířky okna přes hranici stupně (resize, ne jen reload) dál zapisoval
+     * `--dot-fix` do SKRYTÉHO SVG předchozího stupně.
+     */
+    let currentSvg: SVGSVGElement | undefined;
+    let path: SVGPathElement | null = null;
+    let dot: SVGCircleElement | null = null;
+    const bindActiveSvg = (svg: SVGSVGElement) => {
+      currentSvg = svg;
+      path = svg.querySelector('.faq__route-path');
+      dot = svg.querySelector('.faq__dot');
+    };
+    const initialSvg = getActiveSvg();
+    if (initialSvg) bindActiveSvg(initialSvg);
+    const getPath = (): SVGPathElement | null => path;
+    const getDot = (): SVGCircleElement | null => dot;
+    const firstQuestion = section.querySelector('.faq__question') as HTMLElement | null;
+
+    /*
+     * Tečka musí sedět na úrovni první otázky — výška sekce plyne z obsahu
+     * (§12), takže svislé měřítko SVG není známé předem. `cy` se proto po
+     * vykreslení přepočítává na skutečnou pozici první `<dt>` — stejný
+     * princip jako `syncDotPosition` v ReviewsSection.astro (`itemRect.top
+     * + 8`). Cesta samotná (`d`) zůstává statická — její koncový bod leží
+     * přesně na `viewBox.height`, takže se sama roztáhne na skutečnou výšku
+     * sekce díky `height:100%` na <svg>, bez nutnosti JS přepočtu.
+     */
+    const syncDotPosition = () => {
+      const activeSvg = getActiveSvg();
+      if (!activeSvg || !firstQuestion) return;
+      if (activeSvg !== currentSvg) bindActiveSvg(activeSvg);
+      const currentDot = getDot();
+      if (!currentDot) return;
+      const svgRect = activeSvg.getBoundingClientRect();
+      const viewBox = activeSvg.viewBox.baseVal;
+      // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
+      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
+      // (oprava 14. 9. 2026).
+      if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
+      const scaleY = svgRect.height / viewBox.height;
+      const scaleX = svgRect.width / viewBox.width;
+      const itemRect = firstQuestion.getBoundingClientRect();
+      const localY = (itemRect.top + 8 - svgRect.top) / scaleY;
+      currentDot.setAttribute('cy', String(localY));
+      currentDot.style.setProperty('--dot-fix', String(scaleY / scaleX));
+    };
+    syncDotPosition();
+    window.addEventListener('resize', syncDotPosition);
+
+    // `font-display: swap` (fonts.css) — viz CLAUDE.md „Konvence: kontinuální
+    // linka, tečky a text“ bod 5.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncDotPosition());
+    }
+
+    if (firstQuestion && 'ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncDotPosition());
+      resizeObserver.observe(section);
+      resizeObserver.observe(firstQuestion);
+    }
+
+    if (!disableAnimation) {
+      const heading = section.querySelector('.faq__reveal-clip');
+      const offerEl = section.querySelector('.faq__reveal-up');
+      const questionItems = Array.from(section.querySelectorAll('.faq__reveal-item')) as HTMLElement[];
+
+      if (heading) heading.classList.add('is-pending');
+      if (offerEl) offerEl.classList.add('is-pending');
+      questionItems.forEach((el, i) => {
+        el.style.transitionDelay = `${Math.floor(i / 2) * 50}ms`;
+        el.classList.add('is-pending');
+      });
+
+      let contentRevealed = false;
+      const revealContent = () => {
+        if (contentRevealed) return;
+        contentRevealed = true;
+        if (heading) {
+          heading.classList.remove('is-pending');
+          heading.classList.add('is-visible');
+        }
+        if (offerEl) {
+          offerEl.classList.remove('is-pending');
+          offerEl.classList.add('is-visible');
+        }
+        questionItems.forEach((el) => {
+          el.classList.remove('is-pending');
+          el.classList.add('is-visible');
+        });
+      };
+
+      let pathLength = 0;
+      let dotThreshold = 1;
+      const initialPath = getPath();
+      if (initialPath) {
+        const initialDot = getDot();
+        pathLength = initialPath.getTotalLength();
+        initialPath.style.strokeDasharray = String(pathLength);
+        initialPath.style.strokeDashoffset = String(pathLength);
+
+        if (initialDot) {
+          initialDot.classList.add('is-pending');
+          const cx = parseFloat(initialDot.getAttribute('cx') ?? '0');
+          const cy = parseFloat(initialDot.getAttribute('cy') ?? '0');
+          let best = Infinity;
+          const steps = 2000;
+          for (let i = 0; i <= steps; i++) {
+            const l = (pathLength * i) / steps;
+            const pt = initialPath.getPointAtLength(l);
+            const d = Math.hypot(pt.x - cx, pt.y - cy);
+            if (d < best) {
+              best = d;
+              dotThreshold = l / pathLength;
+            }
+          }
+        }
+      }
+
+      let ticking = false;
+      const update = () => {
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+        const currentPath = getPath();
+        if (currentPath) {
+          currentPath.style.strokeDashoffset = String(pathLength * (1 - progress));
+          const currentDot = getDot();
+          if (currentDot && progress >= dotThreshold) {
+            currentDot.classList.remove('is-pending');
+            currentDot.classList.add('is-visible');
+          }
+        }
+
+        if (rect.top < vh) revealContent();
+
+        ticking = false;
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    }
+  }
+</script>
+
+<style>
+  /*
+   * Výška sekce NENÍ pevná (§12) — vyplývá z reálné výšky obsahu (nadpis +
+   * nabídka v levé koloně, seznam otázek v pravé). padding-top drží obsah
+   * na stejné souřadnici jako by měl mít `top` ze zadání, padding-bottom je
+   * mezera pod ním.
+   */
+  .faq {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(168deg, #16324F 0%, #0F2747 58%, #0B1D36 100%);
+  }
+
+  .faq::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(70% 46% at 78% 20%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .faq__inner {
+    position: relative;
+    z-index: 1;
+    padding: 112px 24px 96px calc(24 * 100% / 390 + 32px);
+  }
+
+  /* --- Nadpis --- */
+
+  .faq__heading {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -.04em;
+    font-size: 36px;
+    color: #FFFFFF;
+    text-wrap: pretty;
+  }
+
+  .faq__reveal-clip.is-pending {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .faq__reveal-clip.is-visible {
+    clip-path: inset(0 0 0% 0);
+    transition: clip-path 700ms var(--ease-out);
+  }
+
+  /* --- Otázky --- */
+
+  .faq__list {
+    margin: 40px 0 0;
+  }
+
+  .faq__question {
+    margin: 0;
+    padding-top: 26px;
+    border-top: 1px solid rgba(255, 255, 255, .14);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -.02em;
+    font-size: 19px;
+    color: #FFFFFF;
+  }
+
+  .faq__question:first-of-type {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .faq__answer {
+    margin: 7px 0 26px;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 16px;
+    color: rgba(255, 255, 255, .72);
+    text-wrap: pretty;
+  }
+
+  .faq__answer:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .faq__reveal-item.is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .faq__reveal-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  /* --- Nabídka konzultace --- */
+
+  .faq__offer {
+    display: flex;
+    flex-direction: column;
+    /* width:fit-content — bez toho zabírá blok (bez viditelného pozadí)
+       celou dostupnou šířku sloupce, takže jeho box zasahuje dál doprava,
+       než kolik samotný text/odkaz potřebuje. */
+    width: fit-content;
+    gap: 14px;
+    margin-top: 40px;
+  }
+
+  .faq__reveal-up.is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .faq__reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  .faq__offer-text {
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 16px;
+    color: rgba(255, 255, 255, .62);
+  }
+
+  .faq__offer-link {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    min-height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #FFFFFF;
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .faq__offer-link:hover {
+    color: var(--emerald-light);
+    text-decoration-color: var(--emerald-light);
+  }
+
+  .faq__offer-link:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  /* --- Trasa --- */
+
+  .faq__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .faq__dot {
+    --dot-fix: 1;
+    transform: scaleX(var(--dot-fix));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .faq__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix)) scale(.4);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .faq__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .faq__route--tablet,
+  .faq__route--laptop,
+  .faq__route--desktop {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq__heading,
+    .faq__reveal-item,
+    .faq__reveal-up {
+      opacity: 1;
+      clip-path: none;
+      transform: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .faq__route--mobile {
+      display: none;
+    }
+
+    .faq__route--tablet {
+      display: block;
+    }
+
+    .faq__inner {
+      padding: 112px 40px 100px calc(40 * 100% / 834 + 56px);
+    }
+
+    .faq__heading {
+      font-size: 48px;
+      line-height: 1.06;
+    }
+
+    .faq__list {
+      margin: 56px 0 0;
+      max-width: 620px;
+    }
+
+    .faq__question {
+      padding-top: 28px;
+      font-size: 20px;
+    }
+
+    .faq__answer {
+      margin: 8px 0 28px;
+      font-size: 16.5px;
+      max-width: 580px;
+    }
+
+    .faq__offer {
+      margin-top: 60px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .faq__route--tablet {
+      display: none;
+    }
+
+    .faq__route--laptop {
+      display: block;
+    }
+
+    .faq__inner {
+      display: grid;
+      /*
+       * Levý okraj (padding-left) je teď pevných 96px, ne procentuální —
+       * nadpis v levém sloupci tu není vedle žádné trasy (dělítko je
+       * uprostřed, mezi sloupci), takže nemá důvod procentuálně sledovat
+       * roztahování SVG. Stejná konvence jako nadpisy v Connections/Reviews/
+       * Benefits (taky pevný px, protože nesousedí s trasou) — dřívější
+       * procentuální verze způsobila, že nadpis mimo kalibrační šířku 1366
+       * ujížděl od téhle skupiny sekcí (zjištěno vizuálním srovnáním).
+       *
+       * Šířka prvního sloupce proto NENÍ pevných 410px — dopočítána tak,
+       * aby pravý sloupec (otázky) vždy začínal přesně na pozici dělítka
+       * (osa x=600) + 56px, i mimo kalibrační šířku 1366 (dělítko samo
+       * roste s viewportem, protože leží v neuniformně roztahovaném SVG).
+       * 190 = 96 (pevný levý okraj) + 150 (mezera) − 56 (cílový odstup
+       * pravého sloupce od dělítka).
+       *
+       * `100vw`, ne `100%` — uvnitř `grid-template-columns` se `%` počítá
+       * z content-boxu MŘÍŽKY (`.faq__inner` bez jejího vlastního paddingu),
+       * ne z šířky viewportu jako všude jinde v projektu (`margin`/`padding`
+       * mimo grid). `100vw` referuje přímo šířku viewportu bez ohledu na
+       * kontext.
+       */
+      grid-template-columns: calc(600 * 100vw / 1366 - 190px) 1fr;
+      column-gap: 150px;
+      row-gap: 16px;
+      padding: 176px 96px 100px 96px;
+    }
+
+    .faq__heading {
+      grid-column: 1;
+      grid-row: 1;
+      font-size: 54px;
+      line-height: 1.04;
+    }
+
+    .faq__list {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      margin: 0;
+      /*
+       * Bez stropu by dt/dd (block-level) rostly na celou šířku 1fr sloupce
+       * bez omezení — na velmi širokých oknech (1920px+) by tak přesáhly
+       * obsahovou linku. 614px = obsahová linka (1270) − levý okraj sloupce
+       * (656 = 600 + 56), stejný princip jako `.reviews__list` na notebooku.
+       */
+      max-width: 614px;
+    }
+
+    .faq__question {
+      font-size: 21px;
+    }
+
+    .faq__answer {
+      font-size: 16.5px;
+      max-width: 520px;
+    }
+
+    .faq__offer {
+      grid-column: 1;
+      grid-row: 2;
+      align-self: start;
+      margin-top: 0;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .faq__route--laptop {
+      display: none;
+    }
+
+    .faq__route--desktop {
+      display: block;
+      /* Wide desktop: centrované designové plátno (CLAUDE.md). `.faq`
+         zůstává full-width tmavý pás (§„1. Full-width layer“), ale jeho
+         TRASA musí na švu navazovat na sousední (capnuté) sekce Articles/
+         Contact — sama trasa proto dostává stejný strop nezávisle na
+         pozadí/obsahu sekce (zjištěno `npm run check:layout` na 1920px). */
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    /*
+     * Wide desktop: centrované designové plátno (CLAUDE.md). `.faq` zůstává
+     * full-width tmavý pás (pozadí + trasa) — `.faq__inner` (obsahový
+     * wrapper, existoval už dřív pro padding/grid) dostává STEJNÝ strop jako
+     * trasa, jinak by nadpis/otázky zůstaly fixované na viewport místo na
+     * stage (dřívější implementace capovala jen `.faq__route--desktop`, ne
+     * `.faq__inner` — zjištěno 25. 8. 2026).
+     */
+    .faq__inner {
+      /*
+       * Stejný princip jako notebook výše — pevný levý okraj (120px, nadpis
+       * tu nesousedí s trasou), první sloupec dopočítaný tak, aby pravý
+       * sloupec začínal přesně na dělítku (osa x=640) + 56px na jakékoli
+       * šířce v rámci stupně, ne jen na kalibrační 1440.
+       * 200 = 120 (pevný levý okraj) + 136 (mezera) − 56 (cílový odstup).
+       *
+       * `min(100vw, var(--stage-max))`, ne holé `100vw` — `.faq__inner` je
+       * teď capnutý na `--stage-max` (viz níže), takže jeho SKUTEČNÁ šířka
+       * nad touto hranicí přestává růst s viewportem. Holé `100vw` by tam
+       * dál rostlo neomezeně a první sloupec mřížky by přetekl přes (už
+       * zastavenou) šířku `.faq__inner`.
+       */
+      grid-template-columns: calc(640 * min(100vw, var(--stage-max)) / 1440 - 200px) 1fr;
+      column-gap: 136px;
+      padding: 196px 120px 120px 120px;
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .faq__heading {
+      font-size: 60px;
+      line-height: 1.04;
+      letter-spacing: -.045em;
+    }
+
+    /* 624px = obsahová linka (1320) − levý okraj sloupce (696 = 640 + 56) — stejný princip jako notebook výše. */
+    .faq__list {
+      max-width: 624px;
+    }
+
+    .faq__question {
+      font-size: 22px;
+    }
+
+    .faq__answer {
+      font-size: 17px;
+      max-width: 560px;
+    }
+
+    .faq__offer-text {
+      max-width: 400px;
+    }
+  }
+</style>

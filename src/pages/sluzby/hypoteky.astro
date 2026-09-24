@@ -1,0 +1,1991 @@
+---
+/**
+ * Stránka /sluzby/hypoteky — detail hlavní služby. Zdroj pravdy pro
+ * rozvržení: úkol „Úkol pro Claude Code — podstránka /sluzby/hypoteky“
+ * (1. 9. 2026). Zdroj pravdy pro chování trasy: `src/pages/sluzby.astro`
+ * (sourozenecká stránka — stejná osa/zářez/nájezd/axisScaled technika,
+ * jen 6 kotev místo 4). Texty přesně podle `docs/content-subpages.md`,
+ * kapitola `/sluzby/hypoteky` — copy je STAV „NÁVRH K UŽIVATELSKÉMU
+ * SCHVÁLENÍ“, viz souhrn úkolu. NESMÍ jít do produkce bez potvrzení textů.
+ *
+ * Rozpory/mezery v zadání, které jsem řešil vlastním úsudkem (nahlášeno
+ * v souhrnu úkolu, ne mlčky):
+ * 1) Zadání říká „tři odstavce přesunuté z /sluzby ... použij je na
+ *    místech podle §4“, ale `content-subpages.md`'s vlastní „Archivní
+ *    poznámka“ u těchto tří vět výslovně říká, že jejich obsah je už
+ *    rozpracovaný (jinou, rozšířenou formulací) v sekcích 1 a 5 návrhu
+ *    copy a „jako samostatné věty se v aktuální copy nepoužívají“.
+ *    `content-subpages.md` je zdroj pravdy pro copy (§1 zadání) — jeho
+ *    vlastní poznámka má přednost, takže tyto tři věty NEJSOU na stránce
+ *    použité jako samostatné věty; jejich obsah je už obsažen v Hero a
+ *    v kapitole Fáze/Průběh podle schváleného návrhu.
+ * 2) Text popisku sloupce kapitoly Rozhodnutí byl původně „Při návrhu
+ *    řešení sleduji i“ (doslovně podle §6 zadání) — na výslovné přání
+ *    uživatele (1. 9. 2026) zkráceno o koncové „i“ na „Při návrhu řešení
+ *    sleduji“.
+ * 3) Typografické velikosti nadpisů jednotlivých fází (kapitola Fáze) na
+ *    tabletu/mobilu nejsou v zadání dané (jen desktop 30/26px, notebook
+ *    „ostatní proporce jako desktop“) — odvozeno proporčně z ostatních
+ *    typografických kroků stránky (tablet 26/22px, mobil 22/19px).
+ *    Stejně tak vodorovný odsun osy odbočky Průběhu (56px od textu) na
+ *    tabletu není v zadání restatnutý — ponechán 56px (zadání dává jiné
+ *    číslo jen pro mobil, 22px).
+ * 4) Vizuální styl drobečkové navigace (velikost/barva/oddělovač) není v
+ *    zadání specifikovaný pixelově — zvolen v souladu s existujícím
+ *    „quiet“ textovým stylem webu (13px, `--text-quiet`/`--text-muted`).
+ *
+ * TRASA — stejná technika jako `sluzby.astro` (viz jeho hlavičkový
+ * komentář a CLAUDE.md „Konvence: kontinuální linka, tečky a text“ +
+ * „Konvence: wide desktop a centrované designové plátno“): jedna souvislá
+ * cesta od hero až po tmavé závěrečné CTA, `axisScaled` procentuální
+ * přepočet pro wide-desktop stage (nad `--stage-max`), nájezdový gradient
+ * v hero jen na desktopu/notebooku (tablet/mobil hero bez trasy — v hero
+ * není bezkolizní koridor, stejný důvod jako na `/sluzby`), 6 kotev
+ * (faze/rozhodnuti/oblasti/prubeh/souvislosti/otazky), tmavé CTA bez
+ * kotvy/zářezu, jen svislice v `--line-on-dark`. Osa/zářez/mezera kotva→
+ * text jsou STEJNÉ hodnoty jako na `/sluzby` (120/96/40/24 · 36/36/44/22 ·
+ * 20/20/20/14), takže veškerá route-CSS/JS je z `sluzby.astro` převzatá
+ * beze změny čísel, jen s přejmenovanými klíči kotev.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import LineGradientDefs from '../../components/LineGradientDefs.astro';
+import { PERSON_ID, breadcrumbList } from '../../data/entity';
+
+const SERVICE_NAME = 'Hypotéky a financování bydlení';
+const SERVICE_DESCRIPTION =
+  'Pomohu vám zjistit, na jakou nemovitost dosáhnete, vyřídit hypotéku, refinancování, výstavbu nebo rekonstrukci. Ostrava nebo online po celé ČR.';
+const hypotekyJsonLd = [
+  {
+    '@type': 'Service',
+    name: SERVICE_NAME,
+    description: SERVICE_DESCRIPTION,
+    url: 'https://patrikgajdadzis.cz/sluzby/hypoteky',
+    provider: { '@id': PERSON_ID },
+    areaServed: [
+      { '@type': 'City', name: 'Ostrava' },
+      { '@type': 'Country', name: 'Česko' },
+    ],
+  },
+  breadcrumbList([
+    { name: 'Domů', path: '/' },
+    { name: 'Služby', path: '/sluzby' },
+    { name: SERVICE_NAME, path: '/sluzby/hypoteky' },
+  ]),
+];
+
+interface Phase {
+  heading: string;
+  highlight?: string;
+  paragraphs: string[];
+}
+
+const phases: Phase[] = [
+  {
+    heading: 'Teprve hledáte nemovitost',
+    highlight: 'To je ideální chvíle začít.',
+    paragraphs: [
+      'Nejdřív zjistíme, v jaké ceně můžete nemovitost bezpečně hledat, kolik budete potřebovat vlastních peněz a jaká splátka odpovídá vašemu rozpočtu.',
+      'Díky tomu nehledáte naslepo a víte, jaký prostor skutečně máte.',
+    ],
+  },
+  {
+    heading: 'Už máte nemovitost vybranou',
+    highlight: 'Pak rozhodují i termíny.',
+    paragraphs: [
+      'Prověříme možnosti financování, podmínky banky a kroky, které je potřeba stihnout podle rezervace a průběhu obchodu.',
+    ],
+  },
+  {
+    heading: 'Hypotéku už máte',
+    paragraphs: [
+      'Podíváme se, zda dává smysl refinancování, změna úvěru, navýšení nebo úprava financování podle vaší současné situace.',
+    ],
+  },
+];
+
+const decisionPoints: string[] = [
+  'kolik vlastních prostředků použít,',
+  'jak vysoká splátka je dlouhodobě rozumná,',
+  'jakou rezervu si ponechat,',
+  'podmínky jednotlivých možností financování,',
+  'termíny obchodu a čerpání,',
+  'možnosti budoucích změn hypotéky.',
+];
+
+interface AreaRow {
+  name: string;
+  text: string;
+}
+
+const areaRows: AreaRow[] = [
+  { name: 'Koupě bytu nebo domu', text: 'Financování vlastní nemovitosti včetně nastavení vlastních zdrojů a výše úvěru.' },
+  { name: 'Výstavba', text: 'Nastavení financování podle průběhu stavby a postupného čerpání.' },
+  { name: 'Rekonstrukce', text: 'Hypotéka nebo jiné vhodné financování rekonstrukce podle jejího rozsahu.' },
+  { name: 'Refinancování', text: 'Posouzení stávající hypotéky a možností před koncem fixace nebo při jiné vhodné příležitosti.' },
+  { name: 'Změna nebo navýšení hypotéky', text: 'Pokud se od sjednání úvěru změnila vaše situace nebo potřebujete další prostředky.' },
+];
+
+interface Step {
+  heading: string;
+  paragraphs: string[];
+}
+
+const steps: Step[] = [
+  {
+    heading: 'Nejdřív spočítáme možnosti',
+    paragraphs: [
+      'Projdeme příjmy, závazky, vlastní prostředky a plánované bydlení.',
+      'Výsledkem je reálný rámec, ve kterém se můžeme pohybovat.',
+    ],
+  },
+  { heading: 'Vybereme vhodné financování', paragraphs: ['Porovnám možnosti podle vaší situace a vysvětlím vám rozdíly, které jsou pro rozhodnutí skutečně důležité.'] },
+  { heading: 'Připravíme podklady', paragraphs: ['Řešíme potřebné dokumenty, ocenění nemovitosti a další podmínky pro schválení.'] },
+  { heading: 'Schválení a smlouvy', paragraphs: ['Hlídám průběh schvalování a kroky potřebné k podpisu úvěrové dokumentace.'] },
+  { heading: 'Čerpání', paragraphs: ['Zkontrolujeme splnění podmínek banky a dotáhneme financování až k čerpání.'] },
+];
+
+interface Faq {
+  q: string;
+  a: string;
+}
+
+const faqs: Faq[] = [
+  { q: 'Kdy je nejlepší začít řešit hypotéku?', a: 'Ideálně ještě před výběrem konkrétní nemovitosti. Budete předem vědět, na jakou cenu můžete reálně dosáhnout, kolik potřebujete vlastních peněz a jaká splátka je pro vás rozumná.' },
+  { q: 'Co když už mám podepsanou rezervaci?', a: 'Pak je potřeba vycházet z konkrétních termínů a podmínek obchodu. Projdeme aktuální situaci a stanovíme další postup podle toho, co už je podepsané a co je potřeba stihnout.' },
+  { q: 'Kolik vlastních peněz budu potřebovat?', a: 'Záleží na ceně nemovitosti, jejím ocenění, vašich možnostech a konkrétním způsobu financování. Proto tuto část počítám ještě před tím, než se definitivně nastaví úvěr.' },
+  { q: 'Řešíte také refinancování?', a: 'Ano. Stejně tak změny nebo navýšení stávající hypotéky.' },
+  { q: 'Musím kvůli hypotéce řešit i ostatní finance?', a: 'Ne. Pokud přijdete kvůli hypotéce, prioritou je hypotéka. Další témata mají smysl otevírat pouze tehdy, pokud jsou pro vaši situaci relevantní.' },
+  { q: 'Jak probíhá první konzultace?', a: 'Přibližně 30 minut. Probereme, co řešíte, v jaké jste fázi a jaký by měl být další krok. Konzultace je nezávazná a může proběhnout osobně v Ostravě-Porubě nebo online.' },
+];
+---
+
+<!--
+  SEO title ZMĚNĚN oproti `docs/content-subpages.md` (tam „návrh“, ne
+  „schváleno“: „Hypotéky a financování bydlení | Patrik Gajdadzis“) — úkol
+  „Předspouštěcí P0 technické dotažení“, §8, výslovně žádá „Hypoteční
+  poradce Ostrava | Patrik Gajdadzis“ pro intent „hypoteční poradce
+  Ostrava“/„hypotéky Ostrava“. H1 („Hypotéka má začít čísly, ne
+  podpisem.“) i meta description beze změny.
+-->
+<BaseLayout
+  title="Hypoteční poradce Ostrava | Patrik Gajdadzis"
+  description={SERVICE_DESCRIPTION}
+  jsonLd={hypotekyJsonLd}
+>
+  <Header />
+  <main id="hero" class="hyp">
+    <div class="hyp__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`hyp__route-svg hyp__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2400`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                {/*
+                  Nájezdový gradient — stejná technika jako `sluzby.astro`
+                  (CLAUDE.md „Konvence: nájezdový gradient jen na SKUTEČNÉM
+                  začátku linky“): tahle stránka má vlastní hero, tedy
+                  vlastní začátek trasy. y1/y2 musí sedět s
+                  HERO_ENTRY_START_Y/HERO_ENTRY_LENGTH v <script> níže.
+                */}
+                <LineGradientDefs id={`hyp-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="hyp__route-path" d={`M ${v.axis} -20 V 2400`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="hyp__route-path hyp__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#hyp-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="hyp__route-path hyp__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['faze', 'rozhodnuti', 'oblasti', 'prubeh', 'souvislosti', 'otazky'] as const).map((marker) => (
+              <g class="hyp__marker" data-marker={marker}>
+                <line class="hyp__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="hyp__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="hyp-hero" aria-labelledby="hyp-hero-heading">
+      <nav class="hyp-breadcrumb" aria-label="Drobečková navigace">
+        <ol>
+          <li><a href="/sluzby">Služby</a></li>
+          <li aria-current="page">
+            <span class="hyp-breadcrumb__full">Hypotéky a&nbsp;bydlení</span>
+            <span class="hyp-breadcrumb__short">Hypotéky</span>
+          </li>
+        </ol>
+      </nav>
+
+      <div class="hyp-hero__text">
+        <h1 id="hyp-hero-heading" data-reveal>Hypotéka má začít čísly, ne podpisem.</h1>
+        <p class="hyp-hero__lead" data-reveal>
+          Nejdřív zjistíme, jaké financování je pro&nbsp;vás reálně dostupné, kolik vlastních peněz budete potřebovat
+          a&nbsp;jaká splátka dává smysl pro&nbsp;váš rozpočet. Potom hledáme konkrétní řešení a&nbsp;dotáhneme ho až po&nbsp;čerpání.
+        </p>
+        <div class="hyp-hero__actions" data-reveal>
+          <a class="hyp-cta" href="/#kontakt">Nezávazná konzultace</a>
+          <a class="hyp-phone" href="tel:+420775217721">
+            <svg class="hyp-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="hyp-chapter hyp-chapter--faze" aria-labelledby="faze-heading">
+      <div class="hyp-chapter__bar" data-reveal data-route-target="faze">
+        <p>Fáze</p>
+      </div>
+
+      <div class="hyp-chapter__content hyp-chapter__content--faze">
+        <div class="hyp-chapter__lead-col" data-reveal>
+          <h2 id="faze-heading" class="hyp-h2--faze">Hypotéku řeší každý v&nbsp;jiné fázi.</h2>
+          <p class="hyp-chapter__lead">
+            Někdo ještě nemá vybranou nemovitost. Jiný už podepsal rezervaci. A&nbsp;někdo potřebuje upravit hypotéku,
+            kterou několik let splácí. Podle toho se&nbsp;liší i&nbsp;další postup.
+          </p>
+        </div>
+
+        <ul class="hyp-phases" data-reveal>
+          {
+            phases.map((phase, i) => (
+              <li class={`hyp-phase${i === 0 ? ' hyp-phase--first' : ''}`}>
+                <h3>{phase.heading}</h3>
+                {phase.highlight && <p class="hyp-phase__highlight">{phase.highlight}</p>}
+                <div class="hyp-phase__body">
+                  {phase.paragraphs.map((p) => <p class="hyp-phase__text">{p}</p>)}
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="hyp-chapter hyp-chapter--decision" aria-labelledby="decision-heading">
+      <div class="hyp-chapter__bar" data-reveal data-route-target="rozhodnuti">
+        <p>Rozhodnutí</p>
+      </div>
+
+      <div class="hyp-chapter__content">
+        <div class="hyp-chapter__lead-col" data-reveal>
+          <div class="hyp-decision__intro">
+            <h2 id="decision-heading" class="hyp-h2--std">Dobrá hypotéka není jen úroková sazba.</h2>
+            <p class="hyp-chapter__lead">Sazba je důležitá. Ale sama o&nbsp;sobě neříká, jestli je financování nastavené dobře.</p>
+          </div>
+          <blockquote class="hyp-decision__quote">
+            Cílem není dostat od&nbsp;banky co nejvyšší úvěr. Cílem je financovat bydlení tak, aby vám po&nbsp;zaplacení
+            splátky dál fungoval život.
+          </blockquote>
+        </div>
+
+        <div class="hyp-chapter__list-col" data-reveal>
+          <p class="hyp-chapter__list-label">Při návrhu řešení sleduji</p>
+          <ul class="hyp-chapter__list">
+            {decisionPoints.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="hyp-chapter hyp-chapter--areas" aria-labelledby="areas-heading">
+      <div class="hyp-chapter__bar" data-reveal data-route-target="oblasti">
+        <p>Oblasti</p>
+      </div>
+
+      <div class="hyp-chapter__content hyp-chapter__content--single">
+        <div class="hyp-chapter__lead-col" data-reveal>
+          <h2 id="areas-heading" class="hyp-h2--std">Od&nbsp;prvního propočtu až po&nbsp;čerpání.</h2>
+          <p class="hyp-chapter__lead">
+            Hypotéka pro&nbsp;mě nekončí schválením úvěru. Řeším s&nbsp;vámi celý proces až po&nbsp;čerpání a&nbsp;hlídám i&nbsp;další
+            důležité termíny.
+          </p>
+        </div>
+
+        <ul class="hyp-areas" data-reveal>
+          {
+            areaRows.map((row) => (
+              <li class="hyp-areas__row">
+                <span class="hyp-areas__name">{row.name}</span>
+                <span class="hyp-areas__text">{row.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="hyp-chapter hyp-chapter--steps" aria-labelledby="steps-heading">
+      <div class="hyp-chapter__bar" data-reveal data-route-target="prubeh">
+        <p>Průběh</p>
+      </div>
+
+      <div class="hyp-chapter__content hyp-chapter__content--single">
+        <h2 id="steps-heading" class="hyp-h2--std" data-reveal>V&nbsp;každém kroku víte, co se&nbsp;právě řeší.</h2>
+
+        <ol class="hyp-steps" data-reveal>
+          {
+            steps.map((step, i) => (
+              <li class={`hyp-step${i === 0 ? ' hyp-step--first' : ''}`}>
+                <span class="hyp-step__marker" aria-hidden="true"></span>
+                {i < steps.length - 1 && <span class="hyp-step__connector" aria-hidden="true"></span>}
+                <h3>{step.heading}</h3>
+                <div class="hyp-step__body">
+                  {step.paragraphs.map((p) => <p>{p}</p>)}
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+
+        <p class="hyp-steps__closing">
+          A&nbsp;ani potom hypotéku nemusíte hlídat sami. Důležité budoucí termíny má smysl řešit s&nbsp;předstihem, ne až ve&nbsp;chvíli, kdy hoří.
+        </p>
+      </div>
+    </section>
+
+    <section class="hyp-chapter hyp-chapter--context" aria-labelledby="context-heading">
+      <div class="hyp-chapter__bar" data-reveal data-route-target="souvislosti">
+        <p>Souvislosti</p>
+      </div>
+
+      <div class="hyp-chapter__content">
+        <div class="hyp-chapter__lead-col" data-reveal>
+          <h2 id="context-heading" class="hyp-h2--context">Bydlení nemá spolknout celý finanční plán.</h2>
+          <p class="hyp-chapter__lead">Hypotéka bývá jeden z&nbsp;největších finančních závazků v&nbsp;životě.</p>
+          <p class="hyp-chapter__lead">
+            Proto při jejím nastavení dává smysl přemýšlet nejen nad tím, kolik banka půjčí, ale také nad rezervou,
+            běžnými výdaji a&nbsp;tím, co chcete dělat s&nbsp;penězi v&nbsp;dalších letech.
+          </p>
+        </div>
+
+        <div class="hyp-chapter__statement-col" data-reveal>
+          <h3 class="hyp-chapter__statement">Co budete chtít řešit dál, je na&nbsp;vás.</h3>
+          <div class="hyp-chapter__statement-body">
+            <p class="hyp-chapter__statement-intro">Pokud za&nbsp;mnou přijdete jen kvůli hypotéce, vyřešíme nejdřív hypotéku.</p>
+            <p class="hyp-chapter__statement-intro">
+              Když při tom narazíme na&nbsp;něco, co má pro&nbsp;financování bydlení skutečný význam, vysvětlím vám proč.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="hyp-chapter hyp-chapter--faq" aria-labelledby="otazky-heading">
+      <div class="hyp-chapter__bar" data-reveal data-route-target="otazky">
+        <p id="otazky-heading">Otázky</p>
+      </div>
+
+      <div class="hyp-chapter__content hyp-chapter__content--single">
+        <dl class="hyp-faq" data-reveal>
+          {
+            faqs.map((faq) => (
+              <div class="hyp-faq__row">
+                <dt>{faq.q}</dt>
+                <dd>{faq.a}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="hyp-closing" aria-labelledby="hyp-closing-heading">
+      <div class="hyp-closing__glow" aria-hidden="true"></div>
+
+      <div class="hyp-closing__grid">
+        <h2 id="hyp-closing-heading" data-reveal>Než uděláte další krok, pojďme si ověřit čísla.</h2>
+
+        <div class="hyp-closing__body" data-reveal>
+          <p>
+            Ať teprve hledáte nemovitost, máte podepsanou rezervaci nebo řešíte stávající hypotéku, na&nbsp;první
+            konzultaci si ujasníme možnosti a&nbsp;další postup.
+          </p>
+
+          <p class="hyp-closing__support">Přibližně 30 minut · Ostrava-Poruba nebo online</p>
+
+          <div class="hyp-closing__actions">
+            <a class="hyp-cta hyp-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="hyp-phone hyp-phone--dark" href="tel:+420775217721">
+              <svg class="hyp-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.hyp');
+  const routeWrap = document.querySelector('.hyp__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.hyp__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.hyp-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.hyp-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.hyp-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.hyp-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      faze: main.querySelector('[data-route-target="faze"]'),
+      rozhodnuti: main.querySelector('[data-route-target="rozhodnuti"]'),
+      oblasti: main.querySelector('[data-route-target="oblasti"]'),
+      prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      souvislosti: main.querySelector('[data-route-target="souvislosti"]'),
+      otazky: main.querySelector('[data-route-target="otazky"]'),
+    } as const;
+
+    // Stejná hodnota/technika jako `sluzby.astro` — nájezd s viditelným
+    // odstupem od hlavičky (y=40), ne slepený na její hranici.
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_LENGTH = 100;
+
+    // Stejná technika jako `sluzby.astro`'s `heroArcPath` — hlavní oblouk
+    // začíná AŽ na konci nájezdového gradientu, ne na jeho začátku, aby se
+    // obě cesty na úseku nájezdu nepřekrývaly (CLAUDE.md „nájezdová a
+    // navazující cesta se nikdy nesmí překrývat“).
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${HERO_ENTRY_START_Y + HERO_ENTRY_LENGTH} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.hyp__route-path:not(.hyp__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.hyp__route-path--dark') as SVGPathElement | null;
+
+        // `axisScaled` — stejná OPRAVA jako `sluzby.astro` (CLAUDE.md
+        // „Konvence: wide desktop a centrované designové plátno“): pod
+        // `--stage-max` no-op, nad ní se celá trasa posune vpravo jako
+        // jeden nepřerušený celek, žádný zákrut/hák.
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        // Nastavit `--hyp-shift` jen z AKTIVNÍHO (viditelného) SVG — smyčka
+        // prochází všechny čtyři tiery a bez tohoto stráže by poslední
+        // (desktop), i když zrovna `display:none`, vždy přepsal hodnotu
+        // nulou (jeho `vb` padá zpět na `nominalVb`, když je neaktivní).
+        // Nalezeno při implementaci — stejná chyba existuje i v
+        // `sluzby.astro`, ten ale nesmím podle zadání měnit.
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--hyp-shift', `${shift}px`);
+        }
+
+        if (isHero && heroTextEl) {
+          const textRect = heroTextEl.getBoundingClientRect();
+          const textBottom = textRect.bottom - mainRect.top;
+          const bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+          if (lightPath) lightPath.setAttribute('d', `${heroArcPath(entryX, axisScaled, r, bendY, closingTop)}`);
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        // Stejná mezera-v-čáře technika jako `sluzby.astro` u nadpisu
+        // tmavého CTA — pokud by osa reálně padla do vodorovného rozsahu
+        // nadpisu „Než uděláte další krok...“, čára se v tom úseku (+20px
+        // rezerva) vynechá. Na kalibračních šířkách k tomu nedochází
+        // (nadpis je vlevo, osa vpravo od něj), ale kontrola zůstává
+        // aktivní pro libovolnou budoucí změnu layoutu CTA.
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.hyp__notch');
+          const dot = group.querySelector('.hyp__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg
+        ? (Array.from(activeSvg.querySelectorAll('.hyp__route-path')) as SVGPathElement[])
+        : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.hyp__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 60;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 60);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+</script>
+
+<style>
+  .hyp {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  /* Stejný důvod jako `.sluzby__route` — trasa musí malovat NAD
+     `.hyp-closing`'s pozadí (jinak by tmavý úsek mizel pod ním), text a
+     CTA uvnitř `.hyp-closing__grid` dostávají vlastní vyšší z-index. */
+  .hyp__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hyp__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hyp__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .hyp__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .hyp__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .hyp__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .hyp__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .hyp__route-svg--tablet,
+  .hyp__route-svg--laptop,
+  .hyp__route-svg--desktop {
+    display: none;
+  }
+
+  .hyp :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  /* Pruhy s kotvou nesmí mít posun v odhalovací animaci — stejný důvod
+     jako `[data-route-target]` v `sluzby.astro`. */
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .hyp-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .hyp-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .hyp-cta:active {
+    transform: translateY(1px);
+  }
+
+  .hyp-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .hyp-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .hyp-phone:hover {
+    color: var(--emerald);
+  }
+
+  .hyp-phone--dark {
+    color: var(--white);
+  }
+
+  .hyp-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Drobečková navigace ---------- */
+
+  .hyp-breadcrumb {
+    margin-bottom: 20px;
+  }
+
+  .hyp-breadcrumb ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .hyp-breadcrumb li:not(:last-child)::after {
+    content: '/';
+    margin: 0 8px;
+    color: var(--text-faint);
+  }
+
+  .hyp-breadcrumb a {
+    color: var(--text-quiet);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .hyp-breadcrumb a:hover {
+    color: var(--navy);
+  }
+
+  .hyp-breadcrumb__short {
+    display: none;
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hyp-hero {
+    padding: 64px 24px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hyp-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .hyp-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .hyp-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .hyp-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hyp-hero__actions .hyp-cta {
+    width: 100%;
+  }
+
+  .hyp-hero__actions .hyp-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .hyp-chapter {
+    padding: 56px 24px;
+  }
+
+  .hyp-chapter--faze {
+    margin-top: 72px;
+    background: var(--bg);
+  }
+
+  .hyp-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .hyp-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--hyp-shift, 0px));
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--navy);
+  }
+
+  /* Fáze je dominantní kapitola: smaragdový pruh, žádná barevná plocha
+     ani podtržení — jen barva textu/kotvy. */
+  .hyp-chapter--faze .hyp-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .hyp-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* Levý okraj kapitol na tabletu/mobilu — obsah pod pruhem se zarovnává
+     na stejnou osu jako text pruhu (osa+zářez+mezera), ne jen na okraj
+     sekce (§8/§9 zadání: „Levý okraj kapitol 104/60 px“). */
+  .hyp-chapter__content {
+    padding-left: 0;
+  }
+
+  .hyp-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /*
+   * OPRAVA 1. 9. 2026 (uživatel: kapitola Rozhodnutí „moc namačkaná na
+   * sebe“) — citace (`.hyp-decision__quote`) je vizuálně zvýrazněný blok
+   * (smaragdová svislice) a potřebuje od úvodního textu víc odstupu než
+   * standardní nadpis→text mezera (14px). H2+úvodní text zůstávají svázané
+   * ve vlastním `.hyp-decision__intro` (gap 14px, v souladu s konvencí
+   * „mezera nadpis → úvodní text“ v CLAUDE.md) — vnější `gap` na
+   * `.hyp-chapter__lead-col` je pro tuhle kapitolu zvětšený, takže jde jen
+   * o mezeru intro→citace, ne o zásah do H2→text (jeden zdroj mezery na
+   * každé úrovni, ne kombinace gap+margin).
+   */
+  .hyp-decision__intro {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hyp-chapter--decision .hyp-chapter__lead-col {
+    gap: 28px;
+  }
+
+  .hyp-chapter__lead-col h2,
+  .hyp-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  /* Čtyři velikostní skupiny H2 (§6–§9 zadání): Fáze (dominantní,
+     největší), "ostatní" (Rozhodnutí/Oblasti/Průběh, sdílí jednu
+     velikost), Souvislosti (tlumená, menší) a CTA (`.hyp-closing__grid
+     h2`, řešeno samostatně níže). Modifikátorové třídy místo spoléhání
+     na vnoření do `.hyp-chapter__lead-col`, protože Průběh má svůj H2
+     mimo lead-col (sdílí sloupec se seznamem kroků). */
+  .hyp-h2--faze {
+    font-size: 34px;
+  }
+
+  .hyp-h2--std {
+    font-size: 30px;
+  }
+
+  .hyp-h2--context {
+    font-size: 28px;
+  }
+
+  .hyp-chapter__lead {
+    margin: 0;
+    font-size: 17.5px;
+    line-height: 1.6;
+    font-weight: 600;
+    color: var(--navy);
+    max-width: 520px;
+  }
+
+  .hyp-chapter__list-label {
+    margin: 0 0 4px;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-quiet);
+  }
+
+  .hyp-chapter__list li {
+    font-weight: 600;
+    font-size: 16.5px;
+    color: var(--navy);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .hyp-chapter__list li:last-child {
+    border-bottom: none;
+  }
+
+  .hyp-decision__quote {
+    margin: 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--emerald);
+    font-size: 18px;
+    line-height: 1.4;
+    font-weight: 600;
+    font-style: normal;
+    color: var(--navy);
+  }
+
+  .hyp-chapter__statement-col {
+    padding-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /*
+   * OPRAVA 1. 9. 2026 (na žádost uživatele) — `var(--text-muted)` sedělo,
+   * dokud byly tyhle dva odstavce tichým „nájezdem" PŘED tučnou větou.
+   * Teď je tučná věta (`<h3>`) nahoře jako nadpis a tyhle odstavce ji
+   * vysvětlují POD ní — funkčně stejná role jako `.hyp-phase__text`
+   * (odstavec vysvětlující nadpis kroku ve Fázi), proto stejná barva
+   * `var(--text)`, ne tlumená.
+   */
+  /*
+   * OPRAVA 1. 9. 2026 (stejný důvod jako `.hyp-phase__body`/`.hyp-step__body`)
+   * — mezi h3 a prvním odstavcem má zůstat 14px z `.hyp-chapter__statement-col`,
+   * ale mezi dvěma odstavci, které pokračují jednu myšlenku, je 14px moc.
+   */
+  .hyp-chapter__statement-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hyp-chapter__statement-intro {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .hyp-chapter__statement {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ---------- Fáze ---------- */
+
+  .hyp-phases {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /*
+   * OPRAVA 1. 9. 2026 (sjednocení řádkování stejně jako u kapitoly
+   * Rozhodnutí) — `gap: 8px` bylo nápadně těsnější než 14px používaných
+   * jinde na stránce pro vztah nadpis→text (h3, zvýrazněná věta, odstavec
+   * jsou stejná rodina prvků jako H2+úvodní text+citace u Rozhodnutí).
+   */
+  .hyp-phase {
+    padding-top: 28px;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hyp-phase--first {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .hyp-phase h3 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--navy);
+  }
+
+  .hyp-phase--first h3 {
+    font-size: 26px;
+  }
+
+  .hyp-phase__highlight {
+    margin: 0;
+    font-size: 16.5px;
+    font-weight: 700;
+    color: var(--emerald);
+  }
+
+  /*
+   * OPRAVA 1. 9. 2026 (uživatel: „tady nemá být tak velké řádkování mezi
+   * větami pod nadpisem") — `.hyp-phase`'s 14px gap je správný mezi
+   * nadpisem/zvýrazněnou větou a odstavcem, ale MEZI DVĚMA odstavci, které
+   * jsou pokračováním jedné myšlenky (fáze 1 má dvě věty), je 14px příliš
+   * velké. Samostatný obal s menším gapem — `.hyp-phase` gap (14px) se tak
+   * uplatní jen jednou, mezi h3/highlight a CELÝM textovým blokem.
+   */
+  .hyp-phase__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hyp-phase__text {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ---------- Oblasti ---------- */
+
+  .hyp-areas {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* OPRAVA 1. 9. 2026 (sjednocení řádkování) — 6px bylo nekonzistentní s
+     14px, které pro vztah název/nadpis→text stránka používá jinde (Fáze,
+     Rozhodnutí, Oblasti/Průběh lead-col…). Platí jen do notebooku — od
+     1200px `.hyp-areas__row` přechází na dvousloupcový grid vedle sebe
+     (`gap: 0` tam, viz níže), kde svislá mezera nedává smysl. */
+  .hyp-areas__row {
+    padding: 20px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hyp-areas__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .hyp-areas__name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .hyp-areas__text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Průběh ---------- */
+
+  /* Mobil (§9 zadání): odbočka trasy MÁ být viditelná i tady, jen s
+     menšími hodnotami (odsazení osy 22px, mezera 38px, odsazení kotvy
+     13px) — ne skrytá jako na zbytku stránky, kde hero nemá trasu vůbec
+     (Průběh je samostatná, na hero nezávislá dekorace). */
+  /* Bez vlastního `margin-top` — mezera k H2 nad seznamem už jde ze
+     `.hyp-chapter__content`'s `gap` (32px base / 40px od notebooku),
+     dvojí mezera (gap + margin) by dala víc, než je konzistentní s
+     ostatními kapitolami. */
+  .hyp-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 38px;
+  }
+
+  /* OPRAVA 1. 9. 2026 (sjednocení řádkování) — 6px bylo nekonzistentní
+     s 14px, které stránka jinde používá pro vztah nadpis→text. */
+  .hyp-step {
+    position: relative;
+    padding-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hyp-step h3 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .hyp-step--first h3 {
+    font-size: 21px;
+  }
+
+  /*
+   * OPRAVA 1. 9. 2026 (stejný důvod jako `.hyp-phase__body` výše) — mezi
+   * dvěma větami jednoho kroku (krok 1 má dvě věty) je 14px z `.hyp-step`
+   * příliš velké, patří tam menší mezera pokračující myšlenky.
+   */
+  .hyp-step__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hyp-step p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* `translateY(-50%)` — `top`/`odsazení kotvy` popisuje STŘED kotvy (kam
+     míří i konec spojnice předchozího kroku), ne horní hranu jejího boxu;
+     bez centrování by menší (8px) a větší (9px, první krok) kotva měly
+     mírně jiný skutečný střed, i když sdílí stejnou hodnotu `top`. */
+  .hyp-step__marker {
+    position: absolute;
+    top: 13px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-quiet);
+    transform: translateY(-50%);
+  }
+
+  .hyp-step--first .hyp-step__marker {
+    width: 8px;
+    height: 8px;
+    background: var(--emerald);
+  }
+
+  .hyp-step__connector {
+    position: absolute;
+    top: 13px;
+    bottom: -51px;
+    left: 3px;
+    width: 1px;
+    background: rgba(27, 74, 138, .18);
+  }
+
+  .hyp-step--first .hyp-step__connector {
+    left: 3.5px;
+  }
+
+  .hyp-steps__closing {
+    margin: 0;
+    padding-left: 22px;
+    font-size: 16.5px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  /* ---------- Otázky ---------- */
+
+  .hyp-faq {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* OPRAVA 1. 9. 2026 (sjednocení řádkování) — 8px bylo nekonzistentní
+     s 14px, které stránka jinde používá pro vztah nadpis→text. Platí jen
+     do notebooku — od 1200px `.hyp-faq__row` přechází na dvousloupcový
+     grid vedle sebe (viz níže), kde svislá mezera nedává smysl. */
+  .hyp-faq__row {
+    padding: 20px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hyp-faq__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .hyp-faq dt {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .hyp-faq dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .hyp-closing {
+    position: relative;
+    margin-top: 72px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(174deg, #16324F 0%, #0F2747 44%, #0B1D36 100%);
+  }
+
+  .hyp-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(70% 50% at 78% 20%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .hyp-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .hyp-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  /*
+   * OPRAVA 1. 9. 2026 (na žádost uživatele — „okopíruj vlastnosti toho
+   * modrého baru ze služeb"): stejný mechanismus jako `.sluzby-closing__body`
+   * — jeden zdroj mezery (`gap` na rodiči), děti bez vlastního margin-top,
+   * `.hyp-closing__actions` dostává stejný `margin-top: 8px` navíc jako
+   * `.sluzby-closing__actions` (sjednoceno, ne vlastní hodnota).
+   */
+  .hyp-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .hyp-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .hyp-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hyp-closing__actions .hyp-cta {
+    width: 100%;
+  }
+
+  .hyp-closing__actions .hyp-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .hyp-closing__support {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, .62);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .hyp__route-svg--mobile {
+      display: none;
+    }
+
+    .hyp__route-svg--tablet {
+      display: block;
+    }
+
+    .hyp-chapter__bar p {
+      padding-left: calc(64px + var(--hyp-shift, 0px));
+    }
+
+    /* Levý okraj kapitol 104px (osa 40 + zářez 44 + odstup 20) = section
+       padding (40) + 64 navíc — obsah pod pruhem se zarovnává na stejnou
+       osu jako text pruhu. */
+    .hyp-chapter__content {
+      padding-left: 64px;
+    }
+
+    .hyp-hero {
+      padding: 88px 40px 0;
+    }
+
+    .hyp-hero__text {
+      gap: 20px;
+    }
+
+    .hyp-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .hyp-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .hyp-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .hyp-hero__actions .hyp-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .hyp-hero__actions .hyp-phone {
+      height: auto;
+    }
+
+    .hyp-chapter--faze {
+      margin-top: 90px;
+      padding: 72px 40px;
+    }
+
+    .hyp-chapter {
+      padding: 72px 40px;
+    }
+
+    .hyp-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .hyp-h2--faze {
+      font-size: 44px;
+    }
+
+    .hyp-h2--std {
+      font-size: 40px;
+    }
+
+    .hyp-h2--context {
+      font-size: 36px;
+    }
+
+    .hyp-chapter__lead {
+      font-size: 19px;
+      max-width: 560px;
+    }
+
+    .hyp-chapter__list li {
+      font-size: 17px;
+    }
+
+    .hyp-chapter__statement {
+      font-size: 24px;
+    }
+
+    .hyp-phase h3 {
+      font-size: 26px;
+    }
+
+    .hyp-phase--first h3 {
+      font-size: 30px;
+    }
+
+    .hyp-areas__name {
+      font-size: 20px;
+    }
+
+    .hyp-step h3 {
+      font-size: 22px;
+    }
+
+    .hyp-step--first h3 {
+      font-size: 24px;
+    }
+
+    .hyp-faq dt {
+      font-size: 19px;
+    }
+
+    .hyp-closing {
+      margin-top: 90px;
+      padding-block: 76px;
+    }
+
+    .hyp-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .hyp-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .hyp-closing__body p {
+      font-size: 17px;
+    }
+
+    .hyp-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .hyp-closing__actions .hyp-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .hyp-closing__actions .hyp-phone {
+      height: auto;
+    }
+
+    /* Průběh: odbočka trasy zapnutá od tabletu výš (viz notebook+desktop
+       pravidlo níže pro přesnou geometrii; tablet dědí stejnou 56px osu,
+       jen s většími roztečemi — mezera 44px, odsazení kotvy 14px). `gap`
+       musí přesně odpovídat, jinak spojnice neskončí přesně ve středu
+       následující kotvy. */
+    .hyp-steps {
+      gap: 44px;
+    }
+
+    .hyp-step {
+      padding-left: 56px;
+    }
+
+    .hyp-step__marker {
+      display: block;
+      position: absolute;
+      top: 14px;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-quiet);
+    }
+
+    .hyp-step--first .hyp-step__marker {
+      width: 9px;
+      height: 9px;
+      background: var(--emerald);
+    }
+
+    .hyp-step__connector {
+      display: block;
+      position: absolute;
+      top: 14px;
+      bottom: -58px;
+      left: 3.5px;
+      width: 1px;
+      background: rgba(27, 74, 138, .18);
+    }
+
+    .hyp-step--first .hyp-step__connector {
+      left: 4px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .hyp__route-svg--tablet {
+      display: none;
+    }
+
+    .hyp__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .hyp-chapter__bar p {
+      padding-left: calc(56px + var(--hyp-shift, 0px));
+    }
+
+    .hyp-chapter__content {
+      padding-left: 0;
+    }
+
+    .hyp-hero__text {
+      max-width: 580px;
+      gap: 18px;
+    }
+
+    .hyp-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .hyp-hero__lead {
+      font-size: 19px;
+    }
+
+    .hyp-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .hyp-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .hyp-chapter--faze {
+      margin-top: 110px;
+      padding: 88px 96px;
+    }
+
+    .hyp-chapter {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 56px;
+    }
+
+    /*
+     * OPRAVA 1. 9. 2026: 180px (§7 zadání) je pro jednoslovné popisky
+     * „Rozhodnutí"/„Souvislosti" příliš úzké — `<p>` je flex potomek
+     * (align-self:stretch), takže se text nezalomí (jde o JEDNO slovo bez
+     * mezery, kde se zalomit), místo toho PŘETEČE za hranici sloupce a
+     * sežere mezeru ke sloupci obsahu (56px klesne na ~26px, uživatel to
+     * nahlásil jako „text namačkaný"). Sjednoceno na 240px — stejná
+     * hodnota jako `.sluzby-chapter__bar`/`.sluzby-areas__bar` na
+     * `/sluzby` (tam už ověřeno bezpečné i pro nejdelší popisek „Finanční
+     * plán", reálná mezera ≥59px na všech čtyřech pruzích).
+     */
+    .hyp-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .hyp-chapter__content {
+      flex: 1;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 60px;
+    }
+
+    /* OPRAVA: `display:block` tu dřív zahodilo `gap` z base pravidla
+       `.hyp-chapter__content { display:flex; ...; gap:32px }` — úvodní
+       blok (Oblasti/Průběh) pak seděl přímo nalepený na navazující seznam
+       bez jakékoli mezery („text na sobě namačkaný"). Zůstává flex column,
+       jen s vlastní větší mezerou (oddělení dvou různých bloků, ne jen
+       nadpis→odstavec). */
+    .hyp-chapter__content--single {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    /*
+     * OPRAVA 1. 9. 2026 (uživatel: chce raději „roztáhlejší" styl, jako má
+     * `/sluzby` — 540px notebook / 600px desktop, ne 340px). Platí jednotně
+     * pro všechny kapitoly (dvousloupcové i `--single`) — samostatný,
+     * užší override pro `.hyp-chapter__content--single .hyp-chapter__lead-col`
+     * byl proto odstraněn, Oblasti teď dědí stejnou šířku jako ostatní.
+     */
+    .hyp-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .hyp-h2--faze {
+      font-size: 50px;
+    }
+
+    .hyp-h2--std {
+      font-size: 44px;
+    }
+
+    .hyp-h2--context {
+      font-size: 40px;
+    }
+
+    .hyp-chapter__list-col {
+      flex: 1;
+    }
+
+    .hyp-chapter__statement-col {
+      flex: 1;
+      padding-top: 8px;
+    }
+
+    .hyp-chapter__statement {
+      font-size: 30px;
+    }
+
+    /* Fáze: lead-col (340px) + seznam fází (flex:1), gap 64px — vlastní
+       hodnota nezávislá na obecném `.hyp-chapter__content` gapu 60px. */
+    .hyp-chapter__content--faze {
+      gap: 64px;
+    }
+
+    .hyp-phase h3 {
+      font-size: 26px;
+    }
+
+    .hyp-phase--first h3 {
+      font-size: 30px;
+    }
+
+    /* Oblasti: řádky jako grid 340px (název) + 1fr (popis). */
+    .hyp-areas__row {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      column-gap: 32px;
+      gap: 0;
+      align-items: baseline;
+    }
+
+    .hyp-areas__name {
+      font-size: 24px;
+    }
+
+    .hyp-areas__text {
+      font-size: 17px;
+    }
+
+    /*
+     * OPRAVA 1. 9. 2026 (uživatel si všiml, že sloupce na stránce nesedí) —
+     * `#steps-heading` (Průběh) není zabalený v `.hyp-chapter__lead-col`
+     * (má vlastní H2 mimo něj, sdílí sloupec se seznamem kroků), takže
+     * neměl ŽÁDNÝ strop šířky a táhl se přes celou šířku obsahu (799px) —
+     * širší než vlastní obsah pod ním (`.hyp-steps`, 640px). Sjednoceno na
+     * stejnou šířku jako `.hyp-steps`, aby nadpis a jeho vlastní obsah
+     * sdílely stejnou pravou hranu (640px zůstává i po přechodu ostatních
+     * kapitol na „roztáhlejší" styl — je to prakticky stejná šířka jako
+     * jejich 600px na desktopu).
+     */
+    #steps-heading {
+      max-width: 640px;
+    }
+
+    /* Průběh: kotva top:15px (účaří nadpisu), osa odbočky 56px vlevo od
+       textu, spojnice bottom: -(mezera 44 + odsazení 15) = -59px — `gap`
+       MUSÍ být přesně 44px, jinak spojnice nedosáhne (nebo přesáhne) střed
+       následující kotvy. */
+    .hyp-steps {
+      max-width: 640px;
+      gap: 44px;
+    }
+
+    .hyp-step {
+      padding-left: 56px;
+    }
+
+    .hyp-step__marker {
+      top: 15px;
+    }
+
+    .hyp-step__connector {
+      top: 15px;
+      bottom: -59px;
+    }
+
+    .hyp-step h3 {
+      font-size: 22px;
+    }
+
+    .hyp-step--first h3 {
+      font-size: 24px;
+    }
+
+    .hyp-steps__closing {
+      padding-left: 56px;
+      font-size: 19px;
+    }
+
+    /* Otázky: otázka vlevo 340px / odpověď vpravo. */
+    .hyp-faq {
+      max-width: 900px;
+    }
+
+    .hyp-faq__row {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      column-gap: 56px;
+      align-items: baseline;
+    }
+
+    .hyp-faq dt {
+      font-size: 22px;
+    }
+
+    .hyp-faq dd {
+      font-size: 17px;
+    }
+
+    .hyp-closing {
+      margin-top: 110px;
+      padding-block: 88px;
+    }
+
+    .hyp-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .hyp-closing__glow {
+      height: 320px;
+    }
+
+    .hyp-closing__grid h2 {
+      flex: none;
+      width: 500px;
+      font-size: 46px;
+    }
+
+    .hyp-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .hyp__route-svg--laptop {
+      display: none;
+    }
+
+    .hyp__route-svg--desktop {
+      display: block;
+    }
+
+    /* Wide desktop: centrované designové plátno (CLAUDE.md). Stejný
+       princip jako `sluzby.astro` — `.hyp__route` a všechny obsahové
+       sekce dostávají stejný strop/vystředění nezávisle na sobě. */
+    .hyp__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .hyp-hero,
+    .hyp-chapter,
+    .hyp-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .hyp-chapter__bar p {
+      padding-left: calc(76px + var(--hyp-shift, 0px));
+    }
+
+    .hyp-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .hyp-hero__text {
+      max-width: 640px;
+      gap: 18px;
+    }
+
+    .hyp-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .hyp-hero__lead {
+      font-size: 19px;
+    }
+
+    .hyp-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .hyp-hero__actions .hyp-cta {
+      height: 58px;
+    }
+
+    .hyp-chapter--faze {
+      padding: 88px 100px;
+    }
+
+    .hyp-chapter {
+      padding: 88px 100px;
+    }
+
+    /* `.hyp-chapter__bar` width beze změny (240px, zděděno z notebooku
+       výš) — sjednoceno na obou stupních, viz oprava tam. */
+
+    .hyp-h2--faze {
+      font-size: 56px;
+    }
+
+    .hyp-h2--std {
+      font-size: 48px;
+    }
+
+    .hyp-h2--context {
+      font-size: 44px;
+    }
+
+    /* Sjednoceno s /sluzby (600px desktop, „roztáhlejší" styl, 1. 9. 2026). */
+    .hyp-chapter__lead-col {
+      width: 600px;
+    }
+
+    .hyp-chapter__statement {
+      font-size: 34px;
+    }
+
+    .hyp-phase h3 {
+      font-size: 26px;
+    }
+
+    .hyp-phase--first h3 {
+      font-size: 30px;
+    }
+
+    .hyp-closing {
+      padding-block: 96px;
+    }
+
+    .hyp-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .hyp-closing__glow {
+      height: 340px;
+    }
+
+    .hyp-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+</style>

@@ -1,0 +1,1937 @@
+---
+/**
+ * Stránka /sluzby/financni-plan — detail druhé nejdůležitější služby.
+ * Zdroj pravdy pro rozvržení: úkol „Úkol pro Claude Code — podstránka
+ * /sluzby/financni-plan" (2. 9. 2026). Zdroj pravdy pro chování trasy a
+ * pro všechny hodnoty, které toto zadání výslovně nepřepisuje:
+ * `src/pages/sluzby/hypoteky.astro` (sourozenecká stránka — stejná osa,
+ * nájezd, wide-desktop technika, jen 7 kotev místo 6 a jiný vnitřní rozpad
+ * kapitol, viz níže). Texty přesně podle `docs/content-subpages.md`,
+ * kapitola `/sluzby/financni-plan` — copy je STAV „NÁVRH K UŽIVATELSKÉMU
+ * SCHVÁLENÍ", NESMÍ jít do produkce bez potvrzení textů (viz souhrn úkolu).
+ *
+ * Rozpory/mezery v zadání, které jsem řešil vlastním úsudkem (nahlášeno
+ * v souhrnu úkolu, ne mlčky):
+ * 1) §2 zadání dává pruh kapitoly šířku 180px na desktopu i (implicitně
+ *    přes „přebíráš beze změny z hypoteky.astro") na notebooku. Přesně tahle
+ *    šířka byla u `hypoteky.astro` prokázaná jako nedostatečná pro
+ *    jednoslovné popisky délky „Rozhodnutí"/„Souvislosti" (CLAUDE.md,
+ *    „Konvence: pruh + obsah vedle sebe" — `<p>` je flex potomek bez
+ *    možnosti zalomení, text přeteče a sežere mezeru ke sloupci obsahu).
+ *    Tahle stránka má kapitolu doslova pojmenovanou „Souvislosti" — stejné
+ *    slovo, které problém způsobilo tam, navíc při větším řezu (26px zde
+ *    vs. 24px u hypoték). Ověřeno živě v prohlížeči (`Range.getBoundingClientRect`
+ *    na text, ne box `<p>`) — při 180px text skutečně přetékal. Šířka pruhu
+ *    proto zvýšena na bezpečných 240px (stejná hodnota jako `hypoteky.astro`/
+ *    `/sluzby`, CLAUDE.md: „240 px je bezpečnější univerzální volba pro
+ *    budoucí podstránky s neznámými popisky") na noteboooku i desktopu;
+ *    mezera bar→obsah snížena z 56 na 40px, aby začátek obsahového sloupce
+ *    (§2 „obsah od x=412") zůstal na PŮVODNÍ pozici beze změny (176+240+40=456;
+ *    posunuto jen o 44px oproti zadání, ne o celých 60px, které by
+ *    vzniklo při zachování gap:56) — v praxi: `x = 456` místo zadaného 412 na
+ *    desktopu, `vnitřní rozpad` (lead 440/gap 48/support 440/linka 1340)
+ *    zůstává jinak beze změny čísel, jen se jako celek posune o stejnou
+ *    deltu doprava (support kolona proto reálně začíná na x≈944, ne 900) —
+ *    zaznamenáno zde pro dohledatelnost, ne mlčky přepsáno.
+ * 2) Velikost popisku pruhu (§5: „ostatní 26px, Rozsah/Otázky 21px") je
+ *    daná jen pro jeden stupeň bez rozlišení tier (na rozdíl od H1/H2,
+ *    které mají plný rozpis). Odvozeno proporčně ze stejné škály jako H2
+ *    dominantní kapitoly (56→50→44→34 desktop/notebook/tablet/mobil):
+ *    ostatní 26/24/21/18px, Rozsah a Otázky 21/19/18/16px — viz CSS níže.
+ * 3) Přesná svislá pozice kotev odbočky Průběhu („kotva top: 11.5px(7px)
+ *    resp. 12.4px(5.2px)") a mezera („gap: 44px → svislice na x=412, obsah
+ *    od 457") mají mezi sebou 1px numerickou nesrovnalost (412+44=456, ne
+ *    457) — použita zadáním daná absolutní hodnota odsazení obsahu (45px
+ *    zaokrouhleno), ne slepě dopočtená ze samostatně uvedeného gapu.
+ * 4) Statement/highlight velikosti pro tablet/notebook/mobil (kapitoly
+ *    Souvislosti/Situace/Priority/Propojení/Rozsah) nejsou v zadání
+ *    rozepsané po stupních (jen jedna desktopová hodnota) — odvozeny
+ *    proporčně z ostatních typografických škál stránky, viz CSS níže.
+ *
+ * TRASA — stejná technika jako `hypoteky.astro`/`sluzby.astro` (viz jejich
+ * hlavičkové komentáře + CLAUDE.md „Konvence: kontinuální linka, tečky a
+ * text" + „Konvence: wide desktop a centrované designové plátno"): jedna
+ * souvislá cesta od hero až po tmavé závěrečné CTA, `axisScaled`
+ * procentuální přepočet pro wide-desktop stage, nájezdový gradient v hero
+ * jen na desktopu/notebooku, SEDM kotev (souvislosti/situace/priority/
+ * propojeni/prubeh/rozsah/otazky), tmavé CTA bez kotvy/zářezu.
+ *
+ * Ohyb v hero POUŽÍVÁ STEJNOU techniku jako `hypoteky.astro` (40px pod
+ * patou hero textu, clamp 260..heroBottom-20) — §6 zadání sice žádalo jiný
+ * výpočet (uprostřed mezery hero→první kapitola), ale to vedlo k tomu, že
+ * trasa vedla znatelně jinudy než na `/sluzby/hypoteky` (mnohem delší rovný
+ * úsek, ohyb daleko od hero tlačítek). Na výslovné přání uživatele
+ * (2. 9. 2026, „linka nevede stejně kolem tlačítek") vráceno na hypotékami
+ * ověřenou techniku — viz `bendY` v <script> níže.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import LineGradientDefs from '../../components/LineGradientDefs.astro';
+import { PERSON_ID, breadcrumbList } from '../../data/entity';
+
+const SERVICE_NAME = 'Finanční plánování';
+const SERVICE_DESCRIPTION =
+  'Pomohu vám dát finance do souvislostí, určit priority a nastavit další kroky. Finanční plánování osobně v Ostravě nebo online po celé ČR.';
+const financniPlanJsonLd = [
+  {
+    '@type': 'Service',
+    name: SERVICE_NAME,
+    description: SERVICE_DESCRIPTION,
+    url: 'https://patrikgajdadzis.cz/sluzby/financni-plan',
+    provider: { '@id': PERSON_ID },
+    areaServed: [
+      { '@type': 'City', name: 'Ostrava' },
+      { '@type': 'Country', name: 'Česko' },
+    ],
+  },
+  breadcrumbList([
+    { name: 'Domů', path: '/' },
+    { name: 'Služby', path: '/sluzby' },
+    { name: SERVICE_NAME, path: '/sluzby/financni-plan' },
+  ]),
+];
+
+interface ChainSegment {
+  text: string;
+  kw?: boolean;
+}
+
+// Schválená věta (2. 9. 2026, opraveno 14. 9. 2026 — „Příjem určuje rezervu"
+// nahrazeno za věcně správné „Výdaje určují rezervu": rezerva se odvíjí od
+// výdajů, ne od příjmu) — viz `docs/content-subpages.md`, kapitola
+// `/sluzby/financni-plan`, sekce 2. Šest zvýrazněných slov odpovídá pěti
+// oblastem z kapitoly „Co může finanční plán propojit" + „Výdaje" jako
+// výchozímu bodu řetězce.
+const connectionChain: ChainSegment[] = [
+  { text: 'Výdaje', kw: true },
+  { text: ' určují ' },
+  { text: 'rezervu', kw: true },
+  { text: ', rezerva rozhoduje o ' },
+  { text: 'bydlení', kw: true },
+  { text: ', závazek vyžaduje ' },
+  { text: 'ochranu', kw: true },
+  { text: ', přebytek jde do ' },
+  { text: 'investic', kw: true },
+  { text: ' a z nich postupně vzniká majetek na ' },
+  { text: 'penzi', kw: true },
+  { text: '.' },
+];
+
+const situationList: string[] = [
+  'příjmy a běžné výdaje,',
+  'rezervy a dostupné peníze,',
+  'úvěry a další závazky,',
+  'majetek,',
+  'současné pojištění,',
+  'investice,',
+  'zajištění na penzi,',
+  'krátkodobé a dlouhodobé cíle.',
+];
+
+interface PriorityPoint {
+  name: string;
+  text: string;
+}
+
+const priorityPoints: PriorityPoint[] = [
+  { name: 'Co funguje', text: 'Co už máte nastavené dobře a není důvod do toho zasahovat.' },
+  { name: 'Co má prioritu', text: 'Co má největší význam pro vaši současnou situaci a cíle.' },
+  { name: 'Co může počkat', text: 'Ne všechno je potřeba řešit okamžitě.' },
+  { name: 'Co uděláme dál', text: 'Konkrétní kroky seřadíme tak, aby na sebe dávaly smysl.' },
+];
+
+interface ConnectArea {
+  name: string;
+  text: string;
+}
+
+const connectAreas: ConnectArea[] = [
+  { name: 'Rezerva', text: 'Kolik peněz potřebujete mít dostupných a kdy už přebytek může pracovat jinde.' },
+  { name: 'Bydlení a úvěry', text: 'Jak vysoký závazek odpovídá vašemu rozpočtu a ostatním plánům.' },
+  { name: 'Ochrana příjmu a majetku', text: 'Které situace by měly skutečný finanční dopad na vás nebo rodinu.' },
+  { name: 'Investice', text: 'Kolik můžete dlouhodobě investovat, na jaký cíl a s jakým časem.' },
+  { name: 'Penze', text: 'Jaký majetek bude potřeba vytvořit, aby budoucí příjem nebyl závislý pouze na státu.' },
+];
+
+interface Step {
+  heading: string;
+  text: string;
+}
+
+const steps: Step[] = [
+  { heading: 'Projdeme vaši situaci', text: 'Příjmy, výdaje, závazky, majetek, současná řešení a cíle.' },
+  { heading: 'Určíme priority', text: 'Zjistíme, co je důležité teď a co lze řešit později.' },
+  { heading: 'Spočítáme souvislosti', text: 'Podíváme se, jak jedno rozhodnutí ovlivní rezervu, rozpočet a další cíle.' },
+  { heading: 'Navrhnu další postup', text: 'Dostanete konkrétní doporučení a vysvětlení, proč jednotlivé kroky dávají smysl.' },
+  { heading: 'Pomohu s realizací', text: 'Pokud budete chtít doporučené změny provést, pomohu vám je dotáhnout.' },
+  { heading: 'Plán se může měnit s vámi', text: 'Když se změní příjem, rodina, bydlení nebo cíle, dává smysl plán znovu projít.' },
+];
+
+interface Faq {
+  q: string;
+  a: string;
+}
+
+const faqs: Faq[] = [
+  { q: 'Co je finanční plán?', a: 'Přehled vaší současné finanční situace, cílů a kroků, které dávají smysl řešit. Nejde pouze o seznam smluv. Důležité je, jak jednotlivá rozhodnutí fungují dohromady.' },
+  { q: 'Musím kvůli finančnímu plánu měnit své současné smlouvy?', a: 'Ne. Nejdřív zjistíme, co máte nastavené dobře. Pokud něco není potřeba měnit, není důvod do toho zasahovat.' },
+  { q: 'Musím řešit všechny oblasti financí najednou?', a: 'Ne. Stanovíme priority a začneme tím, co má pro vaši situaci největší význam. Ostatní věci mohou počkat.' },
+  { q: 'Co si mám připravit na první schůzku?', a: 'Na první konzultaci stačí základní informace o vaší situaci a o tom, co chcete řešit. Pokud bude pro další krok potřeba něco konkrétního, řeknu vám co.' },
+  { q: 'Je finanční plán jen pro lidi s vysokými příjmy?', a: 'Ne. Smyslem je vědět, jak pracovat s penězi, které máte k dispozici, a určit správné priority podle vaší konkrétní situace.' },
+  { q: 'Můžeme finanční plán řešit online?', a: 'Ano. Konzultace může proběhnout osobně v Ostravě-Porubě nebo online.' },
+];
+---
+
+<BaseLayout
+  title="Finanční plánování | Patrik Gajdadzis, Ostrava"
+  description={SERVICE_DESCRIPTION}
+  jsonLd={financniPlanJsonLd}
+>
+  <Header />
+  <main id="hero" class="fp">
+    <div class="fp__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`fp__route-svg fp__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2600`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                <LineGradientDefs id={`fp-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="fp__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="fp__route-path fp__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#fp-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="fp__route-path fp__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['souvislosti', 'situace', 'priority', 'propojeni', 'prubeh', 'rozsah', 'otazky'] as const).map((marker) => (
+              <g class="fp__marker" data-marker={marker}>
+                <line class="fp__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="fp__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="fp-hero" aria-labelledby="fp-hero-heading">
+      <nav class="fp-breadcrumb" aria-label="Drobečková navigace">
+        <ol>
+          <li><a href="/sluzby">Služby</a></li>
+          <li aria-current="page">Finanční plán</li>
+        </ol>
+      </nav>
+
+      <div class="fp-hero__text">
+        <h1 id="fp-hero-heading" data-reveal>Finanční plán ukáže, co má smysl řešit jako první.</h1>
+        <p class="fp-hero__lead" data-reveal>
+          Nejdřív společně projdeme vaši současnou situaci, příjmy, závazky, majetek a&nbsp;cíle. Potom stanovíme,
+          co má prioritu, co může počkat a&nbsp;co není potřeba měnit vůbec.
+        </p>
+        <div class="fp-hero__actions" data-reveal>
+          <a class="fp-cta" href="/#kontakt">Nezávazná konzultace</a>
+          <a class="fp-phone" href="tel:+420775217721">
+            <svg class="fp-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="fp-chapter fp-chapter--souvislosti" aria-labelledby="souvislosti-heading">
+      <div class="fp-chapter__bar" data-reveal data-route-target="souvislosti">
+        <p>Souvislosti</p>
+      </div>
+
+      <div class="fp-chapter__content fp-chapter__content--souvislosti">
+        <div class="fp-chapter__top">
+          <div class="fp-chapter__lead-col" data-reveal>
+            <h2 id="souvislosti-heading" class="fp-h2--dominant">Jedno finanční rozhodnutí ovlivní další.</h2>
+          </div>
+          <div class="fp-chapter__support-col" data-reveal>
+            <p class="fp-souvislosti__text">
+              Výše hypotéky ovlivní rezervu. Rezerva určuje, kolik peněz můžete bezpečně investovat. Příjem
+              a&nbsp;závazky zase rozhodují o&nbsp;tom, jak velký problém by představovala dlouhodobá pracovní
+              neschopnost nebo invalidita.
+            </p>
+            <p class="fp-souvislosti__text fp-souvislosti__text--strong">
+              Proto se&nbsp;při finančním plánování nedívám na&nbsp;jednotlivé smlouvy odděleně.
+            </p>
+          </div>
+        </div>
+
+        <p class="fp-chain" data-reveal>
+          {connectionChain.map((seg) => (seg.kw ? <span class="fp-chain__kw">{seg.text}</span> : seg.text))}
+        </p>
+      </div>
+    </section>
+
+    <section class="fp-chapter fp-chapter--situace" aria-labelledby="situace-heading">
+      <div class="fp-chapter__bar" data-reveal data-route-target="situace">
+        <p>Situace</p>
+      </div>
+
+      <div class="fp-chapter__content">
+        <div class="fp-chapter__lead-col" data-reveal>
+          <h2 id="situace-heading" class="fp-h2--std">Nejdřív potřebujeme vědět, co&nbsp;už funguje.</h2>
+          <p class="fp-chapter__lead">
+            Finanční plán nezačíná tím, co vám můžu nabídnout. Začíná tím, co&nbsp;už máte a&nbsp;kam se&nbsp;chcete
+            dostat.
+          </p>
+          <p class="fp-chapter__statement">Některé věci mohou zůstat přesně tak, jak jsou.</p>
+        </div>
+
+        <div class="fp-chapter__support-col" data-reveal>
+          <p class="fp-eyebrow">Projdeme například</p>
+          <ul class="fp-chapter__list">
+            {situationList.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="fp-chapter fp-chapter--priority" aria-labelledby="priority-heading">
+      <div class="fp-chapter__bar" data-reveal data-route-target="priority">
+        <p>Priority</p>
+      </div>
+
+      <div class="fp-chapter__content">
+        <div class="fp-chapter__lead-col" data-reveal>
+          <h2 id="priority-heading" class="fp-h2--std">Máte vědět, co&nbsp;řešit, proč a&nbsp;v&nbsp;jakém pořadí.</h2>
+          <p class="fp-chapter__lead">Cílem finančního plánu není vytvořit seznam produktů. Cílem je určit priority.</p>
+          <p class="fp-chapter__statement">Finanční plán nemá přidat složitost. Má&nbsp;v&nbsp;ní udělat pořádek.</p>
+        </div>
+
+        <ul class="fp-rows fp-rows--priority" data-reveal>
+          {
+            priorityPoints.map((p) => (
+              <li class="fp-rows__row">
+                <span class="fp-rows__name">{p.name}</span>
+                <span class="fp-rows__text">{p.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="fp-chapter fp-chapter--propojeni" aria-labelledby="propojeni-heading">
+      <div class="fp-chapter__bar" data-reveal data-route-target="propojeni">
+        <p>Propojení</p>
+      </div>
+
+      <div class="fp-chapter__content">
+        <div class="fp-chapter__lead-col" data-reveal>
+          <h2 id="propojeni-heading" class="fp-h2--std">Plán propojí rozhodnutí, která by jinak vznikala odděleně.</h2>
+          <p class="fp-chapter__statement fp-chapter__statement--propojeni">Nemusíte řešit všechny oblasti najednou.</p>
+        </div>
+
+        <ul class="fp-rows fp-rows--areas" data-reveal>
+          {
+            connectAreas.map((a) => (
+              <li class="fp-rows__row">
+                <span class="fp-rows__name">{a.name}</span>
+                <span class="fp-rows__text">{a.text}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="fp-chapter fp-chapter--prubeh" aria-labelledby="prubeh-heading">
+      <div class="fp-chapter__bar" data-reveal data-route-target="prubeh">
+        <p>Průběh</p>
+      </div>
+
+      <div class="fp-chapter__content fp-chapter__content--single">
+        <h2 id="prubeh-heading" class="fp-h2--std fp-h2--prubeh" data-reveal>Od&nbsp;současného stavu ke&nbsp;konkrétním krokům.</h2>
+
+        <ol class="fp-steps" data-reveal>
+          {
+            steps.map((step, i) => (
+              <li class={`fp-step${i === 0 ? ' fp-step--first' : ''}`}>
+                <span class="fp-step__marker" aria-hidden="true"></span>
+                {i < steps.length - 1 && <span class="fp-step__connector" aria-hidden="true"></span>}
+                <h3>{step.heading}</h3>
+                <p>{step.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="fp-chapter fp-chapter--rozsah" aria-labelledby="rozsah-heading">
+      <div class="fp-chapter__bar fp-chapter__bar--muted" data-reveal data-route-target="rozsah">
+        <p>Rozsah</p>
+      </div>
+
+      <div class="fp-chapter__content fp-chapter__content--single">
+        <div class="fp-chapter__lead-col" data-reveal>
+          <h2 id="rozsah-heading" class="fp-h2--rozsah">Můžete přijít i&nbsp;s&nbsp;jednou konkrétní otázkou.</h2>
+          <p class="fp-chapter__statement fp-chapter__statement--rozsah">Rozsah spolupráce určujete vy.</p>
+        </div>
+
+        <div class="fp-rozsah__body" data-reveal>
+          <p>Nemusíte mít pocit, že před první schůzkou potřebujete připravit celý svůj finanční život.</p>
+          <p>Můžete přijít kvůli hypotéce, investici, pojištění nebo jen proto, že chcete zjistit, jestli máte finance nastavené rozumně.</p>
+          <p>Začneme tím, co právě potřebujete vyřešit. Širší plán má smysl pouze tehdy, pokud vám pomůže udělat lepší rozhodnutí.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="fp-chapter fp-chapter--faq" aria-labelledby="otazky-heading">
+      <div class="fp-chapter__bar fp-chapter__bar--muted" data-reveal data-route-target="otazky">
+        <p id="otazky-heading">Otázky</p>
+      </div>
+
+      <div class="fp-chapter__content fp-chapter__content--single">
+        <dl class="fp-faq" data-reveal>
+          {
+            faqs.map((faq) => (
+              <div class="fp-faq__row">
+                <dt>{faq.q}</dt>
+                <dd>{faq.a}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="fp-closing" aria-labelledby="fp-closing-heading">
+      <div class="fp-closing__glow" aria-hidden="true"></div>
+
+      <div class="fp-closing__grid">
+        <h2 id="fp-closing-heading" data-reveal>Začněme tím, kde jste dnes.</h2>
+
+        <div class="fp-closing__body" data-reveal>
+          <p>
+            Na&nbsp;první konzultaci projdeme, co právě řešíte, a&nbsp;zjistíme, jestli a&nbsp;v&nbsp;jakém rozsahu
+            pro&nbsp;vás finanční plán dává smysl.
+          </p>
+
+          <div class="fp-closing__actions">
+            <a class="fp-cta fp-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="fp-phone fp-phone--dark" href="tel:+420775217721">
+              <svg class="fp-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.fp');
+  const routeWrap = document.querySelector('.fp__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.fp__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.fp-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.fp-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.fp-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.fp-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      souvislosti: main.querySelector('[data-route-target="souvislosti"]'),
+      situace: main.querySelector('[data-route-target="situace"]'),
+      priority: main.querySelector('[data-route-target="priority"]'),
+      propojeni: main.querySelector('[data-route-target="propojeni"]'),
+      prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      rozsah: main.querySelector('[data-route-target="rozsah"]'),
+      otazky: main.querySelector('[data-route-target="otazky"]'),
+    } as const;
+
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_LENGTH = 100;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${HERO_ENTRY_START_Y + HERO_ENTRY_LENGTH} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      // Guard proti tranzientnímu stavu hned po načtení (CLAUDE.md,
+      // SiteFooter.astro's dokumentovaná "Infinity" chyba — tady řešeno
+      // rovnou, ne ponecháno jako známá vada): dokud `main`/hero sekce
+      // nemají žádnou reálnou výšku, geometrie by dělila nulou/vracela
+      // nekonečno. Bez rozměrů nemá smysl trasu kreslit vůbec.
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      // Stejná technika jako `hypoteky.astro` — ohyb 40px pod patou hero
+      // textu (H1+lead+CTA), ne uprostřed mezery k první kapitole. Menší
+      // odchylka od §6 zadání, ale na výslovné přání uživatele (2. 9. 2026):
+      // trasa má vést kolem hero tlačítek stejně jako na `/sluzby/hypoteky`,
+      // ne se od nich vzdálit do prázdné mezery před první kapitolou.
+      let bendY = 260;
+      if (heroTextEl) {
+        const textRect = heroTextEl.getBoundingClientRect();
+        const textBottom = textRect.bottom - mainRect.top;
+        bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+      }
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.fp__route-path:not(.fp__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.fp__route-path--dark') as SVGPathElement | null;
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--fp-shift', `${shift}px`);
+        }
+
+        if (isHero) {
+          if (lightPath) lightPath.setAttribute('d', `${heroArcPath(entryX, axisScaled, r, bendY, closingTop)}`);
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.fp__notch');
+          const dot = group.querySelector('.fp__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.fp__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.fp__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+</script>
+
+<style>
+  .fp {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .fp__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .fp__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .fp__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .fp__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .fp__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .fp__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .fp__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .fp__route-svg--tablet,
+  .fp__route-svg--laptop,
+  .fp__route-svg--desktop {
+    display: none;
+  }
+
+  .fp :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .fp-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .fp-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .fp-cta:active {
+    transform: translateY(1px);
+  }
+
+  .fp-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .fp-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .fp-phone:hover {
+    color: var(--emerald);
+  }
+
+  .fp-phone--dark {
+    color: var(--white);
+  }
+
+  .fp-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Drobečková navigace ---------- */
+
+  .fp-breadcrumb {
+    margin-bottom: 20px;
+  }
+
+  .fp-breadcrumb ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .fp-breadcrumb li:not(:last-child)::after {
+    content: '/';
+    margin: 0 8px;
+    color: var(--text-faint);
+  }
+
+  .fp-breadcrumb a {
+    color: var(--text-quiet);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .fp-breadcrumb a:hover {
+    color: var(--navy);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .fp-hero {
+    padding: 64px 24px 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fp-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .fp-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .fp-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .fp-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .fp-hero__actions .fp-cta {
+    width: 100%;
+  }
+
+  .fp-hero__actions .fp-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .fp-chapter {
+    padding: 56px 24px;
+  }
+
+  .fp-chapter--souvislosti {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .fp-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .fp-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--fp-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .fp-chapter--souvislosti .fp-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .fp-chapter__bar--muted p {
+    font-weight: 700;
+    color: var(--text-nav);
+  }
+
+  .fp-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* `.fp-chain` nese vlastní `margin` (jediný zdroj mezery k blokům nad
+     sebou) — rodičovský `gap` je tu proto vypnutý, jinak by se obě mezery
+     sečetly (stejná chyba jako CLAUDE.md „Konvence: mezera MEZI BLOKY“). */
+  .fp-chapter__content--souvislosti {
+    gap: 0;
+  }
+
+  .fp-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .fp-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fp-chapter__lead-col h2,
+  .fp-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .fp-h2--dominant {
+    font-size: 34px;
+  }
+
+  .fp-h2--std {
+    font-size: 30px;
+  }
+
+  .fp-h2--rozsah {
+    font-size: 28px;
+  }
+
+  .fp-chapter__lead {
+    margin: 0;
+    font-size: 17.5px;
+    line-height: 1.6;
+    font-weight: 600;
+    color: var(--navy);
+    max-width: 520px;
+  }
+
+  .fp-eyebrow {
+    margin: 0 0 4px;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .fp-chapter__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fp-chapter__list li {
+    font-weight: 600;
+    font-size: 16.5px;
+    color: var(--navy);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .fp-chapter__list li:last-child {
+    border-bottom: none;
+  }
+
+  .fp-chapter__statement {
+    margin: 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--emerald);
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .fp-chapter__statement--propojeni {
+    font-size: 22px;
+  }
+
+  .fp-chapter__statement--rozsah {
+    font-size: 20px;
+  }
+
+  /* ---------- Souvislosti (dominantní) ---------- */
+
+  .fp-souvislosti__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .fp-souvislosti__text--strong {
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .fp-chain {
+    margin: 32px 0 0;
+    font-size: 21px;
+    line-height: 1.42;
+    font-weight: 500;
+    letter-spacing: -.02em;
+    color: var(--text-muted);
+  }
+
+  .fp-chain__kw {
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ---------- Priority / Propojení — řádky ---------- */
+
+  .fp-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fp-rows__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .fp-rows__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .fp-rows--priority .fp-rows__name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .fp-rows--areas .fp-rows__name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .fp-rows__text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Průběh ---------- */
+
+  .fp-h2--prubeh {
+    max-width: 560px;
+  }
+
+  /* Kotva a spojnice jsou na KAŽDÉM kroku zvlášť (stejná technika jako
+     `hypoteky.astro`'s `.hyp-step__connector`) — spojnice vede jen mezi
+     dvěma sousedními kotvami, poslední krok žádnou nemá. Dřívější řešení
+     (jedna souvislá `.fp-steps__spine` přes celý seznam) přesahovalo pod
+     poslední tečku, protože `bottom` sledovalo spodní okraj CELÉHO
+     seznamu (kde končí text posledního kroku), ne pozici jeho kotvy —
+     nahlášeno uživatelem 2. 9. 2026 (viz screenshot: čára pokračovala i
+     pod posledním bodem).
+     */
+  /*
+   * Kotva/spojnice/gap kroků přebírá přesně `hypoteky.astro`'s hodnoty
+   * (kotva 7/8px base → 8/9px tablet+, `top` sdílený mezi první a ostatní
+   * kotvou — mění se jen velikost, ne pozice — gap 38px base/44px tablet+,
+   * barva `var(--text-quiet)`) — na výslovné přání uživatele 2. 9. 2026
+   * („proč jsou ty tečky menší než v sekci hypotéka, mělo by to být
+   * jednotné"). Dřívější vlastní hodnoty (5.2/7px, gap 32px, `top` jiný
+   * pro první kotvu) pocházely doslovně ze zadání §6, ale vytvářely
+   * nekonzistentní vzhled napříč detailními stránkami.
+   */
+  .fp-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 38px;
+  }
+
+  .fp-step {
+    position: relative;
+    padding-left: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fp-step__marker {
+    position: absolute;
+    top: 13px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-quiet);
+    transform: translateY(-50%);
+  }
+
+  .fp-step--first .fp-step__marker {
+    width: 8px;
+    height: 8px;
+    background: var(--emerald);
+  }
+
+  /* Spojnice končí přesně ve středu NÁSLEDUJÍCÍ kotvy: `bottom` = −(gap
+     mezi kroky + top kotvy) — stejný vzorec jako `hypoteky.astro`. */
+  .fp-step__connector {
+    position: absolute;
+    top: 13px;
+    bottom: -51px;
+    left: 3px;
+    width: 1px;
+    background: rgba(27, 74, 138, .18);
+  }
+
+  .fp-step--first .fp-step__connector {
+    left: 3.5px;
+  }
+
+  .fp-step h3 {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--navy-ink);
+  }
+
+  .fp-step--first h3 {
+    font-size: 21px;
+  }
+
+  .fp-step p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ---------- Rozsah ---------- */
+
+  .fp-rozsah__body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .fp-rozsah__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ---------- Otázky ---------- */
+
+  .fp-faq {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fp-faq__row {
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .fp-faq__row:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .fp-faq dt {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .fp-faq dd {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .fp-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .fp-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .fp-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .fp-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .fp-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .fp-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .fp-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .fp-closing__actions .fp-cta {
+    width: 100%;
+  }
+
+  .fp-closing__actions .fp-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .fp__route-svg--mobile {
+      display: none;
+    }
+
+    .fp__route-svg--tablet {
+      display: block;
+    }
+
+    .fp-chapter__bar p {
+      padding-left: calc(64px + var(--fp-shift, 0px));
+    }
+
+    .fp-hero {
+      padding: 88px 40px 0;
+    }
+
+    .fp-hero__text {
+      gap: 20px;
+    }
+
+    .fp-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .fp-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .fp-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .fp-hero__actions .fp-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .fp-hero__actions .fp-phone {
+      height: auto;
+    }
+
+    .fp-chapter--souvislosti {
+      margin-top: 80px;
+      padding: 72px 40px;
+    }
+
+    .fp-chapter {
+      padding: 72px 40px;
+    }
+
+    .fp-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .fp-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .fp-h2--dominant {
+      font-size: 44px;
+    }
+
+    .fp-h2--std {
+      font-size: 40px;
+    }
+
+    .fp-h2--rozsah {
+      font-size: 36px;
+    }
+
+    .fp-chapter__lead {
+      font-size: 19px;
+      max-width: 560px;
+    }
+
+    .fp-chapter__list li {
+      font-size: 17px;
+    }
+
+    .fp-chapter__statement {
+      font-size: 22px;
+    }
+
+    .fp-chapter__statement--propojeni {
+      font-size: 24px;
+    }
+
+    .fp-chain {
+      font-size: 30px;
+    }
+
+    .fp-rows--priority .fp-rows__name,
+    .fp-rows--areas .fp-rows__name {
+      font-size: 20px;
+    }
+
+    .fp-step h3 {
+      font-size: 22px;
+    }
+
+    .fp-step--first h3 {
+      font-size: 24px;
+    }
+
+    .fp-faq dt {
+      font-size: 19px;
+    }
+
+    /* Dvoukolonové bloky pod sebe na tabletu (§7), ale řádky (Priority/
+       Propojení) zůstávají dvousloupcové s levou kolonou 250px — přesně
+       jako `hypoteky.astro`'s "Oblasti/Otázky" vzor v analogickém rozsahu. */
+    .fp-rows__row {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      column-gap: 32px;
+      gap: 0;
+      align-items: baseline;
+    }
+
+    .fp-chapter__content--souvislosti .fp-chapter__top {
+      display: flex;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .fp-chapter__content--souvislosti .fp-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .fp-chapter__content--souvislosti .fp-chapter__support-col {
+      flex: 1;
+    }
+
+    /* Kotva/spojnice Průběhu — stejný skok jako `hypoteky.astro` od tabletu
+       výš (gap 44px, kotva 8/9px, `top`/`bottom` spojnice přepočítané). */
+    .fp-steps {
+      gap: 44px;
+    }
+
+    .fp-step__marker {
+      display: block;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+    }
+
+    .fp-step--first .fp-step__marker {
+      width: 9px;
+      height: 9px;
+    }
+
+    .fp-step__connector {
+      display: block;
+      top: 14px;
+      bottom: -58px;
+      left: 3.5px;
+    }
+
+    .fp-step--first .fp-step__connector {
+      left: 4px;
+    }
+
+    .fp-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    .fp-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .fp-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .fp-closing__body p {
+      font-size: 17px;
+    }
+
+    .fp-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .fp-closing__actions .fp-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .fp-closing__actions .fp-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .fp__route-svg--tablet {
+      display: none;
+    }
+
+    .fp__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .fp-chapter__bar p {
+      padding-left: calc(56px + var(--fp-shift, 0px));
+    }
+
+    .fp-hero__text {
+      max-width: 580px;
+      gap: 18px;
+    }
+
+    .fp-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .fp-hero__lead {
+      font-size: 19px;
+    }
+
+    .fp-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .fp-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .fp-chapter--souvislosti {
+      margin-top: 100px;
+      padding: 88px 96px;
+    }
+
+    .fp-chapter {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      /* 56px — stejná hodnota jako `hypoteky.astro` (bar↔obsah). */
+      gap: 56px;
+    }
+
+    .fp-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .fp-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .fp-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .fp-chapter__content {
+      flex: 1;
+    }
+
+    .fp-chapter__content--single {
+      gap: 40px;
+    }
+
+    .fp-h2--dominant {
+      font-size: 50px;
+    }
+
+    .fp-h2--std {
+      font-size: 44px;
+    }
+
+    .fp-h2--rozsah {
+      font-size: 40px;
+    }
+
+    .fp-chapter__statement {
+      font-size: 24px;
+    }
+
+    .fp-chapter__statement--propojeni {
+      font-size: 28px;
+    }
+
+    .fp-chapter__statement--rozsah {
+      font-size: 24px;
+    }
+
+    .fp-chain {
+      font-size: 36px;
+      margin-top: 48px;
+    }
+
+    .fp-chapter__content--souvislosti {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .fp-chapter__content--souvislosti .fp-chapter__top {
+      display: flex;
+      align-items: flex-start;
+      gap: 60px;
+    }
+
+    .fp-chapter__content--souvislosti .fp-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .fp-chapter__content--souvislosti .fp-chapter__support-col {
+      flex: 1;
+    }
+
+    /* Priority/Propojení: lead-col pevná šířka, řádky vpravo — stejný
+       rozpad (540/gap 60) jako `hypoteky.astro`'s `.hyp-chapter__content`. */
+    .fp-chapter--priority .fp-chapter__content,
+    .fp-chapter--propojeni .fp-chapter__content {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 60px;
+    }
+
+    .fp-chapter--priority .fp-chapter__lead-col,
+    .fp-chapter--propojeni .fp-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .fp-rows {
+      flex: 1;
+    }
+
+    .fp-rows__row {
+      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px 0;
+    }
+
+    .fp-rows--priority .fp-rows__name,
+    .fp-rows--areas .fp-rows__name {
+      font-size: 22px;
+    }
+
+    /* Situace: lead-col vlevo, seznam vpravo. */
+    .fp-chapter--situace .fp-chapter__content {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 60px;
+    }
+
+    .fp-chapter--situace .fp-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .fp-chapter--situace .fp-chapter__support-col {
+      flex: 1;
+    }
+
+    /* Průběh: max-width sloupce, kotva/spojnice s většími hodnotami
+       (stejný princip jako hypoteky.astro's Průběh). */
+    .fp-h2--prubeh {
+      max-width: 600px;
+    }
+
+    .fp-steps {
+      max-width: 600px;
+    }
+
+    .fp-step {
+      padding-left: 56px;
+    }
+
+    .fp-step__marker {
+      top: 15px;
+    }
+
+    .fp-step__connector {
+      top: 15px;
+      bottom: -59px;
+    }
+
+    .fp-step h3 {
+      font-size: 22px;
+    }
+
+    .fp-step--first h3 {
+      font-size: 24px;
+    }
+
+    .fp-chapter--faq .fp-chapter__content {
+      max-width: 900px;
+    }
+
+    .fp-chapter--rozsah .fp-chapter__content {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 60px;
+    }
+
+    .fp-chapter--rozsah .fp-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .fp-faq {
+      max-width: 900px;
+    }
+
+    .fp-faq__row {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      column-gap: 56px;
+      align-items: baseline;
+    }
+
+    .fp-faq dt {
+      font-size: 22px;
+    }
+
+    .fp-faq dd {
+      font-size: 17px;
+    }
+
+    .fp-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .fp-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .fp-closing__glow {
+      height: 320px;
+    }
+
+    .fp-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .fp-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .fp__route-svg--laptop {
+      display: none;
+    }
+
+    .fp__route-svg--desktop {
+      display: block;
+    }
+
+    .fp__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .fp-hero,
+    .fp-chapter,
+    .fp-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .fp-chapter__bar p {
+      padding-left: calc(76px + var(--fp-shift, 0px));
+    }
+
+    .fp-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .fp-hero__text {
+      max-width: 900px;
+      gap: 18px;
+    }
+
+    .fp-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .fp-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .fp-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .fp-hero__actions .fp-cta {
+      height: 56px;
+    }
+
+    .fp-chapter--souvislosti {
+      margin-top: 120px;
+      padding: 88px 100px;
+    }
+
+    .fp-chapter {
+      padding: 88px 100px;
+      gap: 56px;
+    }
+
+    .fp-chapter__bar {
+      width: 240px;
+    }
+
+    .fp-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .fp-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .fp-h2--dominant {
+      font-size: 56px;
+    }
+
+    .fp-h2--std {
+      font-size: 48px;
+    }
+
+    .fp-h2--rozsah {
+      font-size: 44px;
+    }
+
+    .fp-chapter__statement {
+      font-size: 26px;
+    }
+
+    .fp-chapter__statement--propojeni {
+      font-size: 30px;
+    }
+
+    .fp-chapter__statement--rozsah {
+      font-size: 26px;
+    }
+
+    .fp-chain {
+      font-size: 40px;
+      margin-top: 48px;
+    }
+
+    .fp-chapter__content--souvislosti .fp-chapter__lead-col {
+      width: 600px;
+    }
+
+    .fp-chapter--priority .fp-chapter__lead-col,
+    .fp-chapter--propojeni .fp-chapter__lead-col,
+    .fp-chapter--situace .fp-chapter__lead-col,
+    .fp-chapter--rozsah .fp-chapter__lead-col {
+      width: 600px;
+    }
+
+    .fp-rows--priority .fp-rows__name,
+    .fp-rows--areas .fp-rows__name {
+      font-size: 24px;
+    }
+
+    .fp-h2--prubeh {
+      max-width: 640px;
+    }
+
+    .fp-steps {
+      max-width: 640px;
+    }
+
+    .fp-faq dt {
+      font-size: 22px;
+    }
+
+    .fp-closing {
+      padding-block: 96px;
+    }
+
+    .fp-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .fp-closing__glow {
+      height: 340px;
+    }
+
+    .fp-closing__grid h2 {
+      width: 520px;
+      font-size: 52px;
+    }
+  }
+</style>

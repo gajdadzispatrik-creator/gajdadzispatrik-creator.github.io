@@ -1,0 +1,655 @@
+---
+/**
+ * Sekce „Jednoduše. Bez tlaku.“ — klesající trasa (světlá varianta).
+ * Zdroj: design-exploration/financial-architecture/section-process/claude-code-task-process.md
+ *
+ * Kotva (--x, --y) na každém <li> nese souřadnici na trase ve stejném
+ * souřadném prostoru jako SVG (viz --vb na .process) — tečka i blok z ní
+ * vychází, blok je posunutý o pevných +24/+24 (dolů/vpravo od kotvy).
+ *
+ * Left/right/width se počítá jako procento --vb, aby text sledoval stejné
+ * roztažení jako trasa na libovolné šířce; kotva→blok offset (+24) a
+ * nadpis/CTA→osa offset (56/32 px) jsou ale composed přes mixed %+px calc,
+ * takže zůstávají fyzicky stejný počet px při jakékoli šířce (viz oprava
+ * nadpisu v RouterSection.astro — čistě procentuální posun by se s
+ * roztažením trasy sám úměrně zvětšoval/zmenšoval).
+ *
+ * Notebook 1200–1399 má vlastní geometrii odvozenou z desktopu stejnou
+ * afinní transformací (x' = 0.977966·x − 21.356) jako v ConnectionsSection
+ * a RouterSection — sjednocuje hranici mezistupně s předchozí sekcí
+ * (RouterSection má desktop tier od 1400 px), aby trasa navazovala bez
+ * mezery na libovolné šířce.
+ */
+const steps = [
+  {
+    name: 'Poznám vaši situaci',
+    desc: 'Probereme cíle, současné nastavení a to, co potřebujete vyřešit.',
+    pos: 'pos-1',
+  },
+  {
+    name: 'Navrhnu další postup',
+    desc: 'Ukážu vám možnosti, souvislosti a své doporučení.',
+    pos: 'pos-2',
+  },
+  {
+    name: 'Postarám se o realizaci',
+    desc: 'Pomohu s vyřízením a zůstávám vám k dispozici i dál.',
+    pos: 'pos-3',
+  },
+];
+---
+
+<section class="process" aria-labelledby="jak-probiha">
+  <h2 id="jak-probiha" class="process__heading">Jednoduše. Bez tlaku.</h2>
+
+  <ol class="process__steps">
+    {steps.map((step) => (
+      <li class={`process__step process__step--${step.pos}`}>
+        <h3 class="process__name">{step.name}</h3>
+        <p class="process__desc">{step.desc}</p>
+      </li>
+    ))}
+  </ol>
+
+  <a class="process__cta" href="/#kontakt">Nezávazná konzultace</a>
+
+  <!-- Desktop 1400+ -->
+  <svg
+    class="process__route process__route--desktop"
+    viewBox="0 0 1440 1060"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="process__route-path"
+      d="M 1300 -20 V 88 A 28 28 0 0 1 1272 116 H 148 A 28 28 0 0 0 120 144 V 380 A 28 28 0 0 0 148 408 H 600 A 28 28 0 0 1 628 436 V 662 A 28 28 0 0 0 656 690 H 1272 A 28 28 0 0 1 1300 718 V 1060"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="process__dot process__dot--pos-1" cx="240" cy="408" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="process__dot process__dot--pos-2" cx="628" cy="538" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="process__dot process__dot--pos-3" cx="800" cy="690" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!--
+    Notebook 1200–1399, proporčně odvozeno z desktopu stejnou afinní
+    transformací (x' = 0.977966·x − 21.356) jako notebook varianty trasy
+    v ConnectionsSection.astro a RouterSection.astro.
+  -->
+  <svg
+    class="process__route process__route--laptop"
+    viewBox="0 0 1366 1060"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="process__route-path"
+      d="M 1250 -20 V 88 A 28 28 0 0 1 1223 116 H 123 A 28 28 0 0 0 96 144 V 380 A 28 28 0 0 0 123 408 H 565 A 28 28 0 0 1 593 436 V 662 A 28 28 0 0 0 620 690 H 1223 A 28 28 0 0 1 1250 718 V 1060"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <circle class="process__dot process__dot--pos-1" cx="213" cy="408" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="process__dot process__dot--pos-2" cx="593" cy="538" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="process__dot process__dot--pos-3" cx="761" cy="690" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!--
+    Tablet 768–1199: zadání dávalo nájezd `M 794 -20 ...` se zákrutem na
+    osu x=40 (stejný tvar jako vstup do RouterSection) — ale RouterSection na
+    tabletu KONČÍ na x=40, ne na 794 (794 je souřadnice, na které tam vstupuje
+    ConnectionsSection, o sekci dřív). Nájezd na 794 tak vytvářel viditelnou
+    mezeru přes 700 px místo návaznosti — stejná třída chyby, jakou
+    ReviewsSection.astro už řeší pro svůj vlastní vstup (viz její komentář
+    „ProcessSection na tabletu KONČÍ na x=40..."), jen o jednu sekci dřív
+    (oprava 14. 9. 2026). Trasa proto jen pokračuje rovně dolů, žádný zákrut
+    není potřeba — vlastní osa téhle sekce (§8: „osa x=40") je totožná se
+    skutečným koncem RouterSection.
+  -->
+  <svg
+    class="process__route process__route--tablet"
+    viewBox="0 0 834 1080"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="process__route-path"
+      d="M 40 -20 V 1080"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <path
+      class="process__route-notches"
+      d="M 40 340 H 90 M 40 552 H 90 M 40 764 H 90"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <circle class="process__dot process__dot--pos-1" cx="90" cy="340" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="process__dot process__dot--pos-2" cx="90" cy="552" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="process__dot process__dot--pos-3" cx="90" cy="764" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+
+  <!--
+    Mobil <768: stejná chyba/oprava jako u tabletu výše — RouterSection na
+    mobilu KONČÍ na x=24 (vlastní osa téhle sekce, §8), ne na 366 (to je
+    vstupní souřadnice o sekci dřív). Trasa proto pokračuje rovně, bez
+    zákrutu (oprava 14. 9. 2026).
+  -->
+  <svg
+    class="process__route process__route--mobile"
+    viewBox="0 0 390 1020"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      class="process__route-path"
+      d="M 24 -20 V 1020"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <path
+      class="process__route-notches"
+      d="M 24 300 H 46 M 24 502 H 46 M 24 704 H 46"
+      fill="none"
+      stroke="var(--line)"
+      stroke-opacity=".18"
+      stroke-width="1"
+      stroke-linecap="round"
+    ></path>
+    <circle class="process__dot process__dot--pos-1" cx="46" cy="300" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="process__dot process__dot--pos-2" cx="46" cy="502" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="process__dot process__dot--pos-3" cx="46" cy="704" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+  </svg>
+</section>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const section = document.querySelector('.process');
+  if (section && !disableAnimation) {
+    const activeSvg = Array.from(section.querySelectorAll('.process__route')).find(
+      (svg) => getComputedStyle(svg).display !== 'none'
+    );
+    const path = activeSvg?.querySelector('.process__route-path') as SVGPathElement | null;
+    const heading = section.querySelector('.process__heading');
+    const cta = section.querySelector('.process__cta');
+    const stepsEls = Array.from(section.querySelectorAll('.process__step'));
+
+    if (path) {
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = String(length);
+      path.style.strokeDashoffset = String(length);
+
+      const circles = Array.from(activeSvg!.querySelectorAll('.process__dot'));
+      const steps = 2000;
+      const thresholds = circles.map((circle) => {
+        const cx = parseFloat(circle.getAttribute('cx') ?? '0');
+        const cy = parseFloat(circle.getAttribute('cy') ?? '0');
+        let best = Infinity;
+        let bestLen = 0;
+        for (let i = 0; i <= steps; i++) {
+          const l = (length * i) / steps;
+          const pt = path.getPointAtLength(l);
+          const d = Math.hypot(pt.x - cx, pt.y - cy);
+          if (d < best) {
+            best = d;
+            bestLen = l;
+          }
+        }
+        return bestLen / length;
+      });
+
+      stepsEls.forEach((step) => step.classList.add('is-pending'));
+      heading?.classList.add('is-pending');
+      cta?.classList.add('is-pending');
+
+      let ticking = false;
+      const update = () => {
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+        path.style.strokeDashoffset = String(length * (1 - progress));
+
+        stepsEls.forEach((step, i) => {
+          if (progress >= thresholds[i] && step.classList.contains('is-pending')) {
+            step.classList.remove('is-pending');
+            step.classList.add('is-visible');
+          }
+        });
+
+        if (progress > 0.02 && heading?.classList.contains('is-pending')) {
+          heading.classList.remove('is-pending');
+          heading.classList.add('is-visible');
+        }
+
+        if (progress >= 0.98 && cta?.classList.contains('is-pending')) {
+          cta.classList.remove('is-pending');
+          cta.classList.add('is-visible');
+        }
+
+        ticking = false;
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    }
+  }
+</script>
+
+<style>
+  .process {
+    position: relative;
+    overflow: hidden;
+    height: 1020px;
+    background: var(--bg);
+    --vb: 390;
+    /*
+     * Trasa je neuniformně roztahované SVG (preserveAspectRatio="none") —
+     * šířka roste s viewportem, výška sekce přesně sedí s výškou viewBoxu na
+     * všech stupních, takže svislé měřítko je vždy 1. Vodorovné měřítko ale
+     * mimo kalibrační šířku (390/834/1366/1440) roste, takže by z kruhových
+     * teček vyšly elipsy. --dot-fix dopočítá násobek pro zpětné doškálování
+     * na kruh.
+     */
+    --dot-fix: calc(var(--vb) * 1px / 100vw);
+  }
+
+  .process__dot {
+    transform: scaleX(var(--dot-fix));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /*
+   * Odsazení nadpisu (a CTA na desktopu) od svislého úseku trasy zůstává
+   * stejný počet fyzických px na libovolné šířce (§3) — --axis-x je
+   * procentuální (sleduje roztažení trasy), --offset se přičítá až po
+   * převodu na %, takže neroste/nezmenšuje se spolu s ním.
+   */
+  .process__heading {
+    position: absolute;
+    left: calc((var(--axis-x) * 100% / var(--vb)) + (var(--offset) * 1px));
+    right: 24px;
+    top: 120px;
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -.05em;
+    font-size: 40px;
+    color: var(--navy);
+    --axis-x: 24;
+    --offset: 32;
+  }
+
+  .process__heading.is-pending {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .process__heading.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+  }
+
+  .process__steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /*
+   * Jedna kotva (--x, --y) na krok = zdroj pravdy pro tečku i blok. Blok je
+   * posunutý o --ox/--oy (fyzický px offset od kotvy) — left kombinuje
+   * procentuální --x (sleduje trasu) s fixním px offsetem stejnou technikou
+   * jako nadpis výše, aby offset zůstal vizuálně stejný na jakékoli šířce.
+   * Offset se liší podle šířky (mobil +14/−24, tablet +20/−26, desktop a
+   * notebook +24/+24 dle §4) — hodnoty dopočítané ze zadaných kotev a
+   * konkrétních left/top v §4–§6, ne dohady.
+   */
+  .process__step {
+    position: absolute;
+    left: calc((var(--x) * 100% / var(--vb)) + (var(--ox) * 1px));
+    right: calc(var(--rx, 24) * 100% / var(--vb));
+    top: calc((var(--y) + var(--oy)) * 1px);
+    margin: 0;
+    transform: translateY(var(--reveal-y, 0px));
+    --ox: 14;
+    --oy: -24;
+  }
+
+  .process__step.is-pending {
+    opacity: 0;
+    --reveal-y: 12px;
+  }
+
+  .process__step.is-visible {
+    opacity: 1;
+    --reveal-y: 0px;
+    transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+  }
+
+  .process__name {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -.04em;
+    font-size: 26px;
+    color: var(--navy);
+  }
+
+  .process__desc {
+    margin: 7px 0 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  .process__cta {
+    position: absolute;
+    left: calc((var(--axis-x) * 100% / var(--vb)) + (var(--offset) * 1px));
+    right: 24px;
+    top: 882px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out), transform var(--duration-hover) var(--ease-out);
+    --axis-x: 24;
+    --offset: 32;
+  }
+
+  .process__cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .process__cta:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .process__cta:active {
+    transform: translateY(1px);
+  }
+
+  .process__cta.is-pending {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  .process__cta.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms var(--ease-out), transform 400ms var(--ease-out);
+  }
+
+  .process__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .process__route--tablet,
+  .process__route--laptop,
+  .process__route--desktop {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .process__step,
+    .process__heading,
+    .process__cta {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Kotvy — mobil (base) */
+  .process__step--pos-1 {
+    --x: 46;
+    --y: 300;
+  }
+
+  .process__step--pos-2 {
+    --x: 46;
+    --y: 502;
+  }
+
+  .process__step--pos-3 {
+    --x: 46;
+    --y: 704;
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .process {
+      height: 1080px;
+      --vb: 834;
+    }
+
+    .process__heading {
+      right: auto;
+      top: 150px;
+      width: 520px;
+      font-size: 54px;
+      --axis-x: 40;
+      --offset: 56;
+    }
+
+    .process__step {
+      right: auto;
+      width: calc(684 * 100% / var(--vb));
+      --ox: 20;
+      --oy: -26;
+    }
+
+    .process__name {
+      font-size: 30px;
+    }
+
+    .process__desc {
+      font-size: 16px;
+      max-width: 440px;
+    }
+
+    .process__cta {
+      right: auto;
+      top: 930px;
+      width: fit-content;
+      padding: 0 28px;
+      --axis-x: 40;
+      --offset: 56;
+    }
+
+    .process__step--pos-1 {
+      --x: 90;
+      --y: 340;
+    }
+
+    .process__step--pos-2 {
+      --x: 90;
+      --y: 552;
+    }
+
+    .process__step--pos-3 {
+      --x: 90;
+      --y: 764;
+    }
+
+    .process__route--mobile {
+      display: none;
+    }
+
+    .process__route--tablet {
+      display: block;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .process {
+      height: 1060px;
+      --vb: 1366;
+    }
+
+    .process__heading {
+      --axis-x: 96;
+      --offset: 56;
+      top: 196px;
+      width: 820px;
+      font-size: 72px;
+      line-height: 1.02;
+    }
+
+    .process__name {
+      font-size: 34px;
+      letter-spacing: -.04em;
+    }
+
+    .process__desc {
+      font-size: 16.5px;
+      line-height: 1.6;
+      text-wrap: pretty;
+      max-width: none;
+    }
+
+    .process__cta {
+      --axis-x: 96;
+      --offset: 56;
+      top: 880px;
+      height: 58px;
+      padding: 0 30px;
+    }
+
+    /*
+     * --y zůstává stejné jako na desktopu (jen --x prošlo afinní transformací)
+     * — viz §4. Kroky 1 a 3 leží na VODOROVNÉM úseku trasy (text „pod
+     * linkou“) — --ox: 0 zarovná levou hranu textu přesně pod tečku (stejná
+     * konvence jako `.router__area` v RouterSection.astro: `left` bez
+     * přidaného px odsazení, text visí přímo pod tečkou, ne vpravo od ní).
+     * Krok 2 leží na SVISLÉM úseku (text „vedle linky“) — ponechává si
+     * vodorovné odsazení (--ox: 24) a dostává vlastní svislé vystředění
+     * přes transform, ne přes --oy.
+     */
+    .process__step {
+      --ox: 24;
+      --oy: 24;
+    }
+
+    .process__step--pos-1,
+    .process__step--pos-3 {
+      --ox: 0;
+    }
+
+    .process__step--pos-2 {
+      --oy: 0;
+      transform: translateY(calc(-50% + var(--reveal-y, 0px)));
+    }
+
+    .process__step--pos-1 {
+      --x: 213;
+      --y: 408;
+      width: calc(340 * 100% / var(--vb));
+    }
+
+    .process__step--pos-2 {
+      --x: 593;
+      --y: 538;
+      width: calc(400 * 100% / var(--vb));
+    }
+
+    .process__step--pos-3 {
+      --x: 761;
+      --y: 690;
+      width: calc(400 * 100% / var(--vb));
+    }
+
+    .process__route--tablet {
+      display: none;
+    }
+
+    .process__route--laptop {
+      display: block;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .process {
+      --vb: 1440;
+      /* Wide desktop: centrované designové plátno (CLAUDE.md) — viz stejná
+         poznámka v ConnectionsSection.astro. */
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .process__heading {
+      --axis-x: 120;
+    }
+
+    .process__cta {
+      --axis-x: 120;
+    }
+
+    .process__step--pos-1 {
+      --x: 240;
+    }
+
+    .process__step--pos-2 {
+      --x: 628;
+    }
+
+    .process__step--pos-3 {
+      --x: 800;
+    }
+
+    .process__route--laptop {
+      display: none;
+    }
+
+    .process__route--desktop {
+      display: block;
+    }
+  }
+</style>

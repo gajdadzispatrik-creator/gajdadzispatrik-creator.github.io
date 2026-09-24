@@ -1,0 +1,751 @@
+---
+/**
+ * Sekce „Co klient získá“ — proložená sazba, tmavá (varianta 11d).
+ * Zdroj: úkol pro Claude Code „sekce Co klient získá (Proložená sazba, tmavá)“
+ * §4–§8 (geometrie), §9 (interakce), §10 (přístupnost).
+ *
+ * DŮLEŽITÁ ODCHYLKA OD ZADÁNÍ (§2, krok 2 zadání samo tuto kontrolu vyžaduje):
+ * §5–§8 počítají se vstupem trasy na x=1300/1250/794/366 (stejný vzor jako
+ * Router/Process/Connections). Reálně změřeno v prohlížeči (getPointAtLength
+ * na živém .reviews__route-path, viz konverzace) — ReviewsSection ale nemá
+ * pravý-okraj-pak-levá-osa layout jako ony, má prostřední dělítko, takže její
+ * trasa reálně končí na x=640 (desktop) / 600 (notebook) / 40 (tablet) /
+ * 24 (mobil) — ne na 1300/1250/794/366. Podle výslovné instrukce v zadání
+ * („platí reálný výstup, napiš mi to“) je proto vstupní x u všech čtyř
+ * stupňů zde přepočítaný na 640/600/40/24. Na tabletu a mobilu to znamená
+ * rovnou svislici (vstup = vlastní osa této sekce, žádný zákrut potřeba,
+ * stejně jako v ReviewsSection); na desktopu/notebooku dva lomy ve stejném
+ * směru jako předtím, jen z jiného výchozího bodu — proto proti zadání
+ * OPAČNÝ směr prvního zákrutu (vstup 640/600 < osa 940/890, ne >).
+ *
+ * Výška sekce plyne z obsahu (§11) — seznam přínosů je jediný prvek
+ * v normálním tokovém layoutu (nadpis je position:absolute, do výšky se
+ * nepočítá). Čtyři tečky i zářezy proto po vykreslení přepočítávají svou
+ * svislou pozici na skutečnou pozici odpovídající položky (stejný princip
+ * jako jedna tečka v ReviewsSection, jen ×4) — stejný důvod: pevné souřadnice
+ * ze zadání předpokládají jednu konkrétní výšku, která se nemusí shodovat se
+ * skutečně vykresleným rozestupem položek.
+ */
+interface Benefit {
+  name: string;
+  desc: string;
+}
+
+const benefits: Benefit[] = [
+  { name: 'Přehled', desc: 'Budete vědět, co máte a proč.' },
+  { name: 'Souvislosti', desc: 'Jedno rozhodnutí nebude škodit druhému.' },
+  { name: 'Úsporu času', desc: 'Důležité věci nemusíte řešit sami.' },
+  { name: 'Dlouhodobého partnera', desc: 'Máte se na koho obrátit i později.' },
+];
+---
+
+<section class="benefits" aria-labelledby="prinosy">
+  <div class="benefits__stage">
+    <h2 id="prinosy" class="benefits__heading">Ve&nbsp;financích budete mít jasno.</h2>
+
+    <ul class="benefits__list">
+      {benefits.map((benefit) => (
+        <li class="benefits__item">
+          <h3 class="benefits__name">{benefit.name}</h3>
+          <p class="benefits__desc">{benefit.desc}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!--
+    Desktop 1400+ (kalibrace 1440). Vstup x=640 (viz poznámka nahoře, ne 1300
+    ze zadání) — osa/dělítko x=940 beze změny, radius 28 beze změny. Protože
+    vstup (640) je NALEVO od osy (940), první zákrut je S→E (ne S→W jako
+    v zadání), druhý E→S (ne W→S) — trasa jde doprava, ne doleva.
+
+    OPRAVA (nalezeno 24. 8. 2026 podle screenshotu): zářezy/tečky byly na
+    x=900, tj. NALEVO od osy (940) — směrem OD textu (ten začíná až na
+    ose+56=996). Zářez i tečka teď na x=976 (osa+36), tedy NAPRAVO od osy,
+    směrem K textu, s odstupem přesně 20 px od začátku textu — ne osa+44
+    (jako CasesSection.astro), protože ta hodnota tady dávala jen 12,5 px
+    (menší text-offset než u Cases, +56 místo +68) — pod závaznou hranicí
+    ≥20 px z „Konvence: kontinuální linka, tečky a text“ bod 6.
+  -->
+  <svg
+    class="benefits__route benefits__route--desktop"
+    viewBox="0 0 1440 1200"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-notch-offset="36"
+  >
+    <path
+      class="benefits__route-path"
+      d="M 640 -20 V 92 A 28 28 0 0 0 668 120 H 912 A 28 28 0 0 1 940 148 V 1200"
+      fill="none"
+      stroke="#9CB6D4"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="benefits__notch" x1="940" y1="300" x2="976" y2="300"></line>
+    <line class="benefits__notch" x1="940" y1="480" x2="976" y2="480"></line>
+    <line class="benefits__notch" x1="940" y1="660" x2="976" y2="660"></line>
+    <line class="benefits__notch" x1="940" y1="840" x2="976" y2="840"></line>
+    <circle class="benefits__dot benefits__dot--0" cx="976" cy="300" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="benefits__dot benefits__dot--1" cx="976" cy="480" r="2.6" fill="#9CB6D4" fill-opacity=".6"></circle>
+    <circle class="benefits__dot benefits__dot--2" cx="976" cy="660" r="2.6" fill="#9CB6D4" fill-opacity=".6"></circle>
+    <circle class="benefits__dot benefits__dot--3" cx="976" cy="840" r="2.6" fill="#9CB6D4" fill-opacity=".6"></circle>
+  </svg>
+
+  <!-- Notebook 1200–1399 (kalibrace 1366). Vstup x=600 (ne 1250), osa x=890, zářezy na 926 (osa+36, ne 850 od textu ani osa+44 — stejný důvod jako u desktopu výše: 20 px odstup od textu), radius 28 — stejná logika jako desktop výše. -->
+  <svg
+    class="benefits__route benefits__route--laptop"
+    viewBox="0 0 1366 1200"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-notch-offset="36"
+  >
+    <path
+      class="benefits__route-path"
+      d="M 600 -20 V 92 A 28 28 0 0 0 628 120 H 862 A 28 28 0 0 1 890 148 V 1200"
+      fill="none"
+      stroke="#9CB6D4"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="benefits__notch" x1="890" y1="280" x2="926" y2="280"></line>
+    <line class="benefits__notch" x1="890" y1="450" x2="926" y2="450"></line>
+    <line class="benefits__notch" x1="890" y1="620" x2="926" y2="620"></line>
+    <line class="benefits__notch" x1="890" y1="790" x2="926" y2="790"></line>
+    <circle class="benefits__dot benefits__dot--0" cx="926" cy="280" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="benefits__dot benefits__dot--1" cx="926" cy="450" r="2.6" fill="#9CB6D4" fill-opacity=".6"></circle>
+    <circle class="benefits__dot benefits__dot--2" cx="926" cy="620" r="2.6" fill="#9CB6D4" fill-opacity=".6"></circle>
+    <circle class="benefits__dot benefits__dot--3" cx="926" cy="790" r="2.6" fill="#9CB6D4" fill-opacity=".6"></circle>
+  </svg>
+
+  <!--
+    Tablet 768–1199 (kalibrace 834). Vstup x=40 — podle zadání sama osa této
+    sekce je x=40 (§7), takže se přesně shoduje s reálným výstupem Recenzí
+    (viz poznámka nahoře) — žádný zákrut není potřeba, stejný princip jako
+    v ReviewsSection.astro.
+  -->
+  <svg
+    class="benefits__route benefits__route--tablet"
+    viewBox="0 0 834 1400"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-notch-offset="44"
+  >
+    <path
+      class="benefits__route-path"
+      d="M 40 -20 V 1400"
+      fill="none"
+      stroke="#9CB6D4"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="benefits__notch" x1="40" y1="330" x2="84" y2="330"></line>
+    <line class="benefits__notch" x1="40" y1="480" x2="84" y2="480"></line>
+    <line class="benefits__notch" x1="40" y1="630" x2="84" y2="630"></line>
+    <line class="benefits__notch" x1="40" y1="780" x2="84" y2="780"></line>
+    <circle class="benefits__dot benefits__dot--0" cx="84" cy="330" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="benefits__dot benefits__dot--1" cx="84" cy="480" r="2.4" fill="#9CB6D4" fill-opacity=".6"></circle>
+    <circle class="benefits__dot benefits__dot--2" cx="84" cy="630" r="2.4" fill="#9CB6D4" fill-opacity=".6"></circle>
+    <circle class="benefits__dot benefits__dot--3" cx="84" cy="780" r="2.4" fill="#9CB6D4" fill-opacity=".6"></circle>
+  </svg>
+
+  <!-- Mobil <768 (kalibrace 390). Vstup x=24 = vlastní osa (§8) — stejný princip jako tablet výše. -->
+  <svg
+    class="benefits__route benefits__route--mobile"
+    viewBox="0 0 390 1400"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+    focusable="false"
+    data-notch-offset="22"
+  >
+    <path
+      class="benefits__route-path"
+      d="M 24 -20 V 1400"
+      fill="none"
+      stroke="#9CB6D4"
+      stroke-opacity=".3"
+      stroke-width="1"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+    <line class="benefits__notch" x1="24" y1="386" x2="46" y2="386"></line>
+    <line class="benefits__notch" x1="24" y1="522" x2="46" y2="522"></line>
+    <line class="benefits__notch" x1="24" y1="658" x2="46" y2="658"></line>
+    <line class="benefits__notch" x1="24" y1="794" x2="46" y2="794"></line>
+    <circle class="benefits__dot benefits__dot--0" cx="46" cy="386" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="benefits__dot benefits__dot--1" cx="46" cy="522" r="2.4" fill="#9CB6D4" fill-opacity=".6"></circle>
+    <circle class="benefits__dot benefits__dot--2" cx="46" cy="658" r="2.4" fill="#9CB6D4" fill-opacity=".6"></circle>
+    <circle class="benefits__dot benefits__dot--3" cx="46" cy="794" r="2.4" fill="#9CB6D4" fill-opacity=".6"></circle>
+  </svg>
+</section>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
+  // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
+  const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
+
+  const section = document.querySelector('.benefits');
+  if (section) {
+    const allSvgs = Array.from(section.querySelectorAll('.benefits__route')) as SVGSVGElement[];
+    const items = Array.from(section.querySelectorAll('.benefits__item')) as HTMLElement[];
+
+    const getActiveSvg = (): SVGSVGElement | undefined =>
+      allSvgs.find((svg) => getComputedStyle(svg).display !== 'none');
+
+    /*
+     * `activeSvg`/`path`/`notches`/`dots` musí být PŘEVÁZANÉ na aktuálně
+     * viditelné SVG, ne zjištěné jednou při načtení skriptu — nalezeno
+     * 25. 8. 2026 auditem (`Benefits — … vs. tečka (ne osa)` selhávalo na
+     * mobilu/tabletu/desktopu, prošlo jen na notebooku, podle toho, jaký
+     * stupeň byl aktivní při prvním běhu skriptu). Bez převázání by po
+     * změně šířky okna přes hranici stupně (resize, ne jen reload) skript
+     * dál zapisoval pozice do SKRYTÉHO SVG předchozího stupně — nově
+     * zobrazené SVG by tak navždy zůstalo na statických souřadnicích
+     * z markupu. Stejný princip jako `bindActiveSvg` v CasesSection.astro.
+     */
+    let currentSvg: SVGSVGElement | undefined;
+    let path: SVGPathElement | null = null;
+    let notches: SVGLineElement[] = [];
+    let dots: SVGCircleElement[] = [];
+
+    const bindActiveSvg = (svg: SVGSVGElement) => {
+      currentSvg = svg;
+      path = svg.querySelector('.benefits__route-path');
+      notches = Array.from(svg.querySelectorAll('.benefits__notch'));
+      dots = Array.from(svg.querySelectorAll('.benefits__dot'));
+    };
+
+    // Getter funkce místo přímého čtení `path`/`dots`/`notches` v pozdějších
+    // closures — stejný důvod jako v ContactSection.astro/SiteFooter.astro
+    // (TS jinak u sdílených `let` proměnných napříč vnořenými funkcemi
+    // chybně zúží typ).
+    const getPath = (): SVGPathElement | null => path;
+    const getDots = (): SVGCircleElement[] => dots;
+
+    const initialSvg = getActiveSvg();
+    if (initialSvg) bindActiveSvg(initialSvg);
+
+    /*
+     * Čtyři tečky a zářezy musí sedět na úrovni odpovídající položky — ale
+     * výška sekce (a tím svislé měřítko SVG) plyne z reálného obsahu, ne
+     * z pevného rámu (§11). Pevné souřadnice v markupu (kalibrované na jednu
+     * konkrétní výšku) proto po vykreslení přepočítáváme na skutečnou
+     * pozici každé položky — stejný princip jako jedna tečka v
+     * ReviewsSection.astro, tady pro všechny čtyři najednou. Funguje bez
+     * ohledu na prefers-reduced-motion, protože jde o opravu rozvržení, ne
+     * o animaci.
+     *
+     * Vodorovné odsazení zářezu/tečky od osy (`data-notch-offset`, reálné
+     * px) se PŘEPOČÍTÁVÁ stejně jako svislá pozice, ne jen jednou napevno
+     * v markupu — nalezeno 24. 8. 2026: SVG se neuniformně roztahuje
+     * (`preserveAspectRatio="none"`), takže lokální offset v jednotkách
+     * viewBoxu (36/44/22 podle stupně) mimo kalibrační šířku (1440/1366/
+     * 834/390) rostl úměrně se šířkou okna, zatímco text má odsazení pevné
+     * v px (`calc(... + 56px)` apod.) — na 1920 px byla mezera tečka↔text
+     * jen 8,4 px místo 20 px. Přepočet zaručuje konstantní reálnou mezeru
+     * v celém rozsahu stupně, stejně jako to CSS `calc()` dělá pro text.
+     */
+    const syncMarkers = () => {
+      const activeSvg = getActiveSvg();
+      if (!activeSvg) return;
+      if (activeSvg !== currentSvg) bindActiveSvg(activeSvg);
+      const svgRect = activeSvg.getBoundingClientRect();
+      const viewBox = activeSvg.viewBox.baseVal;
+      // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
+      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
+      // (oprava 14. 9. 2026).
+      if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
+      const scaleY = svgRect.height / viewBox.height;
+      const scaleX = svgRect.width / viewBox.width;
+      activeSvg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+      const notchOffsetPx = parseFloat(activeSvg.dataset.notchOffset ?? '0');
+
+      items.forEach((item, i) => {
+        const dot = dots[i];
+        const notch = notches[i];
+        if (!dot && !notch) return;
+        // Zarovnáno na střed celého bloku (název + popisek dohromady) —
+        // viz „Konvence: zarovnání tečky k textu“ v CLAUDE.md.
+        const rect = item.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const localY = (centerY - svgRect.top) / scaleY;
+        if (dot) dot.setAttribute('cy', String(localY));
+        if (notch) {
+          notch.setAttribute('y1', String(localY));
+          notch.setAttribute('y2', String(localY));
+        }
+
+        if (notchOffsetPx > 0) {
+          const axisLocal = parseFloat(notch?.getAttribute('x1') ?? dot?.getAttribute('cx') ?? '0');
+          const axisRealX = svgRect.left + axisLocal * scaleX;
+          const targetLocalX = (axisRealX + notchOffsetPx - svgRect.left) / scaleX;
+          if (notch) notch.setAttribute('x2', String(targetLocalX));
+          if (dot) dot.setAttribute('cx', String(targetLocalX));
+        }
+      });
+    };
+    syncMarkers();
+    window.addEventListener('resize', syncMarkers);
+
+    if (items.length && 'ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncMarkers());
+      resizeObserver.observe(section);
+      items.forEach((item) => resizeObserver.observe(item));
+    }
+
+    // `font-display: swap` (fonts.css) vykreslí text nejdřív náhradním
+    // fontem a Manrope dohraje asynchronně — první `syncMarkers()` volání
+    // tak občas stihne proběhnout ještě na metrikách náhradního fontu (na
+    // prvním přínosu to bylo měřitelné, ~10px odchylka tečky od středu
+    // názvu). Přepočet po dohrání fontu to spolehlivě opraví.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncMarkers());
+    }
+
+    if (!disableAnimation) {
+      /*
+       * Nadpis i všechny položky se odhalí NAJEDNOU, jakmile se sekce objeví
+       * ve výřezu — ne každá položka zvlášť podle vlastní pozice. Stagger
+       * mezi položkami zůstává (transitionDelay níže), ale SPOUŠTĚČ je
+       * jeden společný, stejně jako u "reviews__intro-item" v
+       * ReviewsSection.astro. Důvod: samostatné per-prvkové prahy se
+       * ukázaly jako nespolehlivé — poslední položka nebo nadpis občas
+       * zůstaly natrvalo v `is-pending`, ať už kvůli konkrétní výšce
+       * okna nebo pořadí, ve kterém prvky do výřezu vstupují. Jeden
+       * hrubší, shovívavější spouštěč pro celou sekci to riziko odstraňuje.
+       * Odhalení řeší ruční přepočet na scroll (stejný princip jako
+       * vykreslení trasy a teček níže), ne IntersectionObserver.
+       */
+      const heading = section.querySelector('.benefits__heading');
+      if (heading) heading.classList.add('is-pending');
+      items.forEach((item, i) => {
+        item.style.transitionDelay = `${i * 70}ms`;
+        item.classList.add('is-pending');
+      });
+
+      let pathLength = 0;
+      let dotThresholds: number[] = [];
+
+      // Přepočítáno při KAŽDÉM update() (ne jednou při načtení) — stejný
+      // důvod jako převázání `activeSvg` výše: pokud se během scrollování
+      // změní aktivní stupeň, `path`/`dots` se převáží v `syncMarkers()` a
+      // `measure()` musí počítat délku/prahy ze SPRÁVNÉHO (aktuálního) SVG,
+      // ne z toho, co bylo aktivní při prvním spuštění.
+      const measure = () => {
+        syncMarkers();
+        const currentPath = getPath();
+        if (!currentPath) return;
+        pathLength = currentPath.getTotalLength();
+        currentPath.style.strokeDasharray = String(pathLength);
+        dotThresholds = getDots().map((dot) => {
+          const cx = parseFloat(dot.getAttribute('cx') ?? '0');
+          const cy = parseFloat(dot.getAttribute('cy') ?? '0');
+          let best = Infinity;
+          let bestLen = pathLength;
+          const steps = 2000;
+          for (let i = 0; i <= steps; i++) {
+            const l = (pathLength * i) / steps;
+            const pt = currentPath.getPointAtLength(l);
+            const d = Math.hypot(pt.x - cx, pt.y - cy);
+            if (d < best) {
+              best = d;
+              bestLen = l;
+            }
+          }
+          return bestLen / pathLength;
+        });
+      };
+      measure();
+      const initialPath = getPath();
+      if (initialPath) initialPath.style.strokeDashoffset = String(pathLength);
+      getDots().forEach((dot) => dot.classList.add('is-pending'));
+
+      let contentRevealed = false;
+      const revealContent = () => {
+        if (contentRevealed) return;
+        contentRevealed = true;
+        if (heading) {
+          heading.classList.remove('is-pending');
+          heading.classList.add('is-visible');
+        }
+        items.forEach((item) => {
+          item.classList.remove('is-pending');
+          item.classList.add('is-visible');
+        });
+      };
+
+      let ticking = false;
+      const update = () => {
+        measure();
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+
+        const currentPath = getPath();
+        if (currentPath) {
+          const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
+
+          currentPath.style.strokeDashoffset = String(pathLength * (1 - progress));
+
+          getDots().forEach((dot, i) => {
+            if (progress >= dotThresholds[i]) {
+              dot.classList.remove('is-pending');
+              dot.classList.add('is-visible');
+            }
+          });
+        }
+
+        // Sekce se počítá za "ve výřezu", jakmile její horní hrana překročí
+        // spodní hranu okna — shovívavější podmínka než per-prvkové prahy.
+        if (rect.top < vh) revealContent();
+
+        ticking = false;
+      };
+
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      update();
+    }
+  }
+</script>
+
+<style>
+  /*
+   * Výška sekce NENÍ pevná (§11) — vyplývá z reálné výšky seznamu přínosů
+   * (jediný prvek v normálním tokovém layoutu; nadpis je position:absolute,
+   * do výšky se nepočítá). padding-top drží seznam na stejné souřadnici
+   * jako by měl mít první přínos, padding-bottom je mezera pod posledním.
+   */
+  .benefits {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(168deg, #16324F 0%, #0F2747 58%, #0B1D36 100%);
+  }
+
+  .benefits::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(44% 58% at 74% 30%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  /*
+   * Wide desktop: centrované designové plátno (CLAUDE.md). `.benefits`
+   * zůstává full-width tmavý gradient (pozadí + trasa) — obsah (nadpis,
+   * seznam) dostává vlastní obalovou vrstvu `.benefits__stage`, která nese
+   * i svislý padding dřív patřící přímo `.benefits` (beze změny hodnot pod
+   * 1400px). Nad 1400px dostává stejný strop jako trasa, jinak by se od ní
+   * (a od sousedních capnutých sekcí) na wide desktopu odtrhl — dřívější
+   * implementace capovala jen `.benefits__route--desktop`, ne obsah
+   * (zjištěno 25. 8. 2026, `.benefits__heading{left:120px}` byl fixovaný na
+   * viewport, ne na stage).
+   */
+  .benefits__stage {
+    position: relative;
+    padding-top: 362px;
+    padding-bottom: 72px;
+  }
+
+  /*
+   * --- Nadpis ---
+   * Velikosti (38/50/76/84 px) jsou menší než §5–§8 zadání (52/62/96/112) —
+   * §5 dávalo desktopu 112 px, ale §13 bod 10 výslovně vyžaduje nadpis
+   * menší než H1 v hero. Hero H1 na kalibračních šířkách této sekce je
+   * 42/56/84/92 px (ověřeno živě) — čísla níže jsou pod touto hranicí na
+   * celém rozsahu příslušného stupně, ne jen v kalibračním bodě.
+   */
+  .benefits__heading {
+    position: absolute;
+    left: 56px;
+    right: 24px;
+    top: 112px;
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -.05em;
+    font-size: 38px;
+    color: #FFFFFF;
+    text-wrap: pretty;
+  }
+
+  .benefits__heading.is-pending {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  .benefits__heading.is-visible {
+    clip-path: inset(0 0 0% 0);
+    transition: clip-path 700ms var(--ease-out);
+  }
+
+  /* --- Přínosy --- */
+
+  .benefits__list {
+    position: relative;
+    z-index: 1;
+    /*
+     * left je procentuální, ne pevný px — SVG trasy se neuniformně
+     * roztahuje (preserveAspectRatio="none"), takže skutečná poloha dělítka
+     * (x=24) mimo kalibrační šířku 390 roste s viewportem. Pevných 60px
+     * (dřívější verze) se od reálného dělítka mimo 390px vzdalovalo —
+     * zjištěno auditem odsazení po celém webu, stejná chyba jako
+     * u ReviewsSection a dřívější notebook/desktop verze této sekce
+     * (viz komentář u notebook stupně níže).
+     */
+    margin: 0 24px 0 calc(24 * 100% / 390 + 36px);
+  }
+
+  .benefits__item {
+    margin: 0;
+  }
+
+  .benefits__item + .benefits__item {
+    margin-top: 110px;
+  }
+
+  .benefits__item.is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .benefits__item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+  }
+
+  .benefits__name {
+    margin: 0 0 5px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -.03em;
+    font-size: 24px;
+    color: #FFFFFF;
+  }
+
+  .benefits__desc {
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.5;
+    font-size: 15px;
+    color: rgba(255, 255, 255, .62);
+  }
+
+  /* --- Trasa --- */
+
+  .benefits__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .benefits__notch {
+    stroke: #9CB6D4;
+    stroke-opacity: .3;
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+
+  /*
+   * --dot-fix se nastavuje na <svg> (JS, syncMarkers) a sem se dědí — proto
+   * se NESMÍ deklarovat lokálně na .benefits__dot (ani jako výchozí hodnota
+   * mimo var()), protože vlastní deklarace na prvku by zdědění z nadřazeného
+   * SVG přebila a tečka by vždy použila natvrdo 1 (to byl původní bug —
+   * korekce se v kódu počítala správně, ale k tečce se nikdy nedostala).
+   * Výchozí hodnota 1 je proto uvnitř var(), ne jako samostatná deklarace.
+   */
+  .benefits__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .benefits__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .benefits__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .benefits__route--tablet,
+  .benefits__route--laptop,
+  .benefits__route--desktop {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .benefits__heading,
+    .benefits__item {
+      opacity: 1;
+      clip-path: none;
+      transform: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .benefits__stage {
+      padding-top: 306px;
+      padding-bottom: 80px;
+    }
+
+    .benefits__route--mobile {
+      display: none;
+    }
+
+    .benefits__route--tablet {
+      display: block;
+    }
+
+    .benefits__heading {
+      left: 96px;
+      right: 40px;
+      top: 120px;
+      font-size: 50px;
+    }
+
+    /* left procentuální — stejný důvod jako v base stupni výše (dělítko x=40, viewBox 834). */
+    .benefits__list {
+      margin: 0 40px 0 calc(40 * 100% / 834 + 70px);
+    }
+
+    .benefits__item + .benefits__item {
+      margin-top: 118px;
+    }
+
+    .benefits__name {
+      margin: 0 0 6px;
+      font-size: 30px;
+    }
+
+    .benefits__desc {
+      font-size: 16px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .benefits__stage {
+      padding-top: 242px;
+      padding-bottom: 100px;
+    }
+
+    .benefits__route--tablet {
+      display: none;
+    }
+
+    .benefits__route--laptop {
+      display: block;
+    }
+
+    .benefits__heading {
+      left: 96px;
+      right: auto;
+      top: 176px;
+      max-width: 650px;
+      font-size: 76px;
+    }
+
+    /*
+     * left je procentuální, ne pevný px (946 = 890+56) — SVG trasy se
+     * neuniformně roztahuje (preserveAspectRatio="none"), takže skutečná
+     * poloha osy x=890 mimo kalibrační šířku 1366 roste s viewportem.
+     * Pevný px by se od reálné osy postupně vzdaloval a text by přestal
+     * být spolehlivě vpravo od linky na širších/užších oknech v rámci
+     * tohoto stupně.
+     */
+    .benefits__list {
+      margin: 0 96px 0 calc(890 * 100% / 1366 + 56px);
+    }
+
+    .benefits__item + .benefits__item {
+      margin-top: 132px;
+    }
+
+    .benefits__name {
+      margin: 0 0 6px;
+      font-size: 26px;
+    }
+
+    .benefits__desc {
+      font-size: 16px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .benefits__stage {
+      padding-top: 262px;
+      padding-bottom: 120px;
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .benefits__route--laptop {
+      display: none;
+    }
+
+    .benefits__route--desktop {
+      display: block;
+      /* Wide desktop: centrované designové plátno (CLAUDE.md) — viz stejná
+         poznámka u `.faq__route--desktop` v FaqSection.astro. */
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .benefits__heading {
+      left: 120px;
+      top: 196px;
+      max-width: 700px;
+      font-size: 84px;
+      line-height: 1.02;
+      letter-spacing: -.055em;
+    }
+
+    /* left procentuální (996 = 940+56) — stejný důvod jako v notebook stupni výše. */
+    .benefits__list {
+      margin: 0 120px 0 calc(940 * 100% / 1440 + 56px);
+    }
+
+    .benefits__item + .benefits__item {
+      margin-top: 148px;
+    }
+
+    .benefits__name {
+      margin: 0 0 6px;
+      font-size: 26px;
+    }
+
+    .benefits__desc {
+      font-size: 16px;
+    }
+  }
+</style>

@@ -1,0 +1,872 @@
+---
+/**
+ * Cookie souhlas — Panel v rohu (21b) + Nastavení (21c).
+ * Zdroj: úkol pro Claude Code „Cookie lišta (Panel v rohu)“, §1–§14.
+ * Jeden soubor pro lištu i panel Nastavení (dovoleno §11) — sdílejí stav
+ * souhlasu a otevírání/zavírání panelu je jednodušší v jednom modulu.
+ *
+ * Vloženo do `BaseLayout.astro` mezi výchozí `<slot />` (hlavní obsah stránky)
+ * a `<slot name="footer" />` (SiteFooter.astro) — přesně pořadí podle §10
+ * („lišta je v DOM až za hlavním obsahem, ale před footerem").
+ *
+ * Texty (§4) jsou moje vlastní znění, NEJSOU v content dokumentu — musí projít
+ * právní kontrolou před spuštěním (viz souhrn úkolu).
+ *
+ * §3 „Právní minimum" je dodrženo doslovně:
+ * - žádná analytická/marketingová cookie se nenastavuje před souhlasem
+ *   (`loadAnalytics()` se volá výhradně po Přijmout vše / uložení s analytics:true)
+ * - analytický i marketingový přepínač jsou v DOM bez `checked` (výchozí off)
+ * - Přijmout vše / Odmítnout mají v liště identické rozměry (`flex:1`, stejná
+ *   výška/radius/písmo)
+ * - lišta nemá křížek ani Esc na první úrovni (Esc handler je jen na panelu)
+ * - odkaz „Nastavení cookies" ve footeru (SiteFooter.astro, `#footer-cookie-
+ *   settings`) otevírá stejný panel s aktuálně uloženým stavem
+ * - souhlas nese `version`/`timestamp`, platnost 12 měsíců (365 dní)
+ * - bez JavaScriptu (§13 bod 14): `<aside>` i panel mají `hidden` přímo v
+ *   markupu a odkrývá je výhradně skript (`showBar()`/`openSettings()`) —
+ *   bez JS tedy lišta i panel zůstanou skryté (zvolená cesta „lišta se
+ *   nezobrazí", ne „zobrazí se s nefunkčními tlačítky"), web zůstává plně
+ *   funkční a nic navíc se nenastaví.
+ */
+interface CookieCategory {
+  key: 'necessary' | 'analytics' | 'marketing';
+  name: string;
+  description: string;
+  mobileDescription: string;
+  // `disabled` a `defaultChecked` jsou záměrně oddělené (ne jedno `locked`
+  // pole) — Nezbytné je uzamčené v ZAPNUTÉ poloze, Marketingové ve VYPNUTÉ
+  // poloze (marketing se zatím nepoužívá, schéma souhlasu ho natvrdo píše
+  // jako `false` — viz `finalizeConsent` ve <script> — přepínač by neměl jít
+  // ani vizuálně zapnout, aby nevznikl dojem funkční volby, která nic nedělá).
+  disabled: boolean;
+  defaultChecked: boolean;
+  status: string | null;
+  lockedNote: string | null;
+}
+
+const categories: CookieCategory[] = [
+  {
+    key: 'necessary',
+    name: 'Nezbytné',
+    description: 'Bez nich web nefunguje. Nelze je vypnout.',
+    mobileDescription: 'Bez nich web nefunguje.',
+    disabled: true,
+    defaultChecked: true,
+    status: 'Vždy zapnuto',
+    lockedNote: 'Nelze vypnout',
+  },
+  {
+    key: 'analytics',
+    name: 'Analytické',
+    description: 'Ukazují mi, které stránky jsou užitečné a kde lidé odcházejí.',
+    mobileDescription: 'Ukazují mi, které stránky jsou užitečné.',
+    disabled: false,
+    defaultChecked: false,
+    status: null,
+    lockedNote: null,
+  },
+  {
+    key: 'marketing',
+    name: 'Marketingové',
+    description: 'Zatím nepoužívám. Pokud to změním, zeptám se znovu.',
+    mobileDescription: 'Zatím nepoužívám.',
+    disabled: true,
+    defaultChecked: false,
+    status: 'Nepoužívám',
+    lockedNote: 'Zatím nelze zapnout',
+  },
+];
+---
+
+<aside id="cookie-bar" class="cookie-bar" role="region" aria-label="Souhlas s cookies" hidden>
+  <div class="cookie-bar__body">
+    <p class="cookie-bar__heading">Používám cookies</p>
+    <p class="cookie-bar__text">
+      <span class="cookie-text--full">
+        Nezbytné cookies web potřebuje k&nbsp;provozu. Analytické mi pomáhají zjistit, co je pro&nbsp;vás
+        užitečné. Ty zapnu jen s&nbsp;vaším souhlasem.
+      </span>
+      <span class="cookie-text--short">Nezbytné cookies web potřebuje k&nbsp;provozu. Analytické zapnu jen s&nbsp;vaším souhlasem.</span>
+    </p>
+
+    <div class="cookie-bar__actions">
+      <button type="button" class="cookie-bar__btn cookie-bar__btn--accept" data-action="accept-all">Přijmout vše</button>
+      <button type="button" class="cookie-bar__btn cookie-bar__btn--reject" data-action="reject">Odmítnout</button>
+    </div>
+
+    <div class="cookie-bar__secondary">
+      <button type="button" class="cookie-bar__settings-link" data-action="open-settings">Nastavení</button>
+      <a class="cookie-bar__privacy-link" href="/zpracovani-osobnich-udaju">
+        <span class="cookie-text--full">Zásady zpracování údajů</span>
+        <span class="cookie-text--short">Zásady údajů</span>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<div id="cookie-settings-overlay" class="cookie-settings-overlay" hidden></div>
+
+<div
+  id="cookie-settings"
+  class="cookie-settings"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cookie-settings-heading"
+  hidden
+>
+  <h2 id="cookie-settings-heading" class="cookie-settings__heading" tabindex="-1">Nastavení cookies</h2>
+  <p class="cookie-settings__text">Vyberte, co smím používat. Rozhodnutí můžete kdykoli změnit odkazem v&nbsp;zápatí.</p>
+
+  <div class="cookie-settings__categories">
+    {categories.map((cat) => (
+      <label class="cookie-settings__category" for={`cookie-toggle-${cat.key}`}>
+        <span class="cookie-settings__category-info">
+          <span class="cookie-settings__category-name">{cat.name}</span>
+          <span class="cookie-settings__category-desc" id={`cookie-desc-${cat.key}`}>
+            <span class="cookie-text--full">{cat.description}</span>
+            <span class="cookie-text--short">{cat.mobileDescription}</span>
+          </span>
+          {cat.status && <span class="cookie-settings__category-status">{cat.status}</span>}
+        </span>
+        <input
+          type="checkbox"
+          role="switch"
+          id={`cookie-toggle-${cat.key}`}
+          class="cookie-settings__switch"
+          aria-describedby={`cookie-desc-${cat.key}`}
+          checked={cat.defaultChecked}
+          disabled={cat.disabled}
+          data-category={cat.key}
+        />
+        {cat.lockedNote && <span class="sr-only">{cat.lockedNote}</span>}
+      </label>
+    ))}
+  </div>
+
+  <div class="cookie-settings__actions">
+    <button type="button" class="cookie-settings__btn cookie-settings__btn--save" data-action="save">Uložit volbu</button>
+    <button type="button" class="cookie-settings__btn cookie-settings__btn--reject" data-action="reject-all-settings">Odmítnout vše</button>
+  </div>
+
+  <p class="cookie-settings__status" role="status" aria-live="polite"></p>
+
+  <div class="cookie-settings__links">
+    <a href="/zpracovani-osobnich-udaju">Zásady zpracování osobních údajů</a>
+    <span class="cookie-settings__divider" aria-hidden="true"></span>
+    <a href="/cookies">Cookies</a>
+  </div>
+</div>
+
+<script>
+  /*
+   * §9 — ukládání souhlasu. Verze se zvyšuje při každé změně kategorií nebo
+   * textů (§9 komentář ve schématu). Platnost 365 dní (~12 měsíců).
+   */
+  const STORAGE_KEY = 'pg-cookie-consent';
+  const CURRENT_VERSION = 1;
+  const MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
+
+  interface Consent {
+    version: number;
+    timestamp: string;
+    analytics: boolean;
+    marketing: boolean;
+  }
+
+  function readConsent(): Consent | null {
+    let raw: string | null;
+    try {
+      raw = window.localStorage.getItem(STORAGE_KEY);
+    } catch {
+      return null;
+    }
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as Partial<Consent>;
+      if (
+        parsed.version !== CURRENT_VERSION ||
+        typeof parsed.timestamp !== 'string' ||
+        typeof parsed.analytics !== 'boolean' ||
+        typeof parsed.marketing !== 'boolean'
+      ) {
+        return null;
+      }
+      const age = Date.now() - new Date(parsed.timestamp).getTime();
+      if (!Number.isFinite(age) || age < 0 || age > MAX_AGE_MS) return null;
+      return parsed as Consent;
+    } catch {
+      return null;
+    }
+  }
+
+  function writeConsent(analytics: boolean, marketing: boolean): Consent {
+    // Obrana do hloubky: marketing se zatím nepoužívá (§4/§9) a jeho přepínač
+    // je v panelu `disabled`, takže by odsud nikdy neměl dorazit `true` — i
+    // kdyby se to stalo (např. budoucí úprava markupu), zapsaný souhlas ho
+    // vždy natvrdo přepíše na `false`, dokud marketing skutečně nezavedeme.
+    void marketing;
+    const consent: Consent = {
+      version: CURRENT_VERSION,
+      timestamp: new Date().toISOString(),
+      analytics,
+      marketing: false,
+    };
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
+    } catch {
+      // localStorage nedostupné (např. soukromý režim s blokací) — souhlas se
+      // v té relaci nepodaří uložit; lišta se příště zobrazí znovu, ale nic
+      // se mezitím nenačte bez viditelné akce uživatele.
+    }
+    return consent;
+  }
+
+  // [DOPLNIT] ID měřicího toku Google Analytics 4 (tvar G-XXXXXXXXXX) — bez
+  // skutečného ID `gtag('config', ...)` níže neodešle žádná data, jen si
+  // prohlížeč vyžádá `gtag/js?id=G-XXXXXXXXXX`, které Google nerozpozná.
+  const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+
+  declare global {
+    interface Window {
+      dataLayer?: unknown[];
+    }
+  }
+
+  /*
+   * §9 — dokud souhlas neexistuje, v <head> není žádný analytický skript.
+   * `loadAnalytics()` se volá VÝHRADNĚ z `finalizeConsent()` (Přijmout vše /
+   * Uložit volbu se zapnutými analytickými cookies) a z obnovení dřívějšího
+   * souhlasu při načtení stránky (`readConsent().analytics === true`) — nikdy
+   * dopředu. Vytváří `<script>` s `gtag/js` a inicializuje `dataLayer`/`gtag`
+   * až v tomto okamžiku, ne v `<head>` předem (ani zakomentovaně) — Google
+   * Analytics tak nemůže nastavit `_ga`/`_ga_<ID>` dřív, než uživatel souhlasí.
+   * Google Consent Mode se v tomto úkolu záměrně neimplementuje (viz souhrn
+   * úkolu „doplnění právních stránek“) — buď je souhlas, nebo se nenačte nic.
+   */
+  function loadAnalytics(): void {
+    if (document.documentElement.dataset.analyticsLoaded === 'true') return;
+    document.documentElement.dataset.analyticsLoaded = 'true';
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(...args: unknown[]) {
+      window.dataLayer!.push(args);
+    }
+    gtag('js', new Date());
+    gtag('config', GA_MEASUREMENT_ID);
+  }
+
+  const bar = document.getElementById('cookie-bar');
+  const overlay = document.getElementById('cookie-settings-overlay');
+  const panel = document.getElementById('cookie-settings');
+  const panelHeading = document.getElementById('cookie-settings-heading');
+  const statusEl = panel?.querySelector('.cookie-settings__status') as HTMLElement | null;
+  const footerTrigger = document.getElementById('footer-cookie-settings');
+
+  if (bar && overlay && panel && panelHeading) {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let barWasVisibleBeforeSettings = false;
+    let settingsTrigger: HTMLElement | null = null;
+
+    const getSwitches = (): HTMLInputElement[] =>
+      Array.from(panel.querySelectorAll('input[data-category]'));
+
+    const showBar = () => {
+      bar.hidden = false;
+      if (reduceMotion) {
+        bar.classList.add('is-visible-instant');
+      } else {
+        // `setTimeout`, ne `requestAnimationFrame` — rAF se v neaktivní/
+        // skryté záložce nespouští vůbec (prohlížeč ho pozastaví), takže by
+        // se lišta objevila, ale bez animace do chvíle, než záložku někdo
+        // otevře. `setTimeout` proběhne i tak, jen o něco později.
+        window.setTimeout(() => bar.classList.add('is-visible'), 20);
+      }
+    };
+
+    const hideBar = () => {
+      bar.hidden = true;
+      bar.classList.remove('is-visible', 'is-visible-instant');
+    };
+
+    const syncSwitchesFromConsent = () => {
+      const consent = readConsent();
+      getSwitches().forEach((input) => {
+        if (input.disabled) return;
+        const key = input.dataset.category as 'analytics' | 'marketing';
+        input.checked = consent ? consent[key] : false;
+      });
+    };
+
+    const getFocusable = (): HTMLElement[] =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const onPanelKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        dismissSettings();
+        return;
+      }
+      trapFocus(event);
+    };
+
+    function openSettings(trigger: HTMLElement) {
+      settingsTrigger = trigger;
+      barWasVisibleBeforeSettings = !bar!.hidden;
+      hideBar();
+      syncSwitchesFromConsent();
+      if (statusEl) statusEl.textContent = '';
+      overlay!.hidden = false;
+      panel!.hidden = false;
+      document.addEventListener('keydown', onPanelKeydown, true);
+      panelHeading!.focus();
+    }
+
+    // Zavře panel BEZ obnovení lišty — použij vždy, když už padlo rozhodnutí
+    // (Přijmout vše / Odmítnout / Uložit volbu / Odmítnout vše), protože po
+    // uložení souhlasu se lišta znovu zobrazovat nemá, ať byla před otevřením
+    // panelu viditelná, nebo ne.
+    function closeSettingsUI() {
+      overlay!.hidden = true;
+      panel!.hidden = true;
+      document.removeEventListener('keydown', onPanelKeydown, true);
+      settingsTrigger?.focus();
+      settingsTrigger = null;
+    }
+
+    // Zavře panel a PŘÍPADNĚ obnoví lištu — jen pro odchod BEZ rozhodnutí
+    // (Esc, klik na scrim). `barWasVisibleBeforeSettings` je platné pouze
+    // tady, protože žádná z těchto cest nevolá `writeConsent()`.
+    function dismissSettings() {
+      const shouldRestoreBar = barWasVisibleBeforeSettings;
+      closeSettingsUI();
+      if (shouldRestoreBar) showBar();
+    }
+
+    function finalizeConsent(analytics: boolean, marketing: boolean, announce: boolean) {
+      writeConsent(analytics, marketing);
+      hideBar();
+      if (panel!.hidden === false) {
+        if (announce && statusEl) statusEl.textContent = 'Volba byla uložena.';
+        window.setTimeout(() => closeSettingsUI(), announce ? 700 : 0);
+      }
+      if (analytics) loadAnalytics();
+    }
+
+    bar.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest('[data-action]') as HTMLElement | null;
+      if (!target) return;
+      switch (target.dataset.action) {
+        case 'accept-all':
+          finalizeConsent(true, false, false);
+          break;
+        case 'reject':
+          finalizeConsent(false, false, false);
+          break;
+        case 'open-settings':
+          openSettings(target);
+          break;
+      }
+    });
+
+    panel.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest('[data-action]') as HTMLElement | null;
+      if (!target) return;
+      if (target.dataset.action === 'save') {
+        const analytics = getSwitches().find((i) => i.dataset.category === 'analytics')?.checked ?? false;
+        const marketing = getSwitches().find((i) => i.dataset.category === 'marketing')?.checked ?? false;
+        finalizeConsent(analytics, marketing, true);
+      } else if (target.dataset.action === 'reject-all-settings') {
+        writeConsent(false, false);
+        hideBar();
+        if (statusEl) statusEl.textContent = 'Volba byla uložena.';
+        window.setTimeout(() => closeSettingsUI(), 700);
+      }
+    });
+
+    overlay.addEventListener('click', () => dismissSettings());
+
+    if (footerTrigger) {
+      footerTrigger.addEventListener('click', () => openSettings(footerTrigger));
+    }
+
+    const existing = readConsent();
+    if (existing) {
+      if (existing.analytics) loadAnalytics();
+    } else {
+      const path = window.location.pathname;
+      const isExcluded = path.includes('/zpracovani-osobnich-udaju') || path.includes('/cookies');
+      if (!isExcluded) {
+        window.setTimeout(showBar, 800);
+      }
+    }
+  }
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .cookie-text--short {
+    display: none;
+  }
+
+  /* --- Lišta --- */
+
+  .cookie-bar {
+    position: fixed;
+    z-index: 90;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    box-sizing: border-box;
+    padding: 24px 22px calc(24px + max(0px, env(safe-area-inset-bottom)));
+    border-radius: 18px;
+    background: linear-gradient(158deg, #16324F 0%, #0F2747 58%, #0B1D36 100%);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 260ms var(--ease-out), transform 260ms var(--ease-out);
+  }
+
+  .cookie-bar.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .cookie-bar.is-visible-instant {
+    opacity: 1;
+    transform: translateY(0);
+    transition: none;
+  }
+
+  .cookie-bar__body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cookie-bar__heading {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    font-size: 18px;
+    color: #FFFFFF;
+  }
+
+  .cookie-bar__text {
+    margin: 10px 0 0;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 16px;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .cookie-bar__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  .cookie-bar__btn {
+    /* Šířku dávají kontejnery níž (column: `align-items:stretch`, row: grid
+       `minmax(0,1fr)` sloupce) — ne `flex:1` na samotném tlačítku. Flexbox
+       s `flex-basis:0%` totiž u ohraničeného tlačítka („Odmítnout“, 1px
+       border) i s `box-sizing:border-box` v praxi vyšel o pár px širší než
+       plné („Přijmout vše“); grid se stejnou šířkou sloupců je spolehlivý
+       — a přesně stejná šířka obou tlačítek je vyžadovaná v §3. */
+    height: 52px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    font-family: var(--font-sans);
+  }
+
+  .cookie-bar__btn--accept {
+    border: none;
+    background: var(--emerald);
+    color: #FFFFFF;
+  }
+
+  .cookie-bar__btn--accept:hover {
+    background: var(--emerald-hover);
+  }
+
+  .cookie-bar__btn--reject {
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, .4);
+    background: transparent;
+    color: #FFFFFF;
+  }
+
+  .cookie-bar__btn--reject:hover {
+    border-color: rgba(255, 255, 255, .6);
+  }
+
+  .cookie-bar__secondary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, .14);
+  }
+
+  .cookie-bar__settings-link {
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    color: rgba(255, 255, 255, .82);
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, .34);
+    text-underline-offset: 4px;
+  }
+
+  .cookie-bar__privacy-link {
+    font-weight: 600;
+    font-size: 14px;
+    color: rgba(255, 255, 255, .7);
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, .28);
+    text-underline-offset: 4px;
+  }
+
+  .cookie-bar :is(.cookie-bar__settings-link, .cookie-bar__privacy-link):hover {
+    color: #FFFFFF;
+  }
+
+  .cookie-bar :is(button, a):focus-visible {
+    outline: 2px solid var(--emerald-light);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cookie-bar {
+      transition: none;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .cookie-text--full {
+      display: inline;
+    }
+
+    .cookie-text--short {
+      display: none;
+    }
+
+    .cookie-bar {
+      left: 24px;
+      right: 24px;
+      bottom: 24px;
+      width: auto;
+      max-width: 560px;
+      padding: 24px 26px 28px;
+    }
+
+    .cookie-bar__actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .cookie-bar {
+      left: 32px;
+      right: auto;
+      bottom: 32px;
+      width: 428px;
+      padding: 30px 32px 32px;
+    }
+
+    .cookie-bar__heading {
+      font-size: 19px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .cookie-bar {
+      left: 40px;
+      bottom: 40px;
+      width: 452px;
+    }
+  }
+
+  /* --- Panel Nastavení --- */
+
+  .cookie-settings-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 290;
+    background: rgba(11, 29, 54, .4);
+  }
+
+  .cookie-settings {
+    position: fixed;
+    z-index: 300;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-sizing: border-box;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px 24px;
+    border-radius: 20px 20px 0 0;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /*
+   * Bez tohle by [hidden] zůstal bez efektu: `.cookie-settings{display:flex}`
+   * má stejnou specificitu (0,0,1,0) jako výchozí `[hidden]{display:none}`
+   * z UA stylesheetu, a autorský styl v tie-breaku vždycky vyhraje — panel
+   * by po `panel.hidden = true` zůstal viditelný (`getComputedStyle` hlásil
+   * `display: flex` i s atributem `hidden` nastaveným). Vyšší specificita
+   * (0,0,2,0) tohle jednoznačně vyhraje, bez ohledu na pořadí v souboru.
+   */
+  .cookie-settings[hidden] {
+    display: none;
+  }
+
+  .cookie-settings__heading {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    font-size: 22px;
+    color: var(--navy);
+    outline: none;
+  }
+
+  .cookie-settings__text {
+    margin: 10px 0 0;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 16px;
+    color: var(--text);
+  }
+
+  .cookie-settings__categories {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cookie-settings__category {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+    cursor: pointer;
+  }
+
+  .cookie-settings__category:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .cookie-settings__category-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cookie-settings__category-name {
+    font-weight: 700;
+    letter-spacing: -.015em;
+    font-size: 16.5px;
+    color: var(--navy);
+  }
+
+  .cookie-settings__category-desc {
+    font-weight: 400;
+    line-height: 1.5;
+    font-size: 14.5px;
+    max-width: 340px;
+    color: var(--text-muted);
+  }
+
+  .cookie-settings__category-status {
+    margin-top: 2px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #52657D;
+  }
+
+  .cookie-settings__switch {
+    flex: none;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 46px;
+    height: 26px;
+    margin: 0;
+    border-radius: 13px;
+    background: var(--toggle-off-track);
+    position: relative;
+    cursor: pointer;
+    transition: background var(--duration-hover) var(--ease-out);
+  }
+
+  .cookie-settings__switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #FFFFFF;
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .cookie-settings__switch:checked {
+    background: var(--emerald);
+  }
+
+  .cookie-settings__switch:checked::after {
+    transform: translateX(20px);
+  }
+
+  .cookie-settings__switch:disabled {
+    background: var(--toggle-locked-track);
+    cursor: not-allowed;
+  }
+
+  .cookie-settings__switch:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .cookie-settings__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  .cookie-settings__btn {
+    /* Viz komentář u `.cookie-bar__btn` — šířku dávají kontejnery. */
+    height: 52px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16.5px;
+    font-family: var(--font-sans);
+  }
+
+  .cookie-settings__btn--save {
+    border: none;
+    background: var(--emerald);
+    color: #FFFFFF;
+  }
+
+  .cookie-settings__btn--save:hover {
+    background: var(--emerald-hover);
+  }
+
+  .cookie-settings__btn--reject {
+    box-sizing: border-box;
+    border: 1px solid rgba(15, 39, 71, .28);
+    background: transparent;
+    color: var(--navy);
+  }
+
+  .cookie-settings__status {
+    margin: 0;
+    min-height: 1px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--emerald);
+  }
+
+  .cookie-settings__links {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .cookie-settings__links a {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  .cookie-settings__divider {
+    width: 1px;
+    height: 14px;
+    background: rgba(27, 74, 138, .26);
+  }
+
+  .cookie-settings :is(button, a, input):focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  /* ============ Tablet a výš: 768+ — vycentrovaný dialog, ne bottom sheet ============ */
+  @media (min-width: 768px) {
+    .cookie-settings {
+      left: 50%;
+      right: auto;
+      bottom: auto;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 560px;
+      max-width: calc(100vw - 48px);
+      padding: 36px 40px 40px;
+      border-radius: 20px;
+      gap: 28px;
+    }
+
+    .cookie-settings__heading {
+      font-size: 26px;
+    }
+
+    .cookie-settings__actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+</style>

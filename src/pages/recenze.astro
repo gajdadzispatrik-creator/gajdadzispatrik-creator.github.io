@@ -1,0 +1,1778 @@
+---
+/**
+ * Stránka /recenze — recenze klientů. Zdroj pravdy pro OBSAH, pořadí sekcí
+ * a role: úkol „Úkol pro Claude Code — podstránka /recenze" (9. 9. 2026) +
+ * `docs/content-subpages.md`, kapitola `/recenze` (NÁVRH K UŽIVATELSKÉMU
+ * SCHVÁLENÍ — copy převzata doslovně). Zdroj pravdy pro VŠECHNY hodnoty
+ * sdílené kostry (osa, pruh, zářez, vnitřní rozpad, gap, velikost/barva
+ * kotev, typografická škála): `src/pages/pristup.astro` — na výslovné
+ * přání uživatele.
+ *
+ * BEZ DROBEČKOVÉ NAVIGACE — stejně jako `/pristup`, stránka první úrovně.
+ *
+ * ŽÁDNÁ FOTOGRAFIE na téhle stránce (na rozdíl od `/pristup`) — hero i
+ * trasa proto NEPŘEBÍRAJÍ `/pristup`'s techniku „nájezd v mezeře vedle
+ * fotografie". Nájezd/kotvy jsou 1:1 stejná pevná tierová technika jako
+ * `/sluzby/pojisteni`/`/sluzby/investice`/`/sluzby/penze` (`data-entry`
+ * konstanta, `y=40` pod hlavičkou, `bendY` z paty hero textu) — jen DVA
+ * markery na hlavní ose (recenze/pristup), stránka je záměrně kratší.
+ *
+ * RECENZE — ŽÁDNÁ FIKTIVNÍ DATA. `reviews` pole nese jen strukturální
+ * placeholdery (`author/rating/date/text/sourceUrl: null`), dokud
+ * nedodá uživatel skutečná ověřená data. Dokud `text === null`, renderuje
+ * se JEN vlasové řádky (`lineWidths`) + `aria-hidden` štítek
+ * `RECENZE — PLACEHOLDER` (`--pending-review`, stejný token jako
+ * `/pristup`'s „K ověření před publikací") + `sr-only` text „Text recenze
+ * bude doplněn" — ŽÁDNÝ `<blockquote>` s prázdným obsahem. Řádek
+ * `Jméno autora · hodnocení · datum` je permanentní strukturální popisek
+ * (ne generovaná fiktivní hodnota), barva `--text-muted` (kontrast na
+ * `--bg` bezpečně nad 4,5:1 — `--text-faint`/`--text-quiet` se na
+ * metadatech recenzí NEPOUŽÍVAJÍ, zadání §7 to výslovně zakazuje).
+ * Postupné načítání (`Zobrazit další recenze`) odkrývá DALŠÍ placeholdery
+ * ze stejného pole, ne fiktivní obsah — první dávka se vykreslí i bez JS.
+ *
+ * Souhrnné „X recenzí · 5,0 · Google hodnocení" pole (`.rec-summary`) bylo
+ * na přání uživatele 14. 9. 2026 odstraněno bez náhrady — číslo recenzí se
+ * na stránce už neuvádí nikde. Odkaz na Google profil `https://share.google/XnAx2GCl6M1bOtfto`
+ * dodal uživatel přímo pro tuhle stránku (aktualizováno 14. 9. 2026 — původní
+ * odkaz `WyM4NvhpF51J3DbCZ` vedl jen na obecnou stránku „místa", ne na
+ * recenze) — použit doslovně, nevymýšlen.
+ *
+ * ŽÁDNÉ `Review`/`AggregateRating` schema, žádný carousel, žádné
+ * filtrování, žádné případové studie (jsou jen budoucí rezerva v
+ * `docs/content-subpages.md`, v implementaci zatím vůbec nejsou).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import LineGradientDefs from '../components/LineGradientDefs.astro';
+
+interface Review {
+  author: string | null;
+  rating: number | null;
+  date: string | null;
+  text: string | null;
+  sourceUrl: string | null;
+  lineWidths: string[];
+}
+
+// 42 SKUTEČNÝCH RECENZÍ opsaných přímo z Google profilu „Patrik Gajdadzis |
+// Hypotéky a finance" (5 stažených 10. 9. 2026 bez přihlášení, zbylých 37
+// dodal uživatel 10. 9. 2026 jako screenshoty z vlastního přihlášeného účtu —
+// viz komentář u `rec-summary__note` výše). Text, jméno, hodnocení i
+// relativní datum jsou doslovně převzaté, včetně drobných gramatických
+// nepřesností/překlepů v originále (např. Kubis Kubanec „Dekuji“ bez
+// diakritiky) — jde o přímé citace zákazníků, ne o vlastní copy webu, proto
+// se NEOPRAVUJÍ. Jedna recenze („abhijith vincent“) je v angličtině —
+// ponechána nepřeložená, doslovná citace. Profil má celkem
+// 44 recenzí (5,0★); zbylé 2 čekají na doplnění, až je uživatel dodá.
+const reviews: Review[] = [
+  {
+    author: 'Stony Ka',
+    rating: 5,
+    date: 'před 10 měsíci',
+    text: 'S panem Patrikem Gajdadzisem spolupracujeme už řadu let a jsme maximálně spokojeni. Dokázal nám pomoci i s vyvázáním člověka z hypotéky a následně zařídil novou s výhodnějším úrokem. Veškeré pojištění (od životního přes dům až po auto) máme u něj, a už jen tím šetříme několik tisíc korun ročně. Na Patrikovi si nejvíc vážíme jeho přístupu – kdykoliv bylo potřeba, stačilo zavolat a vždy se nám ochotně věnoval a pomohl najít řešení. Je vidět, že svou práci dělá srdcem a opravdu mu záleží na lidech. Můžeme ho jen doporučit!',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Hana Lucká',
+    rating: 5,
+    date: 'před 4 měsíci',
+    text: 'Ráda bych touto cestou poděkovala společnosti Mint, konkrétně panu Patriku Gajdadzisovi a jeho kolegovi Lukáši Sochorovi, za pomoc při řešení naší finanční situace. Společnost Mint se na náš případ podívala komplexně a pomohla nám najít řešení. Nebylo to ze dne na den, ale díky jejich přístupu, trpělivosti a ochotě se nám podařilo dojít k úspěšnému cíli. Dnes již úvěr čerpáme a naše situace je stabilní. Velmi si vážíme jejich pomoci a můžeme jejich služby s klidným svědomím doporučit.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Sandra Kleiner',
+    rating: 5,
+    date: 'Upraveno před 7 měsíci',
+    text: 'Naše zkušenost s Patrikem Gajdadzisem byla od samého začátku výborná. Konečně jsme měli pocit, že se někdo skutečně zajímá o naši situaci a bere naše potřeby vážně. Vše nám srozumitelně vysvětlil, navrhl řešení na míru a udělal maximum pro to, aby nám pomohl i v momentě, kdy jsme už sami pochybovali, že by bylo možné hypotéku získat. Díky jeho přístupu a finančnímu poradenství jsme se přiblížili ke splnění našeho snu o vlastním bydlení. Oceňujeme také příjemné prostředí kanceláře, které přispělo k celkově pozitivní atmosféře. Moc děkujeme.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Jonáš Molek',
+    rating: 5,
+    date: 'před 4 měsíci',
+    text: 'Profesionální, zároveň milý a empatický pán. Důkladně vysvětlil, proč se oplatí investovat, sestavil bez delších průtahů efektivní investiční plán na míru a pomohl i s pojištěním. Doporučuji všem, kteří se chtějí finančně zaopatřit a nespoléhat jen na svůj důchod :-)',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Ales Vaclavik',
+    rating: 5,
+    date: 'před 11 měsíci',
+    text: 'Tímto bych chtěl poděkovat panu Gajdadzisovi za vyřízení všeho potřebného ohledně hypotéky od A do Z. Moc dobře chápe význam prvního dojmu. Komunikace byla vždy věcná a rychlá. A když už nastal problém, neuhýbal, nestrkal hlavu do písku, ale postavil se mu čelem. Maximální spokojenost. 28 recenzí - hodnocení 5,0 není náhoda.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Kleiner Jan',
+    rating: 5,
+    date: 'před 7 měsíci',
+    text: 'Patrik je člověk na správném místě. Dokáže skvěle poradit a vše vysvětlit tak, aby to pochopil každý člověk. Skvělý individuální přístup. Můžu všem vřele doporučit.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Denis Ilyushkov',
+    rating: 5,
+    date: 'před 10 měsíci',
+    text: 'S Patrikem mám skvělou zkušenost. Rychle pochopil, co potřebuji, a nabídl smysluplné možnosti bez zbytečného nátlaku. Umí vše vysvětlit jednoduše a s trpělivostí, což mi hodně pomohlo. Oceňuji, že opravdu naslouchá a reaguje podle situace, nepracuje podle šablony. Líbí se mi, že se na něj můžu obrátit jak v oblasti financí, tak i pojištění a také v dalších záležitostech, které čas od času řeším. Je fajn mít jednoho člověka, kterému důvěřuji a se kterým můžu vše řešit na jednom místě. Spolupracujeme už několik let a rádi v tom pokračujeme.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Michaela Michaela',
+    rating: 5,
+    date: 'před 7 měsíci',
+    text: 'Spolupráce s hypotečním poradcem panem Gajdadzisem jsem byla velmi spokojená. Oceňuji jeho trpělivost, lidský přístup a schopnost vše vysvětlit tak, aby tomu člověk opravdu rozuměl. Byl ochotný a reagoval rychle na jakýkoliv dotaz. Vždy jsem věděla, co se děje a jaký je další krok. Díky němu pro mě byla hypotéka mnohem méně stresující záležitostí. Moc děkuji a doporučuji všem.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Pavla Buglova',
+    rating: 5,
+    date: 'před 10 měsíci',
+    text: 'S Patrikem Gajdadzisem spolupracuji už několik let a nemůžu si ho vynachválit. Vždycky mi se vším pomohl, všechno srozumitelně vysvětlil a hledal řešení, která dávají smysl. Je spolehlivý, férový a dá se na něj kdykoliv obrátit. Určitě doporučuji každému, kdo chce mít ve financích jasno a vedle sebe člověka, kterému se dá opravdu věřit.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Kateřina Horáková',
+    rating: 5,
+    date: 'před 10 měsíci',
+    text: 'S panem Gajdadzisem spolupracuji už několik let - beru to jako velkou výhodu oproti tomu, když bych musela při každém dotazu nebo změně volat do různých společností a většinou pokaždé mluvit s jiným člověkem. Tím, že se mi pravidelně ozývá, aby se zeptal, jak se mi daří a zda se u mě něco nezměnilo, vím, že co se týká pojištění i investic, mám vždy nastavené nejlépe, jak v danou chvíli můžu. Hypotéku zatím nemám, ale o ní budu uvažovat, vím s jistotou, za kým půjdu.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Sára Fromeliusová',
+    rating: 5,
+    date: 'před rokem',
+    text: 'S panem Gajdadzisem máme s přítelem jen tu nejlepší zkušenost. Vše nám vždy trpělivě vysvětlil, navrhl řešení přesně podle našich potřeb a možností, bez jakéhokoliv nátlaku. Oceňuji otevřenou komunikaci, rychlou reakci na jakýkoliv dotaz a celkový profesionální ale zároveň přátelský přístup. Určitě bych p. Gajdadzise doporučila každému, kdo chce poradce, u kterého má pocit, že mu na spokojenosti zákazníka opravdu záleží.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Karel Valenta',
+    rating: 5,
+    date: 'před rokem',
+    text: 'S panem Gajdadzisem jsme řešili financování nákupu nemovitosti - na první schůzku přišli s jasnou představou co požadujeme, po dlouhých diskusích odešel s úplně jiným produktem který na naši situaci seděl lépe. A to je přesně něco, co od ideálního finančního poradce očekávám, že po zhodnocení mé konkrétní situace nabídne produkt který dává největší smysl i do budoucna. Vše ale zároveň bez spěchu, nátlaku, člověk obdrží doporučení, varianty, možnosti, nechá si to pak několik dní projít hlavou a pak se rozhodne. Velkou výhodu vidím v dlouhodobé spolupráci, člověk si může (a nemusí) dát do pořádku všechny spoření, pojištění, úvěry a to vše založené na konkrétním člověku a jeho situaci. Změnilo to můj zažitý názor že finanční poradce = prodavač produktů na kterých má nejvyšší provizi bez ohledu na klientovy potřeby. Jsem rád že jsme na pana Gajdadzise narazili a věříme v další dlouhodobou spolupráci.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Ivan Kudra',
+    rating: 5,
+    date: 'před 10 měsíci',
+    text: 'Na Patrika jsem narazil přes Google a na základě hodnocení jsem jej kontaktoval. Od přírody jsem velmi nedůvěřivý, ale investice, o které jsem měl zájem, vysvětlil a nakonec jsme i realizovali. Nemám, co vytknout, takže zatím 5*.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'chlebca Chlebik',
+    rating: 5,
+    date: 'před 10 měsíci',
+    text: 'Patrik je ten nejlepší finanční poradce kterého jsem kdy měl. A to jsem jich pár vystřídal. S jeho přístupem jsem nadměrně spokojen. Spolupracujeme už cca 6 let a vyřešil mi vše, co jsem potřeboval od pojistek až po investice. Nehledě na to, že se každý rok potkáváme, abychom pravidelně upgradovali veškeré věci, které mám nasmlouvané. Mohu jen doporučit!!!! ;-)',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Jakub Rychtecký',
+    rating: 5,
+    date: 'před 10 měsíci',
+    text: 'Rád bych tímto poděkoval za odborný přístup a profesionalitu pana Gajdadzise. Po narození dcery jsem dospěl k názoru, že je čas začít se více věnovat financím a zajištění rodiny. Po několika schůzkách s panem Gajdadzisem nejen lépe rozumím financím, ale mám i jistotu, že v případě jakékoli nečekané situace bude naše rodina finančně zajištěná. Pokud máte obavy ze schůzek s finančními poradci, mohu pana Gajdadzise s čistým svědomím doporučit – sám jsem byl na začátku ve stejné situaci.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Tereza Miturová',
+    rating: 5,
+    date: 'Upraveno před rokem',
+    text: 'Měla jsem tu čest poznat pana Gajdadzise, který se mnou řešil hned několik věcí. Jako první jsem za ním přišla, aby mi pomohl sestavit nějaký plán a ukázal mi, jak se starat o finance. Svěřila jsem se se svým cílem a pan Gajdadzis mi vše krásně navrhl a sestavil. Poradil mi nejen s životním pojištěním, ale i s povinným ručením a vše mi srozumitelně vysvětlil. S těmito věcmi teprve začínám, protože mi je 20 let, a musím říct, že podle toho to také vypadá. Tím chci říct, že mi nevnucoval žádné zbytečnosti, které jsou pro dvacetiletého člověka opravdu nepodstatné, ale zaměřil se jen na to skutečně důležité. Myslím, že tohle je správný přístup, a musím ho jen doporučit. Pokud jste mladí a hledáte někoho, kdo vám pomůže nejen s finančním plánem, pak je pan Gajdadzis správná volba. Odešla jsem s úsměvem na tváři a se vším pod kontrolou.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'K T',
+    rating: 5,
+    date: 'před rokem',
+    text: 'Měla jsem tu čest využít služby finančního poradenství a musím říct, že to byla skvělá zkušenost. Pan Gajdadzis měl naprosto profesionální, ale zároveň velmi lidský přístup. Velice si cením jeho ochoty naslouchat a podrobně mi vysvětlit všechny možnosti, které by mohly být pro mě nejvhodnější. Jeho vystupování bylo příjemné a uvolněné, což pomohlo navodit atmosféru vzájemné důvěry. Kromě toho, co mile překvapilo, byla jeho vstřícnost při časovém sladění vzájemných schůzek. Uvědomoval si, jak náročné je někdy najít čas, a vždy se přizpůsobil mému rozvrhu. Tato flexibilita a osobní přístup jsou věci, které opravdu dělají tento typ poradenství výjimečným. Určitě doporučuji každému, kdo hledá kvalitní a lidský přístup k finančnímu plánování.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Kubis Kubanec',
+    rating: 5,
+    date: 'před rokem',
+    text: 'Dobrý den můžu jen doporučit ,perfektní přístup. Pan Patrik Gajdadzis zařídil co měl k mé spokojenosti...vše dopadlo na výbornou a já můžu v klidu dále podnikat.... Dekuji vám mnohokrát. 🙏',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Petr Molitor',
+    rating: 5,
+    date: 'před rokem',
+    text: 'Se službami svého finančního poradce jsem velmi spokojený. Pomohl mi s nastavením pojištění i s úsporami a vše mi srozumitelně vysvětlil. Oceňuji profesionální přístup a lidské jednání. Určitě bych doporučil pana Gajdadzise všem, kdo hledají spolehlivého poradce.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Karolína Jedličková',
+    rating: 5,
+    date: 'před 2 lety',
+    text: 'Pana Patrika mohu s čistým svědomím doporučit všem, kteří se zajímají o své finance a jejich budoucnost. Má přehled v mnoha oblastech financí a je schopen vše podrobně, ale zároveň jednoduše vysvětlit. Pro nás bylo zásadní, abychom cítili dobře a nebyl na nás vyvíjený žádný tlak, což bylo, narozdíl od jiných poradců, 100% splněno. Jsme rádi, že jsme mohli navázat spolupráci a těšíme se na společnou cestu k našim cílům. :)',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Leona Součková',
+    rating: 5,
+    date: 'před 2 lety',
+    text: 'Pana Patrika všem vřele doporučuji. Co se týče finančního poradenství má přehled a dokáže fundovaně poradit. Pomohl mi při řešení životního i penzijního pojištění a dále také s investicemi. Jsem velice spokojena, že se mohu na něho kdykoliv obrátit děkuji',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Nela Holubová',
+    rating: 5,
+    date: 'před 10 měsíci',
+    text: 'Skvělý přístup, ochota a hlavně lidskost. Patrik Gajdadzis ví co dělá a dokáže poradit tak, aby to dávalo smysl.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Jakub Smékal',
+    rating: 5,
+    date: 'před rokem',
+    text: 'Super spolupráce! Řešili jsme poměrně složitou hypotéku a pan Gajdadzis nám byl po celou dobu obrovskou pomocí. Vždy komunikoval obratem a s jasným vysvětlením. Hypotéku nyní máme kompletní a můžeme bydlet.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Vladimir Burda',
+    rating: 5,
+    date: 'před rokem',
+    text: 'Jsem rád, že se mohu podělit o svou zkušenost, protože jsem byl se službami Patrika velmi spokojen. Nikdy by mne nenapadlo, že výsledek jednání může mít pro mne tak zásadní pozitivní efekt. Nejen, že jsem se dověděl spoustu velmi užitečných informací, ale nemusel jsem se o nic starat a vše mám nastaveno lépe, než bych si vůbec dovedl představit, a to jak pojistky, tak investování a dosahování cílů. Zkrátka jsem byl nadšen a všem Patrika vřele doporučuji. Postaral se o mne, jako by byl můj syn. Moc děkuji.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Dominik Jedlička',
+    rating: 5,
+    date: 'před 2 lety',
+    text: 'Rád bych tímto způsobem poděkoval panu Patrikovi za jeho pomoc s nastartováním našeho finančního života a ujasnění si důležitých kroků. Pan Patrik si vyslechl naše požadavky, probrali jsme, zda-li jsou reálné a poté přišel s návrhy řešení, některé jsme si odsouhlasili hned, jelikož za mne bylo bezkonkurenční, některé jsme probrali ještě jednou, abychom měli ve všem jasno. Na čem jsme se domluvili, platilo a to hned od začátku, do ničeho jsme nebyli tlačeni, vše proběhlo diskrétně, ochotně a hlavně profesionálně. Největší přidanou hodnotou je pro nás finanční plán, který nám byl sestaven na míru (tudíž nebylo to jen o produktech, jak to bývá zvykem). Kdykoliv jsem panu Patrikovi zavolal s dotazem, vždy rád vysvětlil a poradil. Těším se na naše servisní schůzky a ještě jednou moc díky za Vaší práci.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Dalibor Soukal',
+    rating: 5,
+    date: 'před 2 lety',
+    text: 'Chtěl bych poděkovat a doporučit pana Patrika za sestavení finančního plánu včetně úvěru, který mi pomohl sestavit k mé spokojenosti. Vše mi dopodrobna vysvětlil a bez nátlaku mi doporučil co by bylo dobré udělat. Šlo na panu Patrikovi vidět že ví co dělá a že se v daném oboru hodně vyzná. Ještě jednou děkuji za pomoc.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Michal Bartusek',
+    rating: 5,
+    date: 'před rokem',
+    text: 'příjemná spolupráce , p. Gajdadzis má přehled portfolia produktů , dostupných na trhu , i člověku neznalému finančního prostředí vše jednoduše vysvětlí a poradí , Oceňuji i fexibilitu co se týče našich schůzek , celkový dojem je plná spokojenost',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Vladimír Štalmach',
+    rating: 5,
+    date: 'před 3 lety',
+    text: 'S Patrikem Gajdadzisem, se kterým jsem v uplynulých týdnech řešil záležitosti ať už produktů, které jsem měl nastaveny z předchozích spolupráci nebo nastavení nových produktů, které mě zajímaly, mi dokázal velmi profesionálně poradit, zrevidovat a doporučit jakým směrem by se měly mé investice směřovat. Na každou otázku dokázal srozumitelně reagovat, vysvětlit a doporučit. S jeho prací jsem nadmíru spokojen a doporučuji tak všem, kteří váhají, zda s někým ohledně financí spolupracovat.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Markéta Kolibová',
+    rating: 5,
+    date: 'před 2 lety',
+    text: 'S Patrikem jsem spokojená, pomohl mi jak s životním pojištěním tak i s ostatními věcmi, které jsme měli špatně od předchozího poradce. Je milý, vstřícný a dokáže pomoct se vším s čím se na něho obrátíte. Děkuji a těším se na další spolupráci.:)',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Petra Večerkova',
+    rating: 5,
+    date: 'před 2 lety',
+    text: 'S manželem jsme velmi spokojeni. Pan Patrik své práci rozumí a dokáže vždy dobře poradit. Pomohl nám jak s životním pojištění, penzijním spořením, tak i s hypotékou. Všem doporučuji.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    // Odlišný Google účet od „Stony Ka" výše (jiná kapitalizace „KA", jiný
+    // text) — recenzi podepsal jménem, ponecháno jako součást citace.
+    author: 'Stony KA',
+    rating: 5,
+    date: 'před 2 lety',
+    text: 'Se spolupráci s panem Gajdadzisem jsme nadmíru spokojeni. Vždy si vyslechne všechny naše potřeby a názory a podle toho hledáme řešení, které nám nabízí vždy opravdu na míru. Domluva je vždy rychlá a dokáže nám pomoci i v akutních situacích. Rozhodně by mužeme jen doporučit. Jan Vašek',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Kumar Hunterkumar',
+    rating: 5,
+    date: 'před 2 lety',
+    text: 'Děkuji za naší spolupráci a vyřešení problémů, které jsem měl z předchozích spolupráce. Tímto bych Patrika chtěl doporučit všem, kteří neví a chtěli by pomoct ohledně financí. Krempaský',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Nikola Marcalikova',
+    rating: 5,
+    date: 'před 4 lety',
+    text: 'Patrik je velice skvělý finanční poradce, jsem s ním velice spokojena, již přes rok se stará o mé finance. Vždy když potřebuji, je na telefonu ochotný řešit každou mojí otázku v co nejkratším čase, hlavně jeho spolupráce nekončí podpisem, stará se o to co vám nejlépe sedí!. Svou práci dělá rád a je to vidět a znát!! Děkuji',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Martin Huber',
+    rating: 5,
+    date: 'před rokem',
+    text: 'Pán poradce je ochotný, dokázal značně zjednodušit proces zařizování hypotéky a zařídil i lepší pojištění. Doporučuji.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Luboš Novák',
+    rating: 5,
+    date: 'před 4 lety',
+    text: 'S Patrikem Gajdadzisem jsem řešil otázku životního pojištění a penzijního spoření a byl jsem velice spokojený, protože mi nejprve vysvětlil, jakým způsobem v této oblasti postupovat, aby to pro mne bylo co nejvýhodnější a zároveň dávalo pro mne smysl. Doporučil mi vhodný produkt, který jsme upravili a nastavili dle mých potřeb. V budoucnu, pokud budu potřebovat poradenství v oblasti pojištění či financí, rád se na Patrika Gajdadzise opět obrátím.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Ladislav Dvorský',
+    rating: 5,
+    date: 'před rokem',
+    text: 'S finančními radami a celkovým jednáním pana Gajdadzise jsem byl maximálně spokojený. Určitě bych ho oslovil i v budoucnu. Dvorský',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Tomáš Zmrzlík',
+    rating: 5,
+    date: 'před rokem',
+    text: 'Super spolupráce, Patrik vyřídil vše okolo hypotéky a zařídil výhodné životní a majetkové pojištění na nemovitost.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Petra Mrockova',
+    rating: 5,
+    date: 'před 4 lety',
+    text: 'Jsem velmi spokojená a doporučuji spolupráci. Vstřícný a ve všem ochotně poradí.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Dominik Sroka',
+    rating: 5,
+    date: 'před 4 lety',
+    text: 'Rád bych tímto způsobem poděkoval za výbornou práci p. Gajdadzise. Pomohl mi jak s pojištěním vozidel, tak i v oblasti investic.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Anna Tosenovjan',
+    rating: 5,
+    date: 'včera',
+    text: 'Patrik jako náš poradce ohledně hypotéky předčil veškerá má očekávání. Žádnou otázku nenechá bez srozumitelné odpovědi, na schůzkách je vždy příjemný, díky jeho radám a ochotě jsme celý proces zvládli s mnohem větším klidem. Jsem vděčná, že jsme přes MintReality narazili právě na něj a ráda si od něho ohledně financí nechám poradit i v budoucnu.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    author: 'Lukáš Jevický',
+    rating: 5,
+    date: 'před 2 týdny',
+    text: 'S panem Gajdadzisem jsme navázali spolupráci teprve nedávno, nicméně během těch několika týdnů dokázal vymyslet a hlavně zrealizovat opravdu spoustu skvělých řešení – od možností financování pro OSVČ až po velmi propracované pojištění osoby či auta. Jeho práce si opravdu velmi cením, a to nejen proto, že dokáže najít a zařídit věci, které pro mě byly dříve prakticky nemožné. Velkým plusem je také jeho lidský a osobitý přístup. Je vidět, že svou práci nedělá jen pro jedničky a nuly v tabulkách, ale především pro lidi – aby jim pomáhal plnit sny, řešit jejich potřeby a zároveň jim zajistil co nejlepší budoucnost. Velké díky a těším se na další spolupráci.',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+  {
+    // Jediná anglicky psaná recenze na profilu — ponechána v originálním
+    // jazyce (doslovná citace, nepřekládá se).
+    author: 'abhijith vincent',
+    rating: 5,
+    date: 'před 11 měsíci',
+    text: 'Patrik Gajdadzis provided excellent service throughout the mortgage process. He was professional, clear, and always available to answer questions. Thanks to his support, everything went smoothly—I highly recommend him!',
+    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    lineWidths: [],
+  },
+];
+
+const REVIEWS_PAGE_SIZE = 3;
+const GOOGLE_PROFILE_URL = 'https://share.google/XnAx2GCl6M1bOtfto';
+---
+
+<BaseLayout
+  title="Recenze a zkušenosti klientů | Patrik Gajdadzis"
+  description="Přečtěte si skutečné Google recenze a zkušenosti mých klientů. Finanční poradenství, hypotéky a dlouhodobá péče v Ostravě i online."
+>
+  <Header />
+  <main id="hero" class="rec">
+    <div class="rec__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`rec__route-svg rec__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2600`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                <LineGradientDefs id={`rec-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="rec__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="rec__route-path rec__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#rec-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="rec__route-path rec__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['recenze', 'pristup'] as const).map((marker) => (
+              <g class="rec__marker" data-marker={marker}>
+                <line class="rec__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="rec__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="rec-hero" aria-labelledby="rec-hero-heading">
+      <div class="rec-hero__text">
+        <h1 id="rec-hero-heading" data-reveal>Co&nbsp;říkají klienti o&nbsp;spolupráci se&nbsp;mnou.</h1>
+        <p class="rec-hero__lead" data-reveal>
+          Nejlepší obrázek o&nbsp;mé práci si uděláte od&nbsp;lidí, kteří se&nbsp;mnou už řešili své finance. Přečtěte si
+          jejich zkušenosti a&nbsp;podívejte se, co pro&nbsp;ně bylo při spolupráci důležité.
+        </p>
+        <div class="rec-hero__actions" data-reveal>
+          <a class="rec-cta" href="#recenze-vypis" data-scroll-target>Zobrazit recenze</a>
+          <a class="rec-phone" href="tel:+420775217721">
+            <svg class="rec-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="rec-chapter rec-chapter--recenze" aria-labelledby="recenze-heading">
+      <div class="rec-chapter__bar" data-reveal data-route-target="recenze">
+        <p>Recenze</p>
+      </div>
+
+      <div class="rec-chapter__content">
+        <div class="rec-chapter__top">
+          <div class="rec-chapter__lead-col" data-reveal>
+            <h2 id="recenze-heading" class="rec-h2--dominant">Zkušenosti, které si můžete ověřit.</h2>
+          </div>
+          <div class="rec-chapter__support-col" data-reveal>
+            <p class="rec-support__text">
+              Recenze pocházejí z&nbsp;mého Google profilu. Můžete si je přečíst tady na&nbsp;webu nebo si zobrazit
+              můj profil a&nbsp;všechny recenze přímo na&nbsp;Googlu.
+            </p>
+            <a class="rec-google-link" href={GOOGLE_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+              <span>Zobrazit na&nbsp;Google</span>
+              <svg class="rec-google-link__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path d="M7 17 17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="sr-only">(externí web)</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="rec-reviews" id="recenze-vypis">
+          <ul class="rec-reviews__list" data-reviews-list>
+            {
+              reviews.map((review, i) => (
+                <li class="rec-review" data-review-index={i} hidden={i >= REVIEWS_PAGE_SIZE}>
+                  {review.text ? (
+                    <blockquote class="rec-review__quote">
+                      <p>{review.text}</p>
+                      <footer class="rec-review__footer">
+                        <cite>{review.author}</cite>
+                        {review.rating != null && (
+                          <>
+                            <span class="rec-review__rating" aria-hidden="true">{'★'.repeat(review.rating)}</span>
+                            <span class="sr-only">{`Hodnocení ${review.rating} z 5`}</span>
+                          </>
+                        )}
+                      </footer>
+                    </blockquote>
+                  ) : (
+                    <div class="rec-review__placeholder">
+                      <div class="rec-review__meta">
+                        <span class="rec-verify-badge" aria-hidden="true">RECENZE — PLACEHOLDER</span>
+                        <p class="rec-review__attribution">Jméno autora · hodnocení · datum</p>
+                      </div>
+                      <div class="rec-review__lines" aria-hidden="true">
+                        {review.lineWidths.map((w) => <span class="rec-review__line" style={`width:${w}`}></span>)}
+                      </div>
+                      <span class="sr-only">Text recenze bude doplněn</span>
+                    </div>
+                  )}
+                </li>
+              ))
+            }
+          </ul>
+
+          {reviews.length > REVIEWS_PAGE_SIZE && (
+            <button type="button" class="rec-reviews__more" data-reviews-more>
+              Zobrazit další recenze
+            </button>
+          )}
+          <p class="sr-only" role="status" data-reviews-status></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="rec-chapter rec-chapter--pristup" aria-labelledby="pristup-heading">
+      <div class="rec-chapter__bar" data-reveal data-route-target="pristup">
+        <p>Přístup</p>
+      </div>
+
+      <div class="rec-chapter__content">
+        <div class="rec-chapter__top">
+          <div class="rec-chapter__lead-col" data-reveal>
+            <h2 id="pristup-heading" class="rec-h2--std">Recenze vám ukážou zkušenosti. Přístup vysvětluje, jak pracuji.</h2>
+          </div>
+          <div class="rec-chapter__support-col" data-reveal>
+            <p class="rec-support__text">
+              Pokud vás zajímá, co se&nbsp;děje na&nbsp;první konzultaci, jak vzniká doporučení a&nbsp;jak probíhá
+              další péče, podívejte se&nbsp;na&nbsp;můj způsob práce.
+            </p>
+            <a class="rec-text-link" href="/pristup">Jak pracuji</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rec-closing" aria-labelledby="rec-closing-heading">
+      <div class="rec-closing__glow" aria-hidden="true"></div>
+
+      <div class="rec-closing__grid">
+        <h2 id="rec-closing-heading" data-reveal>Pojďme se&nbsp;podívat i&nbsp;na&nbsp;vaši situaci.</h2>
+
+        <div class="rec-closing__body" data-reveal>
+          <p>
+            Ať už řešíte hypotéku, současné smlouvy nebo další finanční rozhodnutí, na&nbsp;první konzultaci si
+            ujasníme, co potřebujete a&nbsp;jaký postup dává smysl.
+          </p>
+
+          <div class="rec-closing__actions">
+            <a class="rec-cta rec-cta--dark" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="rec-phone rec-phone--dark" href="tel:+420775217721">
+              <svg class="rec-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const main = document.querySelector('.rec');
+  const routeWrap = document.querySelector('.rec__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.rec__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.rec-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.rec-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.rec-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.rec-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      recenze: main.querySelector('[data-route-target="recenze"]'),
+      pristup: main.querySelector('[data-route-target="pristup"]'),
+    } as const;
+
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_MAX_LENGTH = 100;
+    const HERO_ENTRY_MIN_LENGTH = 40;
+    const HERO_ENTRY_GAP_BEFORE_BEND = 20;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number, entryEndY: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${entryEndY} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      let bendY = 260;
+      if (heroTextEl) {
+        const textRect = heroTextEl.getBoundingClientRect();
+        const textBottom = textRect.bottom - mainRect.top;
+        bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+      }
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const entryX = parseFloat(svg.dataset.entry ?? '0');
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.rec__route-path:not(.rec__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.rec__route-path--dark') as SVGPathElement | null;
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--rec-shift', `${shift}px`);
+        }
+
+        if (isHero) {
+          const available = bendY - r - HERO_ENTRY_START_Y - HERO_ENTRY_GAP_BEFORE_BEND;
+          const entryLength = Math.min(HERO_ENTRY_MAX_LENGTH, Math.max(HERO_ENTRY_MIN_LENGTH, available));
+          const entryEndY = HERO_ENTRY_START_Y + entryLength;
+
+          const gradient = svg.querySelector('linearGradient');
+          if (gradient) {
+            gradient.setAttribute('y1', String(HERO_ENTRY_START_Y));
+            gradient.setAttribute('y2', String(entryEndY));
+          }
+
+          const entryPath = svg.querySelector('.rec__route-entry') as SVGPathElement | null;
+          if (entryPath) entryPath.setAttribute('d', `M ${entryX} ${HERO_ENTRY_START_Y} L ${entryX} ${entryEndY}`);
+
+          if (lightPath) lightPath.setAttribute('d', heroArcPath(entryX, axisScaled, r, bendY, closingTop, entryEndY));
+        } else if (lightPath) {
+          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const rect = target.getBoundingClientRect();
+          const centerY = rect.top + rect.height / 2;
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.rec__notch');
+          const dot = group.querySelector('.rec__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.rec__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.rec__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      /*
+       * OPRAVA (nahlásil uživatel): `threshold: 0.15` vyžaduje, aby bylo
+       * viditelných 15 % PLOCHY celé `<section>`, ne 15 % výšky viewportu.
+       * `.rec-chapter--recenze` teď nese 42 plných recenzí a je mnohonásobně
+       * vyšší než viewport — jediná obrazovka pak nikdy nepokryje 15 % jejího
+       * celkového obsahu, takže `isIntersecting` u dlouhých sekcí nikdy
+       * nenastane a `[data-reveal]` děti (pruh, nadpis, text) zůstanou navždy
+       * `opacity: 0`. `threshold: 0` reaguje na PRVNÍ průnik se sekcí bez
+       * ohledu na její celkovou výšku — funguje stejně pro krátké i velmi
+       * dlouhé sekce.
+       */
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+
+  // Hero CTA „Zobrazit recenze" — plynulý přesun na výpis na téže stránce.
+  const scrollCta = document.querySelector('[data-scroll-target]');
+  if (scrollCta) {
+    scrollCta.addEventListener('click', (e) => {
+      const href = scrollCta.getAttribute('href');
+      if (!href || !href.startsWith('#')) return;
+      const target = document.querySelector(href);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+  }
+
+  // „Zobrazit další recenze" — odkrývá další PLACEHOLDER položky ze
+  // stejného pole (žádný fetch, žádná fiktivní data). Bez JS zůstává
+  // tlačítko skryté funkčně neaktivní (první dávka je vždy vykreslená
+  // v HTML), přesně podle zadání §13.
+  const moreBtn = document.querySelector('[data-reviews-more]') as HTMLButtonElement | null;
+  const reviewsList = document.querySelector('[data-reviews-list]');
+  const statusEl = document.querySelector('[data-reviews-status]');
+  if (moreBtn && reviewsList) {
+    moreBtn.addEventListener('click', () => {
+      const hiddenItems = Array.from(reviewsList.querySelectorAll('[hidden]'));
+      const batch = hiddenItems.slice(0, 3);
+      batch.forEach((el) => el.removeAttribute('hidden'));
+      const remaining = reviewsList.querySelectorAll('[hidden]').length;
+      if (remaining === 0) moreBtn.hidden = true;
+      if (statusEl) {
+        const shown = reviewsList.querySelectorAll('.rec-review:not([hidden])').length;
+        const total = reviewsList.querySelectorAll('.rec-review').length;
+        statusEl.textContent = `Zobrazeno ${shown} z ${total} recenzí.`;
+      }
+    });
+  }
+</script>
+
+<style>
+  .rec {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .rec__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .rec__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .rec__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .rec__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .rec__dot {
+    transform: scaleX(var(--dot-fix, 1));
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .rec__dot.is-pending {
+    opacity: 0;
+    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+  }
+
+  .rec__dot.is-visible {
+    opacity: 1;
+    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .rec__route-svg--tablet,
+  .rec__route-svg--laptop,
+  .rec__route-svg--desktop {
+    display: none;
+  }
+
+  .rec :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .rec-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .rec-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .rec-cta:active {
+    transform: translateY(1px);
+  }
+
+  .rec-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .rec-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .rec-phone:hover {
+    color: var(--emerald);
+  }
+
+  .rec-phone--dark {
+    color: var(--white);
+  }
+
+  .rec-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .rec-hero {
+    padding: 64px 24px 0;
+  }
+
+  .rec-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 640px;
+  }
+
+  .rec-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .rec-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .rec-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rec-hero__actions .rec-cta {
+    width: 100%;
+  }
+
+  .rec-hero__actions .rec-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .rec-chapter {
+    padding: 56px 24px;
+  }
+
+  .rec-chapter--recenze {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .rec-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .rec-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--rec-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .rec-chapter--recenze .rec-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .rec-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .rec-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .rec-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .rec-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rec-chapter__lead-col h2,
+  .rec-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .rec-h2--dominant {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+    font-size: 34px;
+  }
+
+  .rec-h2--std {
+    font-size: 30px;
+  }
+
+  .rec-support__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .rec-google-link,
+  .rec-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: fit-content;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .rec-google-link:hover,
+  .rec-text-link:hover {
+    color: var(--emerald-hover);
+  }
+
+  .rec-google-link__icon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+
+  /* ---------- Badge „k ověření" (sdíleno: souhrn i placeholder recenzí) ---------- */
+
+  .rec-verify-badge {
+    display: inline-block;
+    width: fit-content;
+    padding: 3px 8px;
+    border-radius: var(--radius-tag);
+    background: var(--pending-review-bg);
+    color: var(--pending-review);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Výpis recenzí ---------- */
+
+  .rec-reviews {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rec-reviews__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rec-review {
+    padding: 22px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .rec-review:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .rec-review__placeholder,
+  .rec-review__quote {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rec-review__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .rec-review__attribution {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .rec-review__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rec-review__line {
+    display: block;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--rule);
+  }
+
+  .rec-review__quote {
+    margin: 0;
+  }
+
+  .rec-review__quote p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .rec-review__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .rec-review__footer cite {
+    font-style: normal;
+    color: var(--navy);
+  }
+
+  .rec-review__rating {
+    font-size: 13px;
+    letter-spacing: .15em;
+    color: var(--emerald);
+  }
+
+  .rec-reviews__more {
+    align-self: flex-start;
+    margin-top: 12px;
+    height: 48px;
+    padding-inline: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-btn);
+    background: var(--white);
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+  }
+
+  .rec-reviews__more:hover {
+    border-color: var(--emerald);
+    color: var(--emerald);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .rec-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .rec-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .rec-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .rec-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .rec-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .rec-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .rec-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rec-closing__actions .rec-cta {
+    width: 100%;
+  }
+
+  .rec-closing__actions .rec-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .rec__route-svg--mobile {
+      display: none;
+    }
+
+    .rec__route-svg--tablet {
+      display: block;
+    }
+
+    .rec-chapter__bar p {
+      padding-left: calc(64px + var(--rec-shift, 0px));
+    }
+
+    .rec-hero {
+      padding: 88px 40px 0;
+    }
+
+    .rec-hero__text {
+      gap: 20px;
+    }
+
+    .rec-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .rec-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .rec-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .rec-hero__actions .rec-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .rec-hero__actions .rec-phone {
+      height: auto;
+    }
+
+    .rec-chapter--recenze {
+      margin-top: 80px;
+      padding: 72px 40px;
+    }
+
+    .rec-chapter {
+      padding: 72px 40px;
+    }
+
+    .rec-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .rec-h2--dominant {
+      font-size: 44px;
+    }
+
+    .rec-h2--std {
+      font-size: 40px;
+    }
+
+    .rec-support__text {
+      font-size: 18px;
+    }
+
+    .rec-google-link,
+    .rec-text-link {
+      font-size: 17px;
+    }
+
+    .rec-chapter__top {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .rec-chapter--recenze .rec-chapter__lead-col,
+    .rec-chapter--pristup .rec-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .rec-chapter--recenze .rec-chapter__support-col,
+    .rec-chapter--pristup .rec-chapter__support-col {
+      flex: 1;
+    }
+
+    .rec-review__attribution {
+      font-size: 16.5px;
+    }
+
+    .rec-review__quote p {
+      font-size: 18px;
+    }
+
+    .rec-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    .rec-closing__grid {
+      padding-inline: 40px;
+    }
+
+    .rec-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .rec-closing__body p {
+      font-size: 17px;
+    }
+
+    .rec-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .rec-closing__actions .rec-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .rec-closing__actions .rec-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .rec__route-svg--tablet {
+      display: none;
+    }
+
+    .rec__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .rec-chapter__bar p {
+      padding-left: calc(56px + var(--rec-shift, 0px));
+    }
+
+    .rec-hero__text {
+      max-width: 640px;
+      gap: 18px;
+    }
+
+    .rec-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .rec-hero__lead {
+      font-size: 19px;
+    }
+
+    .rec-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .rec-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .rec-chapter--recenze {
+      margin-top: 100px;
+      padding: 88px 96px;
+    }
+
+    .rec-chapter {
+      padding: 88px 96px;
+      display: flex;
+      align-items: flex-start;
+      gap: 56px;
+    }
+
+    .rec-chapter__bar {
+      flex: none;
+      width: 240px;
+      margin-bottom: 0;
+    }
+
+    .rec-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .rec-chapter__content {
+      flex: 1;
+    }
+
+    .rec-h2--dominant {
+      font-size: 50px;
+    }
+
+    .rec-h2--std {
+      font-size: 44px;
+    }
+
+    .rec-chapter__top {
+      gap: 60px;
+    }
+
+    /* Dřív tuhle mezeru dělal (kromě `.rec-chapter__content`'s 32px gap) i
+       samotný blok „X recenzí · 5,0 · Google hodnocení" (`.rec-summary`,
+       odstraněn 14. 9. 2026 na přání uživatele) — jeho výška fungovala
+       jako druhý odstup navíc. Bez něj byla mezera nadpis→první recenze
+       najednou jen 32px, což uživatel nahlásil jako příliš těsné. Doplněno
+       zvlášť na `.rec-reviews`, ne úpravou sdíleného `.rec-chapter__content`
+       gapu, aby se nezměnila i kompaktní karta v `.rec-chapter--pristup`. */
+    .rec-reviews {
+      margin-top: 40px;
+    }
+
+    .rec-chapter--recenze .rec-chapter__lead-col,
+    .rec-chapter--pristup .rec-chapter__lead-col {
+      width: 540px;
+    }
+
+    .rec-chapter__lead-col {
+      flex: none;
+      width: 540px;
+    }
+
+    .rec-chapter__support-col {
+      flex: 1;
+    }
+
+    /* Řádkový výpis: vlevo autor/hodnocení/datum, vpravo text — zadání
+       §7. Stejný vzor jako `.fp-faq__row`/`.poj-faq__row` (pevný levý
+       sloupec + `1fr`), ale zůstává STACKED na tabletu/mobilu (zadání to
+       odlišuje explicitně od desktopu — krátká jména by v úzké koloně
+       vytvořila díru), takže se přepíná až tady, ne na 768px jako FAQ. */
+    .rec-review {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      /* `dense`: bez toho auto-placement umístí `footer` (sloupec 1) do
+         ŘÁDKU 2, protože `p` (sloupec 2) je v DOM dřív a „spotřebuje"
+         řádek 1 dřív, než na footer dojde řada — sparse packing se pak už
+         nevrací zpátky vyplnit volnou buňku sloupce 1 v řádku 1. Zjištěno
+         po odstranění `<time>` (uživatel nahlásil špatné zarovnání jména
+         a hvězdiček vůči textu recenze). */
+      grid-auto-flow: dense;
+      column-gap: 40px;
+      align-items: start;
+    }
+
+    .rec-review__placeholder,
+    .rec-review__quote {
+      display: contents;
+    }
+
+    .rec-review__meta {
+      grid-column: 1;
+    }
+
+    .rec-review__lines,
+    .rec-review__quote p {
+      grid-column: 2;
+    }
+
+    .rec-review__footer {
+      grid-column: 1;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .rec-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .rec-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .rec-closing__glow {
+      height: 320px;
+    }
+
+    .rec-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .rec-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .rec__route-svg--laptop {
+      display: none;
+    }
+
+    .rec__route-svg--desktop {
+      display: block;
+    }
+
+    .rec__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .rec-hero,
+    .rec-chapter,
+    .rec-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .rec-chapter__bar p {
+      padding-left: calc(76px + var(--rec-shift, 0px));
+    }
+
+    .rec-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .rec-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .rec-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .rec-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .rec-hero__actions .rec-cta {
+      height: 56px;
+    }
+
+    .rec-chapter--recenze {
+      margin-top: 120px;
+      padding: 88px 100px;
+    }
+
+    .rec-chapter {
+      padding: 88px 100px;
+      gap: 56px;
+    }
+
+    .rec-chapter__bar {
+      width: 240px;
+    }
+
+    .rec-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .rec-h2--dominant {
+      font-size: 56px;
+    }
+
+    .rec-h2--std {
+      font-size: 48px;
+    }
+
+    .rec-chapter--recenze .rec-chapter__lead-col,
+    .rec-chapter--pristup .rec-chapter__lead-col,
+    .rec-chapter__lead-col {
+      width: 600px;
+    }
+
+    .rec-review {
+      grid-template-columns: 260px 1fr;
+      column-gap: 48px;
+    }
+
+    .rec-closing {
+      padding-block: 96px;
+    }
+
+    .rec-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .rec-closing__glow {
+      height: 340px;
+    }
+
+    .rec-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+</style>
