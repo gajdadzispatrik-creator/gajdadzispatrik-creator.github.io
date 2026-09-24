@@ -69,6 +69,19 @@ Musí obsahovat `strict-transport-security`, `x-content-type-options`,
 3. „Odpovědět" u přijatého e-mailu musí jít na adresu z formuláře.
 4. `https://patrikgajdadzis.cz/api/limity/` musí vracet `403`.
 
+### Stránka 404
+
+```bash
+curl -sI https://patrikgajdadzis.cz/neexistuje
+```
+
+Musí vracet `404` (ne `200` ani `301`) a v prohlížeči se na té adrese musí
+ukázat stránka „Tuhle stránku jsem nenašel." s hlavičkou a patičkou webu.
+Kdyby se místo ní ukázala výchozí chybová stránka Wedosu, změnit v
+`.htaccess` řádek na `ErrorDocument 404 /domains/patrikgajdadzis.cz/404.html`
+(hostingová `/www/.htaccess` může cestu k chybové stránce řešit jinak než
+běžné požadavky).
+
 ### Ostatní
 
 - `robots.txt` a `sitemap.xml` se otevírají.

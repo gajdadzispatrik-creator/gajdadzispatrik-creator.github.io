@@ -1,0 +1,247 @@
+---
+/**
+ * Stránka 404 — Apache ji vrací pro každou neexistující adresu
+ * (`ErrorDocument 404 /404.html` v public/.htaccess). Text schválil Patrik
+ * 24. 9. 2026.
+ *
+ * Záměrně BEZ dekorativní trasy: jde o technickou stránku, ne o kapitolu
+ * webu — proto ani záznam v `PAGES` (scripts/audit-layout.mjs). Typografie
+ * a odsazení hero jsou 1:1 převzaté z hero sourozeneckých podstránek
+ * (`.cla-hero` v clanky.astro), takže H1 sedí na stejné ose jako logo
+ * v hlavičce na všech stupních, nad 1400 px v centrovaném plátně
+ * (`--stage-max`).
+ *
+ * `canonical={false}` — stránka se zobrazuje na libovolné adrese, vlastní
+ * kanonickou URL nemá; `noindex` ji drží mimo vyhledávače.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+
+<BaseLayout
+  title="Stránka nenalezena | Patrik Gajdadzis"
+  description="Tahle stránka neexistuje. Pokračujte na úvod nebo na přehled služeb."
+  robots="noindex, follow"
+  canonical={false}
+>
+  <Header />
+  <main id="hero" class="nf">
+    <section class="nf-hero" aria-labelledby="nf-heading">
+      <div class="nf-hero__text">
+        <h1 id="nf-heading">Tuhle stránku jsem nenašel.</h1>
+        <p class="nf-hero__lead">Možná se změnila adresa nebo je v&nbsp;odkazu překlep.</p>
+        <div class="nf-hero__actions">
+          <a class="nf-cta" href="/">Zpět na&nbsp;úvod</a>
+          <a class="nf-link" href="/sluzby">Služby</a>
+          <a class="nf-phone" href="tel:+420775217721">
+            <svg class="nf-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<style>
+  .nf {
+    background: var(--bg);
+  }
+
+  .nf :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  /* Symetrický padding (CLAUDE.md „Konvence: mezera mezi sekcemi"). */
+  .nf-hero {
+    padding: 64px 24px;
+  }
+
+  .nf-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 640px;
+  }
+
+  .nf-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .nf-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .nf-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .nf-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .nf-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .nf-cta:active {
+    transform: translateY(1px);
+  }
+
+  .nf-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .nf-link:hover {
+    color: var(--emerald-hover);
+  }
+
+  .nf-phone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    height: 48px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .nf-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .nf-phone:hover {
+    color: var(--emerald);
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .nf-hero {
+      padding: 88px 40px;
+    }
+
+    .nf-hero__text {
+      gap: 20px;
+    }
+
+    .nf-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .nf-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .nf-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .nf-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .nf-link,
+    .nf-phone {
+      height: auto;
+      font-size: 17px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .nf-hero {
+      padding: 112px 96px;
+    }
+
+    .nf-hero__text {
+      gap: 18px;
+    }
+
+    .nf-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .nf-hero__lead {
+      font-size: 19px;
+    }
+
+    .nf-hero__actions {
+      margin-top: 4px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .nf-hero {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+      padding: 120px 100px;
+    }
+
+    .nf-hero__text h1 {
+      font-size: 72px;
+    }
+
+    .nf-hero__lead {
+      max-width: 600px;
+    }
+
+    .nf-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+  }
+</style>

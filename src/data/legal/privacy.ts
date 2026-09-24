@@ -9,13 +9,11 @@ import { type LegalPageData, link } from './types';
  * odstraněn. Sekce „Jak dlouho je uchovávám“ a věta o právu na stížnost u
  * ÚOOÚ byly mezitím smazané a pak na žádost uživatele vráceny zpět (čl. 13
  * odst. 2 písm. a) a d) GDPR je běžně vyžadují). Konkrétní lhůty uchování
- * (6 měsíců / 5 let / 14 měsíců) jsou odhad — uživatel je sám nezná a
- * požádal mě (25. 8. 2026), ať je doplním podle vlastního úsudku; nejde o
- * ověřený fakt a MUSÍ je před nasazením potvrdit/opravit právník i Patrik
- * sám (5 let u dokumentace ke zprostředkovanému produktu je běžná praxe u
- * finančních zprostředkovatelů, ne citace konkrétního zákonného ustanovení;
- * 14 měsíců u Google Analytics je nutné sladit se skutečným nastavením GA4
- * účtu). Před nasazením musí projít právní kontrolou celá stránka (viz
+ * (6 měsíců / 10 let / 14 měsíců) potvrdil Patrik 24. 9. 2026 podle mého
+ * doporučení. 10 let u dokumentace ke zprostředkovanému produktu odpovídá
+ * lhůtě zákona č. 253/2008 Sb. (AML, § 16) — přesnou lhůtu ověřit u
+ * compliance BEplanu; 14 měsíců u Google Analytics je nutné nastavit
+ * v GA4 (Správce → Uchovávání dat), až se bude měření zapínat. Před nasazením musí projít právní kontrolou celá stránka (viz
  * úkol „právní podstránky“, §2).
  */
 export const privacyPage: LegalPageData = {
@@ -153,7 +151,7 @@ export const privacyPage: LegalPageData = {
               'Poptávka, ze které nevznikne spolupráce: uchovávám ji po dobu nutnou k vyřízení, nejdéle 6 měsíců od poslední komunikace.',
             ],
             [
-              'Dokumentace ke zprostředkovanému finančnímu produktu: uchovávám po dobu 5 let od ukončení smluvního vztahu, v souladu se zákonnými požadavky na zprostředkovatele finančních produktů.',
+              'Dokumentace ke zprostředkovanému finančnímu produktu: uchovávám po dobu, kterou mi ukládají právní předpisy pro zprostředkovatele finančních produktů (zejména zákon proti praní peněz), zpravidla 10 let od ukončení smluvního vztahu.',
             ],
             [
               'Data v Google Analytics: uchovávám po dobu 14 měsíců od vaší poslední interakce s webem, podle nastavení účtu Google Analytics.',

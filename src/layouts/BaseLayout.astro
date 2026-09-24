@@ -17,9 +17,12 @@ interface Props {
    *  ProfilePage, BreadcrumbList apod.) — sloučí se s globální Person/WebSite
    *  entitou do jednoho `@graph`, Person/WebSite se NIKDY neduplikují. */
   jsonLd?: Record<string, unknown>[];
+  /** `false` vynechá canonical a og:url — pro stránku 404, která se zobrazuje
+   *  na libovolné neexistující adrese, takže nemá vlastní kanonickou URL. */
+  canonical?: boolean;
 }
 
-const { title, description, robots = 'index, follow', ogType = 'website', jsonLd = [] } = Astro.props;
+const { title, description, robots = 'index, follow', ogType = 'website', jsonLd = [], canonical = true } = Astro.props;
 
 // Canonical se počítá automaticky ze skutečné cesty stránky (žádná ruční
 // hodnota na 14 místech) — sjednoceno bez koncového lomítka (kromě domovské
@@ -43,7 +46,7 @@ const jsonLdGraph = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
-    <link rel="canonical" href={canonicalURL} />
+    {canonical && <link rel="canonical" href={canonicalURL} />}
     <link
       rel="preload"
       href="/fonts/manrope/manrope-latin.woff2"
@@ -62,7 +65,7 @@ const jsonLdGraph = {
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalURL} />
+    {canonical && <meta property="og:url" content={canonicalURL} />}
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="Patrik Gajdadzis" />
     <meta property="og:locale" content="cs_CZ" />

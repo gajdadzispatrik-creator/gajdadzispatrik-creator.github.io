@@ -157,7 +157,7 @@ Ověřeno přímo v `dist/` po buildu (ne jen v kódu) — namátkou homepage, `
 Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 
 - **`/pristup`, sekce „Odměna“** — pořád nese vizuální štítek „K OVĚŘENÍ PŘED PUBLIKACÍ“. Věcně konzistentní s `regulatory.ts` (potvrzeno už dřívějším auditem 9. 9. 2026), ale finální právní sign-off musíš dát ty/právník, ne audit.
-- **Retenční lhůty** v `src/data/legal/privacy.ts` a `cookies.ts` (6 měsíců/5 let/14 měsíců) — pořád označené jako odhad čekající na potvrzení.
+- **Retenční lhůty** v `src/data/legal/privacy.ts` a `cookies.ts` — potvrzeny 24. 9. 2026 (6 měsíců/10 let/14 měsíců, souhlas 12 měsíců), viz bod 5 v sekci 20.
 - **`LocalBusiness`/`FinancialService` schema jsem NEIMPLEMENTOVAL** (zadání §14) — z projektu nejde jednoznačně určit, který subjekt je právně/provozně „ten“ business pro tento účel (Patrik jako OSVČ na `Hlavní třída 568/73, Ostrava`? MINT reality a finance s.r.o.? BEplan finanční plánování s.r.o. jako regulovaný subjekt?), který odpovídá Google Business Profilu, ani jakou adresu by měl nést. `regulatory.ts` navíc jasně rozlišuje **registrované sídlo** (Hlavní třída 568/73) od **místa osobních konzultací** (17. listopadu 599/30, Ostrava-Poruba) — obě adresy jsou reálné, ale patří jinému účelu, a plést je do jednoho schema by bylo přesně to zavádějící sloučení, které zadání §26 zakazuje. **Potřebuju tvoje rozhodnutí/potvrzení**, než se tohle schema vůbec dá bezpečně přidat.
 - **Kontrola zakázaných frází** („nezávislý finanční poradce“, „certifikovaný poradce u ČNB“, „vlastní licence Mint“, garance výnosu/schválení, „nejlepší produkt“) — grep přes celý `src/`: **0 výskytů**. Web je v tomhle čistý.
 
@@ -252,8 +252,8 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 1. Fotky místo placeholderů (homepage hero „FOTO PATRIKA - PLACEHOLDER“, O mně, `/o-mne`, `/pristup`).
 2. Sekce Články na homepage — 3 prázdné řádky; skrýt nebo naplnit, dokud nejsou články.
 3. Favicon + OG obrázek — bez faviconu hlásí každá stránka 404 v konzoli (jediná výtka Lighthouse).
-4. Stránka 404 — návrh předložen, čeká na schválení textu.
-5. Doby uchovávání údajů (`privacy.ts`) — doporučení předloženo, čeká na potvrzení; lhůtu u dokumentace k produktům převzít od BEplan (zastoupený), GA4 nastavit na 14 měsíců (výchozí jsou 2).
+4. ~~Stránka 404~~ — hotovo 24. 9. 2026 (`src/pages/404.astro`, `ErrorDocument 404 /404.html`, `noindex`, bez canonical). Po nasazení ověřit, že vrací kód 404 (postup v `docs/deploy-wedos.md`).
+5. ~~Doby uchovávání údajů~~ — potvrzeno 24. 9. 2026: poptávky 6 měsíců, dokumentace k produktům 10 let (zákon proti praní peněz; přesnou lhůtu ještě ověřit u compliance BEplanu), GA4 14 měsíců, souhlas s cookies 12 měsíců. **Při zapnutí GA4 nastavit uchovávání dat na 14 měsíců** (výchozí jsou 2).
 6. Měření — GA4 ID + událost odeslání formuláře a kliknutí na telefon, Search Console + Bing Webmaster (v den spuštění), hlídání dostupnosti (např. UptimeRobot).
 7. Google Business Profile — stejná adresa jako web (17. listopadu 599/30, 708 00 Ostrava-Poruba). Na webu (patička, kontakt) se zatím zobrazuje bez PSČ → doplnit kvůli jednotnosti NAP.
 8. `LocalBusiness`/`FinancialService` schema — adresa potvrzena, chybí přesný název firmy tak, jak je v Google Business Profile.
