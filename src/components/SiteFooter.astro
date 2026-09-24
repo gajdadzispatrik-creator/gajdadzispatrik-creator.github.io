@@ -42,7 +42,8 @@
  * - `/clanky` dočasně odstraněna z `navLinks` (skutečné články zatím nejsou
  *   připravené, viz zadání úkolu výše) — stránka samotná dál existuje
  *   (`src/pages/clanky.astro`, `noindex`), jen bez veřejného odkazu odsud.
- * - Pořád chybí: Kariéra — `href: null` u této položky je proto stále správně.
+ * - „Kariéra" dočasně skrytá (24. 9. 2026, přání uživatele) — nemá zatím
+ *   cílovou stránku. Až bude, vrátit do `navLinks` mezi „O mně" a „Kontakt".
  */
 import { GOOGLE_REVIEWS_URL } from '../data/entity';
 
@@ -57,7 +58,6 @@ const navLinks: LinkItem[] = [
   { label: 'Jak pracuji', href: '/pristup' },
   { label: 'Recenze', href: '/recenze' },
   { label: 'O mně', href: '/o-mne' },
-  { label: 'Kariéra', href: null },
   { label: 'Kontakt', href: '/#kontakt' },
 ];
 

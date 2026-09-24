@@ -964,28 +964,20 @@ cookies" (`#footer-cookie-settings`) ho otevírá).
 
 **Chybí / TODO (nespuštěno):**
 
-- Podstránky `/sluzby`, `/pristup`, `/recenze`, `/o-mne`, `/clanky` zatím
-  **nejsou implementované** — obsahová architektura je založená v
-  `docs/content-subpages.md` (sekční osnovy, standardní pole ke schválení),
-  ale finální copy ještě není schválené a stránky v `src/pages/` neexistují.
-- **CookieConsent.astro** — texty lišty a panelu Nastavení jsou vlastní znění
-  (nejsou v content dokumentu), **musí projít právní kontrolou před spuštěním**.
-  Žádný analytický nástroj zatím není vybraný — `loadAnalytics()` je inertní
-  stub s jasně označeným místem pro skutečný loader. Marketingová kategorie je
-  v panelu záměrně `disabled` (zamčená ve vypnuté poloze) — marketing se zatím
-  nepoužívá.
-- **SiteFooter.astro — chybějící URL adresy** (`href: null`, vykresleny jako
-  nekliknutelný `<span>`): Facebook, Instagram, Mint reality & finance, Hypotéka
-  Ostrava, Registr ČNB, všechny čtyři právní odkazy (vč. „Zpracování osobních
-  údajů" — pozor, ContactSection.astro i CookieConsent.astro už na
-  `/zasady-zpracovani-osobnich-udaju` odkazují, až bude URL známá, sjednotit),
-  Kariéra, a pět položek v „Služby" (nebyly v zadání výslovně řešené, nemají
-  definovanou cílovou stránku/kotvu).
-- **SiteFooter.astro — drobná chyba nalezená při testování CookieConsent:**
-  `syncRoute()` transientně zapisuje `Infinity` do trasy SVG při některých
-  načteních stránky (chybí `svgRect.width === 0` v guard klauzuli vedle
-  `svgRect.height === 0`) — vizuálně se samo opraví, ale hází konzolové chyby.
-  Neopraveno v tomto úkolu (mimo rozsah), nahlášeno jako samostatný úkol.
+**Aktuální seznam úkolů do spuštění je v `docs/audits/prelaunch-p0-status.md`,
+sekce 20 („ÚKOLY DO SPUŠTĚNÍ“)** — fotky, favicon + OG obrázek, sekce Články
+na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
+`patrikgajdadzis.cz`), Search Console, GA4. Tam se udržuje, tady jen stručně:
+
+- Všechny podstránky (`/sluzby` + 5 detailů, `/pristup`, `/recenze`,
+  `/o-mne`, `/clanky`, právní stránky, 404) jsou hotové. `/clanky` je
+  `noindex` a bez odkazu, dokud nebudou články.
+- **CookieConsent.astro a právní stránky** — vlastní znění, **uživatel je
+  24. 9. 2026 přijal jako hotové bez další právní kontroly**. `loadAnalytics()`
+  je inertní stub, dokud nebude GA4 ID. Marketingová kategorie je záměrně
+  `disabled` (marketing se nepoužívá).
+- **SiteFooter.astro** — všechny odkazy doplněné; „Kariéra“ dočasně skrytá
+  (bez cílové stránky).
 - **ContactSection.astro — odesílání formuláře:** implementováno 24. 9. 2026 —
   POST na `public/api/poptavka.php` (Wedos PHP ≥ 8.1), e-mail na
   `patrik@mintfinance.cz`, odesílatel `poptavka@patrikgajdadzis.cz`, honeypot

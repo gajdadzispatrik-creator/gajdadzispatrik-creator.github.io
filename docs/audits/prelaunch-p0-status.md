@@ -248,21 +248,43 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 - **Safari (WebKit, iPhone 13 + iPad, 13 stránek):** žádné chyby JS, přetečení, NaN/Infinity v trase, deformované tečky; tečka v patičce na konci linky; validace formuláře funguje.
 - **Postup nasazení** — `docs/deploy-wedos.md` (nastavení Wedosu, nahrání vč. skrytých `.htaccess`, kontrolní příkazy po nasazení).
 
-**Otevřené — dodá/rozhodne uživatel (vizuál a obsah se dodělávají)**
-1. Fotky místo placeholderů (homepage hero „FOTO PATRIKA - PLACEHOLDER“, O mně, `/o-mne`, `/pristup`).
-2. Sekce Články na homepage — 3 prázdné řádky; skrýt nebo naplnit, dokud nejsou články.
-3. Favicon + OG obrázek — bez faviconu hlásí každá stránka 404 v konzoli (jediná výtka Lighthouse).
-4. ~~Stránka 404~~ — hotovo 24. 9. 2026 (`src/pages/404.astro`, `ErrorDocument 404 /404.html`, `noindex`, bez canonical). Po nasazení ověřit, že vrací kód 404 (postup v `docs/deploy-wedos.md`).
-5. ~~Doby uchovávání údajů~~ — potvrzeno 24. 9. 2026: poptávky 6 měsíců, dokumentace k produktům 10 let (zákon proti praní peněz; přesnou lhůtu ještě ověřit u compliance BEplanu), GA4 14 měsíců, souhlas s cookies 12 měsíců. **Při zapnutí GA4 nastavit uchovávání dat na 14 měsíců** (výchozí jsou 2).
-6. Měření — GA4 ID + událost odeslání formuláře a kliknutí na telefon, Search Console + Bing Webmaster (v den spuštění), hlídání dostupnosti (např. UptimeRobot).
-7. ~~PSČ na webu~~ — hotovo 24. 9. 2026: patička, kontakt i regulatorní informace „17. listopadu 599/30, 708 00 Ostrava-Poruba" (profil Google uvádí „Ostrava 8" — stejné PSČ, Google obě varianty páruje).
-8. ~~`FinancialService` schema~~ — hotovo 24. 9. 2026 (`businessEntity` v `src/data/entity.ts`, název 1:1 podle profilu „Patrik Gajdadzis | Hypotéky a finance", na každé stránce). **Chybí otevírací doba** — dodat celý týden (profil ukazuje 8–18, ale ne všechny dny).
-9. ~~Dva různé Google odkazy~~ — sjednoceno 24. 9. 2026: všechny viditelné odkazy na Google (homepage, `/recenze`, ikonka v patičce) vedou přímo na záložku Recenze v Google Mapách, `sameAs` ve strukturovaných datech na stálý odkaz `maps.google.com/?cid=…`. Oba jsou v `src/data/entity.ts` (jediné místo), žádný `share.google` odkaz už na webu není.
-9b. **Google profil má jako web `pafinga.cz`, ne `patrikgajdadzis.cz`** (zjištěno 24. 9. 2026 v Mapách). Po spuštění webu změnit v profilu (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí a návštěvy z Map půjdou jinam.
-9a. ~~Nové recenze na `/recenze`~~ — rozhodnuto 24. 9. 2026: recenze se na web nedoplňují. `/recenze` zobrazuje 3, „Zobrazit další recenze" otevírá Google profil. Počet recenzí se na webu nikde neuvádí (jen hodnocení 5,0), takže nic nezastarává.
+**Hotovo 24. 9. 2026 (odpoledne)**
+- **Stránka 404** — `src/pages/404.astro`, `ErrorDocument 404 /404.html`, `noindex`, bez canonical.
+- **Doby uchovávání údajů** — poptávky 6 měsíců, dokumentace k produktům 10 let (zákon proti praní peněz), GA4 14 měsíců, souhlas s cookies 12 měsíců.
+- **Právní texty** (zásady OÚ, cookies, cookie lišta, regulatorní informace) — **uživatel je přijal jako hotové bez další právní kontroly** (rozhodnutí 24. 9. 2026: „ber to jako hotové“).
+- **Google profil na webu** — `FinancialService` ve strukturovaných datech (název 1:1 podle profilu), PSČ v adrese, všechny odkazy na Google vedou přímo na záložku Recenze v Mapách (jediný zdroj `src/data/entity.ts`). `/recenze` zobrazuje 3 recenze, „Zobrazit další recenze“ otevírá profil; počet recenzí se na webu neuvádí.
+- **Typografie** — nezlomitelné mezery na celém webu + trvalá kontrola `npm run check:typo`.
+- **„Kariéra“ v patičce dočasně skrytá** (neměla cílovou stránku). Vrátit, až bude kam odkazovat.
 
-**Otevřené — technické**
-10. Nasazení na Wedos podle `docs/deploy-wedos.md` + živé testy (přesměrování, hlavičky, formulář do obou schránek, SPF/DKIM/DMARC, kontrola na skutečném iPhonu — testovací WebKit pro Windows nevykresluje věrně tučnost variabilního fontu).
-11. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.
-12. Projekt na OneDrivu — synchronizace `node_modules` způsobuje hromadné dotazy na mazání (tisíce souborů při každé aktualizaci) a hrozí promíchání knihoven. Doporučeno přesunout projekt mimo OneDrive (záloha je teď git) nebo vyřadit `node_modules` ze synchronizace.
-13. Drobnosti bez dopadu na návštěvníka: hláška Vite „Failed to scan for dependencies“ v dev režimu (komentáře ve `<script>`), blokující CSS ~0,5 s při simulaci pomalého mobilu (rychlost i tak 98–100).
+---
+
+### ÚKOLY DO SPUŠTĚNÍ
+
+**A) Dodá uživatel před spuštěním**
+1. **Fotky** místo zástupných obrázků: homepage hero („FOTO PATRIKA - PLACEHOLDER“), sekce O mně na homepage, `/o-mne`, `/pristup`.
+2. **Úpravy zobrazení pro mobil a desktop** (spolu s Claude — po každé úpravě `npm run check:layout` + `npm run check:typo`).
+3. **Favicon + obrázek pro sdílení (OG, 1200×630)** — uživatel dodá logo/fotku, Claude z nich připraví všechny velikosti a doplní meta značky. Bez faviconu hlásí každá stránka 404 v konzoli (jediná výtka Lighthouse).
+4. **Sekce Články na homepage** — dnes 3 zástupné řádky („Titulek - placeholder“), návštěvník je uvidí. Uživatel chce články dodat před spuštěním; **pokud nebudou hotové, sekci před spuštěním skrýt**.
+
+**B) Při spouštění webu (spolu, podle `docs/deploy-wedos.md`)**
+5. Wedos: SSL certifikát (před nahráním), PHP 8.1+, schránka `poptavka@patrikgajdadzis.cz`.
+6. DNS: SPF, DKIM, DMARC (doručitelnost poptávek).
+7. Nahrát `dist/` včetně skrytých `.htaccess` a `api/.htaccess`.
+8. Živé testy: přesměrování (www/http/lomítko), bezpečnostní hlavičky, stránka 404 vrací kód 404, **zkušební poptávka dorazí do obou schránek** (ne do spamu), `api/limity/` vrací 403, web projít na skutečném iPhonu.
+
+**C) V den spuštění**
+9. **Google profil: změnit web z `pafinga.cz` na `patrikgajdadzis.cz`** (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí.
+10. **Co s `pafinga.cz`?** — rozhodnout: pokud na ní běží web nebo na ni vedou odkazy, nastavit trvalé přesměrování (301) na `patrikgajdadzis.cz`, aby se neztratila návštěvnost ani pozice ve vyhledávání.
+11. Google Search Console + Bing Webmaster Tools — ověřit doménu, odeslat `sitemap.xml`.
+12. Google Analytics 4 — založit, vložit ID do `CookieConsent.astro` (`loadAnalytics()`), **uchovávání dat nastavit na 14 měsíců** (výchozí 2 — jinak nesedí se zásadami OÚ), události: odeslání formuláře, kliknutí na telefon.
+13. Hlídání dostupnosti webu (např. UptimeRobot, zdarma).
+
+**D) Po spuštění**
+14. Články: obsah + stránka detailu článku + `Article` schema; `/clanky` zapnout (odstranit `noindex`, přidat do menu, patičky a `sitemap.xml`).
+15. Otevírací doba do strukturovaných dat (`openingHoursSpecification`) — dodat celý týden (profil ukazuje 8–18).
+16. Vrátit „Kariéra“ do patičky, až bude cílová stránka.
+
+**E) Doporučené (kdykoli, nejlépe brzy)**
+17. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.
+18. Přesunout projekt mimo OneDrive — synchronizace `node_modules` způsobuje hromadné dotazy na mazání a hrozí promíchání knihoven.
+19. Drobnosti bez dopadu na návštěvníka: hláška Vite „Failed to scan for dependencies“ v dev režimu, blokující CSS ~0,5 s při simulaci pomalého mobilu (rychlost i tak 98–100).
