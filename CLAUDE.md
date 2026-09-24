@@ -382,6 +382,22 @@ bez zásahu by se „a" mohlo octnout samo na konci řádku.
   zobrazí doslovný text „&nbsp;" místo mezery. V editoru/kódu je vizuálně
   nerozeznatelný od běžné mezery, počítej s tím při hledání/kontrole.
 
+**Další místa, kde se nesmí zalomit (doplněno 24. 9. 2026 po celowebové
+kontrole):**
+- číslo + to, k čemu patří: `30&nbsp;minut`, `12&nbsp;měsíců`, `10&nbsp;let`,
+  `Google Analytics&nbsp;4`,
+- telefon `+420&nbsp;775&nbsp;217&nbsp;721`, PSČ + město `708&nbsp;00&nbsp;Ostrava`,
+  datum `1.&nbsp;9.&nbsp;2026`, `17.&nbsp;listopadu`,
+- právní odkazy: `č.&nbsp;257/2016&nbsp;Sb.`, `§&nbsp;3`, `odst.&nbsp;1`,
+  `čl.&nbsp;6`, `písm.&nbsp;f)`, `Osvědčení č.&nbsp;…`,
+- pomlčka nesmí začínat řádek: `slovo&nbsp;— další`, stejně oddělovač
+  `slovo&nbsp;· další`,
+- spojovník v místním názvu (`Ostrava-Poruba`, `Ostravě-Porubě`): za
+  spojovník vložit **word joiner** U+2060 (`&#8288;` v šabloně, znak
+  U+2060 v JS řetězci), nebo celý úsek obalit `white-space: nowrap`
+  (adresa v patičce a kontaktu). **Ne** U+2011 (nezlomitelný spojovník) —
+  Manrope ho nemá a prohlížeč by ho vykreslil jiným písmem.
+
 **Pozor na falešné nálezy:** kontroluj jen SAMOSTATNÁ slova (celá předložka/
 spojka mezi mezerami/interpunkcí), ne stejnou písmennou sekvenci jako
 součást delšího slova (např. „ze" ve slově „zeleň" se netýká) — a nezaměňuj

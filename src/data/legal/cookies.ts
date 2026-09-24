@@ -54,13 +54,13 @@ export const cookiesPage: LegalPageData = {
             [
               ['Nezbytné'],
               [
-                'Zapamatují si vaši volbu v cookie liště, aby se vám při další návštěvě neukazovala znovu. Bez nich web nefunguje. Doba uložení: 12 měsíců. Poskytovatel: tento web.',
+                'Zapamatují si vaši volbu v cookie liště, aby se vám při další návštěvě neukazovala znovu. Bez nich web nefunguje. Doba uložení: 12 měsíců. Poskytovatel: tento web.',
               ],
             ],
             [
               ['Analytické'],
               [
-                'Google Analytics 4 (cookies _ga a _ga_<ID>): měření návštěvnosti a chování na webu v souhrnné podobě. Nastaví se jen s vaším souhlasem. Doba uložení: 2 roky. Poskytovatel: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irsko.',
+                'Google Analytics 4 (cookies _ga a _ga_<ID>): měření návštěvnosti a chování na webu v souhrnné podobě. Nastaví se jen s vaším souhlasem. Doba uložení: 2 roky. Poskytovatel: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irsko.',
               ],
             ],
             [['Marketingové'], ['Zatím nepoužívám.']],
@@ -81,7 +81,7 @@ export const cookiesPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Souhlas platí 12 měsíců od udělení, poté se vás web zeptá znovu. Svou volbu můžete kdykoli změnit nebo odvolat tlačítkem „Nastavení cookies“ níže na této stránce nebo v patičce webu.',
+            'Souhlas platí 12 měsíců od udělení, poté se vás web zeptá znovu. Svou volbu můžete kdykoli změnit nebo odvolat tlačítkem „Nastavení cookies“ níže na této stránce nebo v patičce webu.',
           ],
         },
       ],

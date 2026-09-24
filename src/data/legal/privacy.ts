@@ -38,8 +38,8 @@ export const privacyPage: LegalPageData = {
           lines: [
             ['Patrik Gajdadzis'],
             ['IČO 09214526'],
-            ['Hlavní třída 568/73, 708 00 Ostrava'],
-            ['Telefon: ', link('tel:+420775217721', '+420 775 217 721')],
+            ['Hlavní třída 568/73, 708 00 Ostrava'],
+            ['Telefon: ', link('tel:+420775217721', '+420 775 217 721')],
             ['E-mail: ', link('mailto:patrik@mintfinance.cz', 'patrik@mintfinance.cz')],
           ],
         },
@@ -70,7 +70,7 @@ export const privacyPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Na ochranu formuláře před zneužitím (hromadné odesílání) uchovávám nejvýše jednu hodinu otisk IP adresy, ze které byl formulář odeslán, ne adresu samotnou. Důvodem je oprávněný zájem na zabezpečení webu (čl. 6 odst. 1 písm. f) GDPR); po hodině se otisk automaticky maže.',
+            'Na ochranu formuláře před zneužitím (hromadné odesílání) uchovávám nejvýše jednu hodinu otisk IP adresy, ze které byl formulář odeslán, ne adresu samotnou. Důvodem je oprávněný zájem na zabezpečení webu (čl. 6 odst. 1 písm. f) GDPR); po hodině se otisk automaticky maže.',
           ],
         },
         {
@@ -101,13 +101,13 @@ export const privacyPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Údaje z kontaktního formuláře zpracovávám na základě opatření přijatých na vaši žádost před případným uzavřením smlouvy (čl. 6 odst. 1 písm. b) GDPR). Vyplněním formuláře mě žádáte, abych vás kontaktoval ohledně konzultace. Pokud z poptávky nakonec nevznikne spolupráce, uchovávám údaje po přiměřenou dobu na základě oprávněného zájmu vyřídit váš dotaz a reagovat na případné navazující otázky.',
+            'Údaje z kontaktního formuláře zpracovávám na základě opatření přijatých na vaši žádost před případným uzavřením smlouvy (čl. 6 odst. 1 písm. b) GDPR). Vyplněním formuláře mě žádáte, abych vás kontaktoval ohledně konzultace. Pokud z poptávky nakonec nevznikne spolupráce, uchovávám údaje po přiměřenou dobu na základě oprávněného zájmu vyřídit váš dotaz a reagovat na případné navazující otázky.',
           ],
         },
         {
           type: 'p',
           content: [
-            'Web používá Google Analytics 4 k měření návštěvnosti. Toto zpracování je založené výhradně na vašem souhlasu uděleném přes cookie lištu. Bez souhlasu se analytické cookies nenastaví. Podrobnosti jsou na stránce ',
+            'Web používá Google Analytics 4 k měření návštěvnosti. Toto zpracování je založené výhradně na vašem souhlasu uděleném přes cookie lištu. Bez souhlasu se analytické cookies nenastaví. Podrobnosti jsou na stránce ',
             link('/cookies', 'Cookies'),
             '.',
           ],
@@ -148,13 +148,13 @@ export const privacyPage: LegalPageData = {
           type: 'list',
           items: [
             [
-              'Poptávka, ze které nevznikne spolupráce: uchovávám ji po dobu nutnou k vyřízení, nejdéle 6 měsíců od poslední komunikace.',
+              'Poptávka, ze které nevznikne spolupráce: uchovávám ji po dobu nutnou k vyřízení, nejdéle 6 měsíců od poslední komunikace.',
             ],
             [
-              'Dokumentace ke zprostředkovanému finančnímu produktu: uchovávám po dobu, kterou mi ukládají právní předpisy pro zprostředkovatele finančních produktů (zejména zákon proti praní peněz), zpravidla 10 let od ukončení smluvního vztahu.',
+              'Dokumentace ke zprostředkovanému finančnímu produktu: uchovávám po dobu, kterou mi ukládají právní předpisy pro zprostředkovatele finančních produktů (zejména zákon proti praní peněz), zpravidla 10 let od ukončení smluvního vztahu.',
             ],
             [
-              'Data v Google Analytics: uchovávám po dobu 14 měsíců od vaší poslední interakce s webem, podle nastavení účtu Google Analytics.',
+              'Data v Google Analytics: uchovávám po dobu 14 měsíců od vaší poslední interakce s webem, podle nastavení účtu Google Analytics.',
             ],
           ],
         },
@@ -194,14 +194,14 @@ export const privacyPage: LegalPageData = {
             'Kterékoli z těchto práv můžete uplatnit e-mailem na ',
             link('mailto:patrik@mintfinance.cz', 'patrik@mintfinance.cz'),
             ' nebo telefonicky na ',
-            link('tel:+420775217721', '+420 775 217 721'),
+            link('tel:+420775217721', '+420 775 217 721'),
             '.',
           ],
         },
         {
           type: 'p',
           content: [
-            'Pokud máte pocit, že s vašimi osobními údaji nezacházím v souladu s právními předpisy, můžete podat stížnost u Úřadu pro ochranu osobních údajů, Pplk. Sochora 27, 170 00 Praha 7.',
+            'Pokud máte pocit, že s vašimi osobními údaji nezacházím v souladu s právními předpisy, můžete podat stížnost u Úřadu pro ochranu osobních údajů, Pplk. Sochora 27, 170 00 Praha 7.',
           ],
         },
       ],

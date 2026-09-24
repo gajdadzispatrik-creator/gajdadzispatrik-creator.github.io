@@ -52,14 +52,14 @@ export const regulatoryPage: LegalPageData = {
           lines: [
             ['Patrik Gajdadzis'],
             ['IČO 09214526'],
-            ['Hlavní třída 568/73, 708 00 Ostrava'],
-            ['Telefon: ', link('tel:+420775217721', '+420 775 217 721')],
+            ['Hlavní třída 568/73, 708 00 Ostrava'],
+            ['Telefon: ', link('tel:+420775217721', '+420 775 217 721')],
           ],
         },
         {
           type: 'p',
           content: [
-            'Konzultace poskytuji na adrese 17. listopadu 599/30, 708 00 Ostrava-Poruba, nebo online. Jsem ředitelem a obchodně působím v rámci týmu společnosti MINT reality a finance s.r.o. Regulovanou finanční činnost (viz níže) vykonávám jako vázaný zástupce společnosti BEplan finanční plánování s.r.o., registrovaný u České národní banky.',
+            'Konzultace poskytuji na adrese 17. listopadu 599/30, 708 00 Ostrava-⁠Poruba, nebo online. Jsem ředitelem a obchodně působím v rámci týmu společnosti MINT reality a finance s.r.o. Regulovanou finanční činnost (viz níže) vykonávám jako vázaný zástupce společnosti BEplan finanční plánování s.r.o., registrovaný u České národní banky.',
           ],
         },
       ],
@@ -81,16 +81,16 @@ export const regulatoryPage: LegalPageData = {
           rows: [
             [
               ['Zprostředkování spotřebitelského úvěru (hypotéky)'],
-              ['Vázaný zástupce společnosti BEplan finanční plánování s.r.o. (zákon č. 257/2016 Sb.).'],
+              ['Vázaný zástupce společnosti BEplan finanční plánování s.r.o. (zákon č. 257/2016 Sb.).'],
             ],
             [
               ['Distribuce pojištění'],
-              ['Vázaný zástupce společnosti BEplan finanční plánování s.r.o. (zákon č. 170/2018 Sb.).'],
+              ['Vázaný zástupce společnosti BEplan finanční plánování s.r.o. (zákon č. 170/2018 Sb.).'],
             ],
             [
               ['Investice'],
               [
-                'Vázaný zástupce společnosti BEplan finanční plánování s.r.o. (zákon č. 256/2004 Sb., o podnikání na kapitálovém trhu).',
+                'Vázaný zástupce společnosti BEplan finanční plánování s.r.o. (zákon č. 256/2004 Sb., o podnikání na kapitálovém trhu).',
               ],
             ],
           ],
@@ -115,25 +115,25 @@ export const regulatoryPage: LegalPageData = {
             [
               ['Spotřebitelský úvěr'],
               [
-                'Zkouška dle zákona č. 257/2016 Sb., skupina odbornosti IV. (úvěr na bydlení i jiný spotřebitelský úvěr). Osvědčení č. 250423021, VECTOR Certifikace s.r.o.',
+                'Zkouška dle zákona č. 257/2016 Sb., skupina odbornosti IV. (úvěr na bydlení i jiný spotřebitelský úvěr). Osvědčení č. 250423021, VECTOR Certifikace s.r.o.',
               ],
             ],
             [
               ['Distribuce pojištění'],
               [
-                'Zkouška dle zákona č. 170/2018 Sb., skupina odbornosti IX. (životní pojištění a pojištění velkých pojistných rizik). Osvědčení č. 250423213, VECTOR Certifikace s.r.o.',
+                'Zkouška dle zákona č. 170/2018 Sb., skupina odbornosti IX. (životní pojištění a pojištění velkých pojistných rizik). Osvědčení č. 250423213, VECTOR Certifikace s.r.o.',
               ],
             ],
             [
               ['Investiční služby'],
               [
-                'Zkouška dle zákona č. 256/2004 Sb., skupina odbornosti II. (investiční nástroje dle § 3 odst. 1). Osvědčení č. 250507025, VECTOR Certifikace s.r.o.',
+                'Zkouška dle zákona č. 256/2004 Sb., skupina odbornosti II. (investiční nástroje dle § 3 odst. 1). Osvědčení č. 250507025, VECTOR Certifikace s.r.o.',
               ],
             ],
             [
               ['Zprostředkování pojištění pojistníkem'],
               [
-                'Doplňkové vzdělávání dle zákona č. 170/2018 Sb. Osvědčení č. FLO 3021, VECTOR Certifikace s.r.o.',
+                'Doplňkové vzdělávání dle zákona č. 170/2018 Sb. Osvědčení č. FLO 3021, VECTOR Certifikace s.r.o.',
               ],
             ],
           ],
@@ -189,7 +189,7 @@ export const regulatoryPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Spory týkající se finančních služeb lze mimosoudně řešit u Finančního arbitra, Legerova 1581/69, 110 00 Praha 1.',
+            'Spory týkající se finančních služeb lze mimosoudně řešit u Finančního arbitra, Legerova 1581/69, 110 00 Praha 1.',
           ],
         },
       ],
