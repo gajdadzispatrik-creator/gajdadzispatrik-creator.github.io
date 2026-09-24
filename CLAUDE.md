@@ -22,7 +22,16 @@ npm run dev          # vývojový server (astro dev)
 npm run build        # astro check + astro build → dist/
 npm run preview      # náhled buildu
 npm run check:layout # automatická kontrola pravidel z „Konvence" níže (vyžaduje běžící npm run dev)
+npm run check:typo   # kontrola zalamování řádků v textu (vyžaduje běžící npm run dev)
 ```
+
+`check:typo` (`scripts/check-typography.mjs`) projde **všechny stránky, na
+které web odkazuje** (plus `/clanky` a stránku 404), a hledá ve vykresleném
+textu místa, kde se řádek může zlomit tam, kde nesmí — viz „Konvence:
+nezlomitelná mezera" níže. **Spusť ho po každé změně nebo doplnění textu**
+(nový článek, podstránka, úprava copy, právní texty) — teprve s 0 nálezy je
+text hotový. Nová stránka se zkontroluje sama, jakmile na ni vede odkaz;
+stránku bez odkazu přidej do `EXTRA_PATHS` ve skriptu.
 
 `check:layout` (Playwright, `scripts/audit-layout.mjs`) ověří na živém dev serveru u
 sekcí s dekorativní trasou: že text drží konstantní odstup od tečky/osy na
@@ -397,6 +406,9 @@ kontrole):**
   U+2060 v JS řetězci), nebo celý úsek obalit `white-space: nowrap`
   (adresa v patičce a kontaktu). **Ne** U+2011 (nezlomitelný spojovník) —
   Manrope ho nemá a prohlížeč by ho vykreslil jiným písmem.
+
+Všechna pravidla výše hlídá automaticky `npm run check:typo` (viz „Jak
+spustit").
 
 **Pozor na falešné nálezy:** kontroluj jen SAMOSTATNÁ slova (celá předložka/
 spojka mezi mezerami/interpunkcí), ne stejnou písmennou sekvenci jako
