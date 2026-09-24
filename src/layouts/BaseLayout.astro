@@ -3,7 +3,7 @@ import '../styles/tokens.css';
 import '../styles/fonts.css';
 import '../styles/global.css';
 import CookieConsent from '../components/CookieConsent.astro';
-import { personEntity, websiteEntity } from '../data/entity';
+import { businessEntity, personEntity, websiteEntity } from '../data/entity';
 
 interface Props {
   title: string;
@@ -34,7 +34,9 @@ const canonicalURL = new URL(normalizedPath || '/', Astro.site).toString();
 
 const jsonLdGraph = {
   '@context': 'https://schema.org',
-  '@graph': [websiteEntity, personEntity, ...jsonLd],
+  // Firma (Google Business Profile) je na každé stránce, protože na ni
+  // Person odkazuje přes `workLocation` — bez ní by odkaz visel do prázdna.
+  '@graph': [websiteEntity, personEntity, businessEntity, ...jsonLd],
 };
 ---
 

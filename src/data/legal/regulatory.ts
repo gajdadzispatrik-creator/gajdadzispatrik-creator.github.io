@@ -59,7 +59,7 @@ export const regulatoryPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Konzultace poskytuji na adrese 17. listopadu 599/30, Ostrava-Poruba, nebo online. Jsem ředitelem a obchodně působím v rámci týmu společnosti MINT reality a finance s.r.o. Regulovanou finanční činnost (viz níže) vykonávám jako vázaný zástupce společnosti BEplan finanční plánování s.r.o., registrovaný u České národní banky.',
+            'Konzultace poskytuji na adrese 17. listopadu 599/30, 708 00 Ostrava-Poruba, nebo online. Jsem ředitelem a obchodně působím v rámci týmu společnosti MINT reality a finance s.r.o. Regulovanou finanční činnost (viz níže) vykonávám jako vázaný zástupce společnosti BEplan finanční plánování s.r.o., registrovaný u České národní banky.',
           ],
         },
       ],

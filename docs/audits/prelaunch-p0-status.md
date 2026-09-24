@@ -255,9 +255,10 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 4. ~~Stránka 404~~ — hotovo 24. 9. 2026 (`src/pages/404.astro`, `ErrorDocument 404 /404.html`, `noindex`, bez canonical). Po nasazení ověřit, že vrací kód 404 (postup v `docs/deploy-wedos.md`).
 5. ~~Doby uchovávání údajů~~ — potvrzeno 24. 9. 2026: poptávky 6 měsíců, dokumentace k produktům 10 let (zákon proti praní peněz; přesnou lhůtu ještě ověřit u compliance BEplanu), GA4 14 měsíců, souhlas s cookies 12 měsíců. **Při zapnutí GA4 nastavit uchovávání dat na 14 měsíců** (výchozí jsou 2).
 6. Měření — GA4 ID + událost odeslání formuláře a kliknutí na telefon, Search Console + Bing Webmaster (v den spuštění), hlídání dostupnosti (např. UptimeRobot).
-7. Google Business Profile — stejná adresa jako web (17. listopadu 599/30, 708 00 Ostrava-Poruba). Na webu (patička, kontakt) se zatím zobrazuje bez PSČ → doplnit kvůli jednotnosti NAP.
-8. `LocalBusiness`/`FinancialService` schema — adresa potvrzena, chybí přesný název firmy tak, jak je v Google Business Profile.
+7. ~~PSČ na webu~~ — hotovo 24. 9. 2026: patička, kontakt i regulatorní informace „17. listopadu 599/30, 708 00 Ostrava-Poruba" (profil Google uvádí „Ostrava 8" — stejné PSČ, Google obě varianty páruje).
+8. ~~`FinancialService` schema~~ — hotovo 24. 9. 2026 (`businessEntity` v `src/data/entity.ts`, název 1:1 podle profilu „Patrik Gajdadzis | Hypotéky a finance", na každé stránce). **Chybí otevírací doba** — dodat celý týden (profil ukazuje 8–18, ale ne všechny dny).
 9. Dva různé Google odkazy (`sameAs` → `share.google/cjOK…`, recenze → `share.google/XnAx…`) — ověřit, že oba vedou na správný profil.
+9a. Profil má 45 recenzí, `/recenze` jich zobrazuje 42 — doplnit 3 nové (text, jméno, datum), až je uživatel pošle. Počet recenzí se jinde na webu neuvádí (jen hodnocení 5,0), takže nic dalšího nezastarává.
 
 **Otevřené — technické**
 10. Nasazení na Wedos podle `docs/deploy-wedos.md` + živé testy (přesměrování, hlavičky, formulář do obou schránek, SPF/DKIM/DMARC, kontrola na skutečném iPhonu — testovací WebKit pro Windows nevykresluje věrně tučnost variabilního fontu).

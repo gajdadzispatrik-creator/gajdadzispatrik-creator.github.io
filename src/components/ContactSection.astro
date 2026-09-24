@@ -106,7 +106,7 @@ const bandDetails = [
 
         <address class="kontakt__address">
           <span class="kontakt__address-label">Adresa konzultací</span>
-          <span class="kontakt__address-value">17. listopadu 599/30, Ostrava-Poruba</span>
+          <span class="kontakt__address-value">17. listopadu 599/30, <span class="kontakt__nowrap">708&nbsp;00 Ostrava-Poruba</span></span>
           <span class="kontakt__address-note">Termín po&nbsp;předchozí domluvě</span>
         </address>
       </div>
@@ -803,6 +803,11 @@ const bandDetails = [
     font-weight: 400;
     font-size: 16px;
     color: var(--navy);
+  }
+
+  /* PSČ + město drží pohromadě (jinak se láme u spojovníku „Ostrava-"). */
+  .kontakt__nowrap {
+    white-space: nowrap;
   }
 
   .kontakt__address-note {

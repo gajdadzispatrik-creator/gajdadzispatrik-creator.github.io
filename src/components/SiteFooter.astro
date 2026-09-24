@@ -116,7 +116,7 @@ const socialIcons: Record<string, string> = {
         </div>
         <div class="footer__contact-item">
           <dt>Konzultace</dt>
-          <dd><address>17. listopadu 599/30, Ostrava-Poruba</address></dd>
+          <dd><address>17. listopadu 599/30, <span class="footer__nowrap">708&nbsp;00 Ostrava-Poruba</span></address></dd>
         </div>
       </dl>
     </div>
@@ -675,6 +675,11 @@ const socialIcons: Record<string, string> = {
   .footer__contact address {
     font-style: normal;
     line-height: 1.5;
+  }
+
+  /* PSČ + město drží pohromadě (jinak se láme „708 00 / Ostrava-" nebo u spojovníku). */
+  .footer__nowrap {
+    white-space: nowrap;
   }
 
   /* --- Pásmo 2: kolony odkazů --- */
