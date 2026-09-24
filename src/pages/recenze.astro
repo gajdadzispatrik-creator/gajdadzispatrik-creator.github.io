@@ -28,8 +28,9 @@
  * (ne generovaná fiktivní hodnota), barva `--text-muted` (kontrast na
  * `--bg` bezpečně nad 4,5:1 — `--text-faint`/`--text-quiet` se na
  * metadatech recenzí NEPOUŽÍVAJÍ, zadání §7 to výslovně zakazuje).
- * Postupné načítání (`Zobrazit další recenze`) odkrývá DALŠÍ placeholdery
- * ze stejného pole, ne fiktivní obsah — první dávka se vykreslí i bez JS.
+ * „Zobrazit další recenze" (od 24. 9. 2026) NEodkrývá další položky na
+ * stránce, ale otevírá Google profil v nové kartě — na webu jsou jen první
+ * `REVIEWS_SHOWN` recenze, viz komentář u konstanty.
  *
  * Souhrnné „X recenzí · 5,0 · Google hodnocení" pole (`.rec-summary`) bylo
  * na přání uživatele 14. 9. 2026 odstraněno bez náhrady — číslo recenzí se
@@ -409,7 +410,12 @@ const reviews: Review[] = [
   },
 ];
 
-const REVIEWS_PAGE_SIZE = 3;
+// Na webu se zobrazuje jen prvních pár recenzí, zbytek je na Google profilu
+// (rozhodnutí uživatele 24. 9. 2026 — nové recenze se na web nedoplňují,
+// „Zobrazit další recenze" otevírá profil). Počet recenzí se proto nikde na
+// webu neuvádí. Ostatní položky pole zůstávají jako zásoba, kdyby se počet
+// zobrazených měnil.
+const REVIEWS_SHOWN = 3;
 const GOOGLE_PROFILE_URL = 'https://share.google/XnAx2GCl6M1bOtfto';
 ---
 
@@ -518,10 +524,10 @@ const GOOGLE_PROFILE_URL = 'https://share.google/XnAx2GCl6M1bOtfto';
         </div>
 
         <div class="rec-reviews" id="recenze-vypis">
-          <ul class="rec-reviews__list" data-reviews-list>
+          <ul class="rec-reviews__list">
             {
-              reviews.map((review, i) => (
-                <li class="rec-review" data-review-index={i} hidden={i >= REVIEWS_PAGE_SIZE}>
+              reviews.slice(0, REVIEWS_SHOWN).map((review) => (
+                <li class="rec-review">
                   {review.text ? (
                     <blockquote class="rec-review__quote">
                       <p>{review.text}</p>
@@ -552,12 +558,13 @@ const GOOGLE_PROFILE_URL = 'https://share.google/XnAx2GCl6M1bOtfto';
             }
           </ul>
 
-          {reviews.length > REVIEWS_PAGE_SIZE && (
-            <button type="button" class="rec-reviews__more" data-reviews-more>
-              Zobrazit další recenze
-            </button>
-          )}
-          <p class="sr-only" role="status" data-reviews-status></p>
+          <a class="rec-reviews__more" href={GOOGLE_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+            <span>Zobrazit další recenze</span>
+            <svg class="rec-google-link__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path d="M7 17 17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span class="sr-only">(na Google, externí web)</span>
+          </a>
         </div>
       </div>
     </section>
@@ -851,28 +858,6 @@ const GOOGLE_PROFILE_URL = 'https://share.google/XnAx2GCl6M1bOtfto';
       if (!target) return;
       e.preventDefault();
       target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
-    });
-  }
-
-  // „Zobrazit další recenze" — odkrývá další PLACEHOLDER položky ze
-  // stejného pole (žádný fetch, žádná fiktivní data). Bez JS zůstává
-  // tlačítko skryté funkčně neaktivní (první dávka je vždy vykreslená
-  // v HTML), přesně podle zadání §13.
-  const moreBtn = document.querySelector('[data-reviews-more]') as HTMLButtonElement | null;
-  const reviewsList = document.querySelector('[data-reviews-list]');
-  const statusEl = document.querySelector('[data-reviews-status]');
-  if (moreBtn && reviewsList) {
-    moreBtn.addEventListener('click', () => {
-      const hiddenItems = Array.from(reviewsList.querySelectorAll('[hidden]'));
-      const batch = hiddenItems.slice(0, 3);
-      batch.forEach((el) => el.removeAttribute('hidden'));
-      const remaining = reviewsList.querySelectorAll('[hidden]').length;
-      if (remaining === 0) moreBtn.hidden = true;
-      if (statusEl) {
-        const shown = reviewsList.querySelectorAll('.rec-review:not([hidden])').length;
-        const total = reviewsList.querySelectorAll('.rec-review').length;
-        statusEl.textContent = `Zobrazeno ${shown} z ${total} recenzí.`;
-      }
     });
   }
 </script>
@@ -1271,6 +1256,9 @@ const GOOGLE_PROFILE_URL = 'https://share.google/XnAx2GCl6M1bOtfto';
 
   .rec-reviews__more {
     align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     margin-top: 12px;
     height: 48px;
     padding-inline: 24px;
