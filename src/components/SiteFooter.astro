@@ -34,7 +34,8 @@
  *   `id="kontakt"`), ne na neexistující `/kontakt`.
  * - Facebook a Instagram doplněny (25. 8. 2026):
  *   https://www.facebook.com/patrik.gajdadzis/, https://www.instagram.com/patrikgajdadzis/.
- *   Google odkaz aktualizován na https://share.google/cjOKhgPI7p1vA2HI9.
+ *   Google odkaz (24. 9. 2026) vede na záložku Recenze v Mapách —
+ *   `GOOGLE_REVIEWS_URL` ze src/data/entity.ts, stejně jako recenze.
  * - AKTUALIZOVÁNO (úkol „Předspouštěcí P0 technické dotažení“): `serviceLinks`
  *   propojeny na 5 hotových detailních stránek (`/sluzby/*`) — dřív `href:
  *   null`, ačkoli stránky už existovaly (nalezeno auditem 9. 9. 2026).
@@ -43,6 +44,8 @@
  *   (`src/pages/clanky.astro`, `noindex`), jen bez veřejného odkazu odsud.
  * - Pořád chybí: Kariéra — `href: null` u této položky je proto stále správně.
  */
+import { GOOGLE_REVIEWS_URL } from '../data/entity';
+
 interface LinkItem {
   label: string;
   href: string | null;
@@ -80,7 +83,7 @@ const legalLinks = [
 ];
 
 const socialLinks: LinkItem[] = [
-  { label: 'Google', href: 'https://share.google/cjOKhgPI7p1vA2HI9' },
+  { label: 'Google', href: GOOGLE_REVIEWS_URL },
   { label: 'Facebook', href: 'https://www.facebook.com/patrik.gajdadzis/' },
   { label: 'Instagram', href: 'https://www.instagram.com/patrikgajdadzis/' },
 ];

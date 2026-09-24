@@ -231,7 +231,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 - `npm audit`: 8 zranitelností v build nástrojích (1 critical v `astro`). Pro statický web bez SSR, bez obrázkové optimalizace a bez uživatelského vstupu je dopad na návštěvníky prakticky nulový; týká se buildu a dev serveru (`server.host: true` ho otevírá do lokální sítě). Nezlomové opravy: `npm audit fix`; `astro` vyžaduje major upgrade 5 → 7 jako samostatný úkol.
 - `FAQPage` schema (P1) — nízká hodnota: Google od 8/2023 zobrazuje FAQ rich results jen u autoritativních vládních/zdravotnických webů. Doporučeno vyřadit z plánu.
 - Search Console/Bing Webmaster/IndexNow, `GPTBot` pravidlo — beze změny (po spuštění / tvoje rozhodnutí).
-- `sameAs` v `src/data/entity.ts` odkazuje na `share.google/cjOK…`, odkaz na recenze na webu je `share.google/XnAx…` — ověřit, že oba vedou na správný profil.
+- ~~Dva různé `share.google` odkazy~~ — vyřešeno 24. 9. 2026, viz bod 9 v sekci 20.
 
 ---
 
@@ -257,7 +257,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 6. Měření — GA4 ID + událost odeslání formuláře a kliknutí na telefon, Search Console + Bing Webmaster (v den spuštění), hlídání dostupnosti (např. UptimeRobot).
 7. ~~PSČ na webu~~ — hotovo 24. 9. 2026: patička, kontakt i regulatorní informace „17. listopadu 599/30, 708 00 Ostrava-Poruba" (profil Google uvádí „Ostrava 8" — stejné PSČ, Google obě varianty páruje).
 8. ~~`FinancialService` schema~~ — hotovo 24. 9. 2026 (`businessEntity` v `src/data/entity.ts`, název 1:1 podle profilu „Patrik Gajdadzis | Hypotéky a finance", na každé stránce). **Chybí otevírací doba** — dodat celý týden (profil ukazuje 8–18, ale ne všechny dny).
-9. ~~Dva různé Google odkazy~~ — odkazy na recenze (homepage, `/recenze`) vedou od 24. 9. 2026 přímo na záložku Recenze v Google Mapách (ověřeno). `sameAs` a patička dál používají `share.google/cjOK…`.
+9. ~~Dva různé Google odkazy~~ — sjednoceno 24. 9. 2026: všechny viditelné odkazy na Google (homepage, `/recenze`, ikonka v patičce) vedou přímo na záložku Recenze v Google Mapách, `sameAs` ve strukturovaných datech na stálý odkaz `maps.google.com/?cid=…`. Oba jsou v `src/data/entity.ts` (jediné místo), žádný `share.google` odkaz už na webu není.
 9b. **Google profil má jako web `pafinga.cz`, ne `patrikgajdadzis.cz`** (zjištěno 24. 9. 2026 v Mapách). Po spuštění webu změnit v profilu (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí a návštěvy z Map půjdou jinam.
 9a. ~~Nové recenze na `/recenze`~~ — rozhodnuto 24. 9. 2026: recenze se na web nedoplňují. `/recenze` zobrazuje 3, „Zobrazit další recenze" otevírá Google profil. Počet recenzí se na webu nikde neuvádí (jen hodnocení 5,0), takže nic nezastarává.
 

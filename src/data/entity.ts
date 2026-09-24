@@ -28,8 +28,17 @@ const OFFICE_ADDRESS = {
   addressCountry: 'CZ',
 };
 
-// Google Business Profile odkaz — patří firmě (profilu na Mapách), ne osobě.
-const GOOGLE_PROFILE_URL = 'https://share.google/cjOKhgPI7p1vA2HI9';
+// Google Business Profile — JEDINÉ místo s odkazy na profil (dohledáno
+// v Mapách 24. 9. 2026). Dřívější share.google odkazy vedly na vyhledávání
+// Google, kde se recenze neotevřou hned a Google často chce ověření „nejsem
+// robot“.
+// - GOOGLE_REVIEWS_URL: otevře profil rovnou na záložce Recenze — pro
+//   všechny viditelné odkazy na webu (recenze, patička).
+// - GOOGLE_MAPS_CID_URL: stálý identifikátor místa (CID) — pro `sameAs`
+//   ve strukturovaných datech, nezávislý na názvu firmy.
+export const GOOGLE_REVIEWS_URL =
+  'https://www.google.com/maps/place/Patrik+Gajdadzis+%7C+Hypot%C3%A9ky+a+finance/data=!4m8!3m7!1s0x4713e37436aeb17b:0x4be682e02f942c0!8m2!3d49.8290121!4d18.1635271!9m1!1b1!16s%2Fg%2F11sghfvss6';
+const GOOGLE_MAPS_CID_URL = 'https://maps.google.com/?cid=341825168554410688';
 
 export const personEntity = {
   '@type': 'Person',
@@ -71,7 +80,7 @@ export const businessEntity = {
   address: OFFICE_ADDRESS,
   areaServed: { '@type': 'City', name: 'Ostrava' },
   founder: { '@id': PERSON_ID },
-  sameAs: [GOOGLE_PROFILE_URL],
+  sameAs: [GOOGLE_MAPS_CID_URL],
 };
 
 export const websiteEntity = {

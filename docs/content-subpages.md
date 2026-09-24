@@ -2859,7 +2859,7 @@ je potřeba ověřit aktuální počet, aktuální průměr a že jde skutečně
 **osobní profil Patrika Gajdadzise** — ne o součet/recenze celého Mint
 reality & finance, ne Hypotéky Ostrava, ne jiného poradce.
 
-**Odkaz na Google profil:** `https://share.google/WyM4NvhpF51J3DbCZ`
+**Odkaz na Google profil:** přímo na záložku Recenze v Google Mapách — `GOOGLE_REVIEWS_URL` v `src/data/entity.ts` (sjednoceno 24. 9. 2026; původní `share.google/WyM4NvhpF51J3DbCZ` vedl na obecnou stránku místa).
 (dodaný uživatelem přímo pro tuto stránku, 9. 9. 2026) — použít přesně
 tuhle URL, nevymýšlet ani neodhadovat jinou.
 

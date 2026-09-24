@@ -47,6 +47,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
+import { GOOGLE_REVIEWS_URL } from '../data/entity';
 
 interface Review {
   author: string | null;
@@ -57,10 +58,8 @@ interface Review {
   lineWidths: string[];
 }
 
-// Přímý odkaz na záložku Recenze v Google Mapách (dohledáno 24. 9. 2026 —
-// dřívější share.google odkaz vedl na vyhledávání, kde Google často ukáže
-// ověření „nejsem robot“ a recenze nejsou vidět hned).
-const GOOGLE_PROFILE_URL = 'https://www.google.com/maps/place/Patrik+Gajdadzis+%7C+Hypot%C3%A9ky+a+finance/data=!4m8!3m7!1s0x4713e37436aeb17b:0x4be682e02f942c0!8m2!3d49.8290121!4d18.1635271!9m1!1b1!16s%2Fg%2F11sghfvss6';
+// Odkaz na recenze — jediný zdroj v src/data/entity.ts.
+const GOOGLE_PROFILE_URL = GOOGLE_REVIEWS_URL;
 
 // 42 SKUTEČNÝCH RECENZÍ opsaných přímo z Google profilu „Patrik Gajdadzis |
 // Hypotéky a finance" (5 stažených 10. 9. 2026 bez přihlášení, zbylých 37

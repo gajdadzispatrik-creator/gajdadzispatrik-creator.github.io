@@ -22,6 +22,7 @@
  * (nadpis, dělítko, tečka, obsahová linka, tablet/mobil pozice hodnocení,
  * mobil pozice odkazu), je použito beze změny.
  */
+import { GOOGLE_REVIEWS_URL } from '../data/entity';
 interface Review {
   text: string | null;
   author: string | null;
@@ -46,10 +47,8 @@ const reviews: Review[] = [
   },
 ];
 
-// Přímý odkaz na záložku Recenze v Google Mapách (dohledáno 24. 9. 2026 —
-// dřívější share.google odkaz vedl na vyhledávání, kde Google často ukáže
-// ověření „nejsem robot“ a recenze nejsou vidět hned).
-const googleReviewUrl = 'https://www.google.com/maps/place/Patrik+Gajdadzis+%7C+Hypot%C3%A9ky+a+finance/data=!4m8!3m7!1s0x4713e37436aeb17b:0x4be682e02f942c0!8m2!3d49.8290121!4d18.1635271!9m1!1b1!16s%2Fg%2F11sghfvss6';
+// Odkaz na recenze — jediný zdroj v src/data/entity.ts.
+const googleReviewUrl = GOOGLE_REVIEWS_URL;
 ---
 
 <section class="reviews" aria-labelledby="recenze">
