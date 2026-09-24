@@ -232,3 +232,35 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 - `FAQPage` schema (P1) — nízká hodnota: Google od 8/2023 zobrazuje FAQ rich results jen u autoritativních vládních/zdravotnických webů. Doporučeno vyřadit z plánu.
 - Search Console/Bing Webmaster/IndexNow, `GPTBot` pravidlo — beze změny (po spuštění / tvoje rozhodnutí).
 - `sameAs` v `src/data/entity.ts` odkazuje na `share.google/cjOK…`, odkaz na recenze na webu je `share.google/XnAx…` — ověřit, že oba vedou na správný profil.
+
+---
+
+## 20) Stav a úkoly — 24. 9. 2026 (funkční dotažení)
+
+**Hotovo v tomto kole**
+- **Git** — repozitář založen (`main`), `.gitattributes` drží LF (Wedos je Linux). Zatím jen lokálně.
+- **Formulář** — záloha každé poptávky do `poptavka@patrikgajdadzis.cz` (jiný poskytovatel než Google Workspace), limit 8 odeslání/hod. z jedné IP (otisk v `api/limity/`, složka zvenku zakázaná `api/.htaccess`), zásady ochrany údajů doplněny o skutečné příjemce (WEDOS, Google Workspace) a otisk IP.
+- **Strukturovaná data** — adresa kanceláře (17. listopadu 599/30, 708 00 Ostrava-Poruba) jako `workLocation` u `Person`.
+- **robots.txt** — výslovně povoleni AI roboti (GPTBot, ChatGPT-User, OAI-SearchBot, ClaudeBot, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User, Google-Extended, Applebot-Extended).
+- **Titulky v plánu** — `/sluzby/hypoteky` a `/o-mne` dorovnány na stav webu (změna z předspouštěcího úkolu se nepromítla do `content-subpages.md`).
+- **Astro 5 → 7.3.5**, `npm audit` 0 zranitelností, build i `check:layout` beze změny výstupu (554/554). Dev server jen na `127.0.0.1` (dřív celá lokální síť).
+- **Lighthouse (mobil, produkční build, 5 stránek):** rychlost 98–100, přístupnost 100, osvědčené postupy 96 (jen chybějící favicon → 404), SEO 100. Opraven přístupný název loga (WCAG 2.5.3).
+- **Safari (WebKit, iPhone 13 + iPad, 13 stránek):** žádné chyby JS, přetečení, NaN/Infinity v trase, deformované tečky; tečka v patičce na konci linky; validace formuláře funguje.
+- **Postup nasazení** — `docs/deploy-wedos.md` (nastavení Wedosu, nahrání vč. skrytých `.htaccess`, kontrolní příkazy po nasazení).
+
+**Otevřené — dodá/rozhodne uživatel (vizuál a obsah se dodělávají)**
+1. Fotky místo placeholderů (homepage hero „FOTO PATRIKA - PLACEHOLDER“, O mně, `/o-mne`, `/pristup`).
+2. Sekce Články na homepage — 3 prázdné řádky; skrýt nebo naplnit, dokud nejsou články.
+3. Favicon + OG obrázek — bez faviconu hlásí každá stránka 404 v konzoli (jediná výtka Lighthouse).
+4. Stránka 404 — návrh předložen, čeká na schválení textu.
+5. Doby uchovávání údajů (`privacy.ts`) — doporučení předloženo, čeká na potvrzení; lhůtu u dokumentace k produktům převzít od BEplan (zastoupený), GA4 nastavit na 14 měsíců (výchozí jsou 2).
+6. Měření — GA4 ID + událost odeslání formuláře a kliknutí na telefon, Search Console + Bing Webmaster (v den spuštění), hlídání dostupnosti (např. UptimeRobot).
+7. Google Business Profile — stejná adresa jako web (17. listopadu 599/30, 708 00 Ostrava-Poruba). Na webu (patička, kontakt) se zatím zobrazuje bez PSČ → doplnit kvůli jednotnosti NAP.
+8. `LocalBusiness`/`FinancialService` schema — adresa potvrzena, chybí přesný název firmy tak, jak je v Google Business Profile.
+9. Dva různé Google odkazy (`sameAs` → `share.google/cjOK…`, recenze → `share.google/XnAx…`) — ověřit, že oba vedou na správný profil.
+
+**Otevřené — technické**
+10. Nasazení na Wedos podle `docs/deploy-wedos.md` + živé testy (přesměrování, hlavičky, formulář do obou schránek, SPF/DKIM/DMARC, kontrola na skutečném iPhonu — testovací WebKit pro Windows nevykresluje věrně tučnost variabilního fontu).
+11. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.
+12. Projekt na OneDrivu — synchronizace `node_modules` způsobuje hromadné dotazy na mazání (tisíce souborů při každé aktualizaci) a hrozí promíchání knihoven. Doporučeno přesunout projekt mimo OneDrive (záloha je teď git) nebo vyřadit `node_modules` ze synchronizace.
+13. Drobnosti bez dopadu na návštěvníka: hláška Vite „Failed to scan for dependencies“ v dev režimu (komentáře ve `<script>`), blokující CSS ~0,5 s při simulaci pomalého mobilu (rychlost i tak 98–100).
