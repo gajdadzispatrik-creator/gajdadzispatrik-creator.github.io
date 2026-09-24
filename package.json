@@ -11,10 +11,10 @@
     "check:layout": "node scripts/audit-layout.mjs"
   },
   "dependencies": {
-    "astro": "^5.1.1"
+    "astro": "^7.3.5"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.4",
+    "@astrojs/check": "^0.9.10",
     "@playwright/test": "^1.62.1",
     "typescript": "^5.7.2"
   }
