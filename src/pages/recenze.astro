@@ -34,10 +34,10 @@
  *
  * Souhrnné „X recenzí · 5,0 · Google hodnocení" pole (`.rec-summary`) bylo
  * na přání uživatele 14. 9. 2026 odstraněno bez náhrady — číslo recenzí se
- * na stránce už neuvádí nikde. Odkaz na Google profil `https://share.google/XnAx2GCl6M1bOtfto`
- * dodal uživatel přímo pro tuhle stránku (aktualizováno 14. 9. 2026 — původní
- * odkaz `WyM4NvhpF51J3DbCZ` vedl jen na obecnou stránku „místa", ne na
- * recenze) — použit doslovně, nevymýšlen.
+ * na stránce už neuvádí nikde. Odkaz na recenze (`GOOGLE_PROFILE_URL`) vede
+ * od 24. 9. 2026 přímo na záložku Recenze v Google Mapách — dřívější
+ * `share.google/XnAx2GCl6M1bOtfto` (od uživatele 14. 9. 2026) vedl na
+ * vyhledávání Google, kde se recenze neotevřou hned.
  *
  * ŽÁDNÉ `Review`/`AggregateRating` schema, žádný carousel, žádné
  * filtrování, žádné případové studie (jsou jen budoucí rezerva v
@@ -57,6 +57,11 @@ interface Review {
   lineWidths: string[];
 }
 
+// Přímý odkaz na záložku Recenze v Google Mapách (dohledáno 24. 9. 2026 —
+// dřívější share.google odkaz vedl na vyhledávání, kde Google často ukáže
+// ověření „nejsem robot“ a recenze nejsou vidět hned).
+const GOOGLE_PROFILE_URL = 'https://www.google.com/maps/place/Patrik+Gajdadzis+%7C+Hypot%C3%A9ky+a+finance/data=!4m8!3m7!1s0x4713e37436aeb17b:0x4be682e02f942c0!8m2!3d49.8290121!4d18.1635271!9m1!1b1!16s%2Fg%2F11sghfvss6';
+
 // 42 SKUTEČNÝCH RECENZÍ opsaných přímo z Google profilu „Patrik Gajdadzis |
 // Hypotéky a finance" (5 stažených 10. 9. 2026 bez přihlášení, zbylých 37
 // dodal uživatel 10. 9. 2026 jako screenshoty z vlastního přihlášeného účtu —
@@ -73,7 +78,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 10 měsíci',
     text: 'S panem Patrikem Gajdadzisem spolupracujeme už řadu let a jsme maximálně spokojeni. Dokázal nám pomoci i s vyvázáním člověka z hypotéky a následně zařídil novou s výhodnějším úrokem. Veškeré pojištění (od životního přes dům až po auto) máme u něj, a už jen tím šetříme několik tisíc korun ročně. Na Patrikovi si nejvíc vážíme jeho přístupu – kdykoliv bylo potřeba, stačilo zavolat a vždy se nám ochotně věnoval a pomohl najít řešení. Je vidět, že svou práci dělá srdcem a opravdu mu záleží na lidech. Můžeme ho jen doporučit!',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -81,7 +86,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 4 měsíci',
     text: 'Ráda bych touto cestou poděkovala společnosti Mint, konkrétně panu Patriku Gajdadzisovi a jeho kolegovi Lukáši Sochorovi, za pomoc při řešení naší finanční situace. Společnost Mint se na náš případ podívala komplexně a pomohla nám najít řešení. Nebylo to ze dne na den, ale díky jejich přístupu, trpělivosti a ochotě se nám podařilo dojít k úspěšnému cíli. Dnes již úvěr čerpáme a naše situace je stabilní. Velmi si vážíme jejich pomoci a můžeme jejich služby s klidným svědomím doporučit.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -89,7 +94,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'Upraveno před 7 měsíci',
     text: 'Naše zkušenost s Patrikem Gajdadzisem byla od samého začátku výborná. Konečně jsme měli pocit, že se někdo skutečně zajímá o naši situaci a bere naše potřeby vážně. Vše nám srozumitelně vysvětlil, navrhl řešení na míru a udělal maximum pro to, aby nám pomohl i v momentě, kdy jsme už sami pochybovali, že by bylo možné hypotéku získat. Díky jeho přístupu a finančnímu poradenství jsme se přiblížili ke splnění našeho snu o vlastním bydlení. Oceňujeme také příjemné prostředí kanceláře, které přispělo k celkově pozitivní atmosféře. Moc děkujeme.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -97,7 +102,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 4 měsíci',
     text: 'Profesionální, zároveň milý a empatický pán. Důkladně vysvětlil, proč se oplatí investovat, sestavil bez delších průtahů efektivní investiční plán na míru a pomohl i s pojištěním. Doporučuji všem, kteří se chtějí finančně zaopatřit a nespoléhat jen na svůj důchod :-)',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -105,7 +110,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 11 měsíci',
     text: 'Tímto bych chtěl poděkovat panu Gajdadzisovi za vyřízení všeho potřebného ohledně hypotéky od A do Z. Moc dobře chápe význam prvního dojmu. Komunikace byla vždy věcná a rychlá. A když už nastal problém, neuhýbal, nestrkal hlavu do písku, ale postavil se mu čelem. Maximální spokojenost. 28 recenzí - hodnocení 5,0 není náhoda.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -113,7 +118,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 7 měsíci',
     text: 'Patrik je člověk na správném místě. Dokáže skvěle poradit a vše vysvětlit tak, aby to pochopil každý člověk. Skvělý individuální přístup. Můžu všem vřele doporučit.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -121,7 +126,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 10 měsíci',
     text: 'S Patrikem mám skvělou zkušenost. Rychle pochopil, co potřebuji, a nabídl smysluplné možnosti bez zbytečného nátlaku. Umí vše vysvětlit jednoduše a s trpělivostí, což mi hodně pomohlo. Oceňuji, že opravdu naslouchá a reaguje podle situace, nepracuje podle šablony. Líbí se mi, že se na něj můžu obrátit jak v oblasti financí, tak i pojištění a také v dalších záležitostech, které čas od času řeším. Je fajn mít jednoho člověka, kterému důvěřuji a se kterým můžu vše řešit na jednom místě. Spolupracujeme už několik let a rádi v tom pokračujeme.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -129,7 +134,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 7 měsíci',
     text: 'Spolupráce s hypotečním poradcem panem Gajdadzisem jsem byla velmi spokojená. Oceňuji jeho trpělivost, lidský přístup a schopnost vše vysvětlit tak, aby tomu člověk opravdu rozuměl. Byl ochotný a reagoval rychle na jakýkoliv dotaz. Vždy jsem věděla, co se děje a jaký je další krok. Díky němu pro mě byla hypotéka mnohem méně stresující záležitostí. Moc děkuji a doporučuji všem.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -137,7 +142,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 10 měsíci',
     text: 'S Patrikem Gajdadzisem spolupracuji už několik let a nemůžu si ho vynachválit. Vždycky mi se vším pomohl, všechno srozumitelně vysvětlil a hledal řešení, která dávají smysl. Je spolehlivý, férový a dá se na něj kdykoliv obrátit. Určitě doporučuji každému, kdo chce mít ve financích jasno a vedle sebe člověka, kterému se dá opravdu věřit.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -145,7 +150,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 10 měsíci',
     text: 'S panem Gajdadzisem spolupracuji už několik let - beru to jako velkou výhodu oproti tomu, když bych musela při každém dotazu nebo změně volat do různých společností a většinou pokaždé mluvit s jiným člověkem. Tím, že se mi pravidelně ozývá, aby se zeptal, jak se mi daří a zda se u mě něco nezměnilo, vím, že co se týká pojištění i investic, mám vždy nastavené nejlépe, jak v danou chvíli můžu. Hypotéku zatím nemám, ale o ní budu uvažovat, vím s jistotou, za kým půjdu.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -153,7 +158,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'S panem Gajdadzisem máme s přítelem jen tu nejlepší zkušenost. Vše nám vždy trpělivě vysvětlil, navrhl řešení přesně podle našich potřeb a možností, bez jakéhokoliv nátlaku. Oceňuji otevřenou komunikaci, rychlou reakci na jakýkoliv dotaz a celkový profesionální ale zároveň přátelský přístup. Určitě bych p. Gajdadzise doporučila každému, kdo chce poradce, u kterého má pocit, že mu na spokojenosti zákazníka opravdu záleží.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -161,7 +166,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'S panem Gajdadzisem jsme řešili financování nákupu nemovitosti - na první schůzku přišli s jasnou představou co požadujeme, po dlouhých diskusích odešel s úplně jiným produktem který na naši situaci seděl lépe. A to je přesně něco, co od ideálního finančního poradce očekávám, že po zhodnocení mé konkrétní situace nabídne produkt který dává největší smysl i do budoucna. Vše ale zároveň bez spěchu, nátlaku, člověk obdrží doporučení, varianty, možnosti, nechá si to pak několik dní projít hlavou a pak se rozhodne. Velkou výhodu vidím v dlouhodobé spolupráci, člověk si může (a nemusí) dát do pořádku všechny spoření, pojištění, úvěry a to vše založené na konkrétním člověku a jeho situaci. Změnilo to můj zažitý názor že finanční poradce = prodavač produktů na kterých má nejvyšší provizi bez ohledu na klientovy potřeby. Jsem rád že jsme na pana Gajdadzise narazili a věříme v další dlouhodobou spolupráci.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -169,7 +174,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 10 měsíci',
     text: 'Na Patrika jsem narazil přes Google a na základě hodnocení jsem jej kontaktoval. Od přírody jsem velmi nedůvěřivý, ale investice, o které jsem měl zájem, vysvětlil a nakonec jsme i realizovali. Nemám, co vytknout, takže zatím 5*.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -177,7 +182,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 10 měsíci',
     text: 'Patrik je ten nejlepší finanční poradce kterého jsem kdy měl. A to jsem jich pár vystřídal. S jeho přístupem jsem nadměrně spokojen. Spolupracujeme už cca 6 let a vyřešil mi vše, co jsem potřeboval od pojistek až po investice. Nehledě na to, že se každý rok potkáváme, abychom pravidelně upgradovali veškeré věci, které mám nasmlouvané. Mohu jen doporučit!!!! ;-)',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -185,7 +190,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 10 měsíci',
     text: 'Rád bych tímto poděkoval za odborný přístup a profesionalitu pana Gajdadzise. Po narození dcery jsem dospěl k názoru, že je čas začít se více věnovat financím a zajištění rodiny. Po několika schůzkách s panem Gajdadzisem nejen lépe rozumím financím, ale mám i jistotu, že v případě jakékoli nečekané situace bude naše rodina finančně zajištěná. Pokud máte obavy ze schůzek s finančními poradci, mohu pana Gajdadzise s čistým svědomím doporučit – sám jsem byl na začátku ve stejné situaci.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -193,7 +198,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'Upraveno před rokem',
     text: 'Měla jsem tu čest poznat pana Gajdadzise, který se mnou řešil hned několik věcí. Jako první jsem za ním přišla, aby mi pomohl sestavit nějaký plán a ukázal mi, jak se starat o finance. Svěřila jsem se se svým cílem a pan Gajdadzis mi vše krásně navrhl a sestavil. Poradil mi nejen s životním pojištěním, ale i s povinným ručením a vše mi srozumitelně vysvětlil. S těmito věcmi teprve začínám, protože mi je 20 let, a musím říct, že podle toho to také vypadá. Tím chci říct, že mi nevnucoval žádné zbytečnosti, které jsou pro dvacetiletého člověka opravdu nepodstatné, ale zaměřil se jen na to skutečně důležité. Myslím, že tohle je správný přístup, a musím ho jen doporučit. Pokud jste mladí a hledáte někoho, kdo vám pomůže nejen s finančním plánem, pak je pan Gajdadzis správná volba. Odešla jsem s úsměvem na tváři a se vším pod kontrolou.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -201,7 +206,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'Měla jsem tu čest využít služby finančního poradenství a musím říct, že to byla skvělá zkušenost. Pan Gajdadzis měl naprosto profesionální, ale zároveň velmi lidský přístup. Velice si cením jeho ochoty naslouchat a podrobně mi vysvětlit všechny možnosti, které by mohly být pro mě nejvhodnější. Jeho vystupování bylo příjemné a uvolněné, což pomohlo navodit atmosféru vzájemné důvěry. Kromě toho, co mile překvapilo, byla jeho vstřícnost při časovém sladění vzájemných schůzek. Uvědomoval si, jak náročné je někdy najít čas, a vždy se přizpůsobil mému rozvrhu. Tato flexibilita a osobní přístup jsou věci, které opravdu dělají tento typ poradenství výjimečným. Určitě doporučuji každému, kdo hledá kvalitní a lidský přístup k finančnímu plánování.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -209,7 +214,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'Dobrý den můžu jen doporučit ,perfektní přístup. Pan Patrik Gajdadzis zařídil co měl k mé spokojenosti...vše dopadlo na výbornou a já můžu v klidu dále podnikat.... Dekuji vám mnohokrát. 🙏',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -217,7 +222,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'Se službami svého finančního poradce jsem velmi spokojený. Pomohl mi s nastavením pojištění i s úsporami a vše mi srozumitelně vysvětlil. Oceňuji profesionální přístup a lidské jednání. Určitě bych doporučil pana Gajdadzise všem, kdo hledají spolehlivého poradce.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -225,7 +230,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 lety',
     text: 'Pana Patrika mohu s čistým svědomím doporučit všem, kteří se zajímají o své finance a jejich budoucnost. Má přehled v mnoha oblastech financí a je schopen vše podrobně, ale zároveň jednoduše vysvětlit. Pro nás bylo zásadní, abychom cítili dobře a nebyl na nás vyvíjený žádný tlak, což bylo, narozdíl od jiných poradců, 100% splněno. Jsme rádi, že jsme mohli navázat spolupráci a těšíme se na společnou cestu k našim cílům. :)',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -233,7 +238,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 lety',
     text: 'Pana Patrika všem vřele doporučuji. Co se týče finančního poradenství má přehled a dokáže fundovaně poradit. Pomohl mi při řešení životního i penzijního pojištění a dále také s investicemi. Jsem velice spokojena, že se mohu na něho kdykoliv obrátit děkuji',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -241,7 +246,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 10 měsíci',
     text: 'Skvělý přístup, ochota a hlavně lidskost. Patrik Gajdadzis ví co dělá a dokáže poradit tak, aby to dávalo smysl.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -249,7 +254,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'Super spolupráce! Řešili jsme poměrně složitou hypotéku a pan Gajdadzis nám byl po celou dobu obrovskou pomocí. Vždy komunikoval obratem a s jasným vysvětlením. Hypotéku nyní máme kompletní a můžeme bydlet.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -257,7 +262,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'Jsem rád, že se mohu podělit o svou zkušenost, protože jsem byl se službami Patrika velmi spokojen. Nikdy by mne nenapadlo, že výsledek jednání může mít pro mne tak zásadní pozitivní efekt. Nejen, že jsem se dověděl spoustu velmi užitečných informací, ale nemusel jsem se o nic starat a vše mám nastaveno lépe, než bych si vůbec dovedl představit, a to jak pojistky, tak investování a dosahování cílů. Zkrátka jsem byl nadšen a všem Patrika vřele doporučuji. Postaral se o mne, jako by byl můj syn. Moc děkuji.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -265,7 +270,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 lety',
     text: 'Rád bych tímto způsobem poděkoval panu Patrikovi za jeho pomoc s nastartováním našeho finančního života a ujasnění si důležitých kroků. Pan Patrik si vyslechl naše požadavky, probrali jsme, zda-li jsou reálné a poté přišel s návrhy řešení, některé jsme si odsouhlasili hned, jelikož za mne bylo bezkonkurenční, některé jsme probrali ještě jednou, abychom měli ve všem jasno. Na čem jsme se domluvili, platilo a to hned od začátku, do ničeho jsme nebyli tlačeni, vše proběhlo diskrétně, ochotně a hlavně profesionálně. Největší přidanou hodnotou je pro nás finanční plán, který nám byl sestaven na míru (tudíž nebylo to jen o produktech, jak to bývá zvykem). Kdykoliv jsem panu Patrikovi zavolal s dotazem, vždy rád vysvětlil a poradil. Těším se na naše servisní schůzky a ještě jednou moc díky za Vaší práci.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -273,7 +278,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 lety',
     text: 'Chtěl bych poděkovat a doporučit pana Patrika za sestavení finančního plánu včetně úvěru, který mi pomohl sestavit k mé spokojenosti. Vše mi dopodrobna vysvětlil a bez nátlaku mi doporučil co by bylo dobré udělat. Šlo na panu Patrikovi vidět že ví co dělá a že se v daném oboru hodně vyzná. Ještě jednou děkuji za pomoc.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -281,7 +286,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'příjemná spolupráce , p. Gajdadzis má přehled portfolia produktů , dostupných na trhu , i člověku neznalému finančního prostředí vše jednoduše vysvětlí a poradí , Oceňuji i fexibilitu co se týče našich schůzek , celkový dojem je plná spokojenost',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -289,7 +294,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 3 lety',
     text: 'S Patrikem Gajdadzisem, se kterým jsem v uplynulých týdnech řešil záležitosti ať už produktů, které jsem měl nastaveny z předchozích spolupráci nebo nastavení nových produktů, které mě zajímaly, mi dokázal velmi profesionálně poradit, zrevidovat a doporučit jakým směrem by se měly mé investice směřovat. Na každou otázku dokázal srozumitelně reagovat, vysvětlit a doporučit. S jeho prací jsem nadmíru spokojen a doporučuji tak všem, kteří váhají, zda s někým ohledně financí spolupracovat.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -297,7 +302,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 lety',
     text: 'S Patrikem jsem spokojená, pomohl mi jak s životním pojištěním tak i s ostatními věcmi, které jsme měli špatně od předchozího poradce. Je milý, vstřícný a dokáže pomoct se vším s čím se na něho obrátíte. Děkuji a těším se na další spolupráci.:)',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -305,7 +310,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 lety',
     text: 'S manželem jsme velmi spokojeni. Pan Patrik své práci rozumí a dokáže vždy dobře poradit. Pomohl nám jak s životním pojištění, penzijním spořením, tak i s hypotékou. Všem doporučuji.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -315,7 +320,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 lety',
     text: 'Se spolupráci s panem Gajdadzisem jsme nadmíru spokojeni. Vždy si vyslechne všechny naše potřeby a názory a podle toho hledáme řešení, které nám nabízí vždy opravdu na míru. Domluva je vždy rychlá a dokáže nám pomoci i v akutních situacích. Rozhodně by mužeme jen doporučit. Jan Vašek',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -323,7 +328,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 lety',
     text: 'Děkuji za naší spolupráci a vyřešení problémů, které jsem měl z předchozích spolupráce. Tímto bych Patrika chtěl doporučit všem, kteří neví a chtěli by pomoct ohledně financí. Krempaský',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -331,7 +336,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 4 lety',
     text: 'Patrik je velice skvělý finanční poradce, jsem s ním velice spokojena, již přes rok se stará o mé finance. Vždy když potřebuji, je na telefonu ochotný řešit každou mojí otázku v co nejkratším čase, hlavně jeho spolupráce nekončí podpisem, stará se o to co vám nejlépe sedí!. Svou práci dělá rád a je to vidět a znát!! Děkuji',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -339,7 +344,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'Pán poradce je ochotný, dokázal značně zjednodušit proces zařizování hypotéky a zařídil i lepší pojištění. Doporučuji.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -347,7 +352,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 4 lety',
     text: 'S Patrikem Gajdadzisem jsem řešil otázku životního pojištění a penzijního spoření a byl jsem velice spokojený, protože mi nejprve vysvětlil, jakým způsobem v této oblasti postupovat, aby to pro mne bylo co nejvýhodnější a zároveň dávalo pro mne smysl. Doporučil mi vhodný produkt, který jsme upravili a nastavili dle mých potřeb. V budoucnu, pokud budu potřebovat poradenství v oblasti pojištění či financí, rád se na Patrika Gajdadzise opět obrátím.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -355,7 +360,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'S finančními radami a celkovým jednáním pana Gajdadzise jsem byl maximálně spokojený. Určitě bych ho oslovil i v budoucnu. Dvorský',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -363,7 +368,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před rokem',
     text: 'Super spolupráce, Patrik vyřídil vše okolo hypotéky a zařídil výhodné životní a majetkové pojištění na nemovitost.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -371,7 +376,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 4 lety',
     text: 'Jsem velmi spokojená a doporučuji spolupráci. Vstřícný a ve všem ochotně poradí.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -379,7 +384,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 4 lety',
     text: 'Rád bych tímto způsobem poděkoval za výbornou práci p. Gajdadzise. Pomohl mi jak s pojištěním vozidel, tak i v oblasti investic.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -387,7 +392,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'včera',
     text: 'Patrik jako náš poradce ohledně hypotéky předčil veškerá má očekávání. Žádnou otázku nenechá bez srozumitelné odpovědi, na schůzkách je vždy příjemný, díky jeho radám a ochotě jsme celý proces zvládli s mnohem větším klidem. Jsem vděčná, že jsme přes MintReality narazili právě na něj a ráda si od něho ohledně financí nechám poradit i v budoucnu.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -395,7 +400,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 2 týdny',
     text: 'S panem Gajdadzisem jsme navázali spolupráci teprve nedávno, nicméně během těch několika týdnů dokázal vymyslet a hlavně zrealizovat opravdu spoustu skvělých řešení – od možností financování pro OSVČ až po velmi propracované pojištění osoby či auta. Jeho práce si opravdu velmi cením, a to nejen proto, že dokáže najít a zařídit věci, které pro mě byly dříve prakticky nemožné. Velkým plusem je také jeho lidský a osobitý přístup. Je vidět, že svou práci nedělá jen pro jedničky a nuly v tabulkách, ale především pro lidi – aby jim pomáhal plnit sny, řešit jejich potřeby a zároveň jim zajistil co nejlepší budoucnost. Velké díky a těším se na další spolupráci.',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
   {
@@ -405,7 +410,7 @@ const reviews: Review[] = [
     rating: 5,
     date: 'před 11 měsíci',
     text: 'Patrik Gajdadzis provided excellent service throughout the mortgage process. He was professional, clear, and always available to answer questions. Thanks to his support, everything went smoothly—I highly recommend him!',
-    sourceUrl: 'https://share.google/XnAx2GCl6M1bOtfto',
+    sourceUrl: GOOGLE_PROFILE_URL,
     lineWidths: [],
   },
 ];
@@ -416,7 +421,6 @@ const reviews: Review[] = [
 // webu neuvádí. Ostatní položky pole zůstávají jako zásoba, kdyby se počet
 // zobrazených měnil.
 const REVIEWS_SHOWN = 3;
-const GOOGLE_PROFILE_URL = 'https://share.google/XnAx2GCl6M1bOtfto';
 ---
 
 <BaseLayout

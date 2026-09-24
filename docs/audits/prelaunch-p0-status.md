@@ -257,7 +257,8 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 6. Měření — GA4 ID + událost odeslání formuláře a kliknutí na telefon, Search Console + Bing Webmaster (v den spuštění), hlídání dostupnosti (např. UptimeRobot).
 7. ~~PSČ na webu~~ — hotovo 24. 9. 2026: patička, kontakt i regulatorní informace „17. listopadu 599/30, 708 00 Ostrava-Poruba" (profil Google uvádí „Ostrava 8" — stejné PSČ, Google obě varianty páruje).
 8. ~~`FinancialService` schema~~ — hotovo 24. 9. 2026 (`businessEntity` v `src/data/entity.ts`, název 1:1 podle profilu „Patrik Gajdadzis | Hypotéky a finance", na každé stránce). **Chybí otevírací doba** — dodat celý týden (profil ukazuje 8–18, ale ne všechny dny).
-9. Dva různé Google odkazy (`sameAs` → `share.google/cjOK…`, recenze → `share.google/XnAx…`) — ověřit, že oba vedou na správný profil.
+9. ~~Dva různé Google odkazy~~ — odkazy na recenze (homepage, `/recenze`) vedou od 24. 9. 2026 přímo na záložku Recenze v Google Mapách (ověřeno). `sameAs` a patička dál používají `share.google/cjOK…`.
+9b. **Google profil má jako web `pafinga.cz`, ne `patrikgajdadzis.cz`** (zjištěno 24. 9. 2026 v Mapách). Po spuštění webu změnit v profilu (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí a návštěvy z Map půjdou jinam.
 9a. ~~Nové recenze na `/recenze`~~ — rozhodnuto 24. 9. 2026: recenze se na web nedoplňují. `/recenze` zobrazuje 3, „Zobrazit další recenze" otevírá Google profil. Počet recenzí se na webu nikde neuvádí (jen hodnocení 5,0), takže nic nezastarává.
 
 **Otevřené — technické**
