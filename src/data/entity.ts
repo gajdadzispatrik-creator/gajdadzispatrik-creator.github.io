@@ -29,6 +29,19 @@ export const personEntity = {
     url: 'https://www.mintreality.cz/',
   },
   areaServed: { '@type': 'City', name: 'Ostrava' },
+  // Kancelář, kde probíhají konzultace — potvrzeno uživatelem 24. 9. 2026 jako
+  // jediná adresa pro web a Google Business Profile (ne registrované sídlo
+  // z regulatory.ts, to slouží jinému účelu).
+  workLocation: {
+    '@type': 'Place',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '17. listopadu 599/30',
+      addressLocality: 'Ostrava-Poruba',
+      postalCode: '708 00',
+      addressCountry: 'CZ',
+    },
+  },
   knowsAbout: ['Hypotéky', 'Finanční plánování', 'Pojištění', 'Investice', 'Penzijní plánování'],
   sameAs: [
     'https://www.facebook.com/patrik.gajdadzis/',

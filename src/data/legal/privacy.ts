@@ -70,6 +70,12 @@ export const privacyPage: LegalPageData = {
           ],
         },
         {
+          type: 'p',
+          content: [
+            'Na ochranu formuláře před zneužitím (hromadné odesílání) uchovávám nejvýše jednu hodinu otisk IP adresy, ze které byl formulář odeslán, ne adresu samotnou. Důvodem je oprávněný zájem na zabezpečení webu (čl. 6 odst. 1 písm. f) GDPR); po hodině se otisk automaticky maže.',
+          ],
+        },
+        {
           type: 'table',
           caption: 'Údaje sbírané kontaktním formulářem a účel jejich zpracování',
           columns: ['Údaj', 'Účel'],
@@ -123,7 +129,8 @@ export const privacyPage: LegalPageData = {
         {
           type: 'list',
           items: [
-            ['Poskytovatel hostingu tohoto webu'],
+            ['Poskytovatel hostingu a e-mailu tohoto webu (WEDOS Internet, a.s.), přes kterého se poptávka z formuláře odesílá.'],
+            ['Poskytovatel e-mailové schránky, do které poptávky přicházejí (Google Workspace, Google Ireland Limited).'],
             [
               'Google Analytics, jen pokud udělíte souhlas s analytickými cookies.',
             ],

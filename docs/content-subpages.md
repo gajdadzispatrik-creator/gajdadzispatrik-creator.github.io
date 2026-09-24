@@ -542,7 +542,7 @@ Zvýrazněná závěrečná věta: `Co budete chtít řešit dál, je na vás.`
 ### SEO
 
 **SEO title**
-`Hypotéky a financování bydlení | Patrik Gajdadzis`
+`Hypoteční poradce Ostrava | Patrik Gajdadzis`
 
 **Meta description**
 `Pomohu vám zjistit, na jakou nemovitost dosáhnete, vyřídit hypotéku, refinancování, výstavbu nebo rekonstrukci. Ostrava nebo online po celé ČR.`
@@ -627,7 +627,7 @@ formulací) — jako samostatné věty se v aktuální copy nepoužívají.
 | Primární CTA | `Nezávazná konzultace` (návrh) |
 | Sekundární CTA | `+420 775 217 721` (návrh) |
 | Interní odkazy | viz „Interní odkazy" výše (zaznamenáno, neimplementováno) |
-| SEO title | `Hypotéky a financování bydlení \| Patrik Gajdadzis` (návrh) |
+| SEO title | `Hypoteční poradce Ostrava \| Patrik Gajdadzis` (změněno v předspouštěcím úkolu, v plánu sjednoceno 24. 9. 2026) |
 | Meta description | `Pomohu vám zjistit, na jakou nemovitost dosáhnete, vyřídit hypotéku, refinancování, výstavbu nebo rekonstrukci. Ostrava nebo online po celé ČR.` (návrh) |
 | FAQ | šest otázek — viz sekce 7 „FAQ" výše (návrh) |
 | Strukturovaná data / schema | `Service`, `BreadcrumbList`, `FAQPage` — plánovaný návrh, zatím neimplementováno (viz „Strukturovaná data / schema" výše) |
@@ -3826,7 +3826,7 @@ Přechod na recenze → Finální CTA.
 ### SEO
 
 **SEO title**
-`Patrik Gajdadzis | Finanční poradce Ostrava`
+`O mně | Patrik Gajdadzis`
 
 **Meta description**
 `Jsem finanční poradce z Ostravy. Vedu finanční část Mint reality & finance, stojím za projektem Hypotéka Ostrava a s klienty pracuji osobně.`
@@ -3948,7 +3948,7 @@ neověřené regulatorní role.
 | Primární CTA | `Nezávazná konzultace` (návrh) |
 | Sekundární CTA | `+420 775 217 721` (návrh) |
 | Interní odkazy | viz „Interní odkazy" výše (zaznamenáno, neimplementováno) |
-| SEO title | `Patrik Gajdadzis \| Finanční poradce Ostrava` (návrh) |
+| SEO title | `O mně \| Patrik Gajdadzis` (změněno v předspouštěcím úkolu, v plánu sjednoceno 24. 9. 2026) |
 | Meta description | `Jsem finanční poradce z Ostravy. Vedu finanční část Mint reality & finance, stojím za projektem Hypotéka Ostrava a s klienty pracuji osobně.` (upraveno 24. 9. 2026: první osoba podle briefu §6, zkráceno pod ~920 px, aby ho Google neořezal) |
 | FAQ | `FAQ není pro tuto stránku navrženo. Osobní stránka nemá být rozšiřována o FAQ pouze kvůli SEO.` |
 | Strukturovaná data / schema | `AboutPage`, `BreadcrumbList`, napojení na existující `Person` entitu (žádná nová) — plánovaný návrh, zatím neimplementováno (viz „Strukturovaná data / schema" výše) |

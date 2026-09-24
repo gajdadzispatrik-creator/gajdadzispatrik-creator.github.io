@@ -7,10 +7,36 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
+# AI vyhledávání a asistenti — záměrně povoleno (24. 9. 2026), cílem je, aby
+# web mohli citovat a doporučovat ChatGPT, Claude, Perplexity, Gemini i Apple.
 User-agent: OAI-SearchBot
 Allow: /
 
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
 User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
 Allow: /
 
 Sitemap: https://patrikgajdadzis.cz/sitemap.xml

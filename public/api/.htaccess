@@ -1,0 +1,7 @@
+# Z /api/ je zvenku dostupný jen poptavka.php. Všechno ostatní — hlavně
+# api/limity/ s otisky IP adres pro omezení počtu odeslání — je zakázané.
+# (.htaccess platí i pro podsložky; FilesMatch porovnává název souboru.)
+<FilesMatch "^(?!poptavka\.php$)">
+  Require all denied
+</FilesMatch>
+Options -Indexes
