@@ -1,5 +1,8 @@
 # Usazení fotek — závazný stav (desktop, 28. 9. 2026)
 
+**Desktop schválen Patrikem 28. 9. 2026** — homepage, O mně a Přístup
+prohlédnuté a odsouhlasené na 1280, 1366, 1440, 1920 a 2560 px.
+
 Fotky na webu jsou zatím testovací (nízké rozlišení, vodoznak). Usazení níže
 schválil Patrik. **Až přijdou finální fotky (vyšší rozlišení, bez vodoznaku,
 případně jinak oříznuté), musí na webu vypadat PŘESNĚ takhle** — stejně velká
