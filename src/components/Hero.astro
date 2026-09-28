@@ -1,5 +1,5 @@
 ---
-import HeroPhotoPlaceholder from './HeroPhotoPlaceholder.astro';
+import HeroPhoto from './HeroPhoto.astro';
 ---
 
 <section id="hero" class="hero">
@@ -11,7 +11,7 @@ import HeroPhotoPlaceholder from './HeroPhotoPlaceholder.astro';
     </h1>
 
     <p class="hero__subhead">
-      Bydlení, ochranu, investice a&nbsp;penzi propojuji do&nbsp;jednoho plánu.<br class="hero__subhead-break" />
+      Bydlení, ochranu, investice a&nbsp;penzi propojuji do&nbsp;jednoho plánu. <br class="hero__subhead-break" />
       Aby dával smysl dnes i&nbsp;za&nbsp;několik let.
     </p>
 
@@ -34,7 +34,7 @@ import HeroPhotoPlaceholder from './HeroPhotoPlaceholder.astro';
     </div>
   </div>
 
-  <HeroPhotoPlaceholder />
+  <HeroPhoto />
 </section>
 
 <style>
@@ -157,7 +157,7 @@ import HeroPhotoPlaceholder from './HeroPhotoPlaceholder.astro';
     height: 18px;
   }
 
-  /* --- Fotografie (placeholder) --- */
+  /* --- Fotografie (HeroPhoto.astro) --- */
 
   .hero :global(.hero-photo) {
     position: absolute;
@@ -284,11 +284,17 @@ import HeroPhotoPlaceholder from './HeroPhotoPlaceholder.astro';
       height: clamp(56px, calc(56px + 0.027027 * (100vw - 1366px)), 58px);
     }
 
+    /* Blok fotky o 80 px výš (top 104 → 24, výška +80) — spodní hrana dál
+       přesně na statistickém pásu; víc místa pro větší postavu i s rukama. */
     .hero :global(.hero-photo) {
-      top: 104px;
+      top: 24px;
       left: clamp(900px, calc(900px + 0.594595 * (100vw - 1366px)), 944px);
       width: clamp(466px, calc(466px + 0.459459 * (100vw - 1366px)), 500px);
-      height: clamp(688px, calc(688px + 0.162162 * (100vw - 1366px)), 700px);
+      /* Spodek bloku = spodek hero = horní hrana statistického pásu na každé
+         šířce. Dřív pevná výška (768–780 px) na notebooku přečnívala hero
+         o ~22 px a pás tak uřízl ruku (28. 9. 2026). */
+      bottom: 0;
+      height: auto;
     }
   }
 
@@ -305,6 +311,13 @@ import HeroPhotoPlaceholder from './HeroPhotoPlaceholder.astro';
 
     .hero__inner {
       padding-inline-start: clamp(96px, calc(96px + 0.324324 * (100vw - 1366px)), 120px);
+    }
+
+    /* Široký desktop: fotka jde s pravou stranou hero, ne na pevném x=944
+       (vpravo by zůstávalo prázdno). Na 1440 px beze změny (944), od šířky
+       hero 1564 px se drží 120 px od pravého kraje (500 + 120 = 620). */
+    .hero :global(.hero-photo) {
+      left: max(944px, calc(100% - 620px));
     }
 
     .hero__subhead {

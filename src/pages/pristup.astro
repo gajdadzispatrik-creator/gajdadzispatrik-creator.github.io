@@ -86,10 +86,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
+import heroPhoto from '../assets/photos/patrik-pristup.png';
+import pecePhoto from '../assets/photos/patrik-pristup-pece.png';
 
 // Prázdné = placeholder. Jediné místo pro vložení skutečné fotografie —
 // stejný vzor jako `photoSrc` v `AboutSection.astro`.
 const photoSrc = '';
+// Hero má od 28. 9. 2026 vlastní fotku (výřez bez pozadí, zatím testovací).
+const heroPhotoSrc = heroPhoto.src;
+// Kulatý portrét v kapitole Péče (od 28. 9. 2026).
+const pecePhotoSrc = pecePhoto.src;
 
 interface Step {
   heading: string;
@@ -198,8 +204,8 @@ const faqs: Faq[] = [
         </div>
 
         <div class="pri-photo pri-hero__photo" data-reveal>
-          {photoSrc ? (
-            <img src={photoSrc} alt="Patrik Gajdadzis" width="600" height="700" loading="lazy" decoding="async" />
+          {heroPhotoSrc ? (
+            <img src={heroPhotoSrc} alt="Patrik Gajdadzis" width="600" height="700" loading="lazy" decoding="async" />
           ) : (
             <div class="pri-photo__placeholder" aria-hidden="true">
               <div class="pri-photo__figure">
@@ -209,7 +215,7 @@ const faqs: Faq[] = [
               <span class="pri-photo__label">Foto Patrika — placeholder</span>
             </div>
           )}
-          {!photoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
+          {!heroPhotoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
         </div>
       </div>
     </section>
@@ -366,8 +372,8 @@ const faqs: Faq[] = [
           </p>
 
           <div class="pri-photo pri-pece__photo" data-reveal>
-            {photoSrc ? (
-              <img src={photoSrc} alt="Patrik Gajdadzis" width="480" height="360" loading="lazy" decoding="async" />
+            {pecePhotoSrc ? (
+              <img src={pecePhotoSrc} alt="Patrik Gajdadzis" width="480" height="360" loading="lazy" decoding="async" />
             ) : (
               <div class="pri-photo__placeholder" aria-hidden="true">
                 <div class="pri-photo__figure">
@@ -377,7 +383,7 @@ const faqs: Faq[] = [
                 <span class="pri-photo__label">Foto Patrika — placeholder</span>
               </div>
             )}
-            {!photoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
+            {!pecePhotoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
           </div>
         </div>
       </div>
@@ -883,6 +889,15 @@ const faqs: Faq[] = [
     object-fit: cover;
   }
 
+  /* Hero: výřez bez pozadí po boky — celá postava v rámu (ruce končí
+     na ~94,5 % výšky, změřeno), spodek se rozpouští do pozadí. */
+  .pri-hero__photo img {
+    object-fit: contain;
+    object-position: 50% 100%;
+    -webkit-mask-image: linear-gradient(180deg, #000 93%, rgba(0, 0, 0, .96) 93.9%, rgba(0, 0, 0, .85) 94.8%, rgba(0, 0, 0, .69) 95.6%, rgba(0, 0, 0, .50) 96.5%, rgba(0, 0, 0, .31) 97.4%, rgba(0, 0, 0, .15) 98.3%, rgba(0, 0, 0, .04) 99.1%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 93%, rgba(0, 0, 0, .96) 93.9%, rgba(0, 0, 0, .85) 94.8%, rgba(0, 0, 0, .69) 95.6%, rgba(0, 0, 0, .50) 96.5%, rgba(0, 0, 0, .31) 97.4%, rgba(0, 0, 0, .15) 98.3%, rgba(0, 0, 0, .04) 99.1%, transparent 100%);
+  }
+
   .pri-photo__placeholder {
     position: relative;
     width: 100%;
@@ -945,10 +960,29 @@ const faqs: Faq[] = [
 
   .pri-hero__photo {
     height: 260px;
+    /* Postava stojí PŘED trasou (`.pri__route` má z-index 1) — linka vede
+       za ní, stejně jako na /o-mne (`.om-hero__photo`). */
+    z-index: 2;
   }
 
   .pri-pece__photo {
     display: none;
+  }
+
+  /* Kulatý portrét: výřez bez pozadí → kruh dostane tón z palety
+     placeholderů (--about-photo-1); hlava a ramena přiblížené, aby
+     obličej portrét vyplnil. */
+  .pri-pece__photo:has(img) {
+    background: var(--about-photo-1);
+  }
+
+  .pri-pece__photo img {
+    object-fit: cover;
+    object-position: 50% 0;
+    /* Posun dolů o 9 % — nad vlasy zůstane vzduch, hlava se neřízne
+       o horní okraj kruhu. */
+    transform: translateY(9%) scale(1.25);
+    transform-origin: 50% 0;
   }
 
   /* ---------- Kapitoly — sdílené ---------- */
@@ -1483,14 +1517,33 @@ const faqs: Faq[] = [
       padding: 112px 96px 90px;
     }
 
+    /* Velikost postavy = hero na homepage a /o-mne (hlava ~125 px, měřeno
+       z fotek). Rám nahoře 60 px pod hlavičkou, dole přesahuje hero do
+       mezery před první kapitolou (výška hero beze změny; ~20 px nad
+       textem kapitoly na 1300 px). */
     .pri-hero__photo {
       flex: none;
-      width: 368px;
-      height: 460px;
+      width: 470px;
+      height: 798px;
+      margin: -52px 0 -286px;
     }
 
+    /* Výřez 468×868 (delší, s nohama): prsty končí na 747. px (změřeno).
+       Měřítko 0,983 = hlava stejně velká jako dřív; temeno posunuté o 10 px
+       dolů na stejné místo jako u předchozí fotky. Rám končí ~54 px pod
+       prsty — tam probíhá plynulé rozpuštění (dřív jen ~30 px). */
+    .pri-hero__photo img {
+      height: calc(100% * 1.069);
+      object-fit: contain;
+      object-position: 50% 10px;
+      -webkit-mask-image: linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.3%, rgba(0, 0, 0, .85) 89%, rgba(0, 0, 0, .69) 89.8%, rgba(0, 0, 0, .50) 90.5%, rgba(0, 0, 0, .31) 91.3%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 92.8%, transparent 93.5%);
+              mask-image: linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.3%, rgba(0, 0, 0, .85) 89%, rgba(0, 0, 0, .69) 89.8%, rgba(0, 0, 0, .50) 90.5%, rgba(0, 0, 0, .31) 91.3%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 92.8%, transparent 93.5%);
+    }
+
+    /* 160 (dřív 100) — rozpuštěné nohy hero fotky jinak končily 2 px nad
+       nadpisem kapitoly (28. 9. 2026). */
     .pri-chapter--zacatek {
-      margin-top: 100px;
+      margin-top: 160px;
       padding: 88px 96px;
     }
 
@@ -1715,12 +1768,26 @@ const faqs: Faq[] = [
 
     .pri-hero__photo {
       flex: none;
-      width: 400px;
-      height: 500px;
+      width: 490px;
+      height: 862px;
+      /* margin-left: auto — na širokém okně jde fotka k pravé straně hero
+         s rezervou až 200 px (stejně jako /o-mne). Na 1440 px beze změny
+         (text 640 + mezera 60 + fotka 490 = 1190 px řádku). */
+      margin: -60px clamp(0px, calc(100% - 1190px), 200px) -302px auto;
     }
 
+    /* Měřítko 1,033 (hlava jako dřív), temeno o 11 px níž; rám končí
+       ~80 px pod prsty — delší rozpuštění. */
+    .pri-hero__photo img {
+      height: calc(100% * 1.0406);
+      object-position: 50% 11px;
+      -webkit-mask-image: linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.6%, rgba(0, 0, 0, .85) 89.6%, rgba(0, 0, 0, .69) 90.7%, rgba(0, 0, 0, .50) 91.8%, rgba(0, 0, 0, .31) 92.8%, rgba(0, 0, 0, .15) 93.9%, rgba(0, 0, 0, .04) 94.9%, transparent 96%);
+              mask-image: linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.6%, rgba(0, 0, 0, .85) 89.6%, rgba(0, 0, 0, .69) 90.7%, rgba(0, 0, 0, .50) 91.8%, rgba(0, 0, 0, .31) 92.8%, rgba(0, 0, 0, .15) 93.9%, rgba(0, 0, 0, .04) 94.9%, transparent 96%);
+    }
+
+    /* 180 (dřív 120) — stejný důvod jako notebook výše. */
     .pri-chapter--zacatek {
-      margin-top: 120px;
+      margin-top: 180px;
       padding: 88px 100px;
     }
 

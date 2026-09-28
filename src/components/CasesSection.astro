@@ -957,6 +957,13 @@ const cases: CaseStudy[] = [
       border-left: 1px solid rgba(27, 74, 138, .14);
     }
 
+    /* Text výsledku: stejná mezera pod popiskem jako u Situace/Řešení
+       (`.cases__triad-value` 8px) — `margin-top: 0` výše je jen pro
+       tabletové oddělení popisku (dřív ho omylem vynulovalo i u textu). */
+    .cases__triad > :nth-child(6) {
+      margin-top: 8px;
+    }
+
     .cases__triad > :nth-child(1) {
       grid-row: 1;
     }

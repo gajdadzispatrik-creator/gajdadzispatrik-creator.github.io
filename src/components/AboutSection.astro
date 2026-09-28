@@ -789,10 +789,27 @@ const { photoSrc = '' } = Astro.props;
       margin-top: 4px;
     }
 
+    /* Celá postava (výřez na průhledném pozadí, poměr ~2:3), zvětšená
+       a vytažená nahoru vedle nadpisu — smí přejít přes trasu. */
     .about__photo {
-      flex: 0 0 370px;
-      width: 370px;
-      height: 470px;
+      flex: 0 0 500px;
+      width: 500px;
+      height: 750px;
+      margin-top: -350px;
+      /* 40 (dřív -60) — o 100 px víc vlevo; postava pořád ~37 px za koncem
+         textu nadpisu na 1280 px (změřeno). */
+      margin-right: 40px;
+      /* Postava stojí PŘED trasou (linka za ní, v průhledných místech vidět). */
+      z-index: 2;
+    }
+
+    .about__photo img {
+      object-fit: contain;
+      object-position: 50% 100%;
+      /* Výřez končí u boků — místo tvrdé hrany „ve vzduchu" plynulé
+         rozpuštění spodku postavy do pozadí sekce. */
+      -webkit-mask-image: linear-gradient(180deg, #000 84%, rgba(0, 0, 0, .96) 85.9%, rgba(0, 0, 0, .85) 87.8%, rgba(0, 0, 0, .69) 89.6%, rgba(0, 0, 0, .50) 91.5%, rgba(0, 0, 0, .31) 93.4%, rgba(0, 0, 0, .15) 95.3%, rgba(0, 0, 0, .04) 97.1%, transparent 99%);
+              mask-image: linear-gradient(180deg, #000 84%, rgba(0, 0, 0, .96) 85.9%, rgba(0, 0, 0, .85) 87.8%, rgba(0, 0, 0, .69) 89.6%, rgba(0, 0, 0, .50) 91.5%, rgba(0, 0, 0, .31) 93.4%, rgba(0, 0, 0, .15) 95.3%, rgba(0, 0, 0, .04) 97.1%, transparent 99%);
     }
   }
 
@@ -844,9 +861,9 @@ const { photoSrc = '' } = Astro.props;
 
     .about__row {
       margin: 92px 120px 0 calc(120 * 100% / 1440 + 56px);
-      /* 1320 (obsahová linka) − 176 (levý inset řádku při kalibrační šířce)
-         — stejný důvod jako v notebook stupni výše. */
-      max-width: 1144px;
+      /* Bez stropu — fotka se na širokém okně drží pravé strany sekce
+         (viz `.about__photo` níže), text zůstává vlevo (max-width). */
+      max-width: none;
       gap: 40px;
     }
 
@@ -855,9 +872,18 @@ const { photoSrc = '' } = Astro.props;
     }
 
     .about__photo {
-      flex: 0 0 400px;
-      width: 400px;
-      height: 500px;
+      flex: 0 0 580px;
+      width: 580px;
+      height: 870px;
+      margin-top: -390px;
+      /* Stejné chování jako fotka v hero: na 1440 px beze změny, na širším
+         okně jde s pravou stranou sekce a drží se 120 px od jejího kraje
+         (řádek bez stropu níže končí 120 px od kraje, šířka sekce =
+         min(100vw, --stage-max)). */
+      /* Na širokém okně navíc až 260 px víc vlevo (přání uživatele);
+         na 1440 px nejméně 5 px (o 100 px víc vlevo než dřív), velké
+         rozlišení beze změny. */
+      margin-right: min(260px, max(5px, calc(min(100vw, var(--stage-max)) - 1535px)));
     }
   }
 </style>

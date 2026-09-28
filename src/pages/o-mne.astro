@@ -115,6 +115,8 @@ import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
 import { SITE_URL, PERSON_ID, breadcrumbList } from '../data/entity';
+import duveraPhoto from '../assets/photos/patrik-omne-hero.webp';
+import heroPhoto from '../assets/photos/patrik-omne-hero-top.png';
 
 // ProfilePage (ne AboutPage) + BreadcrumbList — viz úkol „Předspouštěcí P0
 // technické dotažení“, §12. `mainEntity` odkazuje na JEDINOU Person entitu
@@ -136,7 +138,10 @@ const oMneJsonLd = [
 // Prázdné = placeholder. Jediné místo pro vložení skutečné fotografie —
 // stejný vzor jako `photoSrc` v `AboutSection.astro`/`pristup.astro`. Použité
 // na DVOU místech (hero, kapitola Důvěra) beze změny rozvržení při doplnění.
-const photoSrc = '';
+// Hero má od 28. 9. 2026 vlastní fotku (výřez bez pozadí).
+const photoSrc = heroPhoto.src;
+// Kapitola Důvěra má od 28. 9. 2026 vlastní fotku (hero zatím placeholder).
+const duveraPhotoSrc = duveraPhoto.src;
 
 const MARKERS = ['zacatek', 'mint', 'klienti', 'souvislosti', 'duvera', 'projekt', 'role', 'recenze'] as const;
 
@@ -329,7 +334,7 @@ const facts: FactRow[] = [
       <div class="om-chapter__content">
         <div class="om-chapter__top">
           <div class="om-chapter__lead-col" data-reveal>
-            <h2 id="mint-heading" class="om-h2--std">Další krok byl postavit finanční část&nbsp;Mint reality &amp;&nbsp;finance.</h2>
+            <h2 id="mint-heading" class="om-h2--std">Další krok byl postavit finanční část Mint reality &amp;&nbsp;finance.</h2>
           </div>
           <div class="om-chapter__support-col" data-reveal>
             <p class="om-support__text">
@@ -437,8 +442,8 @@ const facts: FactRow[] = [
             <h2 id="duvera-heading" class="om-h2--std">Chci, abyste věděli, proč vám něco doporučuji.</h2>
 
             <div class="om-photo om-photo--dark om-duvera__photo" data-reveal>
-              {photoSrc ? (
-                <img src={photoSrc} alt="Patrik Gajdadzis" width="440" height="520" loading="lazy" decoding="async" />
+              {duveraPhotoSrc ? (
+                <img src={duveraPhotoSrc} alt="Patrik Gajdadzis" width="440" height="520" loading="lazy" decoding="async" />
               ) : (
                 <div class="om-photo__placeholder" aria-hidden="true">
                   <div class="om-photo__bg"></div>
@@ -449,7 +454,7 @@ const facts: FactRow[] = [
                   <span class="om-photo__label">Foto Patrika — placeholder</span>
                 </div>
               )}
-              {!photoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
+              {!duveraPhotoSrc && <span class="sr-only">Fotografie bude doplněna</span>}
             </div>
           </div>
           <div class="om-chapter__support-col" data-reveal>
@@ -1178,6 +1183,36 @@ const facts: FactRow[] = [
     margin-top: 24px;
   }
 
+  /* Hero: výřez bez pozadí — hlava nahoře, spodek se rozpouští do pozadí
+     (stejně jako fotky níže), ne tvrdá hrana. */
+  .om-hero__photo img {
+    object-position: 50% 0;
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 98%);
+            mask-image: linear-gradient(180deg, #000 70%, transparent 98%);
+  }
+
+  /* Výřez bez pozadí (po boky) v rámu původní velikosti — celá postava,
+     zarovnaná vlevo na osu nadpisu; spodek se plynule rozpouští do pozadí
+     sekce (stejně jako fotka v AboutSection na homepage). */
+  .om-duvera__photo img {
+    object-fit: contain;
+    /* Zarovnáno dolů — spodní hrana výřezu = konec přechodu v masce. */
+    object-position: 0 100%;
+    /* Dvě masky dohromady (průnik): spodek + šikmo do pravého dolního rohu.
+       Vykročená noha je na výřezu useknutá jeho pravým krajem (85–100 %
+       výšky) i spodkem (30–100 % šířky) — změřeno z alfa kanálu. Šikmý
+       přechod (150°) je rozpustí, paže s hodinkami (~69 % délky přechodu)
+       zůstává plně vidět. */
+    -webkit-mask-image:
+      linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 80.6%, rgba(0, 0, 0, .85) 83.3%, rgba(0, 0, 0, .69) 85.9%, rgba(0, 0, 0, .50) 88.5%, rgba(0, 0, 0, .31) 91.1%, rgba(0, 0, 0, .15) 93.8%, rgba(0, 0, 0, .04) 96.4%, transparent 99%),
+      linear-gradient(150deg, #000 72%, transparent 88%);
+    -webkit-mask-composite: source-in;
+            mask-image:
+      linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 80.6%, rgba(0, 0, 0, .85) 83.3%, rgba(0, 0, 0, .69) 85.9%, rgba(0, 0, 0, .50) 88.5%, rgba(0, 0, 0, .31) 91.1%, rgba(0, 0, 0, .15) 93.8%, rgba(0, 0, 0, .04) 96.4%, transparent 99%),
+      linear-gradient(150deg, #000 72%, transparent 88%);
+            mask-composite: intersect;
+  }
+
   /* ---------- Kapitoly — sdílené ---------- */
 
   /*
@@ -1736,16 +1771,37 @@ const facts: FactRow[] = [
       padding: 112px 96px 90px;
     }
 
+    /* Výřez postavy bez pozadí — větší než původní rám (300×392), vytažený
+       nahoru a dolů až ke spodku hero; smí přejít přes trasu (z-index 2). */
+    /* Velikost postavy = hero na homepage (šířka ramen ~360–370 px, měřeno):
+       rám 780 px vysoký, nahoře 60 px pod hlavičkou (hlava nesmí být
+       nalepená na hlavičku), dole přesahuje hero do mezery před první
+       kapitolou (výška hero beze změny). */
     .om-hero__photo {
       flex: none;
-      width: 300px;
-      height: 392px;
-      margin-inline: 0;
+      width: 500px;
+      height: 850px;
+      margin: -52px 0 -338px;
       aspect-ratio: auto;
     }
 
+    /* Výřez 422×950 (delší, s nohama): hlava a prsty (738. px) na stejném
+       místě jako u předchozí kratší verze — stejné měřítko 1,048, vodorovný
+       posun 46 px drží hlavu na místě (výřez je víc oříznutý zleva). Rám
+       končí ~76 px pod prsty — dlouhé plynulé rozpuštění. */
+    .om-hero__photo img {
+      height: calc(100% * 1.1713);
+      object-fit: contain;
+      object-position: 46px 1px;
+      -webkit-mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 78.9%, rgba(0, 0, 0, .85) 79.8%, rgba(0, 0, 0, .69) 80.8%, rgba(0, 0, 0, .50) 81.7%, rgba(0, 0, 0, .31) 82.6%, rgba(0, 0, 0, .15) 83.6%, rgba(0, 0, 0, .04) 84.5%, transparent 85.4%);
+              mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 78.9%, rgba(0, 0, 0, .85) 79.8%, rgba(0, 0, 0, .69) 80.8%, rgba(0, 0, 0, .50) 81.7%, rgba(0, 0, 0, .31) 82.6%, rgba(0, 0, 0, .15) 83.6%, rgba(0, 0, 0, .04) 84.5%, transparent 85.4%);
+    }
+
+    /* 220 (dřív 100) — rozpuštěný spodek hero fotky jinak končil 10 px nad
+       nadpisem kapitoly (rám pak ještě prodloužen o 60 px); pravidlo: fotka → další obsah aspoň ~60 px, stejně
+       jako /pristup (28. 9. 2026). */
     .om-chapter--zacatek {
-      margin-top: 100px;
+      margin-top: 220px;
     }
 
     .om-chapter__inner {
@@ -1828,9 +1884,12 @@ const facts: FactRow[] = [
       flex: 1;
     }
 
+    /* Rám = rozměr výřezu 910×1378 v měřítku 0,553 — hlava stejně velká
+       jako druhá fotka na homepage (AboutSection) na stejné šířce (~104 px
+       na 1300 px, změřeno 28. 9. 2026). */
     .om-duvera__photo {
-      width: 380px;
-      height: 450px;
+      width: 503px;
+      height: 762px;
       max-width: none;
       aspect-ratio: auto;
     }
@@ -1982,12 +2041,27 @@ const facts: FactRow[] = [
 
     .om-hero__photo {
       flex: none;
-      width: 340px;
-      height: 444px;
+      width: 510px;
+      height: 901px;
+      /* margin-left: auto — na širokém okně jde fotka k pravé straně hero
+         (jako fotka v hero na homepage), ale s rezervou až 200 px od
+         pravého okraje obsahu (přání uživatele: víc vlevo). Na 1440 px
+         volné místo není (text 730 + gap 40 + fotka 480 = 1250 px řádku),
+         rezerva je 0 a fotka zůstává beze změny. */
+      margin: -60px clamp(0px, calc(100% - 1250px), 200px) -311px auto;
     }
 
+    /* Měřítko 1,089 (hlava jako dřív), posun 43 px; rám ~96 px pod prsty. */
+    .om-hero__photo img {
+      height: calc(100% * 1.1483);
+      object-position: 43px 1px;
+      -webkit-mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 79.1%, rgba(0, 0, 0, .85) 80.3%, rgba(0, 0, 0, .69) 81.4%, rgba(0, 0, 0, .50) 82.5%, rgba(0, 0, 0, .31) 83.7%, rgba(0, 0, 0, .15) 84.8%, rgba(0, 0, 0, .04) 86%, transparent 87.1%);
+              mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 79.1%, rgba(0, 0, 0, .85) 80.3%, rgba(0, 0, 0, .69) 81.4%, rgba(0, 0, 0, .50) 82.5%, rgba(0, 0, 0, .31) 83.7%, rgba(0, 0, 0, .15) 84.8%, rgba(0, 0, 0, .04) 86%, transparent 87.1%);
+    }
+
+    /* 200 (dřív 120) — prodloužený rám hero fotky, mezera ~77 px. */
     .om-chapter--zacatek {
-      margin-top: 120px;
+      margin-top: 200px;
     }
 
     .om-chapter__inner {
@@ -2044,9 +2118,10 @@ const facts: FactRow[] = [
       width: 600px;
     }
 
+    /* Měřítko 0,644 — hlava ~121 px jako AboutSection na 1440 px. */
     .om-duvera__photo {
-      width: 440px;
-      height: 520px;
+      width: 586px;
+      height: 887px;
     }
 
     .om-zacatek__grid {

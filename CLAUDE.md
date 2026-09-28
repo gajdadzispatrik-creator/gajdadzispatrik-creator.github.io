@@ -969,6 +969,10 @@ sekce 20 („ÚKOLY DO SPUŠTĚNÍ“)** — fotky, favicon + OG obrázek, sekce
 na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
 `patrikgajdadzis.cz`), Search Console, GA4. Tam se udržuje, tady jen stručně:
 
+- **Fotky** jsou zatím testovací (vodoznak, nízké rozlišení). Schválené
+  usazení na desktopu je závazně zapsané v `docs/fotky-umisteni.md` (cílové
+  hodnoty + postup + `scripts/photo-metrics.mjs`) — finální fotky usadit
+  přesně podle něj. Mobil/tablet se ladí zvlášť.
 - Všechny podstránky (`/sluzby` + 5 detailů, `/pristup`, `/recenze`,
   `/o-mne`, `/clanky`, právní stránky, 404) jsou hotové. `/clanky` je
   `noindex` a bez odkazu, dokud nebudou články.

@@ -158,7 +158,13 @@ const HOME_PAGE = {
   ],
   // Bloky, které se v žádné sekci nesmí navzájem překrývat.
   overlapChecks: [
-    { name: 'About', sel: '.about__heading, .about__text, .about__photo' },
+    // `.about__photo` záměrně vynechaná (28. 9. 2026): je to výřez postavy
+    // s průhledným okrajem, na přání uživatele vytažený nahoru k nadpisu
+    // a posunutý doleva — obdélník rámu tak zasahuje do obdélníku nadpisu,
+    // samotná postava ale od textu nadpisu odstup drží (ručně změřeno
+    // 36–37 px na 1280/1440 px). Obdélníkové porovnání by hlásilo falešný
+    // překryv.
+    { name: 'About', sel: '.about__heading, .about__text' },
     { name: 'Articles', sel: '.articles__heading, .articles__lead, .articles__topics, .articles__list, .articles__actions' },
     { name: 'FAQ', sel: '.faq__heading, .faq__offer, .faq__question, .faq__answer' },
     { name: 'Cases', sel: '.cases__heading, .cases__lead, .cases__item, .cases__cta' },

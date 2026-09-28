@@ -1,0 +1,82 @@
+---
+/**
+ * Fotografie Patrika v hero — nahrazuje HeroPhotoPlaceholder.astro
+ * (hero-implementation-spec.md §4: kontejner `.hero-photo` je jediné místo,
+ * kde se placeholder vyměňuje za <picture>). Pozici a rozměr bloku na
+ * každém stupni dál řídí Hero.astro (`.hero :global(.hero-photo)`).
+ *
+ * Zdroj: výřez s průhledným pozadím (testovací 434×860 px) — postava stojí přímo na
+ * pozadí sekce, bez rámečku a stínu (§2.4, brief §24). Astro z něj generuje
+ * AVIF/WebP ve více šířkách; obrázek je LCP, proto eager + fetchpriority.
+ *
+ * POZOR (24. 9. 2026): dodaná fotka nese vodoznak „LAVMACH“ přes trup —
+ * před spuštěním nahradit originálem bez vodoznaku (ideálně ve vyšším
+ * rozlišení, ~1000 px na šířku kvůli retina displejům na desktopu).
+ */
+import { Picture } from 'astro:assets';
+import patrikHero from '../assets/photos/patrik-hero.png';
+---
+
+<div class="hero-photo" data-photo="photo">
+  <Picture
+    src={patrikHero}
+    alt="Patrik Gajdadzis, finanční poradce"
+    formats={['avif', 'webp']}
+    widths={[390, 434]}
+    sizes="(min-width: 1200px) 500px, (min-width: 768px) 40vw, 100vw"
+    loading="eager"
+    fetchpriority="high"
+    class="hero-photo__img"
+  />
+</div>
+
+<style>
+  .hero-photo {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Hlava nahoře, spodek postavy dosedá na statistický pás (§3). */
+  .hero-photo :global(.hero-photo__img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0;
+  }
+
+  /* Desktop: celá postava v bloku (ne ořez), spodek dosedá na pás.
+     Za postavou zelenkavá záře — stejná vrstva „rim light“ jako měl
+     placeholder (token --photo-rim-light, stejná poloha a velikost). */
+  @media (min-width: 1200px) {
+    .hero-photo::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(46% 60% at 58% 46%, var(--photo-rim-light), transparent 68%);
+      pointer-events: none;
+    }
+
+    .hero-photo :global(.hero-photo__img) {
+      position: relative;
+      /* Výřez 434×860 (delší verze s nohama oříznutá). Prsty končí na
+         732. px (změřeno). Statistický pás uřízne fotku 50 px pod nimi
+         (785. px = 91,3 % výšky) — ruka má pod sebou kousek kalhot, nohy
+         nejsou tak dlouhé (přání uživatele 28. 9. 2026). Jiná fotka než hero
+         na /o-mne (výslovně).
+         Velikost postavy je vzor pro hero na /o-mne a /pristup. */
+      height: calc(100% / 0.913);
+      object-fit: contain;
+      object-position: 100% 0;
+    }
+  }
+
+  /* Mobil: fotka je pozadí celé hero sekce a postava má být vycentrovaná
+     (spec §3.3). Obličej ve výřezu leží ve ~33 % šířky (ruka v bok vpravo),
+     proto posun doprava — pozadí je průhledné, vlevo nevznikne okraj. */
+  @media (max-width: 767px) {
+    .hero-photo :global(.hero-photo__img) {
+      transform: translateX(14%);
+    }
+  }
+</style>
