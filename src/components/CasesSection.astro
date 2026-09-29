@@ -254,7 +254,9 @@ const cases: CaseStudy[] = [
 </section>
 
 <script>
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
+  // zobrazí hned (stejná cesta jako prefers-reduced-motion).
+  const reduceMotion = true;
   // Na tabletu/desktopu (≥768px) se linka i texty vykreslují rovnou v hotovém
   // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
   const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;

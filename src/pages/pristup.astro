@@ -449,7 +449,9 @@ const faqs: Faq[] = [
 </BaseLayout>
 
 <script>
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
+  // zobrazí hned (stejná cesta jako prefers-reduced-motion).
+  const reduceMotion = true;
   const main = document.querySelector('.pri');
   const routeWrap = document.querySelector('.pri__route');
 
@@ -1420,18 +1422,22 @@ const faqs: Faq[] = [
        na světlém. Homepage tak zůstává jediná s tmavým úvodem. */
     .pri-hero {
       position: relative;
-      /* 320: text začíná přes spodek trička, ve rozpuštěné části fotky —
-         na 375×812 se tak celé hero i s telefonem vejde na obrazovku. */
-      padding-top: 320px;
+      /* 260: minimum, aby text nezakryl obličej — nadpis začíná pod bradou,
+         přes límec/hrudník v rozpuštěné části fotky. */
+      padding-top: 260px;
       /* Hero na výšku displeje pod záhlavím (64 px) jako homepage — text
-         a tlačítka přichycené ke spodku, fotka nahoře; 320 px nahoře zůstává
-         jako minimum, aby text nezakryl obličej (29. 9. 2026). */
+         a tlačítka přichycené ke spodku, fotka nahoře (29. 9. 2026).
+         Spodek 40 px (telefonní řádek je tu o 4 px nižší): spodní hrana
+         CTA leží 100 px nad koncem hero, takže v Safari na iOS 26 (plovoucí
+         panel přes spodních ~140 px, 100svh = 772 px na iPhonu 17 Pro)
+         zůstane tlačítko nad panelem a telefon pod ním — ověřeno podle
+         screenshotu z iPhonu 17 Pro. */
       min-height: calc(100vh - 64px);
       min-height: calc(100svh - 64px);
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding-bottom: 20px;
+      padding-bottom: 40px;
     }
 
     .pri-hero__text {

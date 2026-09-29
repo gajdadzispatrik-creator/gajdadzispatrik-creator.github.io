@@ -615,7 +615,9 @@ const facts: FactRow[] = [
 </BaseLayout>
 
 <script>
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
+  // zobrazí hned (stejná cesta jako prefers-reduced-motion).
+  const reduceMotion = true;
   const main = document.querySelector('.om');
   const routeWrap = document.querySelector('.om__route');
 
@@ -1717,16 +1719,18 @@ const facts: FactRow[] = [
        výřezu) uprostřed stránky; temeno ~30 px pod záhlavím. */
     .om-hero {
       position: relative;
-      padding-top: 320px;
+      /* 260: minimum, aby text nezakryl obličej. */
+      padding-top: 260px;
       /* Hero na výšku displeje pod záhlavím (64 px) jako homepage — text
-         a tlačítka přichycené ke spodku, fotka nahoře; 320 px nahoře zůstává
-         jako minimum, aby text nezakryl obličej (29. 9. 2026). */
+         a tlačítka přichycené ke spodku, fotka nahoře (29. 9. 2026).
+         Spodek 40 px: CTA 100 px nad koncem hero,
+         tj. nad plovoucím panelem Safari na iOS 26 (viz pristup.astro). */
       min-height: calc(100vh - 64px);
       min-height: calc(100svh - 64px);
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding-bottom: 20px;
+      padding-bottom: 40px;
     }
 
     .om-hero__text {

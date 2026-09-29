@@ -24,7 +24,46 @@ const stats = [
       </li>
     ))}
   </ul>
+  <div class="stats-band__tint" aria-hidden="true"></div>
 </section>
+
+<script>
+  /*
+   * Safari na iOS 26 kreslí spodní panel (adresa + navigace) přes stránku
+   * a jeho barvu bere z prvku přichyceného ke spodní hraně obrazovky, jinak
+   * ze světlého pozadí stránky — přes tmavé hero pak panel svítil šedě.
+   * Tenký proužek `position: fixed` v barvě pásu je zapnutý jen na mobilu
+   * a jen dokud spodní hranu obrazovky vyplňuje tmavé hero nebo tenhle pás,
+   * takže je v ostatních prohlížečích neviditelný (leží na stejné barvě).
+   * Na přání uživatele 29. 9. 2026 (iPhone 17 Pro, Safari).
+   */
+  const band = document.querySelector('.stats-band') as HTMLElement | null;
+  const tint = band?.querySelector('.stats-band__tint') as HTMLElement | null;
+  const hero = document.querySelector('.hero') as HTMLElement | null;
+
+  if (band && tint && hero) {
+    const mobile = window.matchMedia('(max-width: 767px)');
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const vh = window.innerHeight;
+      // Tmavá plná barva hero začíná ~150 px nad jeho koncem (.hero::after).
+      const on = mobile.matches
+        && hero.getBoundingClientRect().bottom - 150 < vh
+        && band.getBoundingClientRect().bottom > vh + 4;
+      tint.classList.toggle('is-on', on);
+    };
+    const schedule = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    update();
+  }
+</script>
 
 <style>
   .stats-band {
@@ -37,6 +76,21 @@ const stats = [
   .stats-band__list {
     display: flex;
     flex-direction: column;
+  }
+
+  .stats-band__tint {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: var(--navy);
+    pointer-events: none;
+  }
+
+  .stats-band__tint.is-on {
+    display: block;
   }
 
   .stats-band__item {

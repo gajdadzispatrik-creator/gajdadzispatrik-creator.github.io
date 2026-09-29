@@ -303,17 +303,7 @@ import LineGradientDefs from './LineGradientDefs.astro';
     z-index: 0;
   }
 
-  .hero-line__path {
-    stroke-dasharray: 2400;
-    stroke-dashoffset: 2400;
-    animation: draw-line var(--duration-line) var(--ease-out) 200ms forwards;
-  }
-
-  @keyframes draw-line {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
+  /* Linka je vykreslená hned, bez animace — na přání uživatele 29. 9. 2026. */
 
   .hero-line--desktop,
   .hero-line--laptop,

@@ -631,7 +631,9 @@ const REVIEWS_SHOWN = 3;
 </BaseLayout>
 
 <script>
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
+  // zobrazí hned (stejná cesta jako prefers-reduced-motion).
+  const reduceMotion = true;
   const main = document.querySelector('.rec');
   const routeWrap = document.querySelector('.rec__route');
 

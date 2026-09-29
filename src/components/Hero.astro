@@ -65,30 +65,9 @@ import HeroPhoto from './HeroPhoto.astro';
     color: var(--white);
   }
 
+  /* Bez animace nástupu — na přání uživatele 29. 9. 2026 se vše zobrazí hned. */
   .hero__title-line {
     display: inline-block;
-    opacity: 0;
-    transform: translateY(14px);
-    animation: reveal-line var(--duration-reveal) var(--ease-out) forwards;
-  }
-
-  .hero__title-line--1 {
-    animation-delay: 60ms;
-  }
-
-  .hero__title-line--2 {
-    animation-delay: 150ms;
-  }
-
-  .hero__title-line--3 {
-    animation-delay: 240ms;
-  }
-
-  @keyframes reveal-line {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
 
   .hero__subhead {

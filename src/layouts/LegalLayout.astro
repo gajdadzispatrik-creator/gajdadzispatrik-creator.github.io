@@ -185,7 +185,9 @@ const routeVariants = [
 
 <script>
   const legal = document.querySelector('.legal') as HTMLElement | null;
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
+  // zobrazí hned (stejná cesta jako prefers-reduced-motion).
+  const reduceMotion = true;
 
   if (legal) {
     const svgs = Array.from(legal.querySelectorAll('.legal__route-svg')) as SVGSVGElement[];
