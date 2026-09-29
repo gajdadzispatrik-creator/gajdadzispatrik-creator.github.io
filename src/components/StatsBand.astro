@@ -32,9 +32,12 @@ const stats = [
    * Safari na iOS 26 kreslí spodní panel (adresa + navigace) přes stránku
    * a jeho barvu bere z prvku přichyceného ke spodní hraně obrazovky, jinak
    * ze světlého pozadí stránky — přes tmavé hero pak panel svítil šedě.
-   * Tenký proužek `position: fixed` v barvě pásu je zapnutý jen na mobilu
-   * a jen dokud spodní hranu obrazovky vyplňuje tmavé hero nebo tenhle pás,
-   * takže je v ostatních prohlížečích neviditelný (leží na stejné barvě).
+   * Tenký proužek `position: fixed` je na mobilu zapnutý POŘÁD a jen mění
+   * barvu podle toho, co zrovna leží pod spodní hranou obrazovky (tmavé
+   * hero/pás → navy, jinak skutečné pozadí sekce), takže je v ostatních
+   * prohlížečích neviditelný. Dřívější verze proužek mimo hero vypínala —
+   * Safari pak po návratu nahoru nechal kolem panelu bílý obdélník (barvu
+   * pozadí stránky převzatou ve chvíli, kdy proužek chyběl).
    * Na přání uživatele 29. 9. 2026 (iPhone 17 Pro, Safari).
    */
   const band = document.querySelector('.stats-band') as HTMLElement | null;
@@ -42,16 +45,57 @@ const stats = [
   const hero = document.querySelector('.hero') as HTMLElement | null;
 
   if (band && tint && hero) {
-    const mobile = window.matchMedia('(max-width: 767px)');
+    const navy = getComputedStyle(band).backgroundColor;
+    // Barva přechodu (tmavé sekce: linear-gradient s téměř svislým úhlem)
+    // v bodě y — lineární interpolace mezi zastávkami podle výšky prvku.
+    const gradientAt = (el: Element, image: string, y: number) => {
+      const stops = [...image.matchAll(/rgba?\(([^)]+)\)\s+([\d.]+)%/g)].map((m) => ({
+        c: m[1].split(',').map((v) => parseFloat(v)),
+        at: parseFloat(m[2]) / 100,
+      }));
+      if (stops.length < 2) return '';
+      const r = el.getBoundingClientRect();
+      const t = Math.min(1, Math.max(0, (y - r.top) / r.height));
+      let i = 0;
+      while (i < stops.length - 2 && t > stops[i + 1].at) i++;
+      const a = stops[i];
+      const b = stops[i + 1];
+      const k = b.at > a.at ? Math.min(1, Math.max(0, (t - a.at) / (b.at - a.at))) : 1;
+      const mix = [0, 1, 2].map((j) => Math.round(a.c[j] + (b.c[j] - a.c[j]) * k));
+      return `rgb(${mix.join(', ')})`;
+    };
+    // Barva obsahu pod bodem — přeskočí přichycené vrstvy (cookie lišta,
+    // menu), ty si Safari vzorkuje samo.
+    const bgUnder = (x: number, y: number) => {
+      for (const hit of document.elementsFromPoint(x, y)) {
+        let el: Element | null = hit;
+        let color = '';
+        let fixed = false;
+        while (el && el !== document.documentElement) {
+          const cs = getComputedStyle(el);
+          if (cs.position === 'fixed') { fixed = true; break; }
+          // Jen plochy přes (skoro) celou šířku — ne tlačítka a drobné prvky.
+          if (el.getBoundingClientRect().width < window.innerWidth * 0.8) { el = el.parentElement; continue; }
+          if (!color && cs.backgroundImage.startsWith('linear-gradient')) color = gradientAt(el, cs.backgroundImage, y);
+          const c = cs.backgroundColor;
+          if (!color && c && c !== 'transparent' && c !== 'rgba(0, 0, 0, 0)') color = c;
+          el = el.parentElement;
+        }
+        if (!fixed && color) return color;
+      }
+      return getComputedStyle(document.documentElement).backgroundColor;
+    };
     let ticking = false;
     const update = () => {
       ticking = false;
+      // Proužek existuje jen v Safari na iPhonu (CSS @supports) — jinde nic.
+      if (getComputedStyle(tint).display === 'none') return;
       const vh = window.innerHeight;
-      // Tmavá plná barva hero začíná ~150 px nad jeho koncem (.hero::after).
-      const on = mobile.matches
-        && hero.getBoundingClientRect().bottom - 150 < vh
+      // Tmavá plná barva hero začíná ~150 px nad jeho koncem (.hero::after)
+      // — pozadí samotné sekce hero je světlé, proto zvlášť.
+      const onNavy = hero.getBoundingClientRect().bottom - 150 < vh
         && band.getBoundingClientRect().bottom > vh + 4;
-      tint.classList.toggle('is-on', on);
+      tint.style.backgroundColor = onNavy ? navy : bgUnder(window.innerWidth / 2, vh - 2);
     };
     const schedule = () => {
       if (!ticking) {
@@ -78,19 +122,28 @@ const stats = [
     flex-direction: column;
   }
 
+  /* Safari na iOS 26 bere barvu spodního panelu z fixed prvku ≥ 3 px
+     vysokého, ≥ 80 % širokého a nejvýš 3 px od spodní hrany (vyžaduje
+     viewport-fit=cover, BaseLayout). 12 px s bottom −8 px = 4 px na
+     obrazovce i při sbalování panelu. Zobrazený jen ve WebKitu na iOS
+     (@supports níže), jinde vůbec neexistuje. Barvu nastavuje skript. */
   .stats-band__tint {
     display: none;
     position: fixed;
     left: 0;
-    right: 0;
-    bottom: 0;
-    height: 4px;
-    background: var(--navy);
+    bottom: -8px;
+    width: 100%;
+    height: 12px;
+    background-color: var(--navy);
     pointer-events: none;
   }
 
-  .stats-band__tint.is-on {
-    display: block;
+  @supports (-webkit-touch-callout: none) {
+    @media (max-width: 767px) {
+      .stats-band__tint {
+        display: block;
+      }
+    }
   }
 
   .stats-band__item {

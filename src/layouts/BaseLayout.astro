@@ -44,7 +44,9 @@ const jsonLdGraph = {
 <html lang="cs">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* viewport-fit=cover: bez něj Safari na iOS 26 nebere barvu spodního
+        panelu ze stránky (viz .stats-band__tint ve StatsBand.astro). */}
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
     {/* Náhled na GitHub Pages (PUBLIC_PREVIEW=1 v .github/workflows/preview.yml) se nesmí dostat do Googlu. */}

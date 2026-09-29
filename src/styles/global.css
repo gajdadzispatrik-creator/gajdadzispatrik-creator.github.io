@@ -6,6 +6,9 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Safari na iOS 26 barví panely podle pozadí kořene — průhledné bere jako
+     bílou (bílý obdélník kolem spodního panelu). */
+  background-color: var(--bg);
 }
 
 body {
@@ -13,6 +16,10 @@ body {
   font-family: var(--font-sans);
   color: var(--text);
   background: var(--bg);
+  /* viewport-fit=cover (BaseLayout) pustí stránku na iPhonu naležato až pod
+     výřez displeje — obsah drží mimo něj. Jinde je env() 0. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
