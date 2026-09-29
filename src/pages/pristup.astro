@@ -134,7 +134,9 @@ const faqs: Faq[] = [
       {
         [
           { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
-          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          // Tablet: nájezd shora ZA fotkou jako na homepage (28. 9. 2026) —
+          // x = 87 % šířky (za postavou vpravo od hlavy na 768–1199 px), viz entryRatio v JS.
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: true, entry: 726, entryRatio: 0.87, r: 22 },
           { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
           { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
         ].map((v) => (
@@ -148,11 +150,12 @@ const faqs: Faq[] = [
             data-dot-offset={v.dotOffset}
             data-hero={String(v.hero)}
             data-entry={v.entry}
+            data-entry-ratio={v.entryRatio}
             data-radius={v.r}
           >
             {v.hero && (
               <defs>
-                <LineGradientDefs id={`pri-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={600} x2={v.entry} y2={700} />
+                <LineGradientDefs id={`pri-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : v.tier === 'tablet' ? 'tablet' : 'laptop'} x1={v.entry} y1={600} x2={v.entry} y2={700} />
               </defs>
             )}
             <path class="pri__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
@@ -509,13 +512,16 @@ const faqs: Faq[] = [
         const axis = parseFloat(svg.dataset.axis ?? '24');
         const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
         const isHero = svg.dataset.hero === 'true';
-        const entryX = parseFloat(svg.dataset.entry ?? '0');
         const r = parseFloat(svg.dataset.radius ?? '0');
 
         if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
 
         const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
         const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+        // Tablet: nájezd v poměru k šířce (za postavou na každé šířce), jinak
+        // pevná tierová konstanta jako u sourozenců.
+        const entryRatio = parseFloat(svg.dataset.entryRatio ?? '');
+        const entryX = Number.isFinite(entryRatio) ? entryRatio * vb : parseFloat(svg.dataset.entry ?? '0');
 
         svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
 
@@ -524,6 +530,90 @@ const faqs: Faq[] = [
 
         const axisScaled = (axis / nominalVb) * vb;
         const shift = axisScaled - axis;
+        // Mobil (28. 9. 2026): trasa jako na tabletu — od osy pod obsahem hero
+        // obloukem doprava, po pravé straně nahoru a pod záhlavím končí do
+        // ztracena nájezdovým gradientem (barvy LineGradientDefs tier „tablet").
+        // Je-li v hero fotka v pozadí (absolutně nahoře), vede linka ZA ní jako
+        // na homepage: nahoře vedle hlavy je vidět, za postavou schovaná a v místě,
+        // kde se fotka rozpouští, se plynule znovu objeví (úsek „mid" s vlastním
+        // gradientem — v průsvitné části fotky by jinak linka prosvítala).
+        // Gradienty a pomocné cesty se v mobilním SVG vytvoří jednou za běhu.
+        const mobileFramePath = (endY: number): string | null => {
+          if (!heroSection) return null;
+          const els = Array.from(heroSection.querySelectorAll('[class*="hero__text"], [class*="hero__photo"], [class*="hero__breadcrumb"], nav')) as HTMLElement[];
+          const rects = els.map((e) => e.getBoundingClientRect()).filter((r) => r.height > 0);
+          if (!rects.length) return null;
+          const bottom = Math.max(...rects.map((r) => r.bottom)) - mainRect.top;
+          const fr = 18;
+          const rightX = (378 / nominalVb) * vb;
+          const y0 = 40;
+          const yB = bottom + 28;
+          const yE = Math.min(140, yB - fr - 20);
+          const NS = 'http://www.w3.org/2000/svg';
+          const ensure = (cls: string, stops: [string, string, string][]) => {
+            let path = svg.querySelector(`path.${cls}`) as SVGPathElement | null;
+            let grad = svg.querySelector(`linearGradient.${cls}`) as SVGLinearGradientElement | null;
+            if (!path || !grad) {
+              const defs = document.createElementNS(NS, 'defs');
+              grad = document.createElementNS(NS, 'linearGradient') as SVGLinearGradientElement;
+              grad.id = `${cls}-${Math.random().toString(36).slice(2, 9)}`;
+              grad.setAttribute('class', cls);
+              grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+              stops.forEach(([o, c, op]) => {
+                const st = document.createElementNS(NS, 'stop');
+                st.setAttribute('offset', o);
+                st.setAttribute('stop-color', c);
+                st.setAttribute('stop-opacity', op);
+                grad!.appendChild(st);
+              });
+              defs.appendChild(grad);
+              svg.insertBefore(defs, svg.firstChild);
+              path = document.createElementNS(NS, 'path') as SVGPathElement;
+              path.setAttribute('class', cls);
+              path.setAttribute('fill', 'none');
+              path.setAttribute('stroke', `url(#${grad.id})`);
+              path.setAttribute('stroke-width', '1');
+              path.setAttribute('stroke-linecap', 'round');
+              svg.appendChild(path);
+            }
+            return { path, grad };
+          };
+          const entry = ensure('route-mobile-entry', [['0%', '#1E7A5C', '0'], ['34%', '#1E7A5C', '.36'], ['70%', '#255E77', '.24'], ['100%', '#1B4A8A', '.18']]);
+          entry.grad.setAttribute('x1', String(rightX));
+          entry.grad.setAttribute('x2', String(rightX));
+          entry.grad.setAttribute('y1', String(y0));
+          entry.grad.setAttribute('y2', String(yE));
+          entry.path.setAttribute('d', `M ${rightX} ${y0} L ${rightX} ${yE}`);
+          let mainStart = yE;
+          const bgPhoto = heroSection.querySelector('[class*="hero__photo"]') as HTMLElement | null;
+          if (bgPhoto && getComputedStyle(bgPhoto).position === 'absolute') {
+            const pr = bgPhoto.getBoundingClientRect();
+            const pTop = pr.top - mainRect.top;
+            const yA = pTop + pr.height * 0.44;
+            // Pod 72 % výšky fotky je postava už skoro rozpuštěná — linka je až do
+            // té výšky schovaná (i přes průsvitnou ruku) a objeví se až pod ní.
+            const yD = pTop + pr.height * 0.72;
+            const yF = Math.min(pTop + pr.height * 0.9, yB - fr - 1);
+            if (yF > yE + 20) {
+              const span = yF - yE;
+              const pA = Math.max(0, Math.min(1, (yA - yE) / span));
+              const pC = Math.max(pA, Math.min(1, pA + 12 / span));
+              const pD = Math.max(pC, Math.min(1, (yD - yE) / span));
+              const mid = ensure('route-mobile-mid', [['0%', '#1B4A8A', '.18'], ['0%', '#1B4A8A', '.18'], ['0%', '#1B4A8A', '0'], ['0%', '#1B4A8A', '0'], ['100%', '#1B4A8A', '.18']]);
+              const st = mid.grad.querySelectorAll('stop');
+              st[1].setAttribute('offset', String(pA));
+              st[2].setAttribute('offset', String(pC));
+              st[3].setAttribute('offset', String(pD));
+              mid.grad.setAttribute('x1', String(rightX));
+              mid.grad.setAttribute('x2', String(rightX));
+              mid.grad.setAttribute('y1', String(yE));
+              mid.grad.setAttribute('y2', String(yF));
+              mid.path.setAttribute('d', `M ${rightX} ${yE} L ${rightX} ${yF}`);
+              mainStart = yF;
+            }
+          }
+          return `M ${rightX} ${mainStart} V ${yB - fr} A ${fr} ${fr} 0 0 1 ${rightX - fr} ${yB} H ${axisScaled + fr} A ${fr} ${fr} 0 0 0 ${axisScaled} ${yB + fr} V ${endY}`;
+        };
         if (isActive) {
           (main as HTMLElement).style.setProperty('--pri-shift', `${shift}px`);
         }
@@ -544,7 +634,7 @@ const faqs: Faq[] = [
 
           if (lightPath) lightPath.setAttribute('d', heroArcPath(entryX, axisScaled, r, bendY, closingTop, entryEndY));
         } else if (lightPath) {
-          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+          lightPath.setAttribute('d', mobileFramePath(closingTop) ?? `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
         }
 
         const gapBuffer = 20;
@@ -1294,6 +1384,91 @@ const faqs: Faq[] = [
     }
   }
 
+  /* ============ Mobil (<768): obsah od popisku u tečky, ne na lince ============
+     Popisek kapitoly stojí 36 px od kraje sekce (osa 24 + zářez) — obsah
+     kapitol i závěrečné sekce začíná na stejné svislici, jako na tabletu
+     (28. 9. 2026, dřív nadpisy a text ležely přímo na lince). */
+  @media (max-width: 767px) {
+    .pri-chapter__content {
+      padding-left: calc(36px + var(--pri-shift, 0px));
+    }
+
+    .pri-closing__grid {
+      padding-left: calc(60px + var(--pri-shift, 0px));
+    }
+
+    /* Kulatý portrét v Péči i na mobilu (dřív jen od tabletu) — pod
+       závěrečnou větou kapitoly (28. 9. 2026; vedle věty byl sloupec
+       textu moc úzký, uživatel zvolil text a pod ním fotku). */
+    .pri-pece__photo {
+      display: block;
+      flex: none;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      /* Na střed stránky (ne sloupce textu): levý kraj obsahu kapitoly je
+         24 + 36 px (+ posun osy), polovina fotky 80 px. */
+      align-self: flex-start;
+      margin-left: calc(50vw - 60px - var(--pri-shift, 0px) - 80px);
+      /* Na mobilu fotka NAD závěrečnou větou (přání uživatele 28. 9. 2026). */
+      order: -1;
+    }
+
+    /* Hero: fotka v pozadí jako na homepage, ale SVĚTLÁ varianta
+       (28. 9. 2026, volba uživatele) — postava nahoře, dolů se plynule
+       rozpustí do pozadí stránky (ne do tmavě modré), text zůstává tmavý
+       na světlém. Homepage tak zůstává jediná s tmavým úvodem. */
+    .pri-hero {
+      position: relative;
+      /* 320: text začíná přes spodek trička, ve rozpuštěné části fotky —
+         na 375×812 se tak celé hero i s telefonem vejde na obrazovku. */
+      padding-top: 320px;
+      /* Hero na výšku displeje pod záhlavím (64 px) jako homepage — text
+         a tlačítka přichycené ke spodku, fotka nahoře; 320 px nahoře zůstává
+         jako minimum, aby text nezakryl obličej (29. 9. 2026). */
+      min-height: calc(100vh - 64px);
+      min-height: calc(100svh - 64px);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 20px;
+    }
+
+    .pri-hero__text {
+      position: relative;
+      z-index: 3;
+    }
+
+    .pri-hero__photo {
+      position: absolute;
+      /* 24 px pod záhlavím — hlava mu nesmí být nalepená (28. 9. 2026). */
+      top: 24px;
+      left: 0;
+      width: 100%;
+      height: 560px;
+    }
+
+    .pri-hero__photo img {
+      object-fit: cover;
+      /* Obličej leží ve 40,4 % šířky výřezu (změřeno) — posun o 9,6 %
+         dá hlavu přesně doprostřed stránky (přání uživatele 28. 9. 2026). */
+      object-position: 50% 0;
+      transform: translateX(9.6%);
+      /* Dvě masky (průnik): spodek do ztracena + pravý kraj do ztracena,
+         aby paže u pravého okraje nepůsobila uříznutě (28. 9. 2026). Obrázek
+         je posunutý o 9,6 % doprava, viditelný pravý kraj je tedy na ~90 %
+         jeho šířky — přechod 56 → 90 % (plynulý, 28. 9. 2026). */
+      -webkit-mask-image:
+        linear-gradient(180deg, #000 44%, rgba(0, 0, 0, .96) 48%, rgba(0, 0, 0, .85) 52%, rgba(0, 0, 0, .69) 56%, rgba(0, 0, 0, .5) 60%, rgba(0, 0, 0, .31) 64%, rgba(0, 0, 0, .15) 68%, rgba(0, 0, 0, .04) 72%, transparent 76%),
+        linear-gradient(90deg, #000 56%, rgba(0, 0, 0, .98) 59%, rgba(0, 0, 0, .94) 62%, rgba(0, 0, 0, .85) 65%, rgba(0, 0, 0, .75) 68%, rgba(0, 0, 0, .63) 71%, rgba(0, 0, 0, .5) 74%, rgba(0, 0, 0, .37) 77%, rgba(0, 0, 0, .25) 80%, rgba(0, 0, 0, .15) 83%, rgba(0, 0, 0, .06) 86%, rgba(0, 0, 0, .02) 88%, transparent 90%);
+      -webkit-mask-composite: source-in;
+              mask-image:
+        linear-gradient(180deg, #000 44%, rgba(0, 0, 0, .96) 48%, rgba(0, 0, 0, .85) 52%, rgba(0, 0, 0, .69) 56%, rgba(0, 0, 0, .5) 60%, rgba(0, 0, 0, .31) 64%, rgba(0, 0, 0, .15) 68%, rgba(0, 0, 0, .04) 72%, transparent 76%),
+        linear-gradient(90deg, #000 56%, rgba(0, 0, 0, .98) 59%, rgba(0, 0, 0, .94) 62%, rgba(0, 0, 0, .85) 65%, rgba(0, 0, 0, .75) 68%, rgba(0, 0, 0, .63) 71%, rgba(0, 0, 0, .5) 74%, rgba(0, 0, 0, .37) 77%, rgba(0, 0, 0, .25) 80%, rgba(0, 0, 0, .15) 83%, rgba(0, 0, 0, .06) 86%, rgba(0, 0, 0, .02) 88%, transparent 90%);
+              mask-composite: intersect;
+    }
+  }
+
   /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
   @media (min-width: 768px) {
     .pri__route-svg--mobile {
@@ -1345,17 +1520,49 @@ const faqs: Faq[] = [
       height: auto;
     }
 
-    .pri-hero__photo {
-      height: 360px;
-    }
-
+    /* Jako /o-mne: fotka se rozpouští až na spodku hero, pod ní k „Začátku"
+       jen padding kapitoly (72 px), ne dalších 80 px navíc. */
     .pri-chapter--zacatek {
-      margin-top: 80px;
+      margin-top: 0;
       padding: 72px 40px;
     }
 
     .pri-chapter {
       padding: 72px 40px;
+    }
+
+    /* Obsah kapitol od popisku u tečky (osa 40 + 64 = 104 px), ne na ose
+       — dřív nadpisy a text ležely přímo na lince. Stejně jako
+       `.hyp-chapter__content` na /sluzby/hypoteky (28. 9. 2026). */
+    .pri-chapter__content {
+      padding-left: calc(64px + var(--pri-shift, 0px));
+    }
+
+    /* Na tabletu nadpis kapitoly NAD textem přes celou šířku (ne dva sloupce
+       vedle sebe) — stejně jako /o-mne (28. 9. 2026, přání uživatele).
+       Vedle sebe až od notebooku (pravidla přesunutá do bloku 1200+). */
+    .pri-chapter__top {
+      max-width: 640px;
+    }
+
+    /* Kulatý portrét v Péči i na tabletu (dřív až od 1200 px), vedle
+       závěrečné věty jako na desktopu, jen menší. */
+    .pri-pece__closing {
+      flex-direction: row;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .pri-pece__closing .pri-chapter__statement {
+      flex: 1;
+    }
+
+    .pri-pece__photo {
+      display: block;
+      flex: none;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
     }
 
     .pri-chapter__bar p {
@@ -1380,27 +1587,6 @@ const faqs: Faq[] = [
 
     .pri-chapter__statement {
       font-size: 24px;
-    }
-
-    .pri-chapter__top {
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-    }
-
-    .pri-chapter--vstup .pri-chapter__lead-col,
-    .pri-chapter--doporuceni .pri-chapter__lead-col,
-    .pri-chapter--realizace .pri-chapter__lead-col,
-    .pri-chapter--pece .pri-chapter__lead-col {
-      flex: none;
-      width: 300px;
-    }
-
-    .pri-chapter--vstup .pri-chapter__support-col,
-    .pri-chapter--doporuceni .pri-chapter__support-col,
-    .pri-chapter--realizace .pri-chapter__support-col,
-    .pri-chapter--pece .pri-chapter__support-col {
-      flex: 1;
     }
 
     .pri-steps {
@@ -1439,8 +1625,10 @@ const faqs: Faq[] = [
       padding-block: 76px;
     }
 
+    /* Text od linky odsazený stejně jako obsah kapitol (osa + 64 px). */
     .pri-closing__grid {
       padding-inline: 40px;
+      padding-left: calc(104px + var(--pri-shift, 0px));
     }
 
     .pri-closing__grid h2 {
@@ -1466,8 +1654,118 @@ const faqs: Faq[] = [
     }
   }
 
+  /* ============ Jen tablet (768–1199): hero jako homepage ============
+     Rozložení 1:1 podle Hero.astro na tabletu (28. 9. 2026, přání uživatele
+     „pozice textů jako na homepage"): text vlevo se stejnou velikostí
+     nadpisu, šířkou a odstupy, fotka vpravo absolutně ve stejném bloku
+     (top/left/šířka/výška stejné vzorce jako .hero-photo na homepage) —
+     spodek bloku = spodek hero. Postava: cover (průhledné okraje výřezu se
+     oříznou), hlava ~85 px jako na homepage; vidět ~816 px výřezu, pod
+     prsty plynulé rozpuštění. */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .pri-hero {
+      position: relative;
+      padding: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px) 40px 0;
+      min-height: clamp(656px, calc(656px + 0.255639 * (100vw - 834px)), 792px);
+    }
+
+    .pri-hero__text {
+      gap: 0;
+    }
+
+    .pri-hero__text h1 {
+      max-width: 490px;
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      line-height: .99;
+    }
+
+    .pri-hero__lead {
+      margin-top: 60px;
+      max-width: min(520px, calc(100vw - 392px));
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+
+    .pri-hero__actions {
+      margin-top: 46px;
+      gap: clamp(32px, calc(32px + 0.007519 * (100vw - 834px)), 36px);
+    }
+
+    .pri-hero__photo {
+      position: absolute;
+      top: clamp(72px, calc(72px + 0.060150 * (100vw - 834px)), 104px);
+      left: min(
+        clamp(560px, calc(560px + 0.639098 * (100vw - 834px)), 900px),
+        calc(100% - clamp(334px, calc(312px + 0.289474 * (100vw - 834px)), 466px) - 8px)
+      );
+      bottom: 0;
+      /* Min. 334 px (ne 312): užší blok pod ~900 px ořezával cover-em boky
+         fotky a uřízl loket vpravo (28. 9. 2026). */
+      width: clamp(334px, calc(312px + 0.289474 * (100vw - 834px)), 466px);
+      height: auto;
+      margin: 0;
+    }
+
+    .pri-hero__photo img {
+      height: calc(100% * 1.064);
+      object-fit: cover;
+      object-position: 50% 0;
+      -webkit-mask-image: linear-gradient(180deg, #000 86%, rgba(0, 0, 0, .96) 87%, rgba(0, 0, 0, .85) 88%, rgba(0, 0, 0, .69) 89%, rgba(0, 0, 0, .50) 90%, rgba(0, 0, 0, .31) 91%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 93%, transparent 94%);
+              mask-image: linear-gradient(180deg, #000 86%, rgba(0, 0, 0, .96) 87%, rgba(0, 0, 0, .85) 88%, rgba(0, 0, 0, .69) 89%, rgba(0, 0, 0, .50) 90%, rgba(0, 0, 0, .31) 91%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 93%, transparent 94%);
+    }
+  }
+
+  /* Úzký tablet (768–833): postava z /pristup je širší a levou rukou
+     visí níž než na homepage — užší nadpis a odstavec a menší postava
+     (jinak se jich dotýkala ruka / rameno).
+     Změřeno 28. 9. 2026 z průhlednosti výřezu. */
+  @media (min-width: 768px) and (max-width: 833px) {
+    .pri-hero__text h1 {
+      max-width: calc(100vw - 400px);
+    }
+
+    .pri-hero__lead {
+      max-width: calc(100vw - 420px);
+    }
+
+    /* Tlačítka vedle sebe jako na homepage — aby se telefon nedotkl ruky,
+       postava se pod 834 px plynule zmenšuje (na 768 px ~82 %). Šířka i výška
+       bloku klesají stejným poměrem, pravý kraj (loket) zůstává na místě. */
+    .pri-hero__photo {
+      top: calc(72px + 1.557 * (834px - 100vw));
+      width: calc(334px - 0.8907 * (834px - 100vw));
+      left: calc(100% - (334px - 0.8907 * (834px - 100vw)) - 8px);
+    }
+  }
+
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
+    /* Dva sloupce vedle sebe (dřív už od tabletu, teď od notebooku). */
+    .pri-chapter__top {
+      max-width: none;
+    }
+
+    .pri-chapter__top {
+      max-width: none;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 40px;
+    }
+
+    .pri-chapter--vstup .pri-chapter__lead-col,
+    .pri-chapter--doporuceni .pri-chapter__lead-col,
+    .pri-chapter--realizace .pri-chapter__lead-col,
+    .pri-chapter--pece .pri-chapter__lead-col {
+      flex: none;
+      width: 300px;
+    }
+
+    .pri-chapter--vstup .pri-chapter__support-col,
+    .pri-chapter--doporuceni .pri-chapter__support-col,
+    .pri-chapter--realizace .pri-chapter__support-col,
+    .pri-chapter--pece .pri-chapter__support-col {
+      flex: 1;
+    }
+
     .pri__route-svg--tablet {
       display: none;
     }
@@ -1570,6 +1868,7 @@ const faqs: Faq[] = [
 
     .pri-chapter__content {
       flex: 1;
+      padding-left: 0;
     }
 
     .pri-chapter__content--single {

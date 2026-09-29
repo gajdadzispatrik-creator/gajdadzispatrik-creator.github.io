@@ -179,8 +179,7 @@ const bandDetails = [
         </p>
 
         <p class="kontakt__privacy">
-          Údaje použiji pouze pro&nbsp;vyřízení vaší poptávky a&nbsp;navazující komunikaci.
-          <a href="/zpracovani-osobnich-udaju">Zásady zpracování osobních údajů</a>
+          Údaje použiji pouze pro&nbsp;vyřízení vaší poptávky a&nbsp;navazující komunikaci. <a href="/zpracovani-osobnich-udaju">Zásady zpracování osobních údajů</a>
         </p>
       </form>
     </div>
@@ -990,6 +989,13 @@ const bandDetails = [
     font-weight: 600;
     font-size: 17px;
     transition: background var(--duration-hover) var(--ease-out);
+  }
+
+  /* Mobil: tlačítko na střed pod polem zprávy (28. 9. 2026). */
+  @media (max-width: 767px) {
+    .kontakt__submit {
+      align-self: center;
+    }
   }
 
   .kontakt__submit:hover {

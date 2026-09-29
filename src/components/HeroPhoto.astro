@@ -75,8 +75,10 @@ import patrikHero from '../assets/photos/patrik-hero.png';
      (spec §3.3). Obličej ve výřezu leží ve ~33 % šířky (ruka v bok vpravo),
      proto posun doprava — pozadí je průhledné, vlevo nevznikne okraj. */
   @media (max-width: 767px) {
+    /* translateY 20 px: temeno ~30 px pod záhlavím, stejně jako hero
+       fotka na /pristup na mobilu (28. 9. 2026, dřív ~11 px). */
     .hero-photo :global(.hero-photo__img) {
-      transform: translateX(14%);
+      transform: translateX(14%) translateY(20px);
     }
   }
 </style>

@@ -180,9 +180,50 @@ import HeroPhoto from './HeroPhoto.astro';
       #0f2747 94%,
       #0f2747 100%
     );
-    -webkit-mask-image: linear-gradient(180deg, transparent 0, transparent 250px, black 250px);
-            mask-image: linear-gradient(180deg, transparent 0, transparent 250px, black 250px);
+    /* Horní hrana modrého pozadí textu se plynule rozpouští — pod hlavou
+       (od 215 px) delší kosinovou křivkou do 375 px, tedy lehce do první
+       řádky nadpisu (340 px), aby přechod nebyl strmý (28. 9. 2026). */
+    -webkit-mask-image: linear-gradient(180deg, transparent 215px, rgba(0, 0, 0, .02) 228px, rgba(0, 0, 0, .06) 242px, rgba(0, 0, 0, .15) 255px, rgba(0, 0, 0, .25) 268px, rgba(0, 0, 0, .37) 282px, rgba(0, 0, 0, .5) 295px, rgba(0, 0, 0, .63) 308px, rgba(0, 0, 0, .75) 322px, rgba(0, 0, 0, .85) 335px, rgba(0, 0, 0, .94) 348px, rgba(0, 0, 0, .98) 362px, #000 375px);
+            mask-image: linear-gradient(180deg, transparent 215px, rgba(0, 0, 0, .02) 228px, rgba(0, 0, 0, .06) 242px, rgba(0, 0, 0, .15) 255px, rgba(0, 0, 0, .25) 268px, rgba(0, 0, 0, .37) 282px, rgba(0, 0, 0, .5) 295px, rgba(0, 0, 0, .63) 308px, rgba(0, 0, 0, .75) 322px, rgba(0, 0, 0, .85) 335px, rgba(0, 0, 0, .94) 348px, rgba(0, 0, 0, .98) 362px, #000 375px);
     pointer-events: none;
+  }
+
+  /* ============ Mobil (<768): hero na výšku displeje ============
+     28. 9. 2026: hero vyplní obrazovku pod záhlavím (64 px), nejméně ale
+     700 px — pod tím by nadpis s tmavým pozadím zakryl obličej. Text je
+     přichycený ke SPODKU (36 px nad pásem, jako dřív při 764 px), fotka
+     zůstává nahoře; tmavé pozadí i jeho rozpuštění se počítají od spodku,
+     takže pod textem vypadají na každé výšce stejně jako dřív na 764 px.
+     Na 764 px vychází všechno 1:1 jako předtím. HeroLine.astro (mobilní
+     linka) používá stejný vzorec výšky. */
+  @media (max-width: 767px) {
+    .hero {
+      min-height: max(700px, calc(100vh - 64px));
+      min-height: max(700px, calc(100svh - 64px));
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .hero__inner {
+      padding-top: 0;
+      padding-bottom: 36px;
+    }
+
+    .hero::after {
+      background: linear-gradient(
+        180deg,
+        rgba(120, 152, 193, 0) calc(100% - 764px),
+        rgba(92, 127, 172, .42) calc(100% - 642px),
+        rgba(58, 92, 138, .68) calc(100% - 458px),
+        rgba(32, 62, 104, .86) calc(100% - 290px),
+        rgba(19, 45, 80, .96) calc(100% - 153px),
+        #0f2747 calc(100% - 46px),
+        #0f2747 100%
+      );
+      -webkit-mask-image: linear-gradient(180deg, transparent calc(100% - 549px), rgba(0, 0, 0, .02) calc(100% - 536px), rgba(0, 0, 0, .06) calc(100% - 522px), rgba(0, 0, 0, .15) calc(100% - 509px), rgba(0, 0, 0, .25) calc(100% - 496px), rgba(0, 0, 0, .37) calc(100% - 482px), rgba(0, 0, 0, .5) calc(100% - 469px), rgba(0, 0, 0, .63) calc(100% - 456px), rgba(0, 0, 0, .75) calc(100% - 442px), rgba(0, 0, 0, .85) calc(100% - 429px), rgba(0, 0, 0, .94) calc(100% - 416px), rgba(0, 0, 0, .98) calc(100% - 402px), #000 calc(100% - 389px));
+              mask-image: linear-gradient(180deg, transparent calc(100% - 549px), rgba(0, 0, 0, .02) calc(100% - 536px), rgba(0, 0, 0, .06) calc(100% - 522px), rgba(0, 0, 0, .15) calc(100% - 509px), rgba(0, 0, 0, .25) calc(100% - 496px), rgba(0, 0, 0, .37) calc(100% - 482px), rgba(0, 0, 0, .5) calc(100% - 469px), rgba(0, 0, 0, .63) calc(100% - 456px), rgba(0, 0, 0, .75) calc(100% - 442px), rgba(0, 0, 0, .85) calc(100% - 429px), rgba(0, 0, 0, .94) calc(100% - 416px), rgba(0, 0, 0, .98) calc(100% - 402px), #000 calc(100% - 389px));
+    }
   }
 
   /* ============ Tablet: 768–1199 ============ */
@@ -212,7 +253,9 @@ import HeroPhoto from './HeroPhoto.astro';
 
     .hero__subhead {
       color: var(--text);
-      max-width: 520px;
+      /* Na úzkém tabletu užší, aby se nepotkal s posunutou fotkou
+         (100vw − 392 = místo vlevo od fotky s odstupem). */
+      max-width: min(520px, calc(100vw - 392px));
       margin-top: 60px;
       font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
     }
@@ -243,13 +286,31 @@ import HeroPhoto from './HeroPhoto.astro';
       color: var(--emerald);
     }
 
+    /* Velikost postavy = hero na /pristup (stejně velká hlava na každé
+       tabletové šířce, přání uživatele 28. 9. 2026). --hp-w je šířka bloku
+       = měřítko fotky × 434; vzorce odvozené z měření /pristup (tam je
+       měřítko po částech: do ~964 px podle výšky, pak podle šířky).
+       Výška bloku = 790 px zdroje (pás uřízne fotku kousek pod rukou),
+       spodek na spodku hero = na statistickém pásu. Loket ~15 px od kraje. */
     .hero :global(.hero-photo) {
+      --hp-w: max(
+        calc(305.5px + 0.102 * (100vw - 834px)),
+        calc(284.5px + 0.264 * (100vw - 834px))
+      );
       inset: auto;
-      top: clamp(72px, calc(72px + 0.060150 * (100vw - 834px)), 104px);
-      left: clamp(560px, calc(560px + 0.639098 * (100vw - 834px)), 900px);
-      width: clamp(312px, calc(312px + 0.289474 * (100vw - 834px)), 466px);
-      height: clamp(584px, calc(584px + 0.195489 * (100vw - 834px)), 688px);
+      bottom: 0;
+      left: calc(100% - var(--hp-w) - 3px);
+      width: var(--hp-w);
+      height: calc(var(--hp-w) * 1.8203);
       border-radius: 0;
+    }
+  }
+
+  /* Úzký tablet (768–833): na /pristup se postava zmenšuje, aby se ruka
+     nedotkla telefonu — tady stejně, ať jsou obě stejně velké. */
+  @media (min-width: 768px) and (max-width: 833px) {
+    .hero :global(.hero-photo) {
+      --hp-w: calc(305.6px - 0.8147 * (834px - 100vw));
     }
   }
 

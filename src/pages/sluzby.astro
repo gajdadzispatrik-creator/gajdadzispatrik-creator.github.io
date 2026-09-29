@@ -151,7 +151,9 @@ const areas: Area[] = [
       {
         [
           { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
-          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: false, entry: 0, r: 0 },
+          // Tablet: nájezd shora v 90 % šířky (jako notebook), obloukem pod hero
+          // textem k ose — stejně jako /pristup a /o-mne (28. 9. 2026).
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: true, entry: 750, entryRatio: 0.9, r: 22 },
           { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
           { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
         ].map((v) => (
@@ -165,6 +167,7 @@ const areas: Area[] = [
             data-dot-offset={v.dotOffset}
             data-hero={String(v.hero)}
             data-entry={v.entry}
+            data-entry-ratio={v.entryRatio}
             data-radius={v.r}
           >
             {v.hero && (
@@ -178,7 +181,7 @@ const areas: Area[] = [
                   protože trasa tady vstupuje shora dolů, ne vodorovně od H1.
                   y1/y2 musí sedět s `HERO_ENTRY_START_Y` v <script> níže.
                 */}
-                <LineGradientDefs id={`sluzby-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+                <LineGradientDefs id={`sluzby-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : v.tier === 'tablet' ? 'tablet' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
               </defs>
             )}
             <path class="sluzby__route-path" d={`M ${v.axis} -20 V 2000`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
@@ -420,7 +423,6 @@ const areas: Area[] = [
         const axis = parseFloat(svg.dataset.axis ?? '24');
         const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
         const isHero = svg.dataset.hero === 'true';
-        const entryX = parseFloat(svg.dataset.entry ?? '0');
         const r = parseFloat(svg.dataset.radius ?? '0');
 
         /*
@@ -437,6 +439,9 @@ const areas: Area[] = [
          */
         const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
         const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+        // Tablet: nájezd v poměru k šířce, jinak pevná tierová konstanta.
+        const entryRatio = parseFloat(svg.dataset.entryRatio ?? '');
+        const entryX = Number.isFinite(entryRatio) ? entryRatio * vb : parseFloat(svg.dataset.entry ?? '0');
 
         svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
 
@@ -466,6 +471,90 @@ const areas: Area[] = [
          */
         const axisScaled = (axis / nominalVb) * vb;
         const shift = axisScaled - axis;
+        // Mobil (28. 9. 2026): trasa jako na tabletu — od osy pod obsahem hero
+        // obloukem doprava, po pravé straně nahoru a pod záhlavím končí do
+        // ztracena nájezdovým gradientem (barvy LineGradientDefs tier „tablet").
+        // Je-li v hero fotka v pozadí (absolutně nahoře), vede linka ZA ní jako
+        // na homepage: nahoře vedle hlavy je vidět, za postavou schovaná a v místě,
+        // kde se fotka rozpouští, se plynule znovu objeví (úsek „mid" s vlastním
+        // gradientem — v průsvitné části fotky by jinak linka prosvítala).
+        // Gradienty a pomocné cesty se v mobilním SVG vytvoří jednou za běhu.
+        const mobileFramePath = (endY: number): string | null => {
+          if (!heroSection) return null;
+          const els = Array.from(heroSection.querySelectorAll('[class*="hero__text"], [class*="hero__photo"], [class*="hero__breadcrumb"], nav')) as HTMLElement[];
+          const rects = els.map((e) => e.getBoundingClientRect()).filter((r) => r.height > 0);
+          if (!rects.length) return null;
+          const bottom = Math.max(...rects.map((r) => r.bottom)) - mainRect.top;
+          const fr = 18;
+          const rightX = (378 / nominalVb) * vb;
+          const y0 = 40;
+          const yB = bottom + 28;
+          const yE = Math.min(140, yB - fr - 20);
+          const NS = 'http://www.w3.org/2000/svg';
+          const ensure = (cls: string, stops: [string, string, string][]) => {
+            let path = svg.querySelector(`path.${cls}`) as SVGPathElement | null;
+            let grad = svg.querySelector(`linearGradient.${cls}`) as SVGLinearGradientElement | null;
+            if (!path || !grad) {
+              const defs = document.createElementNS(NS, 'defs');
+              grad = document.createElementNS(NS, 'linearGradient') as SVGLinearGradientElement;
+              grad.id = `${cls}-${Math.random().toString(36).slice(2, 9)}`;
+              grad.setAttribute('class', cls);
+              grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+              stops.forEach(([o, c, op]) => {
+                const st = document.createElementNS(NS, 'stop');
+                st.setAttribute('offset', o);
+                st.setAttribute('stop-color', c);
+                st.setAttribute('stop-opacity', op);
+                grad!.appendChild(st);
+              });
+              defs.appendChild(grad);
+              svg.insertBefore(defs, svg.firstChild);
+              path = document.createElementNS(NS, 'path') as SVGPathElement;
+              path.setAttribute('class', cls);
+              path.setAttribute('fill', 'none');
+              path.setAttribute('stroke', `url(#${grad.id})`);
+              path.setAttribute('stroke-width', '1');
+              path.setAttribute('stroke-linecap', 'round');
+              svg.appendChild(path);
+            }
+            return { path, grad };
+          };
+          const entry = ensure('route-mobile-entry', [['0%', '#1E7A5C', '0'], ['34%', '#1E7A5C', '.36'], ['70%', '#255E77', '.24'], ['100%', '#1B4A8A', '.18']]);
+          entry.grad.setAttribute('x1', String(rightX));
+          entry.grad.setAttribute('x2', String(rightX));
+          entry.grad.setAttribute('y1', String(y0));
+          entry.grad.setAttribute('y2', String(yE));
+          entry.path.setAttribute('d', `M ${rightX} ${y0} L ${rightX} ${yE}`);
+          let mainStart = yE;
+          const bgPhoto = heroSection.querySelector('[class*="hero__photo"]') as HTMLElement | null;
+          if (bgPhoto && getComputedStyle(bgPhoto).position === 'absolute') {
+            const pr = bgPhoto.getBoundingClientRect();
+            const pTop = pr.top - mainRect.top;
+            const yA = pTop + pr.height * 0.44;
+            // Pod 72 % výšky fotky je postava už skoro rozpuštěná — linka je až do
+            // té výšky schovaná (i přes průsvitnou ruku) a objeví se až pod ní.
+            const yD = pTop + pr.height * 0.72;
+            const yF = Math.min(pTop + pr.height * 0.9, yB - fr - 1);
+            if (yF > yE + 20) {
+              const span = yF - yE;
+              const pA = Math.max(0, Math.min(1, (yA - yE) / span));
+              const pC = Math.max(pA, Math.min(1, pA + 12 / span));
+              const pD = Math.max(pC, Math.min(1, (yD - yE) / span));
+              const mid = ensure('route-mobile-mid', [['0%', '#1B4A8A', '.18'], ['0%', '#1B4A8A', '.18'], ['0%', '#1B4A8A', '0'], ['0%', '#1B4A8A', '0'], ['100%', '#1B4A8A', '.18']]);
+              const st = mid.grad.querySelectorAll('stop');
+              st[1].setAttribute('offset', String(pA));
+              st[2].setAttribute('offset', String(pC));
+              st[3].setAttribute('offset', String(pD));
+              mid.grad.setAttribute('x1', String(rightX));
+              mid.grad.setAttribute('x2', String(rightX));
+              mid.grad.setAttribute('y1', String(yE));
+              mid.grad.setAttribute('y2', String(yF));
+              mid.path.setAttribute('d', `M ${rightX} ${yE} L ${rightX} ${yF}`);
+              mainStart = yF;
+            }
+          }
+          return `M ${rightX} ${mainStart} V ${yB - fr} A ${fr} ${fr} 0 0 1 ${rightX - fr} ${yB} H ${axisScaled + fr} A ${fr} ${fr} 0 0 0 ${axisScaled} ${yB + fr} V ${endY}`;
+        };
         // OPRAVA 2. 9. 2026: bez tohoto strážce smyčka nad všemi čtyřmi
         // tiery přepsala `--sluzby-shift` hodnotou z POSLEDNÍHO (vždy
         // neaktivního, `display:none`) tieru, jehož `vb` padá zpět na
@@ -482,9 +571,11 @@ const areas: Area[] = [
           const textRect = heroTextEl.getBoundingClientRect();
           const textBottom = textRect.bottom - mainRect.top;
           const bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+          const entryPath = svg.querySelector('.sluzby__route-entry') as SVGPathElement | null;
+          if (entryPath) entryPath.setAttribute('d', `M ${entryX} ${HERO_ENTRY_START_Y} L ${entryX} ${HERO_ENTRY_START_Y + HERO_ENTRY_LENGTH}`);
           if (lightPath) lightPath.setAttribute('d', `${heroArcPath(entryX, axisScaled, r, bendY, closingTop)}`);
         } else if (lightPath) {
-          lightPath.setAttribute('d', `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+          lightPath.setAttribute('d', mobileFramePath(closingTop) ?? `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
         }
         /*
          * Tmavý úsek pokračuje na STEJNÉ `axisScaled` — žádný zákrut, jedna
@@ -1285,6 +1376,22 @@ const areas: Area[] = [
     }
   }
 
+  /* ============ Mobil (<768): obsah od popisku u tečky, ne na lince ============
+     Popisek kapitoly stojí 36 px od kraje sekce (osa 24 + zářez) — obsah
+     kapitol i závěrečné sekce začíná na stejné svislici, jako na tabletu
+     (28. 9. 2026, dřív nadpisy a text ležely přímo na lince). */
+  @media (max-width: 767px) {
+    .sluzby-router__list,
+    .sluzby-chapter__content,
+    .sluzby-areas__columns {
+      padding-left: calc(36px + var(--sluzby-shift, 0px));
+    }
+
+    .sluzby-closing__grid {
+      padding-left: calc(60px + var(--sluzby-shift, 0px));
+    }
+  }
+
   /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
   @media (min-width: 768px) {
     .sluzby__route-svg--mobile {
@@ -1298,6 +1405,15 @@ const areas: Area[] = [
     .sluzby-router__bar h2,
     .sluzby-chapter__bar p,
     .sluzby-areas__bar p {
+      padding-left: calc(64px + var(--sluzby-shift, 0px));
+    }
+
+    /* Obsah kapitol od popisku u tečky (osa 40 + 64 = 104 px), ne na ose —
+       dřív nadpisy a text ležely přímo na lince. Stejně jako /pristup
+       a /sluzby/hypoteky (28. 9. 2026). */
+    .sluzby-router__list,
+    .sluzby-chapter__content,
+    .sluzby-areas__columns {
       padding-left: calc(64px + var(--sluzby-shift, 0px));
     }
 
@@ -1380,10 +1496,8 @@ const areas: Area[] = [
       max-width: 560px;
     }
 
-    .sluzby-chapter--plan .sluzby-chapter__content {
-      border-top: 1px solid rgba(27, 74, 138, .14);
-    }
-
+    /* Dřív tu byla dělicí čára nad obsahem (border-top) — po odsazení obsahu
+       od osy křížila linku a působila jako chyba, odstraněno 28. 9. 2026. */
     .sluzby-chapter--plan .sluzby-chapter__statement-col {
       padding-top: 24px;
     }
@@ -1420,11 +1534,9 @@ const areas: Area[] = [
       padding-top: 0;
     }
 
-    .sluzby-areas__col:nth-child(1) {
-      border-right: 1px solid rgba(27, 74, 138, .14);
-      padding-right: 36px;
-    }
-
+    /* Na tabletu bez dělicích čar mezi oblastmi (svislá mezi 1. a 2.,
+       vodorovná nad 3.) — na přání uživatele 28. 9. 2026, stejně jako
+       odstraněná čára u Finančního plánu. Oddělení nese jen mezera. */
     .sluzby-areas__col:nth-child(2) {
       padding-left: 0;
     }
@@ -1432,6 +1544,7 @@ const areas: Area[] = [
     .sluzby-areas__col:nth-child(3) {
       grid-column: 1 / -1;
       max-width: 390px;
+      border-top: none;
     }
 
     .sluzby-areas__col h2 {
@@ -1443,8 +1556,10 @@ const areas: Area[] = [
       padding-block: 76px;
     }
 
+    /* Text od linky odsazený stejně jako obsah kapitol (osa + 64 px). */
     .sluzby-closing__grid {
       padding-inline: 40px;
+      padding-left: calc(104px + var(--sluzby-shift, 0px));
     }
 
     .sluzby-closing__grid h2 {
@@ -1471,6 +1586,40 @@ const areas: Area[] = [
 
     .sluzby-closing__actions .sluzby-phone {
       height: auto;
+    }
+  }
+
+  /* ============ Jen tablet (768–1199): hero text jako homepage ============
+     Stejná velikost nadpisu, úvodního textu a odstupy jako Hero.astro,
+     /pristup a /o-mne na tabletu (28. 9. 2026, sjednocení na přání
+     uživatele). Bez fotky, proto nadpis širší (11em místo 490 px). */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .sluzby-hero {
+      padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      /* Tlačítka → první popisek 216 px jako na ostatních podstránkách
+         (136 + padding rozcestníku 80). */
+      padding-bottom: 136px;
+    }
+
+    .sluzby-hero__text {
+      gap: 0;
+    }
+
+    .sluzby-hero__text h1 {
+      max-width: 11em;
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      line-height: .99;
+    }
+
+    .sluzby-hero__lead {
+      margin-top: 60px;
+      max-width: 520px;
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+
+    .sluzby-hero__actions {
+      margin-top: 46px;
+      gap: clamp(32px, calc(32px + 0.007519 * (100vw - 834px)), 36px);
     }
   }
 
@@ -1541,6 +1690,7 @@ const areas: Area[] = [
     .sluzby-router__list {
       flex: 1;
       margin-top: 0;
+      padding-left: 0;
     }
 
     .sluzby-router__row {
@@ -1605,6 +1755,7 @@ const areas: Area[] = [
       align-items: flex-start;
       justify-content: space-between;
       gap: 60px;
+      padding-left: 0;
     }
 
     .sluzby-chapter__lead-col {
@@ -1659,6 +1810,7 @@ const areas: Area[] = [
       display: flex;
       flex-direction: row;
       gap: 48px;
+      padding-left: 0;
     }
 
     .sluzby-areas__col {

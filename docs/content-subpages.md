@@ -3629,7 +3629,7 @@ beze změny/domýšlení nad jejich rámec:
 `Jsem Patrik Gajdadzis. Finanční poradce z Ostravy.`
 
 **Hero text**
-`Vedu finanční část Mint reality & finance a zároveň dál osobně pracuji s klienty. Baví mě hledat řešení, která dávají smysl nejen sama o sobě, ale i ve spojení s ostatními financemi.`
+`Vedu finanční část Mint reality & finance a zároveň dál osobně pracuji s klienty. Baví mě hledat řešení, která dávají smysl nejen sama o sobě, ale i ve spojení s ostatními nástroji.`
 
 **Primární CTA**
 `Nezávazná konzultace`
@@ -3942,7 +3942,7 @@ neověřené regulatorní role.
 | Search intent | viz „Search intent" výše |
 | Obchodní cíl | primární: nezávazná konzultace; sekundární: vybudovat osobní důvěru před konzultací a podpořit brandové/lokální vyhledávání entity Patrika Gajdadzise |
 | H1 | `Jsem Patrik Gajdadzis. Finanční poradce z Ostravy.` (návrh) |
-| Hero text | `Vedu finanční část Mint reality & finance a zároveň dál osobně pracuji s klienty. Baví mě hledat řešení, která dávají smysl nejen sama o sobě, ale i ve spojení s ostatními financemi.` (návrh) |
+| Hero text | `Vedu finanční část Mint reality & finance a zároveň dál osobně pracuji s klienty. Baví mě hledat řešení, která dávají smysl nejen sama o sobě, ale i ve spojení s ostatními nástroji.` (návrh) |
 | Sekční struktura | deset sekcí — viz „Sekční osnova — návrh copy" výše (Hero, Jak jsem se k financím dostal, Mint, Proč pořád pracuji s klienty, Co považuji za svou silnou stránku, Důvěra a dlouhodobá spolupráce, Hypotéka Ostrava, Profesní role/faktický blok, Přechod na recenze, Finální CTA) |
 | Finální / pracovní copy | NÁVRH K UŽIVATELSKÉMU SCHVÁLENÍ — kompletní první verze, viz „Sekční osnova — návrh copy" výše (sekce 1–10), založená výhradně na skutečných podkladech od Patrika (viz „Zdrojová fakta" výše) |
 | Primární CTA | `Nezávazná konzultace` (návrh) |

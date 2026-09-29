@@ -182,7 +182,7 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     aria-hidden="true"
     focusable="false"
     data-shelf="true"
-    data-off-shelf="true"
+    data-off-shelf="false"
     data-entry="40"
     data-exit="794"
     data-radius="22"
@@ -199,27 +199,17 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
-    <path
-      class="articles__route-notch"
-      d="M 794 640 H 750"
-      fill="none"
-      stroke="var(--line)"
-      stroke-opacity=".18"
-      stroke-width="1"
-      stroke-linecap="round"
-    ></path>
-    <path
-      class="articles__route-continue"
-      d="M 794 640 V 1000"
-      fill="none"
-      stroke="var(--line)"
-      stroke-opacity=".18"
-      stroke-width="1"
-      stroke-linecap="round"
-    ></path>
+    <!--
+      Odbočka pro „mimopoliční" třetí článek (data-off-shelf, zářez x=750)
+      zrušena 28. 9. 2026: třetí článek ve skutečném rozvržení stojí na polici
+      ve 2. sloupci pod druhým, linka police vede pod ním — odbočka pak mířila
+      zespodu nahoru a tečka končila uprostřed článku přes jeho řádky.
+      Třetí tečka zůstává (JS podle ní odhaluje třetí článek); sedí na polici
+      ve stejném sloupci jako druhá, takže splývá s ní.
+    -->
     <circle class="articles__dot articles__dot--lead" cx="140" cy="470" r="3.2" fill="var(--emerald)"></circle>
     <circle class="articles__dot" cx="470" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
-    <circle class="articles__dot" cx="750" cy="640" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="articles__dot" cx="470" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
   </svg>
 
   <!--
@@ -344,15 +334,28 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
       const gapPx = parseFloat(svg.dataset.gap ?? '22');
 
       if (svg.dataset.shelf !== 'true') {
+        // Mobil: zářez z osy k tečce 14 px před textem, svisle na středu
+        // popisku kategorie (CLAUDE.md „text vedle tečky na svislém úseku“).
+        // Dřív tečka seděla přímo na ose ~13 px pod popiskem a zářezy zůstaly
+        // na pevných souřadnicích mimo tečky (28. 9. 2026).
         const axisX = parseFloat(svg.dataset.axis ?? '0');
+        const notches = svg.querySelector('.articles__route-notches');
+        let notchD = '';
         items.forEach((item, i) => {
           const dot = dots[i];
           if (!dot) return;
-          const r = item.getBoundingClientRect();
-          const y = (r.top + gapPx - svgRect.top) / scaleY;
-          dot.setAttribute('cx', String(axisX));
+          const label = (item.querySelector('.articles__category') ?? item) as HTMLElement;
+          const r = label.getBoundingClientRect();
+          // Bez posunu z animace odhalení (translateY na položce) — jinak by
+          // tečka zůstala o posun níž, když se přepočet trefí před odhalením.
+          const t = new DOMMatrixReadOnly(getComputedStyle(item).transform === 'none' ? undefined : getComputedStyle(item).transform);
+          const y = (r.top - t.m42 + r.height / 2 - svgRect.top) / scaleY;
+          const x = (r.left - t.m41 - 14 - svgRect.left) / scaleX;
+          dot.setAttribute('cx', String(x));
           dot.setAttribute('cy', String(y));
+          notchD += `M ${axisX} ${y} H ${x} `;
         });
+        if (notches) notches.setAttribute('d', notchD.trim());
         return;
       }
 

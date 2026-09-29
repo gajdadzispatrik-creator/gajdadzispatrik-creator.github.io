@@ -549,6 +549,26 @@ const { photoSrc = '' } = Astro.props;
     object-fit: cover;
   }
 
+  /* Mobil: celá postava jako na tabletu (dřív 220 px vysoký výřez s cover —
+     hlava byla uříznutá, vidět jen trup; 28. 9. 2026). Rám v poměru výřezu
+     (692×1380), spodek rozpuštěný stejnou maskou jako tablet/desktop;
+     spodní rozpuštěná část zasahuje do paddingu sekce jako na tabletu. */
+  @media (max-width: 767px) {
+    .about__photo {
+      width: min(260px, 100%);
+      height: auto;
+      aspect-ratio: 325 / 648;
+      margin-bottom: -48px;
+    }
+
+    .about__photo img {
+      object-fit: contain;
+      object-position: 50% 100%;
+      -webkit-mask-image: linear-gradient(180deg, #000 84%, rgba(0, 0, 0, .96) 85.9%, rgba(0, 0, 0, .85) 87.8%, rgba(0, 0, 0, .69) 89.6%, rgba(0, 0, 0, .50) 91.5%, rgba(0, 0, 0, .31) 93.4%, rgba(0, 0, 0, .15) 95.3%, rgba(0, 0, 0, .04) 97.1%, transparent 99%);
+              mask-image: linear-gradient(180deg, #000 84%, rgba(0, 0, 0, .96) 85.9%, rgba(0, 0, 0, .85) 87.8%, rgba(0, 0, 0, .69) 89.6%, rgba(0, 0, 0, .50) 91.5%, rgba(0, 0, 0, .31) 93.4%, rgba(0, 0, 0, .15) 95.3%, rgba(0, 0, 0, .04) 97.1%, transparent 99%);
+    }
+  }
+
   .about__reveal-mask.is-pending {
     clip-path: inset(0 0 100% 0);
   }
@@ -724,9 +744,23 @@ const { photoSrc = '' } = Astro.props;
       border-left: 1px solid rgba(27, 74, 138, .26);
     }
 
+    /* Tablet: rám na výšku výřezu 692×1380 v měřítku 0,47 (hlava ~90 px),
+       celá postava s hlavou — dřív nízký rám 300×420 + cover uřízl hlavu
+       (28. 9. 2026). Spodek se rozpouští stejně jako na desktopu. */
     .about__photo {
-      width: 300px;
-      height: 420px;
+      width: 325px;
+      height: 648px;
+      /* Spodních ~60 px rámu je rozpuštěných do průhledna — o tolik rám
+         zasahuje do spodního paddingu sekce, aby VIDITELNÁ mezera k další
+         sekci byla ~200 px jako mezi ostatními sekcemi (ne ~260 px). */
+      margin-bottom: -60px;
+    }
+
+    .about__photo img {
+      object-fit: contain;
+      object-position: 50% 100%;
+      -webkit-mask-image: linear-gradient(180deg, #000 84%, rgba(0, 0, 0, .96) 85.9%, rgba(0, 0, 0, .85) 87.8%, rgba(0, 0, 0, .69) 89.6%, rgba(0, 0, 0, .50) 91.5%, rgba(0, 0, 0, .31) 93.4%, rgba(0, 0, 0, .15) 95.3%, rgba(0, 0, 0, .04) 97.1%, transparent 99%);
+              mask-image: linear-gradient(180deg, #000 84%, rgba(0, 0, 0, .96) 85.9%, rgba(0, 0, 0, .85) 87.8%, rgba(0, 0, 0, .69) 89.6%, rgba(0, 0, 0, .50) 91.5%, rgba(0, 0, 0, .31) 93.4%, rgba(0, 0, 0, .15) 95.3%, rgba(0, 0, 0, .04) 97.1%, transparent 99%);
     }
   }
 

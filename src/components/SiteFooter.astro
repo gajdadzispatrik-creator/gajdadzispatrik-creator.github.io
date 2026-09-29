@@ -316,7 +316,12 @@ const socialIcons: Record<string, string> = {
     <circle class="footer__dot" cx="96" cy="122" r="3.2" fill="var(--emerald)"></circle>
   </svg>
 
-  <!-- Mobil <768 (kalibrace 390). Vstup x=24, radius 18, mezera značky 20 px. -->
+  <!--
+    Mobil <768 (kalibrace 390). Vstup x=24. Bez zatočení ke značce — značka
+    je zarovnaná s ostatním obsahem patičky a na zatočení před ní není místo;
+    trasa jde rovně dolů a končí tečkou na ose 18 px nad značkou
+    (data-straight, 28. 9. 2026, přání uživatele).
+  -->
   <svg
     class="footer__route footer__route--mobile"
     viewBox="0 0 390 1200"
@@ -326,6 +331,7 @@ const socialIcons: Record<string, string> = {
     data-entry="24"
     data-radius="18"
     data-gap="20"
+    data-straight="true"
   >
     <path
       class="footer__route-path"
@@ -413,13 +419,19 @@ const socialIcons: Record<string, string> = {
       const bendYReal = brandRect.top + brandRect.height / 2;
       const bendY = (bendYReal - svgRect.top) / scaleY;
 
+      const straight = svg.dataset.straight === 'true';
+      // Mobil: značka stojí na ose (zarovnaná s kontakty), trasa proto končí
+      // tečkou 18 px NAD ní, ne ve výšce jejího středu (tečka by byla na „P").
+      const straightEndY = (brandRect.top - 18 - svgRect.top) / scaleY;
       if (path) {
-        const d = `M ${entryX} -20 V ${bendY - r} A ${r} ${r} 0 0 0 ${entryX + r} ${bendY} H ${endX}`;
+        const d = straight
+          ? `M ${entryX} -20 V ${straightEndY}`
+          : `M ${entryX} -20 V ${bendY - r} A ${r} ${r} 0 0 0 ${entryX + r} ${bendY} H ${endX}`;
         path.setAttribute('d', d);
       }
       if (dot) {
-        dot.setAttribute('cx', String(endX));
-        dot.setAttribute('cy', String(bendY));
+        dot.setAttribute('cx', String(straight ? entryX : endX));
+        dot.setAttribute('cy', String(straight ? straightEndY : bendY));
       }
 
       const topRect = top.getBoundingClientRect();
@@ -520,16 +532,33 @@ const socialIcons: Record<string, string> = {
         const vh = window.innerHeight;
         const progress = Math.min(1, Math.max(0, rect.height > 0 ? (vh - rect.top) / rect.height : 0));
 
+        // Trasa končí u značky nahoře v patičce — kreslí se podle toho, kde je
+        // její KONEC (tečka) v okně: celá je hotová, když tečka dojede do 85 %
+        // výšky okna. Dřív se kreslila podle scrollu CELOU patičkou (na mobilu
+        // ~1100 px), takže k tečce dojela až na úplném konci stránky a do té
+        // doby byla tečka odtržená od linky (28. 9. 2026).
         const currentPath = getPath();
+        const endDot = getDot();
+        let pathProgress = progress;
+        if (currentPath && endDot) {
+          const dr = endDot.getBoundingClientRect();
+          const endY = dr.top + dr.height / 2;
+          const startY = rect.top - 20;
+          const span = Math.max(1, endY - startY);
+          pathProgress = Math.min(1, Math.max(0, (vh * 0.85 - startY) / span));
+        }
         if (currentPath) {
-          currentPath.style.strokeDashoffset = String(mainLength * (1 - progress));
+          currentPath.style.strokeDashoffset = String(mainLength * (1 - pathProgress));
         }
         dividers.forEach((line) => {
           const len = dividerLengths.get(line) ?? 0;
           line.style.strokeDashoffset = String(len * (1 - progress));
         });
         const currentDot = getDot();
-        if (currentDot && progress >= dotThreshold) {
+        // Tolerance: tečka je na samém konci trasy (práh ≈ 1) a na konci
+        // stránky vychází progres kvůli zaokrouhlení jen 0,9999 — bez ní se
+        // tečka na mobilu nikdy neukázala (28. 9. 2026).
+        if (currentDot && pathProgress >= dotThreshold - 0.01) {
           currentDot.classList.remove('is-pending');
           currentDot.classList.add('is-visible');
         }
@@ -611,7 +640,9 @@ const socialIcons: Record<string, string> = {
   }
 
   .footer__identity {
-    margin-left: 32px;
+    /* Mobil: zarovnané s telefonem/e-mailem pod ním (přání uživatele
+       28. 9. 2026); tablet+ má vlastní odsazení. */
+    margin-left: 0;
     display: flex;
     flex-direction: column;
     gap: 8px;

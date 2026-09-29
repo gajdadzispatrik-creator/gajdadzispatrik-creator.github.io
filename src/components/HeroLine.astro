@@ -134,6 +134,9 @@ import LineGradientDefs from './LineGradientDefs.astro';
   (1100 px), ne na jeho okraj, aby odchylka na obou koncích zůstala stejná
   a nikde nepřesáhla mezeru mezi nadpisem a podnadpisem (viz ověření v
   konverzaci — clearance min. ~20 px na 1000 i 1199 px).
+  Svislý konec vlevo je na x = 52.76 (= 40 / 834 × 1100): pod statistickým
+  pásem navazuje ConnectionsSection s viewBoxem 834 (osa 40/834 šířky) —
+  s x = 40 se linka nad a pod pásem rozjela o ~12 px (28. 9. 2026).
 -->
 <svg
   class="hero-line hero-line--tablet-wide"
@@ -147,7 +150,7 @@ import LineGradientDefs from './LineGradientDefs.astro';
   </defs>
   <path
     class="hero-line__path"
-    d="M240,308 L662,308 Q684,308 684,330 L684,572 Q684,594 662,594 L62,594 Q40,594 40,616 L40,724"
+    d="M240,308 L662,308 Q684,308 684,330 L684,572 Q684,594 662,594 L74.76,594 Q52.76,594 52.76,616 L52.76,724"
     fill="none"
     stroke="var(--line)"
     stroke-opacity=".18"
@@ -181,6 +184,63 @@ import LineGradientDefs from './LineGradientDefs.astro';
     stroke-width="1"
     stroke-linecap="round"
     stroke-linejoin="round"
+  ></path>
+</svg>
+
+<!--
+  Mobil — spodní část linky NAD tmavým pozadím textu (Hero.astro `::after`),
+  jinak by pod ním zmizela. Svislý úsek vpravo vede nahoře ZA fotkou (hlavní
+  cesta výše, pod fotkou i pozadím — přání uživatele), od úrovně tlačítka
+  (y=600, postava je tam už ztmavená) se plynule objeví, vede do zatočení
+  pod telefonem a obloukem doleva na osu x=24 a končí na horní hraně statistického pásu —
+  přes pás pokračuje `hero-line-tail--mobile`, pod ním ConnectionsSection
+  (osa 24/390 šířky). Dřív končila vpravo na x=378 a pod pásem začínala
+  vlevo — nenavazovala (28. 9. 2026).
+-->
+<svg
+  class="hero-line hero-line--mobile-front"
+  viewBox="0 600 390 164"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient id="line-mobile-front" gradientUnits="userSpaceOnUse" x1="0" y1="600" x2="0" y2="670">
+      <stop offset="0%" style="stop-color: var(--line-on-dark); stop-opacity: 0" />
+      <stop offset="100%" style="stop-color: var(--line-on-dark); stop-opacity: .34" />
+    </linearGradient>
+  </defs>
+  <path
+    class="hero-line__path"
+    d="M378,600 L378,728 Q378,746 360,746 L42,746 Q24,746 24,764"
+    fill="none"
+    stroke="url(#line-mobile-front)"
+    stroke-width="1"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+</svg>
+
+<!--
+  Mobil — linka viditelně PŘES statistický pás (x=24). Tmavé pozadí hero
+  a pás na mobilu splývají, schovaná pod pásem linka působila přerušeně
+  (28. 9. 2026). Výška = zbytek .hero-group pod hero (= výška pásu).
+-->
+<svg
+  class="hero-line-tail hero-line-tail--mobile"
+  viewBox="0 0 390 100"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path
+    class="hero-line__path"
+    d="M24,0 L24,100"
+    fill="none"
+    stroke="var(--line-on-dark)"
+    stroke-opacity=".34"
+    stroke-width="1"
+    stroke-linecap="round"
   ></path>
 </svg>
 
@@ -262,8 +322,16 @@ import LineGradientDefs from './LineGradientDefs.astro';
     display: none;
   }
 
-  .hero-line--mobile {
+  .hero-line--mobile,
+  .hero-line--mobile-front {
     display: block;
+  }
+
+  /* Nad tmavým pozadím textu (Hero `::after`, z-index 2 — tahle vrstva je
+     v DOM později, takže při stejném z-indexu leží nad ním), pod textem
+     (z-index 3). */
+  .hero-line--mobile-front {
+    z-index: 2;
   }
 
   /*
@@ -273,8 +341,21 @@ import LineGradientDefs from './LineGradientDefs.astro';
    * roztahovala a sjížděla níž, než odpovídá viewBoxu. Výška proto musí
    * přesně sledovat stejný vzorec jako .hero { min-height } v Hero.astro.
    */
+  /* Mobil: hero má výšku displeje pod záhlavím, nejméně 700 px (stejný
+     vzorec jako `.hero { min-height }` v Hero.astro, 28. 9. 2026). Horní
+     část linky (za fotkou, pod tmavým pozadím) se roztáhne na celou výšku;
+     spodní viditelná část (164 px: od úrovně tlačítka po oblouk na osu)
+     je přichycená ke spodku hero v pevných px, stejně jako text. */
   .hero-line--mobile {
-    height: 764px;
+    height: max(700px, calc(100vh - 64px));
+    height: max(700px, calc(100svh - 64px));
+  }
+
+  .hero-line--mobile-front {
+    top: calc(max(700px, calc(100vh - 64px)) - 164px);
+    top: calc(max(700px, calc(100svh - 64px)) - 164px);
+    bottom: auto;
+    height: 164px;
   }
 
   .hero-line--tablet,
@@ -306,8 +387,21 @@ import LineGradientDefs from './LineGradientDefs.astro';
     top: clamp(656px, calc(656px + 0.255639 * (100vw - 834px)), 792px);
   }
 
+  /* Mobil: nad pásem (z-index 3 > StatsBand 2), od spodku hero (výška
+     hero, viz výše) do spodku .hero-group (= spodek pásu). */
+  .hero-line-tail--mobile {
+    display: block;
+    top: max(700px, calc(100vh - 64px));
+    top: max(700px, calc(100svh - 64px));
+    height: calc(100% - max(700px, calc(100vh - 64px)));
+    height: calc(100% - max(700px, calc(100svh - 64px)));
+    z-index: 3;
+  }
+
   @media (min-width: 768px) {
-    .hero-line--mobile {
+    .hero-line--mobile,
+    .hero-line--mobile-front,
+    .hero-line-tail--mobile {
       display: none;
     }
 

@@ -155,12 +155,15 @@ interface Tier {
   // jako sourozenci (`/pristup` atd.) — NE dopočítaná z pozice fotografie
   // (viz hlavičkový komentář výše, oprava po zpětné vazbě 10. 9. 2026).
   entry: number;
+  // Tablet: vstup jako podíl šířky (za hlavou postavy na 768–1199 px),
+  // stejně jako /pristup — fotka jde s pravým krajem, pevné x by ujelo.
+  entryRatio?: number;
   radius: number;
 }
 
 const TIERS: Tier[] = [
   { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, mode: 'photo', entry: 24, radius: 0 },
-  { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, mode: 'photo', entry: 40, radius: 0 },
+  { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, mode: 'hero', entry: 734, entryRatio: 0.88, radius: 22 },
   { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, mode: 'hero', entry: 1230, radius: 28 },
   { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, mode: 'hero', entry: 1300, radius: 28 },
 ];
@@ -168,14 +171,15 @@ const TIERS: Tier[] = [
 interface FactRow {
   heading: string;
   text: string;
-  pair?: [string, string];
+  // Dvojice čísel, každé s vlastním popiskem (jako StatsBand na homepage).
+  pair?: [{ value: string; label: string }, { value: string; label: string }];
 }
 
 const facts: FactRow[] = [
   { heading: 'Vedu finanční část Mint reality & finance', text: 'Vedle vedení poradců dál osobně pracuji se svými klienty.' },
   { heading: 'Stojím za projektem Hypotéka Ostrava', text: 'Články, kalkulačka a propojení s hypotečními specialisty.' },
   { heading: 'Odborná způsobilost', text: 'Úvěry, pojištění a investice.' },
-  { heading: '', text: 'Google hodnocení.', pair: ['150+ klientů', '5,0'] },
+  { heading: '', text: '', pair: [{ value: '150+', label: 'osobních klientů' }, { value: '5,0', label: 'hodnocení na Googlu' }] },
 ];
 ---
 
@@ -208,13 +212,14 @@ const facts: FactRow[] = [
             data-dot-offset={v.dotOffset}
             data-mode={v.mode}
             data-entry={v.entry}
+            data-entry-ratio={v.entryRatio}
             data-radius={v.radius}
           >
             {v.mode === 'hero' && (
               <defs>
                 <LineGradientDefs
                   id={`om-line-entry-${v.tier}`}
-                  tier={v.tier === 'desktop' ? 'desktop' : 'laptop'}
+                  tier={v.tier === 'desktop' ? 'desktop' : v.tier === 'tablet' ? 'tablet' : 'laptop'}
                   x1={0}
                   y1={0}
                   x2={0}
@@ -245,7 +250,7 @@ const facts: FactRow[] = [
           <p class="om-hero__lead" data-reveal>
             Vedu finanční část Mint reality &amp;&nbsp;finance a&nbsp;zároveň dál osobně pracuji s&nbsp;klienty. Baví mě
             hledat řešení, která dávají smysl nejen sama o&nbsp;sobě, ale i&nbsp;ve&nbsp;spojení s&nbsp;ostatními
-            financemi.
+            nástroji.
           </p>
           <div class="om-hero__actions" data-reveal>
             <a class="om-cta" href="/#kontakt">Nezávazná konzultace</a>
@@ -536,15 +541,17 @@ const facts: FactRow[] = [
             facts.map((fact) => (
               <li class="om-facts__row">
                 {fact.pair ? (
-                  <h3 class="om-facts__pair">
-                    <span>{fact.pair[0]}</span>
+                  <div class="om-facts__pair">
+                    <p class="om-facts__stat"><strong>{fact.pair[0].value}</strong> <span>{fact.pair[0].label}</span></p>
                     <span class="om-facts__divider" aria-hidden="true"></span>
-                    <span>{fact.pair[1]}</span>
-                  </h3>
+                    <p class="om-facts__stat"><strong>{fact.pair[1].value}</strong> <span>{fact.pair[1].label}</span></p>
+                  </div>
                 ) : (
-                  <h3>{fact.heading}</h3>
+                  <>
+                    <h3>{fact.heading}</h3>
+                    <p>{fact.text}</p>
+                  </>
                 )}
-                <p>{fact.text}</p>
               </li>
             ))
           }
@@ -669,13 +676,14 @@ const facts: FactRow[] = [
         const axis = parseFloat(svg.dataset.axis ?? '24');
         const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
         const mode = svg.dataset.mode;
-        const entry = parseFloat(svg.dataset.entry ?? '0');
         const r = parseFloat(svg.dataset.radius ?? '0');
 
         if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
 
         const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
         const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+        const entryRatio = parseFloat(svg.dataset.entryRatio ?? '');
+        const entry = Number.isFinite(entryRatio) ? entryRatio * vb : parseFloat(svg.dataset.entry ?? '0');
 
         svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
 
@@ -686,6 +694,90 @@ const facts: FactRow[] = [
 
         const axisScaled = (axis / nominalVb) * vb;
         const shift = axisScaled - axis;
+        // Mobil (28. 9. 2026): trasa jako na tabletu — od osy pod obsahem hero
+        // obloukem doprava, po pravé straně nahoru a pod záhlavím končí do
+        // ztracena nájezdovým gradientem (barvy LineGradientDefs tier „tablet").
+        // Je-li v hero fotka v pozadí (absolutně nahoře), vede linka ZA ní jako
+        // na homepage: nahoře vedle hlavy je vidět, za postavou schovaná a v místě,
+        // kde se fotka rozpouští, se plynule znovu objeví (úsek „mid" s vlastním
+        // gradientem — v průsvitné části fotky by jinak linka prosvítala).
+        // Gradienty a pomocné cesty se v mobilním SVG vytvoří jednou za běhu.
+        const mobileFramePath = (endY: number): string | null => {
+          if (!heroSection) return null;
+          const els = Array.from(heroSection.querySelectorAll('[class*="hero__text"], [class*="hero__photo"], [class*="hero__breadcrumb"], nav')) as HTMLElement[];
+          const rects = els.map((e) => e.getBoundingClientRect()).filter((r) => r.height > 0);
+          if (!rects.length) return null;
+          const bottom = Math.max(...rects.map((r) => r.bottom)) - mainRect.top;
+          const fr = 18;
+          const rightX = (378 / nominalVb) * vb;
+          const y0 = 40;
+          const yB = bottom + 28;
+          const yE = Math.min(140, yB - fr - 20);
+          const NS = 'http://www.w3.org/2000/svg';
+          const ensure = (cls: string, stops: [string, string, string][]) => {
+            let path = svg.querySelector(`path.${cls}`) as SVGPathElement | null;
+            let grad = svg.querySelector(`linearGradient.${cls}`) as SVGLinearGradientElement | null;
+            if (!path || !grad) {
+              const defs = document.createElementNS(NS, 'defs');
+              grad = document.createElementNS(NS, 'linearGradient') as SVGLinearGradientElement;
+              grad.id = `${cls}-${Math.random().toString(36).slice(2, 9)}`;
+              grad.setAttribute('class', cls);
+              grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+              stops.forEach(([o, c, op]) => {
+                const st = document.createElementNS(NS, 'stop');
+                st.setAttribute('offset', o);
+                st.setAttribute('stop-color', c);
+                st.setAttribute('stop-opacity', op);
+                grad!.appendChild(st);
+              });
+              defs.appendChild(grad);
+              svg.insertBefore(defs, svg.firstChild);
+              path = document.createElementNS(NS, 'path') as SVGPathElement;
+              path.setAttribute('class', cls);
+              path.setAttribute('fill', 'none');
+              path.setAttribute('stroke', `url(#${grad.id})`);
+              path.setAttribute('stroke-width', '1');
+              path.setAttribute('stroke-linecap', 'round');
+              svg.appendChild(path);
+            }
+            return { path, grad };
+          };
+          const entry = ensure('route-mobile-entry', [['0%', '#1E7A5C', '0'], ['34%', '#1E7A5C', '.36'], ['70%', '#255E77', '.24'], ['100%', '#1B4A8A', '.18']]);
+          entry.grad.setAttribute('x1', String(rightX));
+          entry.grad.setAttribute('x2', String(rightX));
+          entry.grad.setAttribute('y1', String(y0));
+          entry.grad.setAttribute('y2', String(yE));
+          entry.path.setAttribute('d', `M ${rightX} ${y0} L ${rightX} ${yE}`);
+          let mainStart = yE;
+          const bgPhoto = heroSection.querySelector('[class*="hero__photo"]') as HTMLElement | null;
+          if (bgPhoto && getComputedStyle(bgPhoto).position === 'absolute') {
+            const pr = bgPhoto.getBoundingClientRect();
+            const pTop = pr.top - mainRect.top;
+            const yA = pTop + pr.height * 0.44;
+            // Pod 72 % výšky fotky je postava už skoro rozpuštěná — linka je až do
+            // té výšky schovaná (i přes průsvitnou ruku) a objeví se až pod ní.
+            const yD = pTop + pr.height * 0.72;
+            const yF = Math.min(pTop + pr.height * 0.9, yB - fr - 1);
+            if (yF > yE + 20) {
+              const span = yF - yE;
+              const pA = Math.max(0, Math.min(1, (yA - yE) / span));
+              const pC = Math.max(pA, Math.min(1, pA + 12 / span));
+              const pD = Math.max(pC, Math.min(1, (yD - yE) / span));
+              const mid = ensure('route-mobile-mid', [['0%', '#1B4A8A', '.18'], ['0%', '#1B4A8A', '.18'], ['0%', '#1B4A8A', '0'], ['0%', '#1B4A8A', '0'], ['100%', '#1B4A8A', '.18']]);
+              const st = mid.grad.querySelectorAll('stop');
+              st[1].setAttribute('offset', String(pA));
+              st[2].setAttribute('offset', String(pC));
+              st[3].setAttribute('offset', String(pD));
+              mid.grad.setAttribute('x1', String(rightX));
+              mid.grad.setAttribute('x2', String(rightX));
+              mid.grad.setAttribute('y1', String(yE));
+              mid.grad.setAttribute('y2', String(yF));
+              mid.path.setAttribute('d', `M ${rightX} ${yE} L ${rightX} ${yF}`);
+              mainStart = yF;
+            }
+          }
+          return `M ${rightX} ${mainStart} V ${yB - fr} A ${fr} ${fr} 0 0 1 ${rightX - fr} ${yB} H ${axisScaled + fr} A ${fr} ${fr} 0 0 0 ${axisScaled} ${yB + fr} V ${endY}`;
+        };
         if (isActive) {
           (main as HTMLElement).style.setProperty('--om-shift', `${shift}px`);
         }
@@ -714,7 +806,7 @@ const facts: FactRow[] = [
           // (`.om-hero__photo` má vyšší z-index než `.om__route`, viz CSS) —
           // trasa se pod fotografií "schová" a pokračuje dál pod ní, přesně
           // jak zadání 10. 9. 2026 vyžádalo („linka má vést za fotkou").
-          lightD = `M ${axisScaled} -20 V ${duveraEnd}`;
+          lightD = mobileFramePath(duveraEnd) ?? `M ${axisScaled} -20 V ${duveraEnd}`;
         }
 
         if (duveraTop != null && duveraBottom != null) {
@@ -1490,6 +1582,32 @@ const facts: FactRow[] = [
     background: var(--border);
   }
 
+  /* Číslo + vlastní popisek pod ním (dřív jeden popisek „Google hodnocení."
+     pod oběma čísly, jako by i 150+ klientů bylo hodnocení; 28. 9. 2026). */
+  .om-facts__row .om-facts__stat {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  /* Obě čísla vždy vedle sebe (popisky se případně zalomí), přes celou
+     šířku řádku i v dvousloupcovém gridu na desktopu. */
+  .om-facts__row .om-facts__pair {
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 20px;
+    grid-column: 1 / -1;
+  }
+
+  .om-facts__stat strong {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--navy);
+  }
+
   /* ---------- Tmavé CTA ---------- */
 
   .om-closing {
@@ -1566,6 +1684,87 @@ const facts: FactRow[] = [
     }
   }
 
+  /* ============ Mobil (<768): obsah od popisku u tečky, ne na lince ============
+     Popisek kapitoly stojí 36 px od kraje sekce (osa 24 + zářez) — obsah
+     kapitol i závěrečné sekce začíná na stejné svislici, jako na tabletu
+     (28. 9. 2026, dřív nadpisy a text ležely přímo na lince). */
+  @media (max-width: 767px) {
+    .om-chapter__content {
+      padding-left: calc(36px + var(--om-shift, 0px));
+    }
+
+    .om-closing__grid {
+      padding-left: calc(60px + var(--om-shift, 0px));
+    }
+
+    /* Nezlomitelné „Mint reality & finance." (9,9 em) se na úzkém telefonu
+       nevešlo do sloupce (přesah 16 px na 360 px) — nadpisy se pod ~380 px
+       mírně zmenší, šířka sloupce = 100vw − 84 px. */
+    .om-h2--std {
+      font-size: min(30px, calc((100vw - 84px) / 9.9));
+    }
+
+    /* „…pro co se rozhoduje." je nezlomitelné (9,4 em) — na nejužších
+       telefonech (~320 px) přetékalo o 25 px; od ~340 px beze změny. */
+    .om-statement-big p {
+      font-size: min(28px, calc((100vw - 84px) / 9.4));
+    }
+
+    /* Hero: fotka v pozadí, světlá varianta — stejně jako /pristup
+       (28. 9. 2026). Rám 560 px jako tam (trasa v JS počítá rozpuštění
+       z jeho výšky). Postava stejně velká jako na /pristup: hlava 126 px
+       zdroje → ~95 px, tj. obrázek 84,8 % šířky; hlava (32,8 % šířky
+       výřezu) uprostřed stránky; temeno ~30 px pod záhlavím. */
+    .om-hero {
+      position: relative;
+      padding-top: 320px;
+      /* Hero na výšku displeje pod záhlavím (64 px) jako homepage — text
+         a tlačítka přichycené ke spodku, fotka nahoře; 320 px nahoře zůstává
+         jako minimum, aby text nezakryl obličej (29. 9. 2026). */
+      min-height: calc(100vh - 64px);
+      min-height: calc(100svh - 64px);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 20px;
+    }
+
+    .om-hero__text {
+      position: relative;
+      z-index: 3;
+    }
+
+    .om-hero__photo {
+      position: absolute;
+      top: 15px;
+      left: 0;
+      width: 100%;
+      height: 560px;
+      margin: 0;
+      aspect-ratio: auto;
+    }
+
+    .om-hero__photo img {
+      position: absolute;
+      top: 0;
+      left: 22.3%;
+      width: 84.8%;
+      height: auto;
+      object-fit: fill;
+      /* Svisle: rozpuštění na stejné výšce stránky jako /pristup
+         (255 → 435 px rámu = 35,6 → 60,8 % výšky obrázku). Vodorovně:
+         pravý kraj do ztracena (viditelný kraj ~91,7 % šířky obrázku). */
+      -webkit-mask-image:
+        linear-gradient(180deg, #000 35.6%, rgba(0, 0, 0, .96) 38.8%, rgba(0, 0, 0, .85) 41.9%, rgba(0, 0, 0, .69) 45.1%, rgba(0, 0, 0, .5) 48.2%, rgba(0, 0, 0, .31) 51.4%, rgba(0, 0, 0, .15) 54.5%, rgba(0, 0, 0, .04) 57.7%, transparent 60.8%),
+        linear-gradient(90deg, #000 57%, rgba(0, 0, 0, .98) 60%, rgba(0, 0, 0, .94) 63%, rgba(0, 0, 0, .85) 66%, rgba(0, 0, 0, .75) 69%, rgba(0, 0, 0, .63) 72%, rgba(0, 0, 0, .5) 75%, rgba(0, 0, 0, .37) 78%, rgba(0, 0, 0, .25) 81%, rgba(0, 0, 0, .15) 84%, rgba(0, 0, 0, .06) 87%, rgba(0, 0, 0, .02) 89.5%, transparent 91.7%);
+      -webkit-mask-composite: source-in;
+              mask-image:
+        linear-gradient(180deg, #000 35.6%, rgba(0, 0, 0, .96) 38.8%, rgba(0, 0, 0, .85) 41.9%, rgba(0, 0, 0, .69) 45.1%, rgba(0, 0, 0, .5) 48.2%, rgba(0, 0, 0, .31) 51.4%, rgba(0, 0, 0, .15) 54.5%, rgba(0, 0, 0, .04) 57.7%, transparent 60.8%),
+        linear-gradient(90deg, #000 57%, rgba(0, 0, 0, .98) 60%, rgba(0, 0, 0, .94) 63%, rgba(0, 0, 0, .85) 66%, rgba(0, 0, 0, .75) 69%, rgba(0, 0, 0, .63) 72%, rgba(0, 0, 0, .5) 75%, rgba(0, 0, 0, .37) 78%, rgba(0, 0, 0, .25) 81%, rgba(0, 0, 0, .15) 84%, rgba(0, 0, 0, .06) 87%, rgba(0, 0, 0, .02) 89.5%, transparent 91.7%);
+              mask-composite: intersect;
+    }
+  }
+
   /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
   @media (min-width: 768px) {
     .om__route-svg--mobile {
@@ -1577,6 +1776,13 @@ const facts: FactRow[] = [
     }
 
     .om-chapter__bar p {
+      padding-left: calc(64px + var(--om-shift, 0px));
+    }
+
+    /* Obsah kapitol od popisku u tečky (osa 40 + 64 = 104 px), ne na ose —
+       dřív nadpisy a text ležely přímo na lince. Stejně jako /pristup
+       a /sluzby/hypoteky (28. 9. 2026). */
+    .om-chapter__content {
       padding-left: calc(64px + var(--om-shift, 0px));
     }
 
@@ -1671,33 +1877,32 @@ const facts: FactRow[] = [
       max-width: 780px;
     }
 
+    /* Na tabletu nadpis NAD textem (ne dva sloupce vedle sebe) — názvy
+       „Mint reality & finance" a „Hypotéka Ostrava" jsou nezlomitelné
+       a do 300px sloupce se nevešly, přesahovaly do textu (28. 9. 2026,
+       volba uživatele). Vedle sebe až od notebooku. */
     .om-chapter__top {
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-    }
-
-    .om-chapter--mint .om-chapter__lead-col,
-    .om-chapter--klienti .om-chapter__lead-col,
-    .om-chapter--souvislosti .om-chapter__lead-col,
-    .om-chapter--duvera .om-chapter__lead-col,
-    .om-chapter--projekt .om-chapter__lead-col,
-    .om-chapter--recenze .om-chapter__lead-col {
-      flex: none;
-      width: 300px;
-    }
-
-    .om-chapter--mint .om-chapter__support-col,
-    .om-chapter--klienti .om-chapter__support-col,
-    .om-chapter--souvislosti .om-chapter__support-col,
-    .om-chapter--duvera .om-chapter__support-col,
-    .om-chapter--projekt .om-chapter__support-col,
-    .om-chapter--recenze .om-chapter__support-col {
-      flex: 1;
+      max-width: 640px;
     }
 
     .om-facts__row h3 {
       font-size: 19px;
+    }
+
+    /* Závěr jako na ostatních podstránkách (/pristup): stejné odsazení
+       od linky (osa + 64 px), stejné mezery a velikost nadpisu. */
+    .om-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    .om-closing__grid {
+      padding-inline: 40px;
+      padding-left: calc(104px + var(--om-shift, 0px));
+    }
+
+    .om-closing__grid h2 {
+      font-size: 44px;
     }
 
     .om-closing__body p {
@@ -1716,6 +1921,84 @@ const facts: FactRow[] = [
 
     .om-closing__actions .om-phone {
       height: auto;
+    }
+  }
+
+  /* ============ Jen tablet (768–1199): hero jako homepage a /pristup ============
+     28. 9. 2026: text vlevo se stejnou velikostí nadpisu, šířkou a odstupy
+     jako Hero.astro a /pristup, fotka vpravo absolutně (ne pod textem na
+     plnou šířku). Postava stejně velká jako na /pristup a homepage (hlava
+     126 px zdroje → stejná velikost jako tam na každé šířce): --om-w =
+     šířka bloku = měřítko × 422, vzorce odvozené z měření /pristup.
+     Blok = 820 px zdroje (prsty 738), spodek na spodku hero, pod prsty
+     plynulé rozpuštění. Linka vstupuje shora za hlavou (TIERS, entryRatio). */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .om-hero {
+      position: relative;
+      padding: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px) 40px 0;
+      min-height: clamp(656px, calc(656px + 0.255639 * (100vw - 834px)), 792px);
+    }
+
+    .om-hero__text {
+      gap: 0;
+    }
+
+    .om-hero__text h1 {
+      /* V em: nadpis je delší než na /pristup, s 490 px by se od ~900 px
+         lámal na 5 řádků — takhle drží 3 řádky jako na 834 px. */
+      max-width: 8.6em;
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      line-height: .99;
+    }
+
+    .om-hero__lead {
+      margin-top: 60px;
+      max-width: min(520px, calc(100vw - 392px));
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+
+    .om-hero__actions {
+      margin-top: 46px;
+      gap: clamp(32px, calc(32px + 0.007519 * (100vw - 834px)), 36px);
+    }
+
+    .om-hero__photo {
+      --om-w: max(
+        calc(285.3px + 0.0952 * (100vw - 834px)),
+        calc(265.7px + 0.2465 * (100vw - 834px))
+      );
+      position: absolute;
+      left: calc(100% - var(--om-w) - 3px);
+      bottom: 0;
+      width: var(--om-w);
+      height: calc(var(--om-w) * 1.9431);
+      margin: 0;
+      aspect-ratio: auto;
+    }
+
+    /* Fotka končí rozpuštěním až na spodku hero — mezera pod ní k „Začátku"
+       je jen padding kapitoly (72 px), bez dalších 80 px navíc. */
+    .om-chapter--zacatek {
+      margin-top: 0;
+    }
+
+    .om-hero__photo img {
+      object-fit: cover;
+      object-position: 50% 0;
+      -webkit-mask-image: linear-gradient(180deg, #000 91%, rgba(0, 0, 0, .96) 92.1%, rgba(0, 0, 0, .85) 93.3%, rgba(0, 0, 0, .69) 94.4%, rgba(0, 0, 0, .50) 95.5%, rgba(0, 0, 0, .31) 96.6%, rgba(0, 0, 0, .15) 97.8%, rgba(0, 0, 0, .04) 98.9%, transparent 100%);
+              mask-image: linear-gradient(180deg, #000 91%, rgba(0, 0, 0, .96) 92.1%, rgba(0, 0, 0, .85) 93.3%, rgba(0, 0, 0, .69) 94.4%, rgba(0, 0, 0, .50) 95.5%, rgba(0, 0, 0, .31) 96.6%, rgba(0, 0, 0, .15) 97.8%, rgba(0, 0, 0, .04) 98.9%, transparent 100%);
+    }
+  }
+
+  /* Úzký tablet (768–833): užší nadpis a odstavec a postava se zmenšuje
+     stejně jako na /pristup (hlava stejně velká). */
+  @media (min-width: 768px) and (max-width: 833px) {
+    .om-hero__lead {
+      max-width: calc(100vw - 420px);
+    }
+
+    .om-hero__photo {
+      --om-w: calc(284.5px - 0.7608 * (834px - 100vw));
     }
   }
 
@@ -1827,6 +2110,7 @@ const facts: FactRow[] = [
 
     .om-chapter__content {
       flex: 1;
+      padding-left: 0;
     }
 
     .om-chapter__content--single {
@@ -1862,6 +2146,9 @@ const facts: FactRow[] = [
     }
 
     .om-chapter__top {
+      max-width: none;
+      flex-direction: row;
+      align-items: flex-start;
       gap: 60px;
     }
 
@@ -1872,6 +2159,7 @@ const facts: FactRow[] = [
     .om-chapter--projekt .om-chapter__lead-col,
     .om-chapter--recenze .om-chapter__lead-col,
     .om-chapter__lead-col {
+      flex: none;
       width: 540px;
     }
 

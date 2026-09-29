@@ -198,6 +198,37 @@ import SiteFooter from '../components/SiteFooter.astro';
     }
   }
 
+  /* ============ Jen tablet (768–1199): hero text jako homepage ============
+     Stejná velikost nadpisu, úvodního textu a odstupy jako Hero.astro,
+     /pristup a /o-mne na tabletu (28. 9. 2026, sjednocení na přání
+     uživatele). Bez fotky, proto nadpis širší (11em místo 490 px). */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .nf-hero {
+      padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+    }
+
+    .nf-hero__text {
+      gap: 0;
+    }
+
+    .nf-hero__text h1 {
+      max-width: 11em;
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      line-height: .99;
+    }
+
+    .nf-hero__lead {
+      margin-top: 60px;
+      max-width: 520px;
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+
+    .nf-hero__actions {
+      margin-top: 46px;
+      gap: clamp(32px, calc(32px + 0.007519 * (100vw - 834px)), 36px);
+    }
+  }
+
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
     .nf-hero {
