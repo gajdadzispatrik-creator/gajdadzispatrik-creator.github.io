@@ -47,7 +47,8 @@ const jsonLdGraph = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content={robots} />
+    {/* Náhled na GitHub Pages (PUBLIC_PREVIEW=1 v .github/workflows/preview.yml) se nesmí dostat do Googlu. */}
+    <meta name="robots" content={import.meta.env.PUBLIC_PREVIEW ? 'noindex, nofollow' : robots} />
     {canonical && <link rel="canonical" href={canonicalURL} />}
     <link
       rel="preload"
