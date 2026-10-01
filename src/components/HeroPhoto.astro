@@ -5,7 +5,7 @@
  * kde se placeholder vyměňuje za <picture>). Pozici a rozměr bloku na
  * každém stupni dál řídí Hero.astro (`.hero :global(.hero-photo)`).
  *
- * Zdroj: výřez s průhledným pozadím (testovací 434×860 px) — postava stojí přímo na
+ * Zdroj: výřez s průhledným pozadím (testovací 343×702 px, od 1. 10. 2026) — postava stojí přímo na
  * pozadí sekce, bez rámečku a stínu (§2.4, brief §24). Astro z něj generuje
  * AVIF/WebP ve více šířkách; obrázek je LCP, proto eager + fetchpriority.
  *
@@ -22,7 +22,7 @@ import patrikHero from '../assets/photos/patrik-hero.png';
     src={patrikHero}
     alt="Patrik Gajdadzis, finanční poradce"
     formats={['avif', 'webp']}
-    widths={[390, 434]}
+    widths={[343]}
     sizes="(min-width: 1200px) 500px, (min-width: 768px) 40vw, 100vw"
     loading="eager"
     fetchpriority="high"
@@ -59,15 +59,16 @@ import patrikHero from '../assets/photos/patrik-hero.png';
 
     .hero-photo :global(.hero-photo__img) {
       position: relative;
-      /* Výřez 434×860 (delší verze s nohama oříznutá). Prsty končí na
-         732. px (změřeno). Statistický pás uřízne fotku 50 px pod nimi
-         (785. px = 91,3 % výšky) — ruka má pod sebou kousek kalhot, nohy
-         nejsou tak dlouhé (přání uživatele 28. 9. 2026). Jiná fotka než hero
+      /* Výřez 343×702 (temeno 4, hlava 97, střed hlavy 117,6, prsty 584 px —
+         scripts/photo-metrics.mjs). Výška fotky 1,1157 × rám = hlava
+         116/120 px na 1300/1440 px, temeno 11–12 px, prsty ~47 px nad
+         statistickým pásem (docs/fotky-umisteni.md). Vpravo +3 px = střed
+         hlavy 200/224 px (průhledný okraj výřezu). Jiná fotka než hero
          na /o-mne (výslovně).
          Velikost postavy je vzor pro hero na /o-mne a /pristup. */
-      height: calc(100% / 0.913);
+      height: calc(100% * 1.1157);
       object-fit: contain;
-      object-position: 100% 0;
+      object-position: calc(100% + 3px) 7px;
     }
   }
 

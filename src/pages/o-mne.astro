@@ -271,7 +271,7 @@ const facts: FactRow[] = [
 
         <div class="om-photo om-hero__photo" data-reveal>
           {photoSrc ? (
-            <img src={photoSrc} alt="Patrik Gajdadzis" width="460" height="600" loading="lazy" decoding="async" />
+            <img src={photoSrc} alt="Patrik Gajdadzis" width="373" height="714" loading="lazy" decoding="async" />
           ) : (
             <div class="om-photo__placeholder" aria-hidden="true">
               <div class="om-photo__bg"></div>
@@ -448,7 +448,7 @@ const facts: FactRow[] = [
 
             <div class="om-photo om-photo--dark om-duvera__photo" data-reveal>
               {duveraPhotoSrc ? (
-                <img src={duveraPhotoSrc} alt="Patrik Gajdadzis" width="440" height="520" loading="lazy" decoding="async" />
+                <img src={duveraPhotoSrc} alt="Patrik Gajdadzis" width="656" height="1080" loading="lazy" decoding="async" />
               ) : (
                 <div class="om-photo__placeholder" aria-hidden="true">
                   <div class="om-photo__bg"></div>
@@ -1292,19 +1292,10 @@ const facts: FactRow[] = [
     object-fit: contain;
     /* Zarovnáno dolů — spodní hrana výřezu = konec přechodu v masce. */
     object-position: 0 100%;
-    /* Dvě masky dohromady (průnik): spodek + šikmo do pravého dolního rohu.
-       Vykročená noha je na výřezu useknutá jeho pravým krajem (85–100 %
-       výšky) i spodkem (30–100 % šířky) — změřeno z alfa kanálu. Šikmý
-       přechod (150°) je rozpustí, paže s hodinkami (~69 % délky přechodu)
-       zůstává plně vidět. */
-    -webkit-mask-image:
-      linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 80.6%, rgba(0, 0, 0, .85) 83.3%, rgba(0, 0, 0, .69) 85.9%, rgba(0, 0, 0, .50) 88.5%, rgba(0, 0, 0, .31) 91.1%, rgba(0, 0, 0, .15) 93.8%, rgba(0, 0, 0, .04) 96.4%, transparent 99%),
-      linear-gradient(150deg, #000 72%, transparent 88%);
-    -webkit-mask-composite: source-in;
-            mask-image:
-      linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 80.6%, rgba(0, 0, 0, .85) 83.3%, rgba(0, 0, 0, .69) 85.9%, rgba(0, 0, 0, .50) 88.5%, rgba(0, 0, 0, .31) 91.1%, rgba(0, 0, 0, .15) 93.8%, rgba(0, 0, 0, .04) 96.4%, transparent 99%),
-      linear-gradient(150deg, #000 72%, transparent 88%);
-            mask-composite: intersect;
+    /* Výřez 656×1080 končí u stehen (prsty na 93,6 % výšky, změřeno
+       scripts/photo-metrics.mjs) — rozpouštění od prstů do spodku výřezu. */
+    -webkit-mask-image: linear-gradient(180deg, #000 93.6%, rgba(0, 0, 0, .96) 94.34%, rgba(0, 0, 0, .85) 95.08%, rgba(0, 0, 0, .69) 95.81%, rgba(0, 0, 0, .50) 96.55%, rgba(0, 0, 0, .31) 97.29%, rgba(0, 0, 0, .15) 98.03%, rgba(0, 0, 0, .04) 98.76%, transparent 99.5%);
+            mask-image: linear-gradient(180deg, #000 93.6%, rgba(0, 0, 0, .96) 94.34%, rgba(0, 0, 0, .85) 95.08%, rgba(0, 0, 0, .69) 95.81%, rgba(0, 0, 0, .50) 96.55%, rgba(0, 0, 0, .31) 97.29%, rgba(0, 0, 0, .15) 98.03%, rgba(0, 0, 0, .04) 98.76%, transparent 99.5%);
   }
 
   /* ---------- Kapitoly — sdílené ---------- */
@@ -1751,20 +1742,23 @@ const facts: FactRow[] = [
     .om-hero__photo img {
       position: absolute;
       top: 0;
-      left: 22.3%;
-      width: 84.8%;
+      /* Výřez 373×714: hlava stejně velká a uprostřed jako u předchozí
+         fotky (1. 10. 2026). */
+      left: 9.1%;
+      width: 97.3%;
       height: auto;
       object-fit: fill;
       /* Svisle: rozpuštění na stejné výšce stránky jako /pristup
-         (255 → 435 px rámu = 35,6 → 60,8 % výšky obrázku). Vodorovně:
-         pravý kraj do ztracena (viditelný kraj ~91,7 % šířky obrázku). */
+         (255 → 435 px rámu = 36,5 → 62,3 % výšky obrázku). Vodorovně:
+         pravý kraj do ztracena (viditelný kraj ~93,5 % šířky obrázku =
+         pravý kraj rámu). */
       -webkit-mask-image:
-        linear-gradient(180deg, #000 35.6%, rgba(0, 0, 0, .96) 38.8%, rgba(0, 0, 0, .85) 41.9%, rgba(0, 0, 0, .69) 45.1%, rgba(0, 0, 0, .5) 48.2%, rgba(0, 0, 0, .31) 51.4%, rgba(0, 0, 0, .15) 54.5%, rgba(0, 0, 0, .04) 57.7%, transparent 60.8%),
-        linear-gradient(90deg, #000 57%, rgba(0, 0, 0, .98) 60%, rgba(0, 0, 0, .94) 63%, rgba(0, 0, 0, .85) 66%, rgba(0, 0, 0, .75) 69%, rgba(0, 0, 0, .63) 72%, rgba(0, 0, 0, .5) 75%, rgba(0, 0, 0, .37) 78%, rgba(0, 0, 0, .25) 81%, rgba(0, 0, 0, .15) 84%, rgba(0, 0, 0, .06) 87%, rgba(0, 0, 0, .02) 89.5%, transparent 91.7%);
+        linear-gradient(180deg, #000 36.49%, rgba(0, 0, 0, .96) 39.77%, rgba(0, 0, 0, .85) 42.95%, rgba(0, 0, 0, .69) 46.23%, rgba(0, 0, 0, .5) 49.4%, rgba(0, 0, 0, .31) 52.68%, rgba(0, 0, 0, .15) 55.86%, rgba(0, 0, 0, .04) 59.14%, transparent 62.32%),
+        linear-gradient(90deg, #000 63.24%, rgba(0, 0, 0, .98) 65.86%, rgba(0, 0, 0, .94) 68.47%, rgba(0, 0, 0, .85) 71.09%, rgba(0, 0, 0, .75) 73.7%, rgba(0, 0, 0, .63) 76.32%, rgba(0, 0, 0, .5) 78.93%, rgba(0, 0, 0, .37) 81.55%, rgba(0, 0, 0, .25) 84.16%, rgba(0, 0, 0, .15) 86.77%, rgba(0, 0, 0, .06) 89.39%, rgba(0, 0, 0, .02) 91.57%, transparent 93.48%);
       -webkit-mask-composite: source-in;
               mask-image:
-        linear-gradient(180deg, #000 35.6%, rgba(0, 0, 0, .96) 38.8%, rgba(0, 0, 0, .85) 41.9%, rgba(0, 0, 0, .69) 45.1%, rgba(0, 0, 0, .5) 48.2%, rgba(0, 0, 0, .31) 51.4%, rgba(0, 0, 0, .15) 54.5%, rgba(0, 0, 0, .04) 57.7%, transparent 60.8%),
-        linear-gradient(90deg, #000 57%, rgba(0, 0, 0, .98) 60%, rgba(0, 0, 0, .94) 63%, rgba(0, 0, 0, .85) 66%, rgba(0, 0, 0, .75) 69%, rgba(0, 0, 0, .63) 72%, rgba(0, 0, 0, .5) 75%, rgba(0, 0, 0, .37) 78%, rgba(0, 0, 0, .25) 81%, rgba(0, 0, 0, .15) 84%, rgba(0, 0, 0, .06) 87%, rgba(0, 0, 0, .02) 89.5%, transparent 91.7%);
+        linear-gradient(180deg, #000 36.49%, rgba(0, 0, 0, .96) 39.77%, rgba(0, 0, 0, .85) 42.95%, rgba(0, 0, 0, .69) 46.23%, rgba(0, 0, 0, .5) 49.4%, rgba(0, 0, 0, .31) 52.68%, rgba(0, 0, 0, .15) 55.86%, rgba(0, 0, 0, .04) 59.14%, transparent 62.32%),
+        linear-gradient(90deg, #000 63.24%, rgba(0, 0, 0, .98) 65.86%, rgba(0, 0, 0, .94) 68.47%, rgba(0, 0, 0, .85) 71.09%, rgba(0, 0, 0, .75) 73.7%, rgba(0, 0, 0, .63) 76.32%, rgba(0, 0, 0, .5) 78.93%, rgba(0, 0, 0, .37) 81.55%, rgba(0, 0, 0, .25) 84.16%, rgba(0, 0, 0, .15) 86.77%, rgba(0, 0, 0, .06) 89.39%, rgba(0, 0, 0, .02) 91.57%, transparent 93.48%);
               mask-composite: intersect;
     }
   }
@@ -1986,11 +1980,29 @@ const facts: FactRow[] = [
       margin-top: 0;
     }
 
+    /* Výřez 373×714 v šířce 114,6 % rámu = hlava ~85 px na 834 px, stejně
+       jako hero na homepage a /pristup (1. 10. 2026). Postava je širší než
+       rám — pravý loket končí na kraji okna, prsty volné ruky vyčnívají
+       vlevo z rámu (proto bez ořezu; spodek je v masce průhledný).
+       Rozpuštění od prstů (82,8 %) do spodku rámu (88,6 % výšky obrázku).
+       `clip-path: none` — konečný stav odhalení (`inset(0)`) by jinak
+       ořízl postavu na rám stejně jako `overflow: hidden`. */
+    .om-hero__photo,
+    .om-hero__photo.is-visible {
+      overflow: visible;
+      clip-path: none;
+    }
+
     .om-hero__photo img {
-      object-fit: cover;
-      object-position: 50% 0;
-      -webkit-mask-image: linear-gradient(180deg, #000 91%, rgba(0, 0, 0, .96) 92.1%, rgba(0, 0, 0, .85) 93.3%, rgba(0, 0, 0, .69) 94.4%, rgba(0, 0, 0, .50) 95.5%, rgba(0, 0, 0, .31) 96.6%, rgba(0, 0, 0, .15) 97.8%, rgba(0, 0, 0, .04) 98.9%, transparent 100%);
-              mask-image: linear-gradient(180deg, #000 91%, rgba(0, 0, 0, .96) 92.1%, rgba(0, 0, 0, .85) 93.3%, rgba(0, 0, 0, .69) 94.4%, rgba(0, 0, 0, .50) 95.5%, rgba(0, 0, 0, .31) 96.6%, rgba(0, 0, 0, .15) 97.8%, rgba(0, 0, 0, .04) 98.9%, transparent 100%);
+      position: absolute;
+      top: 0;
+      left: -11.7%;
+      width: 114.6%;
+      max-width: none;
+      height: auto;
+      object-fit: fill;
+      -webkit-mask-image: linear-gradient(180deg, #000 82.8%, rgba(0, 0, 0, .96) 83.53%, rgba(0, 0, 0, .85) 84.25%, rgba(0, 0, 0, .69) 84.98%, rgba(0, 0, 0, .50) 85.7%, rgba(0, 0, 0, .31) 86.43%, rgba(0, 0, 0, .15) 87.15%, rgba(0, 0, 0, .04) 87.88%, transparent 88.6%);
+              mask-image: linear-gradient(180deg, #000 82.8%, rgba(0, 0, 0, .96) 83.53%, rgba(0, 0, 0, .85) 84.25%, rgba(0, 0, 0, .69) 84.98%, rgba(0, 0, 0, .50) 85.7%, rgba(0, 0, 0, .31) 86.43%, rgba(0, 0, 0, .15) 87.15%, rgba(0, 0, 0, .04) 87.88%, transparent 88.6%);
     }
   }
 
@@ -2067,28 +2079,40 @@ const facts: FactRow[] = [
     .om-hero__photo {
       flex: none;
       width: 500px;
-      height: 850px;
-      margin: -52px 0 -338px;
+      height: 768px;
+      margin: -52px 0 -256px;
       aspect-ratio: auto;
     }
 
-    /* Výřez 422×950 (delší, s nohama): hlava a prsty (738. px) na stejném
-       místě jako u předchozí kratší verze — stejné měřítko 1,048, vodorovný
-       posun 46 px drží hlavu na místě (výřez je víc oříznutý zleva). Rám
-       končí ~76 px pod prsty — dlouhé plynulé rozpuštění. */
-    .om-hero__photo img {
-      height: calc(100% * 1.1713);
-      object-fit: contain;
-      object-position: 46px 1px;
-      -webkit-mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 78.9%, rgba(0, 0, 0, .85) 79.8%, rgba(0, 0, 0, .69) 80.8%, rgba(0, 0, 0, .50) 81.7%, rgba(0, 0, 0, .31) 82.6%, rgba(0, 0, 0, .15) 83.6%, rgba(0, 0, 0, .04) 84.5%, transparent 85.4%);
-              mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 78.9%, rgba(0, 0, 0, .85) 79.8%, rgba(0, 0, 0, .69) 80.8%, rgba(0, 0, 0, .50) 81.7%, rgba(0, 0, 0, .31) 82.6%, rgba(0, 0, 0, .15) 83.6%, rgba(0, 0, 0, .04) 84.5%, transparent 85.4%);
+    /* Výřez 373×714 (temeno 16, hlava 97, střed hlavy 157, prsty 591 px —
+       scripts/photo-metrics.mjs) v měřítku 1,206: hlava 117 px jako hero
+       na /pristup (1. 10. 2026), temeno 22, střed hlavy 191 px. Rám bez
+       ořezu — prsty volné ruky smí vyčnívat vlevo (spodek pod rámem je
+       v masce průhledný). Rozpuštění od prstů (716 px) do spodku rámu
+       (768 px) — stejná délka ~52 px jako hero na /pristup (1. 10. 2026). */
+    .om-hero__photo,
+    .om-hero__photo.is-visible {
+      overflow: visible;
+      clip-path: none;
     }
 
-    /* 220 (dřív 100) — rozpuštěný spodek hero fotky jinak končil 10 px nad
+    .om-hero__photo img {
+      position: absolute;
+      top: 2.7px;
+      left: 1.6px;
+      width: 449.9px;
+      max-width: none;
+      height: auto;
+      object-fit: fill;
+      -webkit-mask-image: linear-gradient(180deg, #000 82.78%, rgba(0, 0, 0, .96) 83.54%, rgba(0, 0, 0, .85) 84.29%, rgba(0, 0, 0, .69) 85.05%, rgba(0, 0, 0, .50) 85.8%, rgba(0, 0, 0, .31) 86.55%, rgba(0, 0, 0, .15) 87.31%, rgba(0, 0, 0, .04) 88.06%, transparent 88.82%);
+              mask-image: linear-gradient(180deg, #000 82.78%, rgba(0, 0, 0, .96) 83.54%, rgba(0, 0, 0, .85) 84.29%, rgba(0, 0, 0, .69) 85.05%, rgba(0, 0, 0, .50) 85.8%, rgba(0, 0, 0, .31) 86.55%, rgba(0, 0, 0, .15) 87.31%, rgba(0, 0, 0, .04) 88.06%, transparent 88.82%);
+    }
+
+    /* 138 (dřív 220, rám o 82 px kratší 1. 10. 2026) — rozpuštěný spodek hero fotky jinak končil 10 px nad
        nadpisem kapitoly (rám pak ještě prodloužen o 60 px); pravidlo: fotka → další obsah aspoň ~60 px, stejně
        jako /pristup (28. 9. 2026). */
     .om-chapter--zacatek {
-      margin-top: 220px;
+      margin-top: 138px;
     }
 
     .om-chapter__inner {
@@ -2176,14 +2200,25 @@ const facts: FactRow[] = [
       flex: 1;
     }
 
-    /* Rám = rozměr výřezu 910×1378 v měřítku 0,553 — hlava stejně velká
-       jako druhá fotka na homepage (AboutSection) na stejné šířce (~104 px
-       na 1300 px, změřeno 28. 9. 2026). */
+    /* Rám 503×762 (schválený 28. 9. 2026) — hlava stejně velká jako druhá
+       fotka na homepage (AboutSection) na stejné šířce (~104 px na 1300 px).
+       Výřez 656×1080 v měřítku 0,671: temeno 16 px, střed hlavy 247 px
+       (docs/fotky-umisteni.md). */
     .om-duvera__photo {
       width: 503px;
       height: 762px;
       max-width: none;
       aspect-ratio: auto;
+    }
+
+    .om-duvera__photo img {
+      position: absolute;
+      top: 8.6px;
+      left: 10px;
+      width: 440.2px;
+      max-width: none;
+      height: auto;
+      object-fit: fill;
     }
 
     /* Začátek — dvousloupcová mřížka: H2+statement vlevo, dvě vyprávěcí
@@ -2334,26 +2369,29 @@ const facts: FactRow[] = [
     .om-hero__photo {
       flex: none;
       width: 510px;
-      height: 901px;
+      height: 828px;
       /* margin-left: auto — na širokém okně jde fotka k pravé straně hero
          (jako fotka v hero na homepage), ale s rezervou až 200 px od
          pravého okraje obsahu (přání uživatele: víc vlevo). Na 1440 px
          volné místo není (text 730 + gap 40 + fotka 480 = 1250 px řádku),
          rezerva je 0 a fotka zůstává beze změny. */
-      margin: -60px clamp(0px, calc(100% - 1250px), 200px) -311px auto;
+      margin: -60px clamp(0px, calc(100% - 1250px), 200px) -238px auto;
     }
 
-    /* Měřítko 1,089 (hlava jako dřív), posun 43 px; rám ~96 px pod prsty. */
+    /* Měřítko 1,268: hlava 123 px jako /pristup, temeno 23, střed hlavy
+       194 px; rozpuštění od prstů (752 px) do spodku rámu (828 px),
+       ~76 px jako /pristup. */
     .om-hero__photo img {
-      height: calc(100% * 1.1483);
-      object-position: 43px 1px;
-      -webkit-mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 79.1%, rgba(0, 0, 0, .85) 80.3%, rgba(0, 0, 0, .69) 81.4%, rgba(0, 0, 0, .50) 82.5%, rgba(0, 0, 0, .31) 83.7%, rgba(0, 0, 0, .15) 84.8%, rgba(0, 0, 0, .04) 86%, transparent 87.1%);
-              mask-image: linear-gradient(180deg, #000 78%, rgba(0, 0, 0, .96) 79.1%, rgba(0, 0, 0, .85) 80.3%, rgba(0, 0, 0, .69) 81.4%, rgba(0, 0, 0, .50) 82.5%, rgba(0, 0, 0, .31) 83.7%, rgba(0, 0, 0, .15) 84.8%, rgba(0, 0, 0, .04) 86%, transparent 87.1%);
+      top: 2.7px;
+      left: -5.1px;
+      width: 473px;
+      -webkit-mask-image: linear-gradient(180deg, #000 82.77%, rgba(0, 0, 0, .96) 83.82%, rgba(0, 0, 0, .85) 84.87%, rgba(0, 0, 0, .69) 85.92%, rgba(0, 0, 0, .50) 86.97%, rgba(0, 0, 0, .31) 88.01%, rgba(0, 0, 0, .15) 89.06%, rgba(0, 0, 0, .04) 90.11%, transparent 91.16%);
+              mask-image: linear-gradient(180deg, #000 82.77%, rgba(0, 0, 0, .96) 83.82%, rgba(0, 0, 0, .85) 84.87%, rgba(0, 0, 0, .69) 85.92%, rgba(0, 0, 0, .50) 86.97%, rgba(0, 0, 0, .31) 88.01%, rgba(0, 0, 0, .15) 89.06%, rgba(0, 0, 0, .04) 90.11%, transparent 91.16%);
     }
 
-    /* 200 (dřív 120) — prodloužený rám hero fotky, mezera ~77 px. */
+    /* 127 (dřív 200, rám o 73 px kratší 1. 10. 2026) — mezera ~77 px. */
     .om-chapter--zacatek {
-      margin-top: 200px;
+      margin-top: 127px;
     }
 
     .om-chapter__inner {
@@ -2410,10 +2448,17 @@ const facts: FactRow[] = [
       width: 600px;
     }
 
-    /* Měřítko 0,644 — hlava ~121 px jako AboutSection na 1440 px. */
+    /* Hlava ~121 px jako AboutSection na 1440 px — výřez v měřítku 0,781:
+       temeno 19 px, střed hlavy 288 px. */
     .om-duvera__photo {
       width: 586px;
       height: 887px;
+    }
+
+    .om-duvera__photo img {
+      top: 10.4px;
+      left: 12.2px;
+      width: 512.1px;
     }
 
     .om-zacatek__grid {

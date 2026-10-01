@@ -170,16 +170,24 @@ const areas = [
     x=40→24 pak měla nesymetrický, „zamotaný“ oblouk — obojí zbytečné, teď
     obě sekce sdílí stejnou osu už na zdroji.)
   -->
+  <!--
+    „Had" (29. 9. 2026, přání uživatele: tečky přímo na lince jako na
+    desktopu, bez zářezů z rovné osy). Z osy x=24 u každé oblasti vodorovně
+    přes šířku, střídavě doprava/doleva; tečka na vodorovném úseku, text pod
+    ní zarovnaný vlevo. Po páté oblasti trasa končí vpravo na x=378 — tam
+    na ni navazuje ProcessSection.astro. Poloměry 18 jako ostatní mobilní
+    trasy.
+  -->
   <svg
     class="router__axis router__axis--mobile"
-    viewBox="0 0 390 1020"
+    viewBox="0 0 390 1060"
     preserveAspectRatio="none"
     aria-hidden="true"
     focusable="false"
   >
     <path
       class="router__axis-path"
-      d="M 24 -20 V 1020"
+      d="M 24 -20 V 212 A 18 18 0 0 0 42 230 H 360 A 18 18 0 0 1 378 248 V 402 A 18 18 0 0 1 360 420 H 42 A 18 18 0 0 0 24 438 V 556 A 18 18 0 0 0 42 574 H 360 A 18 18 0 0 1 378 592 V 710 A 18 18 0 0 1 360 728 H 42 A 18 18 0 0 0 24 746 V 864 A 18 18 0 0 0 42 882 H 360 A 18 18 0 0 1 378 900 V 1060"
       fill="none"
       stroke="var(--line-on-dark)"
       stroke-opacity=".3"
@@ -187,20 +195,11 @@ const areas = [
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
-    <path
-      class="router__axis-notches"
-      d="M 24 268 H 46 M 24 480 H 46 M 24 604 H 46 M 24 728 H 46 M 24 852 H 46"
-      fill="none"
-      stroke="var(--line-on-dark)"
-      stroke-opacity=".3"
-      stroke-width="1"
-      stroke-linecap="round"
-    ></path>
-    <circle class="router__dot router__dot--pos-1" cx="46" cy="268" r="3.2" fill="var(--emerald)"></circle>
-    <circle class="router__dot router__dot--pos-2" cx="46" cy="480" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-3" cx="46" cy="604" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-4" cx="46" cy="728" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-5" cx="46" cy="852" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-1" cx="60" cy="230" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="router__dot router__dot--pos-2" cx="60" cy="420" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-3" cx="60" cy="574" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-4" cx="60" cy="728" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-5" cx="60" cy="882" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
   </svg>
 </section>
 
@@ -289,7 +288,7 @@ const areas = [
   .router {
     position: relative;
     overflow: hidden;
-    height: 1020px;
+    height: 1060px;
     background: linear-gradient(196deg, var(--router-grad-1) 0%, var(--navy) 52%, var(--router-grad-2) 100%);
     --vb: 390;
     /*
@@ -390,7 +389,8 @@ const areas = [
     transform: translateY(calc(var(--reveal-mag, 0px) * var(--reveal-dir, 1)));
     margin: 0;
     --x: 60;
-    --rx: 24;
+    /* Mobil: 40 = odstup textu od pravé svislice „hada" (x=378). */
+    --rx: 40;
     --reveal-dir: 1;
   }
 
@@ -527,30 +527,31 @@ const areas = [
     }
   }
 
-  /* Kotvy — mobil (base): dominanta má vlastní posun (-30), ostatní shodný (-24). */
+  /* Kotvy — mobil (base): tečka na vodorovném úseku „hada", text 14 px
+     pod ní, levá hrana = tečka (x=60). */
   .router__area--pos-1 {
-    --y: 268;
-    --oy: -30;
+    --y: 230;
+    --oy: 14;
   }
 
   .router__area--pos-2 {
-    --y: 480;
-    --oy: -24;
+    --y: 420;
+    --oy: 14;
   }
 
   .router__area--pos-3 {
-    --y: 604;
-    --oy: -24;
+    --y: 574;
+    --oy: 14;
   }
 
   .router__area--pos-4 {
     --y: 728;
-    --oy: -24;
+    --oy: 14;
   }
 
   .router__area--pos-5 {
-    --y: 852;
-    --oy: -24;
+    --y: 882;
+    --oy: 14;
   }
 
   /* ============ Tablet: 768–1199 ============ */

@@ -156,33 +156,29 @@ const areas = [
     aria-hidden="true"
     focusable="false"
   >
-    <!-- Smyčka kolem „Jeden plán" (28. 9. 2026, přání uživatele): z osy
-         doprava skoro ke kraji (x=378 jako svislice hero linky), obtočí
-         popisek (824–839) a zpět doleva na osu x=24, kde navazuje
-         RouterSection. Poloměry 18 jako hero linka na mobilu. -->
+    <!-- Schodovitá trasa jako tablet/desktop (29. 9. 2026, přání uživatele):
+         tečky leží přímo na lince, žádné zářezy z rovné osy.
+         Osa x=24 → vodorovně (Rezerva, text pod tečkou) → svisle x=200
+         (Ochrana, Bydlení, text vpravo) → vodorovně (Investice, text pod
+         tečkou) → svisle u pravého kraje x=378 (Penze a „Jeden plán", text
+         vlevo od čáry — vpravo není místo) → zpět doleva na osu x=24, kde
+         navazuje RouterSection. Poloměry 18 jako hero linka na mobilu.
+         x=200/240 drží odstupy textů od čar i na 320 px (souřadnice se
+         škálují s šířkou, texty ne). -->
     <path
       class="connections__route-path"
-      d="M24,0 V772 A18,18 0 0 0 42,790 H360 A18,18 0 0 1 378,808 V854 A18,18 0 0 1 360,872 H42 A18,18 0 0 0 24,890 V900"
+      d="M24,0 V354 A18,18 0 0 0 42,372 H182 A18,18 0 0 1 200,390 V544 A18,18 0 0 0 218,562 H360 A18,18 0 0 1 378,580 V842 A18,18 0 0 1 360,860 H42 A18,18 0 0 0 24,878 V900"
       fill="none"
       stroke="#1B4A8A"
       stroke-opacity=".18"
       stroke-width="1"
       stroke-linecap="round"
     ></path>
-    <path
-      class="connections__route-notches"
-      d="M24,400 H46 M24,484 H46 M24,568 H46 M24,652 H46 M24,736 H46"
-      fill="none"
-      stroke="#1B4A8A"
-      stroke-opacity=".18"
-      stroke-width="1"
-      stroke-linecap="round"
-    ></path>
-    <circle cx="46" cy="400" r="3.2" fill="#1E7A5C"></circle>
-    <circle cx="46" cy="484" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
-    <circle cx="46" cy="568" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
-    <circle cx="46" cy="652" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
-    <circle cx="46" cy="736" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="72" cy="372" r="3.2" fill="#1E7A5C"></circle>
+    <circle cx="200" cy="446" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="200" cy="516" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="240" cy="562" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="378" cy="656" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
   </svg>
 </section>
 
@@ -279,6 +275,14 @@ const areas = [
      * se tečka doškáluje ve vodorovném směru zpět na kruh.
      */
     --dot-fix: calc(var(--vb) * 1px / 100vw);
+    /*
+     * Mobil: velikost nadpisu. „Neřeším produkty." je 8,17 em široké, sloupec
+     * 100vw − 94 px (left 70 + right 24) — pod ~373 px by se řádek zalomil
+     * a nadpis přetekl přes text pod sebou (absolutní pozice). Proto 34 px,
+     * jen pod 375 px menší (8,2 em = malá rezerva). Text pod nadpisem
+     * počítá top ze stejné hodnoty: 86 + 2 řádky × 1,06 + 14 px (29. 9. 2026).
+     */
+    --conn-h: min(34px, calc((100vw - 94px) / 8.2));
   }
 
   .connections__route circle {
@@ -294,7 +298,7 @@ const areas = [
     top: 86px;
     margin: 0;
     font-weight: 700;
-    font-size: 34px;
+    font-size: var(--conn-h);
     line-height: 1.06;
     letter-spacing: -.04em;
     color: var(--navy);
@@ -309,7 +313,7 @@ const areas = [
        webem (1. 9. 2026) stejně jako CasesSection/ArticlesSection/
        ContactSection/podstránky; původní 222px byl reziduum z doby před
        touto konvencí, 3–6× větší než ustálená hodnota. */
-    top: 172px;
+    top: calc(86px + 2.12 * var(--conn-h) + 14px);
     margin: 0;
     font-weight: 500;
     font-size: 16.5px;
@@ -349,49 +353,65 @@ const areas = [
   }
 
   /*
-   * Mobil (base) — kotvy §4 (shodné s tečkami). Všech pět pozic má stejnou
-   * typografickou váhu. --x posunuto z 62 na 46 (oprava 14. 9. 2026) — osa
-   * trasy na mobilu se sjednotila na x=24 (viz komentář u trasy níže), takže
-   * zářez/tečka teď končí na 46 (24+22), ne na 62 (40+22).
+   * Mobil (base) — kotvy shodné s tečkami schodovité trasy (29. 9. 2026,
+   * stejný princip jako tablet): vodorovný úsek → text pod tečkou, zarovnaný
+   * na ni vlevo (--oy 12); svislý úsek → text 14 px vpravo, svisle
+   * vycentrovaný. Penze na pravé svislici má text VLEVO od čáry (viz
+   * @media níže). Všech pět pozic má stejnou typografickou váhu.
    */
   .connections__area--pos-1 {
-    --x: 46;
-    --y: 400;
+    --x: 72;
+    --y: 372;
+    --ox: 0;
+    --oy: 12;
+    --ty: 0;
     font-weight: 600;
     font-size: 22px;
     color: var(--navy-ink);
   }
 
   .connections__area--pos-2 {
-    --x: 46;
-    --y: 484;
+    --x: 200;
+    --y: 446;
     font-weight: 600;
     font-size: 22px;
     color: var(--navy-ink);
   }
 
   .connections__area--pos-3 {
-    --x: 46;
-    --y: 568;
+    --x: 200;
+    --y: 516;
     font-weight: 600;
     font-size: 22px;
     color: var(--navy-ink);
   }
 
   .connections__area--pos-4 {
-    --x: 46;
-    --y: 652;
+    --x: 240;
+    --y: 562;
+    --ox: 0;
+    --oy: 12;
+    --ty: 0;
     font-weight: 600;
     font-size: 22px;
     color: var(--navy-ink);
   }
 
   .connections__area--pos-5 {
-    --x: 46;
-    --y: 736;
+    --x: 378;
+    --y: 656;
     font-weight: 600;
     font-size: 22px;
     color: var(--navy-ink);
+  }
+
+  @media (max-width: 767px) {
+    /* Penze u pravého kraje: zarovnaná doprava 14 px před čárou. */
+    .connections__area--pos-5 {
+      left: auto;
+      right: calc(100% - 378 * 100% / 390 + 14px);
+      text-align: right;
+    }
   }
 
   .connections__end-label {
@@ -406,12 +426,13 @@ const areas = [
     color: var(--text-faint);
   }
 
-  /* Mobil: uvnitř smyčky trasy zarovnaný doprava — 30 px před její pravou
-     svislicí (x=378/390), zrcadlově k 30 px od osy vlevo (28. 9. 2026). */
+  /* Mobil: u pravé svislice trasy pod Penzí, zarovnaný doprava stejně jako
+     ona — 14 px před čárou (x=378/390). */
   @media (max-width: 767px) {
     .connections__end-label {
       left: auto;
-      right: calc(100% - 378 * 100% / 390 + 30px);
+      right: calc(100% - 378 * 100% / 390 + 14px);
+      top: 772px;
     }
   }
 

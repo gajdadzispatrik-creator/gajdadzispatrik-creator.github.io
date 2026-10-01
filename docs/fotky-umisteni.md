@@ -37,10 +37,10 @@ Hodnoty jsou v CSS pixelech na webu, měřené od levého horního rohu rámu.
 | | | 1440 | 500 × 780 | 120 | 12 | 224 | 726 | 〃 |
 | Homepage — „Za každým doporučením…" | `patrik-duvera.webp` | 1300 | 500 × 750 | 104 | 11 | 293 | 673 | 84 % → 99 % výšky rámu |
 | | | 1440 | 580 × 870 | 121 | 13 | 340 | 781 | 〃 |
-| O mně — hero | `patrik-omne-hero-top.png` | 1300 | 500 × 850 | 132 | 22 | 191 | 775 | od prstů do spodku rámu (~75 px) |
-| | | 1440 | 510 × 901 | 137 | 23 | 194 | 805 | od prstů do spodku rámu (~96 px) |
-| O mně — Důvěra | `patrik-omne-hero.webp` | 1300 | 503 × 762 | 104 | 16 | 247 | 606 | 78 % → 99 % + šikmo přes nohu vpravo dole |
-| | | 1440 | 586 × 887 | 121 | 19 | 288 | 705 | 〃 |
+| O mně — hero | `patrik-omne-hero-top.png` | 1300 | 500 × 768 | 117 | 22 | 191 | 716 | od prstů do spodku rámu (~52 px, jako Přístup); rám bez ořezu (prsty volné ruky smí vyčnívat vlevo, na tabletu ~25 px) |
+| | | 1440 | 510 × 828 | 123 | 23 | 194 | 752 | od prstů do spodku rámu (~76 px, jako Přístup) |
+| O mně — Důvěra | `patrik-omne-hero.webp` | 1300 | 503 × 762 | 104 | 16 | 247 | 687 | od prstů do spodku výřezu (93,6 % → 99,5 % výšky fotky); výřez od 1. 10. 2026 končí u stehen, spodních ~29 px rámu zůstává prázdných |
+| | | 1440 | 586 × 887 | 121 | 19 | 288 | 800 | 〃 (~34 px prázdných) |
 | Přístup — hero | `patrik-pristup.png` | 1300 | 470 × 798 | 117 | 18 | 191 | 744 | od prstů do spodku rámu (~54 px) |
 | | | 1440 | 490 × 862 | 123 | 19 | 198 | 783 | od prstů do spodku rámu (~79 px) |
 | Přístup — Péče (kulatý portrét) | `patrik-pristup-pece.png` | 1300 | 220 × 220 | 82 | 30 | 108 | — | žádné, kruh s pozadím `--about-photo-1` |
@@ -51,7 +51,8 @@ s pravou stranou obsahu).
 
 ## Pravidla, která platí pro všechny fotky
 
-- Hero fotky mají stejně velkou postavu (hlava 116–137 px), druhé fotky
+- Hero fotky mají stejně velkou postavu (hlava 116–123 px; od 1. 10. 2026
+  i O mně, dřív 132/137 px — Patrik: „větší než v ostatních hero“), druhé fotky
   (homepage „Za každým…", O mně Důvěra) stejnou menší (104/121 px).
 - Ruce vždy celé vidět; rozpouštění až pod nimi, nikdy tvrdá hrana ve vzduchu.
 - Hero fotka začíná 60 px pod hlavičkou; od nadpisu první kapitoly pod ní
