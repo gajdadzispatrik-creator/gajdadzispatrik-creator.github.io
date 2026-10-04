@@ -1,0 +1,937 @@
+---
+/**
+ * Finanční check-up — 8 otázek na klikání, vyhodnocení přímo v prohlížeči,
+ * nic se neodesílá. Texty schválil Patrik 4. 10. 2026
+ * (docs/financni-check-up-navrh.md — tam jsou i pravidla vyhodnocení).
+ *
+ * Záměrně BEZ dekorativní trasy (nástroj, ne kapitola webu — stejně jako
+ * 404.astro), proto ani záznam v `PAGES` (scripts/audit-layout.mjs). Hero
+ * odsazení a typografie 1:1 jako 404.astro / sourozenecké podstránky.
+ *
+ * Všechny otázky i varianty výsledku jsou ve statickém HTML (skryté), JS
+ * jen přepíná, co je vidět — check:typo tak vidí celý text. Výsledek lze
+ * poslat přes kontaktní formulář: odpovědi jdou přes sessionStorage do
+ * pole „Stručně popište svou situaci“ (ContactSection.astro), odešle je až
+ * návštěvník sám.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { BOOKING_URL } from '../data/entity';
+
+// Nezlomitelná mezera za krátkými předložkami/spojkami a za číslem
+// (CLAUDE.md „Konvence: nezlomitelná mezera").
+const nb = (text: string) =>
+  text
+    .replace(/(^|[\s(])([aikosuvzAIKOSUVZ]|do|ke|na|od|po|pro|se|ve|za|ze|Do|Ke|Na|Od|Po|Pro|Se|Ve|Za|Ze) /g, '$1$2 ')
+    .replace(/(^|[\s(])([aikosuvzAIKOSUVZ]|do|ke|na|od|po|pro|se|ve|za|ze|Do|Ke|Na|Od|Po|Pro|Se|Ve|Za|Ze) /g, '$1$2 ')
+    .replace(/(\d) /g, '$1 ');
+
+interface Question {
+  id: string;
+  title: string;
+  q: string;
+  options: string[];
+}
+
+const questions: Question[] = [
+  {
+    id: 'rezerva',
+    title: 'Rezerva',
+    q: 'Kdybyste zítra přišli o příjem, na jak dlouho by vám vystačily úspory?',
+    options: ['Méně než měsíc', '1 až 3 měsíce', '3 až 6 měsíců', 'Déle než 6 měsíců'],
+  },
+  {
+    id: 'pojisteni',
+    title: 'Pojištění příjmu',
+    q: 'Jste pojištění pro případ dlouhodobé nemoci nebo invalidity?',
+    options: ['Ano a vím, na jaké částky', 'Ano, ale nevím přesně, co pojištění kryje', 'Ne', 'Nevím'],
+  },
+  {
+    id: 'zavislost',
+    title: 'Kdo na vás závisí',
+    q: 'Živí váš příjem i další lidi, nebo z něj splácíte úvěr?',
+    options: ['Ano', 'Ne'],
+  },
+  {
+    id: 'hypoteka',
+    title: 'Hypotéka',
+    q: 'Máte hypotéku?',
+    options: ['Nemám', 'Mám a vím, kdy mi končí fixace', 'Mám, ale nevím, kdy mi končí fixace'],
+  },
+  {
+    id: 'bydleni',
+    title: 'Plány s bydlením',
+    q: 'Plánujete v příštích dvou letech koupi, stavbu nebo rekonstrukci bydlení?',
+    options: ['Ano', 'Možná', 'Ne'],
+  },
+  {
+    id: 'investice',
+    title: 'Dlouhodobé peníze',
+    q: 'Odkládáte si pravidelně peníze na delší dobu, na pět a více let?',
+    options: ['Ano, pravidelně investuji', 'Spořím, ale peníze leží na účtu', 'Zatím ne'],
+  },
+  {
+    id: 'penze',
+    title: 'Penze',
+    q: 'Víte, z čeho budete žít v důchodu?',
+    options: [
+      'Mám představu a pravidelně si na to odkládám',
+      'Mám penzijní spoření nebo DIP, ale nevím, jestli to stačí',
+      'Zatím to neřeším',
+    ],
+  },
+  {
+    id: 'smlouvy',
+    title: 'Přehled o smlouvách',
+    q: 'Kdy jste naposledy prošli své smlouvy (pojištění, úvěry, spoření)?',
+    options: ['Během posledního roku', 'Před více lety', 'Ještě nikdy'],
+  },
+];
+
+// Varianty textu každé oblasti; kterou zobrazit, rozhoduje skript níže
+// (pravidla viz docs/financni-check-up-navrh.md, „Vyhodnocení").
+interface Area {
+  id: string;
+  name: string;
+  link: { label: string; href: string };
+  texts: Record<string, string>;
+}
+
+const areas: Area[] = [
+  {
+    id: 'rezerva',
+    name: 'Rezerva',
+    link: { label: 'Finanční plán', href: '/sluzby/financni-plan' },
+    texts: {
+      ok: 'Máte rezervu, která vás podrží i při nečekaném výpadku příjmu.',
+      check:
+        'Rezerva je základ, na kterém stojí všechno ostatní. Obvykle se doporučuje mít stranou alespoň tři až šest měsíčních výdajů.',
+    },
+  },
+  {
+    id: 'prijem',
+    name: 'Příjem a rodina',
+    link: { label: 'Pojištění', href: '/sluzby/pojisteni' },
+    texts: {
+      ok: 'Máte pojištěné to nejdůležitější, svůj příjem.',
+      check:
+        'Největší finanční riziko většiny lidí není škoda na majetku, ale dlouhý výpadek příjmu. Vyplatí se vědět, co by se v takové situaci stalo.',
+      checkDep:
+        'Na vašem příjmu závisí další lidé nebo splátky. O to důležitější je vědět, že ho máte dobře pojištěný.',
+    },
+  },
+  {
+    id: 'bydleni',
+    name: 'Bydlení a hypotéka',
+    link: { label: 'Hypotéky', href: '/sluzby/hypoteky' },
+    texts: {
+      ok: 'V oblasti bydlení teď nic akutního neřešíte.',
+      okFix: 'Víte, kdy vám končí fixace, to je dobrý základ. Začít se vyplatí klidně i rok před tímto datem a zjistit, jaká je situace na trhu.',
+      checkFix:
+        'Vyplatí se zjistit, kdy vám končí fixace. Konec fixace je nejlepší chvíle hypotéku zkontrolovat. Začít se vyplatí klidně i rok předem a zjistit, jaká je situace na trhu, ne až když přijde nabídka od banky.',
+      checkPlan:
+        'Než začnete hledat, je dobré znát čísla: na jakou cenu dosáhnete, kolik budete potřebovat vlastních peněz a jaká splátka je pro vás rozumná.',
+    },
+  },
+  {
+    id: 'investice',
+    name: 'Dlouhodobé peníze',
+    link: { label: 'Investice', href: '/sluzby/investice' },
+    texts: {
+      ok: 'Pravidelně odkládáte na delší dobu. Vyplatí se jen občas zkontrolovat, jestli investice pořád odpovídají vašim cílům.',
+      check: 'Peníze, které nebudete potřebovat pět a více let, na běžném účtu časem ztrácejí hodnotu kvůli inflaci.',
+    },
+  },
+  {
+    id: 'penze',
+    name: 'Penze',
+    link: { label: 'Penze', href: '/sluzby/penze' },
+    texts: {
+      ok: 'Na penzi myslíte s předstihem, to je velká výhoda.',
+      check: 'Čím dřív víte, kolik budete na penzi potřebovat, tím menší částky stačí odkládat.',
+    },
+  },
+  {
+    id: 'smlouvy',
+    name: 'Přehled o smlouvách',
+    link: { label: 'Finanční plán', href: '/sluzby/financni-plan' },
+    texts: {
+      ok: 'Smlouvy máte zkontrolované nedávno.',
+      check: 'Život se mění rychleji než smlouvy. Co dávalo smysl před lety, dnes nemusí odpovídat vaší situaci.',
+    },
+  },
+];
+
+const config = {
+  questions: questions.map((q) => ({ id: q.id, title: q.title, options: q.options })),
+};
+---
+
+<BaseLayout
+  title="Finanční check-up | Patrik Gajdadzis"
+  description="Osm krátkých otázek, zhruba dvě minuty. Zjistěte, co máte ve financích nastavené dobře a kde se vyplatí podívat blíž."
+>
+  <Header />
+  <main id="hero" class="chk">
+    <section class="chk-hero" aria-labelledby="chk-heading">
+      <div class="chk-hero__text" data-checkup data-config={JSON.stringify(config)}>
+        <h1 id="chk-heading">Jak na&nbsp;tom jsou vaše finance?</h1>
+
+        <!-- Úvod -->
+        <div class="chk-step chk-intro" data-step="intro">
+          <p class="chk-hero__lead">
+            Osm krátkých otázek, zhruba dvě minuty. Na&nbsp;konci uvidíte, co máte nastavené dobře a&nbsp;kde se&nbsp;vyplatí
+            podívat blíž.
+          </p>
+          <p class="chk-intro__meta">Odpovědi zůstávají jen ve&nbsp;vašem prohlížeči, nikam se&nbsp;neodesílají.</p>
+          <div class="chk-intro__actions">
+            <button class="chk-cta" type="button" data-start>Začít</button>
+          </div>
+          <noscript>
+            <p class="chk-intro__meta">
+              Check-up potřebuje zapnutý JavaScript. Zavolejte mi na&nbsp;<a href="tel:+420775217721">+420&nbsp;775&nbsp;217&nbsp;721</a>.
+            </p>
+          </noscript>
+        </div>
+
+        <!-- Otázky -->
+        <div class="chk-step chk-quiz" data-step="quiz" hidden>
+          <div class="chk-progress" aria-hidden="true">
+            {questions.map(() => <span class="chk-progress__dot"></span>)}
+          </div>
+          <p class="chk-quiz__count" aria-live="polite">Otázka <span data-count>1</span> z&nbsp;{questions.length}</p>
+
+          {
+            questions.map((q, qi) => (
+              <fieldset class="chk-question" data-question={qi} hidden>
+                <legend class="chk-question__title" tabindex="-1">{nb(q.q)}</legend>
+                <div class="chk-options">
+                  {q.options.map((option, oi) => (
+                    <button class="chk-option" type="button" data-option={oi}>
+                      <span class="chk-option__mark" aria-hidden="true" />
+                      <span>{nb(option)}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ))
+          }
+
+          <button class="chk-back" type="button" data-back>Zpět</button>
+        </div>
+
+        <!-- Výsledek -->
+        <div class="chk-step chk-result" data-step="result" hidden>
+          <h2 class="chk-result__heading" tabindex="-1">Váš přehled</h2>
+          <p class="chk-result__summary" data-summary></p>
+
+          <ul class="chk-areas">
+            {
+              areas.map((area) => (
+                <li class="chk-area" data-area={area.id}>
+                  <span class="chk-area__dot" aria-hidden="true" />
+                  <div class="chk-area__body">
+                    <p class="chk-area__status" data-status-ok>V&nbsp;pořádku</p>
+                    <p class="chk-area__status chk-area__status--check" data-status-check>Vyplatí se&nbsp;podívat</p>
+                    <h3 class="chk-area__name">{nb(area.name)}</h3>
+                    <div class="chk-area__texts">
+                      {Object.entries(area.texts).map(([key, text]) => (
+                        <p data-text={key} hidden>{nb(text)}</p>
+                      ))}
+                    </div>
+                    <a class="chk-area__link" href={area.link.href}>{area.link.label}</a>
+                  </div>
+                </li>
+              ))
+            }
+          </ul>
+
+          <div class="chk-result__cta">
+            <h2 class="chk-result__cta-heading">Chcete to probrat?</h2>
+            <p class="chk-result__cta-text">Úvodní konzultace trvá přibližně 30&nbsp;minut a&nbsp;je nezávazná.</p>
+            <div class="chk-result__actions">
+              <a class="chk-cta" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat termín online</a>
+              <a class="chk-text-link" href="/#kontakt" data-send>Poslat výsledek Patrikovi</a>
+            </div>
+            <button class="chk-back" type="button" data-restart>Projít znovu</button>
+          </div>
+
+          <p class="chk-result__note">
+            Přehled je orientační a&nbsp;vychází jen z&nbsp;vašich odpovědí. Nejde o&nbsp;doporučení konkrétního řešení ani
+            produktu. To je možné až po&nbsp;společném projití vaší situace.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  interface Config {
+    questions: { id: string; title: string; options: string[] }[];
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-checkup]');
+  if (root) {
+    const config = JSON.parse(root.dataset.config ?? '{}') as Config;
+    const total = config.questions.length;
+    const answers: number[] = [];
+    let current = 0;
+
+    const steps = root.querySelectorAll<HTMLElement>('[data-step]');
+    const questionEls = root.querySelectorAll<HTMLElement>('[data-question]');
+    const dots = root.querySelectorAll<HTMLElement>('.chk-progress__dot');
+    const countEl = root.querySelector<HTMLElement>('[data-count]');
+    const backBtn = root.querySelector<HTMLButtonElement>('[data-back]');
+    const areaOrder = Array.from(root.querySelectorAll<HTMLElement>('[data-area]'));
+
+    const showStep = (name: string) => {
+      steps.forEach((s) => (s.hidden = s.dataset.step !== name));
+    };
+
+    const showQuestion = (index: number, focus = true) => {
+      current = index;
+      questionEls.forEach((q, i) => (q.hidden = i !== index));
+      dots.forEach((d, i) => {
+        d.classList.toggle('is-done', i < index);
+        d.classList.toggle('is-current', i === index);
+      });
+      if (countEl) countEl.textContent = String(index + 1);
+      questionEls[index].querySelectorAll<HTMLElement>('[data-option]').forEach((o) => {
+        o.classList.toggle('is-selected', Number(o.dataset.option) === answers[index]);
+      });
+      if (focus) questionEls[index].querySelector<HTMLElement>('legend')?.focus({ preventScroll: true });
+      // Na mobilu otázka začíná pod velkým nadpisem — držet ji ve výhledu.
+      const top = root.getBoundingClientRect().top;
+      if (top < 0) root.scrollIntoView({ block: 'start' });
+    };
+
+    const a = (id: string) => answers[config.questions.findIndex((q) => q.id === id)];
+
+    // Pravidla vyhodnocení — docs/financni-check-up-navrh.md, „Vyhodnocení".
+    const evaluate = (): Record<string, { ok: boolean; texts: string[] }> => {
+      const fixUnknown = a('hypoteka') === 2;
+      const plans = a('bydleni') <= 1;
+      return {
+        rezerva: { ok: a('rezerva') >= 2, texts: [a('rezerva') >= 2 ? 'ok' : 'check'] },
+        prijem: {
+          ok: a('pojisteni') === 0,
+          texts: [a('pojisteni') === 0 ? 'ok' : a('zavislost') === 0 ? 'checkDep' : 'check'],
+        },
+        bydleni: {
+          ok: !fixUnknown && !plans,
+          texts:
+            fixUnknown || plans
+              ? [...(fixUnknown ? ['checkFix'] : []), ...(plans ? ['checkPlan'] : [])]
+              : [a('hypoteka') === 1 ? 'okFix' : 'ok'],
+        },
+        investice: { ok: a('investice') === 0, texts: [a('investice') === 0 ? 'ok' : 'check'] },
+        penze: { ok: a('penze') === 0, texts: [a('penze') === 0 ? 'ok' : 'check'] },
+        smlouvy: { ok: a('smlouvy') === 0, texts: [a('smlouvy') === 0 ? 'ok' : 'check'] },
+      };
+    };
+
+    let summaryText = '';
+
+    const showResult = () => {
+      const result = evaluate();
+      const okCount = Object.values(result).filter((r) => r.ok).length;
+      const areaCount = Object.keys(result).length;
+      const summary = root.querySelector<HTMLElement>('[data-summary]');
+      if (summary) {
+        summary.textContent =
+          okCount === areaCount
+            ? `V pořádku máte všech ${areaCount} oblastí.`
+            : `V pořádku: ${okCount} z ${areaCount} oblastí. Vyplatí se podívat: ${areaCount - okCount}.`;
+      }
+
+      const okNames: string[] = [];
+      const checkNames: string[] = [];
+      const list = root.querySelector<HTMLElement>('.chk-areas');
+      const areaEls = [...areaOrder];
+      // Oblasti, kde se vyplatí podívat, nahoru (v pořadí z markupu). Přesun
+      // v DOM, ne CSS `order` — oddělovací linky se řídí :first-child.
+      areaEls
+        .sort((x, y) => Number(result[x.dataset.area ?? '']?.ok) - Number(result[y.dataset.area ?? '']?.ok))
+        .forEach((el) => list?.appendChild(el));
+      areaEls.forEach((el) => {
+        const r = result[el.dataset.area ?? ''];
+        if (!r) return;
+        el.classList.toggle('is-check', !r.ok);
+        el.querySelector<HTMLElement>('[data-status-ok]')!.hidden = !r.ok;
+        el.querySelector<HTMLElement>('[data-status-check]')!.hidden = r.ok;
+        el.querySelectorAll<HTMLElement>('[data-text]').forEach((p) => (p.hidden = !r.texts.includes(p.dataset.text ?? '')));
+        const name = el.querySelector('.chk-area__name')?.textContent ?? '';
+        (r.ok ? okNames : checkNames).push(name);
+      });
+
+      summaryText = [
+        'Výsledek finančního check-upu z webu:',
+        checkNames.length ? `Vyplatí se podívat: ${checkNames.join(', ')}` : '',
+        okNames.length ? `V pořádku: ${okNames.join(', ')}` : '',
+        '',
+        'Odpovědi:',
+        ...config.questions.map((q, i) => `${q.title}: ${q.options[answers[i]]}`),
+      ]
+        .filter((line, i, arr) => line !== '' || arr[i - 1] !== '')
+        .join('\n');
+
+      showStep('result');
+      root.querySelector<HTMLElement>('.chk-result__heading')?.focus({ preventScroll: true });
+      root.scrollIntoView({ block: 'start' });
+    };
+
+    root.querySelector('[data-start]')?.addEventListener('click', () => {
+      showStep('quiz');
+      showQuestion(0);
+    });
+
+    questionEls.forEach((q, qi) => {
+      q.querySelectorAll<HTMLElement>('[data-option]').forEach((option) => {
+        option.addEventListener('click', () => {
+          answers[qi] = Number(option.dataset.option);
+          if (qi + 1 < total) showQuestion(qi + 1);
+          else showResult();
+        });
+      });
+    });
+
+    backBtn?.addEventListener('click', () => {
+      if (current > 0) showQuestion(current - 1);
+      else showStep('intro');
+    });
+
+    root.querySelector('[data-restart]')?.addEventListener('click', () => {
+      answers.length = 0;
+      showStep('quiz');
+      showQuestion(0);
+    });
+
+    // Výsledek do kontaktního formuláře (ContactSection.astro si ho vyzvedne).
+    root.querySelector('[data-send]')?.addEventListener('click', () => {
+      try {
+        sessionStorage.setItem('checkup-vysledek', summaryText);
+      } catch {
+        /* bez úložiště se jen otevře prázdný formulář */
+      }
+    });
+  }
+</script>
+
+<style>
+  .chk {
+    background: var(--bg);
+  }
+
+  .chk :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  /* Nadpis otázky dostává fokus jen kvůli čtečkám — bez rámečku. */
+  .chk-question__title:focus,
+  .chk-result__heading:focus {
+    outline: none;
+  }
+
+  /* Symetrický padding (CLAUDE.md „Konvence: mezera mezi sekcemi"). */
+  .chk-hero {
+    padding: 64px 24px;
+  }
+
+  .chk-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 640px;
+  }
+
+  .chk-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .chk-step {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .chk-step[hidden] {
+    display: none;
+  }
+
+  .chk-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .chk-intro__meta {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .chk-intro__actions {
+    margin-top: 6px;
+  }
+
+  .chk-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 56px;
+    padding-inline: 30px;
+    border: none;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .chk-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .chk-cta:active {
+    transform: translateY(1px);
+  }
+
+  /* --- Postup: linka s tečkami jako trasa webu --- */
+  .chk-progress {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 260px;
+    height: 8px;
+  }
+
+  .chk-progress::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--line);
+    opacity: .18;
+  }
+
+  .chk-progress__dot {
+    position: relative;
+    width: 4.8px;
+    height: 4.8px;
+    border-radius: 50%;
+    background: var(--line);
+    opacity: .35;
+  }
+
+  .chk-progress__dot.is-done {
+    background: var(--emerald);
+    opacity: 1;
+  }
+
+  .chk-progress__dot.is-current {
+    width: 6.4px;
+    height: 6.4px;
+    background: var(--emerald);
+    opacity: 1;
+  }
+
+  .chk-quiz__count {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    color: var(--navy);
+  }
+
+  .chk-question {
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+  }
+
+  .chk-question[hidden] {
+    display: none;
+  }
+
+  .chk-question__title {
+    padding: 0;
+    margin: 0 0 20px;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .chk-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 560px;
+  }
+
+  .chk-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 56px;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    background: var(--white);
+    color: var(--navy);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .chk-option:hover,
+  .chk-option.is-selected {
+    border-color: var(--emerald);
+  }
+
+  .chk-option__mark {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .chk-option.is-selected .chk-option__mark {
+    border-color: var(--emerald);
+  }
+
+  .chk-option.is-selected .chk-option__mark::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--emerald);
+  }
+
+  .chk-back {
+    align-self: flex-start;
+    padding: 12px 0;
+    border: none;
+    background: none;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .chk-back:hover {
+    color: var(--emerald);
+  }
+
+  /* --- Výsledek --- */
+  .chk-result__heading,
+  .chk-result__cta-heading {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -.04em;
+    color: var(--navy);
+  }
+
+  .chk-result__summary {
+    margin: -4px 0 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .chk-areas {
+    display: flex;
+    flex-direction: column;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    max-width: 560px;
+  }
+
+  .chk-area {
+    display: grid;
+    grid-template-columns: 6.4px minmax(0, 1fr);
+    column-gap: 14px;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .chk-area:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .chk-area:last-child {
+    padding-bottom: 0;
+  }
+
+  .chk-area__dot {
+    width: 6.4px;
+    height: 6.4px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: var(--emerald);
+  }
+
+  .chk-area.is-check .chk-area__dot {
+    background: var(--pending-review);
+  }
+
+  .chk-area__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .chk-area__status {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: var(--emerald);
+  }
+
+  .chk-area__status--check {
+    color: var(--pending-review);
+  }
+
+  .chk-area__name {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--navy);
+  }
+
+  .chk-area__texts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .chk-area__texts p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .chk-area__texts p[hidden] {
+    display: none;
+  }
+
+  .chk-area__link,
+  .chk-text-link {
+    position: relative;
+    align-self: flex-start;
+    margin-top: 6px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .chk-area__link::after,
+  .chk-text-link::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
+  .chk-area__link:hover,
+  .chk-text-link:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+
+  .chk-result__cta {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 24px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    max-width: 560px;
+  }
+
+  .chk-result__cta-text {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .chk-result__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 8px;
+  }
+
+  .chk-result__actions .chk-text-link {
+    align-self: center;
+    margin-top: 0;
+  }
+
+  /* Na mobilu pod tlačítky přes celou šířku na střed, od tabletu vlevo. */
+  .chk-result__cta .chk-back {
+    align-self: center;
+  }
+
+  .chk-result__note {
+    margin: 8px 0 0;
+    max-width: 560px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-quiet);
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .chk-hero {
+      padding: 88px 40px;
+    }
+
+    .chk-hero__text {
+      gap: 20px;
+    }
+
+    .chk-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .chk-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .chk-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .chk-question__title {
+      font-size: 28px;
+    }
+
+    .chk-result__heading,
+    .chk-result__cta-heading {
+      font-size: 34px;
+    }
+
+    .chk-result__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .chk-result__actions .chk-text-link {
+      align-self: auto;
+    }
+
+    .chk-result__cta .chk-back {
+      align-self: flex-start;
+    }
+  }
+
+  /* ============ Jen tablet (768–1199): hero text jako sourozenecké podstránky ============ */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .chk-hero {
+      padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo i nadpis na jedné svislé */
+    }
+
+    .chk-hero__text h1 {
+      max-width: 11em;
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      line-height: .99;
+    }
+
+    .chk-hero__text {
+      gap: 40px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .chk-hero {
+      padding: 112px 96px;
+    }
+
+    .chk-hero__text {
+      gap: 32px;
+    }
+
+    .chk-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .chk-hero__lead {
+      font-size: 19px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .chk-hero {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+      padding: 120px 100px;
+    }
+
+    .chk-hero__text h1 {
+      font-size: 72px;
+    }
+
+    .chk-hero__lead {
+      max-width: 600px;
+    }
+  }
+</style>

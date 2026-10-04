@@ -293,7 +293,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 18. Vrátit „Kariéra“ do patičky, až bude cílová stránka.
 18a. **Automatické e-maily kolem konzultace** (uživatel chce, 4. 10. 2026): po rezervaci/odeslání formuláře „Děkuji, tady je, co si připravit“, připomínka den před schůzkou, **žádost o Google recenzi pár dní po konzultaci** (přímý odkaz na napsání recenze, posílat všem — Google zakazuje vybírat jen spokojené). Řešení: připomínky v placeném Google Workspace (rezervační stránka musí být založená v kalendáři Workspace účtu), zbytek Google Apps Script v jeho účtu, případně potvrzení klientovi přímo z `api/poptavka.php`.
 18b. **Měsíční e-mail klientům s novým článkem** (uživatel chce, 4. 10. 2026): nástroj pro rozesílky (např. Ecomail/MailerLite), souhlas a odhlášení podle GDPR (stávající klienti — oprávněný zájem s možností odhlášení; ostatní jen se souhlasem), případně přihlášení k odběru na webu u článků.
-18c. **Finanční check-up a kalkulačka splátky** (návrh 4. 10. 2026, čeká na rozhodnutí): viz konverzace — dotazník ~8 otázek s výsledkem v prohlížeči + nabídka termínu; kalkulačka splátky na /sluzby/hypoteky (sazbu zadává klient, jinak pravidla reklamy na úvěr).
+18c. ~~**Finanční check-up**~~ HOTOVO 4. 10. 2026 (`/financni-check-up`, odkaz v patičce a na `/sluzby`; homepage zatím ne — rozcestník má pevné výšky a trasu). **Kalkulačka splátky** (návrh, čeká na rozhodnutí): viz konverzace — dotazník ~8 otázek s výsledkem v prohlížeči + nabídka termínu; kalkulačka splátky na /sluzby/hypoteky (sazbu zadává klient, jinak pravidla reklamy na úvěr).
 
 **E) Doporučené (kdykoli, nejlépe brzy)**
 19. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.

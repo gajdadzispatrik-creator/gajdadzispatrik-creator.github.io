@@ -481,6 +481,19 @@ const bandDetails = [
         if (startedAt === null) startedAt = performance.now();
       };
       ['focusin', 'input', 'change'].forEach((type) => form.addEventListener(type, markStart));
+      // Výsledek z /financni-check-up („Poslat výsledek Patrikovi“) — předvyplní
+      // popis situace; odešle se až tím, že formulář odešle návštěvník sám.
+      try {
+        const checkup = sessionStorage.getItem('checkup-vysledek');
+        const situation = form.elements.namedItem('situace') as HTMLTextAreaElement | null;
+        if (checkup && situation && !situation.value) {
+          situation.value = checkup;
+          situation.rows = Math.min(14, checkup.split('\n').length + 1);
+        }
+        sessionStorage.removeItem('checkup-vysledek');
+      } catch {
+        /* úložiště nedostupné — formulář zůstane prázdný */
+      }
       const errorSummary = form.querySelector('.kontakt__form-errors') as HTMLElement | null;
       const successStatus = form.querySelector('.kontakt__status--success') as HTMLElement | null;
       const errorStatus = form.querySelector('.kontakt__status--error') as HTMLElement | null;
