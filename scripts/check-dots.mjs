@@ -106,13 +106,15 @@ function collectLinks(origin) {
 const browser = await chromium.launch();
 const fails = [];
 let dotCount = 0, notchCount = 0;
-const pages = ['/', ...EXTRA_PATHS];
+// ONLY=/o-mne,/pristup — zkontrolovat jen vybrané stránky (po úpravě jedné stránky).
+const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
+const pages = ONLY || ['/', ...EXTRA_PATHS];
 
 try {
   // Seznam stránek z odkazů.
   const crawler = await browser.newPage();
   const seen = new Set(pages);
-  for (let i = 0; i < pages.length; i++) {
+  for (let i = 0; !ONLY && i < pages.length; i++) {
     await crawler.goto(ORIGIN + pages[i], { waitUntil: 'networkidle' });
     for (const link of await crawler.evaluate(collectLinks, ORIGIN)) if (!seen.has(link)) { seen.add(link); pages.push(link); }
   }

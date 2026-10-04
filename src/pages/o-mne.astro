@@ -80,13 +80,11 @@
  * jako chyba vykreslení.
  *
  * ZAČÁTEK — JEDINÁ KAPITOLA S VNITŘNÍM ČLENĚNÍM (zadání §6). Dvě vyprávěcí
- * části (`.om-zacatek__block`) se statementem MEZI nimi. Od notebooku výš
- * (kde má kapitola dva sloupce) leží statement v LEVÉM sloupci vedle DRUHÉ
- * části (CSS grid, explicitní `grid-row`/`grid-column`), ne pod první —
- * přesně jak zadání žádá „v levé koloně vedle druhé části vyprávění, ne pod
- * ním". Na tabletu/mobilu (jeden sloupec) jde o prostý tok v pořadí H2 →
- * blok 1 → statement → blok 2, což se zadání nijak nevylučuje (na šířku,
- * kde „levý sloupec" jako pojem neexistuje).
+ * části (`.om-zacatek__block`) se statementem MEZI nimi. Na všech stupních
+ * (od 4. 10. 2026 i na notebooku/desktopu — kapitoly mají rozložení jako
+ * tablet, přání uživatele) jde o prostý tok v pořadí H2 → blok 1 →
+ * statement → blok 2. Dřív od notebooku dvousloupcová mřížka se statementem
+ * v levém sloupci vedle druhé části (původní zadání §6).
  *
  * VELKÝ STANDALONE STATEMENT mezi kapitolami Klienti a Souvislosti — bez
  * `<section>`, bez pruhu, bez kotvy (zadání §6), proto NENÍ v poli
@@ -1495,8 +1493,8 @@ const facts: FactRow[] = [
   }
 
   /* Nadpis → první text 20 px jako u ostatních kapitol podstránek
-     (om/pri/inv-chapter__top); mezi dalšími bloky zůstává 32. Od notebooku
-     je nadpis vedle textu (grid), tam se neuplatní. */
+     (om/pri/inv-chapter__top); mezi dalšími bloky zůstává 32. Platí na
+     všech stupních (od 4. 10. 2026 je i desktop pod sebou jako tablet). */
   .om-zacatek__heading {
     margin-bottom: -12px;
   }
@@ -1952,6 +1950,7 @@ const facts: FactRow[] = [
     .om-hero {
       position: relative;
       padding: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px) 40px 0;
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       min-height: clamp(656px, calc(656px + 0.255639 * (100vw - 834px)), 792px);
     }
 
@@ -2133,18 +2132,19 @@ const facts: FactRow[] = [
       margin-top: 138px;
     }
 
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, stejně jako /sluzby): popisek u tečky
+     * nahoře, pod ním obsah pod sebou (nadpis → text → odkaz/řádky), jen
+     * s desktopovými velikostmi. Obsah začíná pod textem popisku (osa +
+     * zářez + mezera), šířka omezená kvůli čitelnosti dlouhých řádků.
+     * VÝJIMKA: Důvěra (fotka, usazení schválené v docs/fotky-umisteni.md)
+     * zůstává beze změny — popisek vlevo, nadpis + fotka | text vedle sebe.
+     */
     .om-chapter__inner {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 56px;
     }
 
-    .om-chapter__bar {
-      flex: none;
-      width: 240px;
-      margin-bottom: 0;
-    }
 
     .om-chapter__bar p {
       font-size: 24px;
@@ -2155,8 +2155,15 @@ const facts: FactRow[] = [
     }
 
     .om-chapter__content {
-      flex: 1;
-      padding-left: 0;
+      padding-left: calc(56px + var(--om-shift, 0px));
+      max-width: 880px;
+    }
+
+    /* Důvěra (4. 10. 2026): popisek nahoře jako ostatní kapitoly; pod ním
+       nadpis přes celou šířku, text vlevo a fotka vpravo vedle textu —
+       rám fotky beze změny (docs/fotky-umisteni.md). */
+    .om-chapter--duvera .om-chapter__content {
+      max-width: none;
     }
 
     .om-chapter__content--single {
@@ -2191,31 +2198,47 @@ const facts: FactRow[] = [
       max-width: 900px;
     }
 
+    /* Nadpis NAD textem jako na tabletu (gap 20 z base); šířku drží
+       `.om-chapter__content` (880). Vedle sebe jen Důvěra (fotka). */
     .om-chapter__top {
       max-width: none;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 60px;
     }
 
-    .om-chapter--mint .om-chapter__lead-col,
-    .om-chapter--klienti .om-chapter__lead-col,
-    .om-chapter--souvislosti .om-chapter__lead-col,
-    .om-chapter--duvera .om-chapter__lead-col,
-    .om-chapter--projekt .om-chapter__lead-col,
-    .om-chapter--recenze .om-chapter__lead-col,
-    .om-chapter__lead-col {
-      flex: none;
-      width: 540px;
+    .om-chapter--duvera .om-chapter__top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 503px;
+      grid-template-areas: 'nadpis nadpis' 'text foto';
+      column-gap: 56px;
+      row-gap: 20px;
+      align-items: start;
     }
 
-    .om-chapter--mint .om-chapter__support-col,
-    .om-chapter--klienti .om-chapter__support-col,
-    .om-chapter--souvislosti .om-chapter__support-col,
-    .om-chapter--duvera .om-chapter__support-col,
-    .om-chapter--projekt .om-chapter__support-col,
-    .om-chapter--recenze .om-chapter__support-col {
-      flex: 1;
+    .om-chapter--duvera .om-chapter__lead-col {
+      display: contents;
+    }
+
+    .om-chapter--duvera .om-chapter__lead-col h2 {
+      grid-area: nadpis;
+      max-width: 880px;
+    }
+
+    /* Spodek postavy (konec výřezu u stehen) přesně na spodní hraně tmavé
+       sekce, bez rozpouštění — jako hero na homepage nad statistickým pásem
+       (přání uživatele 4. 10. 2026). Záporný margin = spodní padding sekce
+       (88) + prázdný pruh pod výřezem v rámu (762 − 8,6 − 725 = 28,4). */
+    .om-chapter--duvera .om-duvera__photo {
+      grid-area: foto;
+      align-self: end;
+      margin-bottom: -116.4px;
+    }
+
+    .om-chapter--duvera .om-duvera__photo img {
+      -webkit-mask-image: none;
+              mask-image: none;
+    }
+
+    .om-chapter--duvera .om-chapter__support-col {
+      grid-area: text;
     }
 
     /* Rám 503×762 (schválený 28. 9. 2026) — hlava stejně velká jako druhá
@@ -2239,43 +2262,12 @@ const facts: FactRow[] = [
       object-fit: fill;
     }
 
-    /* Začátek — dvousloupcová mřížka: H2+statement vlevo, dvě vyprávěcí
-       části vpravo. Statement sedí vedle DRUHÉ části, ne pod první
-       (zadání §6). */
-    .om-zacatek__grid {
-      display: grid;
-      grid-template-columns: 540px 1fr;
-      column-gap: 56px;
-      row-gap: 40px;
-    }
+    /* Začátek — od 4. 10. 2026 jako tablet: H2 → blok 1 → statement →
+       blok 2 pod sebou (pravidla z base, žádná mřížka). Dřív dva sloupce. */
 
-    .om-zacatek__heading {
-      grid-column: 1;
-      grid-row: 1;
-      margin-bottom: 0;
-    }
-
-    .om-zacatek__block--1 {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .om-zacatek__statement {
-      grid-column: 1;
-      grid-row: 2;
-      align-self: end;
-    }
-
-    .om-zacatek__block--2 {
-      grid-column: 2;
-      grid-row: 2;
-    }
-
+    /* Role — název nad textem jako na tabletu (flex sloupec z base),
+       dřív mřížka „název | text" vedle sebe. */
     .om-facts__row {
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 0 32px; /* dřív column-gap + gap: 0 = mezera 0 (4. 10. 2026) */
-      align-items: baseline;
       padding: 22px 0;
     }
 
@@ -2414,12 +2406,13 @@ const facts: FactRow[] = [
 
     .om-chapter__inner {
       padding: 88px 100px;
-      gap: 56px;
     }
 
-    .om-chapter__bar {
-      width: 240px;
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text (76 + posun). */
+    .om-chapter__content {
+      padding-left: calc(76px + var(--om-shift, 0px));
     }
+
 
     .om-chapter__bar p {
       font-size: 26px;
@@ -2456,14 +2449,13 @@ const facts: FactRow[] = [
       max-width: 980px;
     }
 
-    .om-chapter--mint .om-chapter__lead-col,
-    .om-chapter--klienti .om-chapter__lead-col,
-    .om-chapter--souvislosti .om-chapter__lead-col,
-    .om-chapter--duvera .om-chapter__lead-col,
-    .om-chapter--projekt .om-chapter__lead-col,
-    .om-chapter--recenze .om-chapter__lead-col,
-    .om-chapter__lead-col {
-      width: 600px;
+    .om-chapter--duvera .om-chapter__top {
+      grid-template-columns: minmax(0, 1fr) 586px;
+    }
+
+    /* 88 + (887 − 10,4 − 843) = 121,6 */
+    .om-chapter--duvera .om-duvera__photo {
+      margin-bottom: -121.6px;
     }
 
     /* Hlava ~121 px jako AboutSection na 1440 px — výřez v měřítku 0,781:
@@ -2477,10 +2469,6 @@ const facts: FactRow[] = [
       top: 10.4px;
       left: 12.2px;
       width: 512.1px;
-    }
-
-    .om-zacatek__grid {
-      grid-template-columns: 600px 1fr;
     }
 
     .om-closing {

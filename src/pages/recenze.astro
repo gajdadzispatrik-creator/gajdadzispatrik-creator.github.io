@@ -1611,6 +1611,7 @@ const REVIEWS_SHOWN = 3;
   @media (min-width: 768px) and (max-width: 1199px) {
     .rec-hero {
       padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       /* Místo pod tlačítky pro oblouk linky (ohyb 40 px pod textem). */
       padding-bottom: 64px;
     }
@@ -1639,27 +1640,35 @@ const REVIEWS_SHOWN = 3;
 
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
-    /* Dva sloupce vedle sebe (dřív už od tabletu, teď od notebooku). */
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, vzor /sluzby): popisek u tečky nahoře,
+     * pod ním obsah pod sebou (nadpis → text → recenze/odkaz), jen
+     * s desktopovými velikostmi. Dřív byl popisek vlevo (240 px) a nadpis
+     * s textem ve dvou sloupcích vedle sebe, recenze jako mřížka
+     * jméno | text. Obsah začíná pod textem popisku, šířka omezená kvůli
+     * čitelnosti dlouhých řádků.
+     */
     .rec-chapter__top {
       max-width: none;
     }
 
-    .rec-chapter__top {
-      max-width: none;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
+    .rec-chapter__content {
+      padding-left: calc(56px + var(--rec-shift, 0px));
+      max-width: 880px;
+      /* Úvodní text → první recenze 72 px jako na tabletu (32 + 40), tady
+         jediným zdrojem — gap rodiče, `.rec-reviews` bez vlastního marginu. */
+      gap: 72px;
     }
 
-    .rec-chapter--recenze .rec-chapter__lead-col,
-    .rec-chapter--pristup .rec-chapter__lead-col {
-      flex: none;
-      width: 300px;
+    .rec-reviews {
+      margin-top: 0;
+      /* Poslední recenze → tlačítko 32 px, jediný zdroj (gap). */
+      gap: 32px;
     }
 
-    .rec-chapter--recenze .rec-chapter__support-col,
-    .rec-chapter--pristup .rec-chapter__support-col {
-      flex: 1;
+    .rec-reviews__more {
+      margin-top: 0;
     }
 
     .rec__route-svg--tablet {
@@ -1706,24 +1715,10 @@ const REVIEWS_SHOWN = 3;
 
     .rec-chapter {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 56px;
-    }
-
-    .rec-chapter__bar {
-      flex: none;
-      width: 240px;
-      margin-bottom: 0;
     }
 
     .rec-chapter__bar p {
       font-size: 24px;
-    }
-
-    .rec-chapter__content {
-      flex: 1;
-      padding-left: 0;
     }
 
     .rec-h2--dominant {
@@ -1732,75 +1727,6 @@ const REVIEWS_SHOWN = 3;
 
     .rec-h2--std {
       font-size: 44px;
-    }
-
-    .rec-chapter__top {
-      gap: 60px;
-    }
-
-    /* Dřív tuhle mezeru dělal (kromě `.rec-chapter__content`'s 32px gap) i
-       samotný blok „X recenzí · 5,0 · Google hodnocení" (`.rec-summary`,
-       odstraněn 14. 9. 2026 na přání uživatele) — jeho výška fungovala
-       jako druhý odstup navíc. Bez něj byla mezera nadpis→první recenze
-       najednou jen 32px, což uživatel nahlásil jako příliš těsné. Doplněno
-       zvlášť na `.rec-reviews`, ne úpravou sdíleného `.rec-chapter__content`
-       gapu, aby se nezměnila i kompaktní karta v `.rec-chapter--pristup`. */
-    .rec-reviews {
-      margin-top: 40px;
-    }
-
-    .rec-chapter--recenze .rec-chapter__lead-col,
-    .rec-chapter--pristup .rec-chapter__lead-col {
-      width: 540px;
-    }
-
-    .rec-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .rec-chapter__support-col {
-      flex: 1;
-    }
-
-    /* Řádkový výpis: vlevo autor/hodnocení/datum, vpravo text — zadání
-       §7. Stejný vzor jako `.fp-faq__row`/`.poj-faq__row` (pevný levý
-       sloupec + `1fr`), ale zůstává STACKED na tabletu/mobilu (zadání to
-       odlišuje explicitně od desktopu — krátká jména by v úzké koloně
-       vytvořila díru), takže se přepíná až tady, ne na 768px jako FAQ. */
-    .rec-review {
-      display: grid;
-      grid-template-columns: 220px 1fr;
-      /* `dense`: bez toho auto-placement umístí `footer` (sloupec 1) do
-         ŘÁDKU 2, protože `p` (sloupec 2) je v DOM dřív a „spotřebuje"
-         řádek 1 dřív, než na footer dojde řada — sparse packing se pak už
-         nevrací zpátky vyplnit volnou buňku sloupce 1 v řádku 1. Zjištěno
-         po odstranění `<time>` (uživatel nahlásil špatné zarovnání jména
-         a hvězdiček vůči textu recenze). */
-      grid-auto-flow: dense;
-      column-gap: 40px;
-      align-items: start;
-    }
-
-    .rec-review__placeholder,
-    .rec-review__quote {
-      display: contents;
-    }
-
-    .rec-review__meta {
-      grid-column: 1;
-    }
-
-    .rec-review__lines,
-    .rec-review__quote p {
-      grid-column: 2;
-    }
-
-    .rec-review__footer {
-      grid-column: 1;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
     }
 
     .rec-closing {
@@ -1860,6 +1786,11 @@ const REVIEWS_SHOWN = 3;
       padding-left: calc(76px + var(--rec-shift, 0px));
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .rec-chapter__content {
+      padding-left: calc(76px + var(--rec-shift, 0px));
+    }
+
     .rec-hero {
       padding: 120px 100px 90px;
     }
@@ -1891,11 +1822,6 @@ const REVIEWS_SHOWN = 3;
 
     .rec-chapter {
       padding: 88px 100px;
-      gap: 56px;
-    }
-
-    .rec-chapter__bar {
-      width: 240px;
     }
 
     .rec-chapter__bar p {
@@ -1908,17 +1834,6 @@ const REVIEWS_SHOWN = 3;
 
     .rec-h2--std {
       font-size: 48px;
-    }
-
-    .rec-chapter--recenze .rec-chapter__lead-col,
-    .rec-chapter--pristup .rec-chapter__lead-col,
-    .rec-chapter__lead-col {
-      width: 600px;
-    }
-
-    .rec-review {
-      grid-template-columns: 260px 1fr;
-      column-gap: 48px;
     }
 
     .rec-closing {

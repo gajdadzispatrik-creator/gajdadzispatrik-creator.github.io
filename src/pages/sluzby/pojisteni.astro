@@ -1021,7 +1021,8 @@ const faqs: Faq[] = [
   }
 
   /* Péče nemá __top wrapper — nadpis → text 20 px jako ostatní kapitoly
-     (dřív 32 px z gapu __content). Od notebooku přebíjí řádkový gap 60. */
+     (dřív 32 px z gapu __content). Platí na všech stupních (od 4. 10. 2026
+     je i notebook/desktop pod sebou, ne vedle sebe). */
   .poj-chapter--pece .poj-chapter__content {
     gap: 20px;
   }
@@ -1593,6 +1594,7 @@ const faqs: Faq[] = [
   @media (min-width: 768px) and (max-width: 1199px) {
     .poj-hero {
       padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       /* Místo pod tlačítky pro oblouk linky (ohyb 40 px pod textem). */
       padding-bottom: 64px;
     }
@@ -1621,31 +1623,15 @@ const faqs: Faq[] = [
 
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
-    /* Dva sloupce vedle sebe (dřív už od tabletu, teď od notebooku). */
-    .poj-chapter__top {
-      max-width: none;
-    }
-
-    .poj-chapter__top {
-      max-width: none;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-    }
-
-    .poj-chapter--dopad .poj-chapter__lead-col,
-    .poj-chapter--prijem .poj-chapter__lead-col,
-    .poj-chapter--majetek .poj-chapter__lead-col {
-      flex: none;
-      width: 300px;
-    }
-
-    .poj-chapter--dopad .poj-chapter__support-col,
-    .poj-chapter--prijem .poj-chapter__support-col,
-    .poj-chapter--majetek .poj-chapter__support-col {
-      flex: 1;
-    }
-
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, vzor /sluzby): popisek u tečky nahoře,
+     * pod ním obsah pod sebou (nadpis → text → řádky/seznam/věta), jen
+     * s desktopovými velikostmi. Dřív byl popisek v úzkém sloupci vlevo
+     * a nadpis s textem ve dvou sloupcích vedle sebe. Obsah začíná pod
+     * textem popisku (osa + zářez + mezera), šířka omezená kvůli čitelnosti.
+     * Dvousloupcové řádky „název | text“ (250px 1fr) zůstávají jako na tabletu.
+     */
     .poj__route-svg--tablet {
       display: none;
     }
@@ -1690,15 +1676,6 @@ const faqs: Faq[] = [
 
     .poj-chapter {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 56px;
-    }
-
-    .poj-chapter__bar {
-      flex: none;
-      width: 240px;
-      margin-bottom: 0;
     }
 
     .poj-chapter__bar p {
@@ -1709,9 +1686,10 @@ const faqs: Faq[] = [
       font-size: 19px;
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
     .poj-chapter__content {
-      flex: 1;
-      padding-left: 0;
+      padding-left: calc(56px + var(--poj-shift, 0px));
+      max-width: 880px;
     }
 
     .poj-chapter__content--single {
@@ -1738,37 +1716,10 @@ const faqs: Faq[] = [
       font-size: 24px;
     }
 
-    .poj-chapter__top {
-      gap: 60px;
-    }
-
-    .poj-chapter--dopad .poj-chapter__lead-col,
-    .poj-chapter--prijem .poj-chapter__lead-col,
-    .poj-chapter--majetek .poj-chapter__lead-col {
-      width: 540px;
-    }
-
-    .poj-chapter--kontrola .poj-chapter__content,
-    .poj-chapter--pece .poj-chapter__content {
-      flex-direction: row;
-      justify-content: space-between;
-      gap: 60px;
-    }
-
-    .poj-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .poj-chapter__support-col {
-      flex: 1;
-    }
-
+    /* Řádek „název | text“ zůstává dvousloupcový jako na tabletu, levá
+       kolona úměrně širší k větší velikosti názvu (22–26 px místo 20). */
     .poj-rows__row {
-      grid-template-columns: 1fr;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+      grid-template-columns: 300px 1fr;
       padding: 16px 0;
     }
 
@@ -1784,14 +1735,6 @@ const faqs: Faq[] = [
 
     .poj-h2--prubeh {
       max-width: 600px;
-    }
-
-    .poj-steps {
-      max-width: 600px;
-    }
-
-    .poj-step {
-      padding-left: 56px;
     }
 
     .poj-step__marker {
@@ -1813,13 +1756,6 @@ const faqs: Faq[] = [
 
     .poj-faq {
       max-width: 900px;
-    }
-
-    .poj-faq__row {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      column-gap: 56px;
-      align-items: baseline;
     }
 
     .poj-faq dt {
@@ -1887,6 +1823,11 @@ const faqs: Faq[] = [
       padding-left: calc(76px + var(--poj-shift, 0px));
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .poj-chapter__content {
+      padding-left: calc(76px + var(--poj-shift, 0px));
+    }
+
     .poj-hero {
       padding: 120px 100px 90px;
     }
@@ -1923,11 +1864,6 @@ const faqs: Faq[] = [
 
     .poj-chapter {
       padding: 88px 100px;
-      gap: 56px;
-    }
-
-    .poj-chapter__bar {
-      width: 240px;
     }
 
     .poj-chapter__bar p {
@@ -1958,13 +1894,6 @@ const faqs: Faq[] = [
       font-size: 26px;
     }
 
-    .poj-chapter--dopad .poj-chapter__lead-col,
-    .poj-chapter--prijem .poj-chapter__lead-col,
-    .poj-chapter--majetek .poj-chapter__lead-col,
-    .poj-chapter__lead-col {
-      width: 600px;
-    }
-
     .poj-rows__name {
       font-size: 24px;
     }
@@ -1981,10 +1910,6 @@ const faqs: Faq[] = [
     }
 
     .poj-h2--prubeh {
-      max-width: 640px;
-    }
-
-    .poj-steps {
       max-width: 640px;
     }
 

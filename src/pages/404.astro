@@ -205,6 +205,7 @@ import SiteFooter from '../components/SiteFooter.astro';
   @media (min-width: 768px) and (max-width: 1199px) {
     .nf-hero {
       padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
     }
 
     .nf-hero__text {

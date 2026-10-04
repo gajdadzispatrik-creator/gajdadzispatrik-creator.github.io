@@ -1649,6 +1649,7 @@ const faqs: Faq[] = [
   @media (min-width: 768px) and (max-width: 1199px) {
     .pen-hero {
       padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       /* Místo pod tlačítky pro oblouk linky (ohyb 40 px pod textem). */
       padding-bottom: 64px;
     }
@@ -1677,35 +1678,15 @@ const faqs: Faq[] = [
 
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
-    /* Dva sloupce vedle sebe (dřív už od tabletu, teď od notebooku). */
-    .pen-chapter__top {
-      max-width: none;
-    }
-
-    .pen-chapter__top {
-      max-width: none;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-    }
-
-    .pen-chapter--castka .pen-chapter__lead-col,
-    .pen-chapter--prijem .pen-chapter__lead-col,
-    .pen-chapter--zdroje .pen-chapter__lead-col,
-    .pen-chapter--role .pen-chapter__lead-col,
-    .pen-chapter--vyuziti .pen-chapter__lead-col {
-      flex: none;
-      width: 300px;
-    }
-
-    .pen-chapter--castka .pen-chapter__support-col,
-    .pen-chapter--prijem .pen-chapter__support-col,
-    .pen-chapter--zdroje .pen-chapter__support-col,
-    .pen-chapter--role .pen-chapter__support-col,
-    .pen-chapter--vyuziti .pen-chapter__support-col {
-      flex: 1;
-    }
-
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, vzor /sluzby): popisek u tečky nahoře,
+     * pod ním obsah pod sebou (nadpis → text → řádky/seznam/věta), jen
+     * s desktopovými velikostmi. Dřív byl popisek v úzkém sloupci vlevo
+     * a nadpis s textem ve dvou sloupcích vedle sebe. Obsah začíná pod
+     * textem popisku (osa + zářez + mezera), šířka omezená kvůli čitelnosti.
+     * Dvousloupcové řádky „název | text“ (250px 1fr) zůstávají jako na tabletu.
+     */
     .pen__route-svg--tablet {
       display: none;
     }
@@ -1750,15 +1731,6 @@ const faqs: Faq[] = [
 
     .pen-chapter {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 56px;
-    }
-
-    .pen-chapter__bar {
-      flex: none;
-      width: 240px;
-      margin-bottom: 0;
     }
 
     .pen-chapter__bar p {
@@ -1769,9 +1741,10 @@ const faqs: Faq[] = [
       font-size: 19px;
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
     .pen-chapter__content {
-      flex: 1;
-      padding-left: 0;
+      padding-left: calc(56px + var(--pen-shift, 0px));
+      max-width: 880px;
     }
 
     .pen-chapter__content--single {
@@ -1790,43 +1763,15 @@ const faqs: Faq[] = [
       font-size: 28px;
     }
 
-    .pen-chapter__top {
-      gap: 60px;
-    }
-
-    .pen-chapter--castka .pen-chapter__lead-col,
-    .pen-chapter--prijem .pen-chapter__lead-col,
-    .pen-chapter--zdroje .pen-chapter__lead-col,
-    .pen-chapter--role .pen-chapter__lead-col,
-    .pen-chapter--vyuziti .pen-chapter__lead-col {
-      width: 540px;
-    }
-
-    .pen-chapter--kontrola .pen-chapter__content {
-      flex-direction: row;
-      justify-content: space-between;
-      gap: 60px;
-    }
-
-    .pen-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .pen-chapter__support-col {
-      flex: 1;
-    }
-
     .pen-navaznost {
       font-size: 36px;
       margin-top: 48px;
     }
 
+    /* Řádek „název | text“ zůstává dvousloupcový jako na tabletu, levá
+       kolona úměrně širší k větší velikosti názvu (22–26 px místo 20). */
     .pen-rows__row {
-      grid-template-columns: 1fr;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+      grid-template-columns: 300px 1fr;
       padding: 16px 0;
     }
 
@@ -1840,14 +1785,6 @@ const faqs: Faq[] = [
 
     .pen-h2--prubeh {
       max-width: 600px;
-    }
-
-    .pen-steps {
-      max-width: 600px;
-    }
-
-    .pen-step {
-      padding-left: 56px;
     }
 
     .pen-step__marker {
@@ -1869,13 +1806,6 @@ const faqs: Faq[] = [
 
     .pen-faq {
       max-width: 900px;
-    }
-
-    .pen-faq__row {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      column-gap: 56px;
-      align-items: baseline;
     }
 
     .pen-faq dt {
@@ -1943,6 +1873,11 @@ const faqs: Faq[] = [
       padding-left: calc(76px + var(--pen-shift, 0px));
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .pen-chapter__content {
+      padding-left: calc(76px + var(--pen-shift, 0px));
+    }
+
     .pen-hero {
       padding: 120px 100px 90px;
     }
@@ -1979,11 +1914,6 @@ const faqs: Faq[] = [
 
     .pen-chapter {
       padding: 88px 100px;
-      gap: 56px;
-    }
-
-    .pen-chapter__bar {
-      width: 240px;
     }
 
     .pen-chapter__bar p {
@@ -2006,15 +1936,6 @@ const faqs: Faq[] = [
       font-size: 30px;
     }
 
-    .pen-chapter--castka .pen-chapter__lead-col,
-    .pen-chapter--prijem .pen-chapter__lead-col,
-    .pen-chapter--zdroje .pen-chapter__lead-col,
-    .pen-chapter--role .pen-chapter__lead-col,
-    .pen-chapter--vyuziti .pen-chapter__lead-col,
-    .pen-chapter__lead-col {
-      width: 600px;
-    }
-
     .pen-navaznost {
       font-size: 40px;
     }
@@ -2028,10 +1949,6 @@ const faqs: Faq[] = [
     }
 
     .pen-h2--prubeh {
-      max-width: 640px;
-    }
-
-    .pen-steps {
       max-width: 640px;
     }
 

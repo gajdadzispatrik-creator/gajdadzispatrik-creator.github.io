@@ -216,7 +216,7 @@ const navLinks = [
 
     .site-header__inner {
       height: clamp(72px, calc(72px + 0.037594 * (100vw - 834px)), 92px);
-      padding-inline: clamp(40px, calc(40px + 0.105263 * (100vw - 834px)), 96px);
+      padding-inline: calc(40 * 100% / 834); /* logo na stejné svislé jako nadpis hero a linka (40 px na 834, úměrně šířce), 4. 10. 2026 */
     }
 
     .nav-cta {

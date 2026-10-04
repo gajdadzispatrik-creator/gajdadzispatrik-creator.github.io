@@ -1647,6 +1647,7 @@ const faqs: Faq[] = [
   @media (min-width: 768px) and (max-width: 1199px) {
     .fp-hero {
       padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       /* Místo pod tlačítky pro oblouk linky (ohyb 40 px pod textem). */
       padding-bottom: 64px;
     }
@@ -1675,28 +1676,6 @@ const faqs: Faq[] = [
 
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
-    /* Dva sloupce vedle sebe (dřív už od tabletu, teď od notebooku). */
-    .fp-chapter__top {
-      max-width: none;
-    }
-
-    .fp-chapter__content--souvislosti .fp-chapter__top {
-      max-width: none;
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-    }
-
-    .fp-chapter__content--souvislosti .fp-chapter__lead-col {
-      flex: none;
-      width: 300px;
-    }
-
-    .fp-chapter__content--souvislosti .fp-chapter__support-col {
-      flex: 1;
-    }
-
     .fp__route-svg--tablet {
       display: none;
     }
@@ -1741,16 +1720,6 @@ const faqs: Faq[] = [
 
     .fp-chapter {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      /* 56px — stejná hodnota jako `hypoteky.astro` (bar↔obsah). */
-      gap: 56px;
-    }
-
-    .fp-chapter__bar {
-      flex: none;
-      width: 240px;
-      margin-bottom: 0;
     }
 
     .fp-chapter__bar p {
@@ -1761,12 +1730,19 @@ const faqs: Faq[] = [
       font-size: 19px;
     }
 
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, vzor `sluzby.astro`): popisek u tečky
+     * nahoře, pod ním obsah pod sebou (nadpis → text → seznam/řádky), jen
+     * s desktopovými velikostmi. Dřív byl popisek vlevo (240px sloupec)
+     * a obsah ve sloupcích vedle sebe. Obsah začíná pod textem popisku
+     * (osa + zářez + mezera), šířka omezená kvůli čitelnosti. Řádky
+     * Priority/Propojení zůstávají dvousloupcové (250px | text) jako na
+     * tabletu.
+     */
     .fp-chapter__content {
-      flex: 1;
-      padding-left: 0;
-    }
-
-    .fp-chapter__content--single {
+      padding-left: calc(56px + var(--fp-shift, 0px));
+      max-width: 880px;
       gap: 40px;
     }
 
@@ -1799,52 +1775,9 @@ const faqs: Faq[] = [
       margin-top: 48px;
     }
 
+    /* Souvislosti: `.fp-chain` nese vlastní margin (jediný zdroj mezery). */
     .fp-chapter__content--souvislosti {
-      display: flex;
-      flex-direction: column;
       gap: 0;
-    }
-
-    .fp-chapter__content--souvislosti .fp-chapter__top {
-      display: flex;
-      align-items: flex-start;
-      gap: 60px;
-    }
-
-    .fp-chapter__content--souvislosti .fp-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .fp-chapter__content--souvislosti .fp-chapter__support-col {
-      flex: 1;
-    }
-
-    /* Priority/Propojení: lead-col pevná šířka, řádky vpravo — stejný
-       rozpad (540/gap 60) jako `hypoteky.astro`'s `.hyp-chapter__content`. */
-    .fp-chapter--priority .fp-chapter__content,
-    .fp-chapter--propojeni .fp-chapter__content {
-      flex-direction: row;
-      justify-content: space-between;
-      gap: 60px;
-    }
-
-    .fp-chapter--priority .fp-chapter__lead-col,
-    .fp-chapter--propojeni .fp-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .fp-rows {
-      flex: 1;
-    }
-
-    .fp-rows__row {
-      grid-template-columns: 1fr;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      padding: 16px 0;
     }
 
     .fp-rows--priority .fp-rows__name,
@@ -1852,32 +1785,8 @@ const faqs: Faq[] = [
       font-size: 22px;
     }
 
-    /* Situace: lead-col vlevo, seznam vpravo. */
-    .fp-chapter--situace .fp-chapter__content {
-      flex-direction: row;
-      justify-content: space-between;
-      gap: 60px;
-    }
-
-    .fp-chapter--situace .fp-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .fp-chapter--situace .fp-chapter__support-col {
-      flex: 1;
-    }
-
-    /* Průběh: max-width sloupce, kotva/spojnice s většími hodnotami
-       (stejný princip jako hypoteky.astro's Průběh). */
-    .fp-h2--prubeh {
-      max-width: 600px;
-    }
-
-    .fp-steps {
-      max-width: 600px;
-    }
-
+    /* Průběh: kotva/spojnice s většími hodnotami (stejný princip jako
+       hypoteky.astro's Průběh); šířku drží `max-width` kapitoly. */
     .fp-step {
       padding-left: 56px;
     }
@@ -1899,32 +1808,7 @@ const faqs: Faq[] = [
       font-size: 24px;
     }
 
-    .fp-chapter--faq .fp-chapter__content {
-      max-width: 900px;
-    }
-
-    .fp-chapter--rozsah .fp-chapter__content {
-      flex-direction: row;
-      justify-content: space-between;
-      gap: 60px;
-    }
-
-    .fp-chapter--rozsah .fp-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .fp-faq {
-      max-width: 900px;
-    }
-
-    .fp-faq__row {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      column-gap: 56px;
-      align-items: baseline;
-    }
-
+    /* Otázky: otázka nad odpovědí jako na tabletu (gap 14 px z base). */
     .fp-faq dt {
       font-size: 22px;
     }
@@ -1990,6 +1874,11 @@ const faqs: Faq[] = [
       padding-left: calc(76px + var(--fp-shift, 0px));
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .fp-chapter__content {
+      padding-left: calc(76px + var(--fp-shift, 0px));
+    }
+
     .fp-hero {
       padding: 120px 100px 90px;
     }
@@ -2026,11 +1915,6 @@ const faqs: Faq[] = [
 
     .fp-chapter {
       padding: 88px 100px;
-      gap: 56px;
-    }
-
-    .fp-chapter__bar {
-      width: 240px;
     }
 
     .fp-chapter__bar p {
@@ -2070,28 +1954,9 @@ const faqs: Faq[] = [
       margin-top: 48px;
     }
 
-    .fp-chapter__content--souvislosti .fp-chapter__lead-col {
-      width: 600px;
-    }
-
-    .fp-chapter--priority .fp-chapter__lead-col,
-    .fp-chapter--propojeni .fp-chapter__lead-col,
-    .fp-chapter--situace .fp-chapter__lead-col,
-    .fp-chapter--rozsah .fp-chapter__lead-col {
-      width: 600px;
-    }
-
     .fp-rows--priority .fp-rows__name,
     .fp-rows--areas .fp-rows__name {
       font-size: 24px;
-    }
-
-    .fp-h2--prubeh {
-      max-width: 640px;
-    }
-
-    .fp-steps {
-      max-width: 640px;
     }
 
     .fp-faq dt {

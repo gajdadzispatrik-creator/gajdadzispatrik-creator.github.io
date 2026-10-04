@@ -25,6 +25,7 @@ npm run check:layout # automatická kontrola pravidel z „Konvence" níže (vy�
 npm run check:typo   # kontrola zalamování řádků v textu (vyžaduje běžící npm run dev)
 npm run check:dots   # velikost teček, délka zářezů a mezera k textu (vyžaduje běžící npm run dev)
 npm run check:spacing # mezery nadpis → text a konce sekcí na všech stránkách (vyžaduje běžící npm run dev)
+# Po úpravě jedné stránky stačí: ONLY=/o-mne npm run check:dots (totéž check:spacing)
 ```
 
 `check:spacing` (`scripts/check-spacing.mjs`, od 4. 10. 2026) měří na
@@ -377,6 +378,27 @@ stránky (odkazy od homepage) na 17 šířkách a změří každou tečku, zář
 mezeru k textu, svislou polohu tečky vůči prvnímu řádku textu vedle ní
 a levou hranu textu pod tečkou. **Spusť ho po každé úpravě trasy nebo nové sekci/stránce
 s tečkami** — teprve s 0 nálezy je hotovo.
+
+## Konvence: schválené šířky 375 a 768 jako vzor pro celý stupeň
+
+Doplněno 4. 10. 2026 — uživatel schválil mobil na **375 × 812** a tablet na
+**768 × 1024**. Ostatní šířky stupně (mobil 320–767, tablet 768–1199) mají
+z nich vycházet: **mezery, rozestupy a pravidla (tečky, zářezy, nadpis →
+text, konce sekcí) stejné jako na schválené šířce.**
+
+- **Plynulé zvětšování je v pořádku a záměrné** — hero (nadpis, výška,
+  fotka) a hlavička na tabletu rostou `clamp(…, calc(… + k * (100vw -
+  834px)), …)` směrem k notebooku, aby přechod mezi zařízeními neskákal.
+  Nezamrazovat na pevné px (zkusilo se 4. 10. 2026 a uživatel to vrátil:
+  „chtěl jsem, ať se to zvětšuje normálně, jen mezery ať vychází
+  z odsouhlasených“).
+- Co se zvětšovat NEMÁ: mezery mezi položkami jen proto, že se text na
+  širším okně zalomí na méně řádků. Položky na lince s pevnými pozicemi
+  (Rozcestník, Proces na mobilu) se proto řadí v JS podle skutečné výšky
+  textu s pevnou mezerou (`layoutMobileAreas`, `layoutMobileSteps`) —
+  pevné `--y` platí jen jako výchozí stav bez JS.
+- Kontrola: porovnat stránky na šířkách stupně se schválenou šířkou
+  (mezery mezi bloky, přetečení, překryvy) + `check:spacing`.
 
 ## Konvence: běžný text nikdy pod 16px
 

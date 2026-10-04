@@ -1608,6 +1608,7 @@ const areas: Area[] = [
   @media (min-width: 768px) and (max-width: 1199px) {
     .sluzby-hero {
       padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       /* Tlačítka → první popisek 216 px jako na ostatních podstránkách
          (136 + padding rozcestníku 80). */
       padding-bottom: 136px;
@@ -1687,45 +1688,26 @@ const areas: Area[] = [
       margin-top: 4px;
     }
 
+    /*
+     * Rozcestník, kapitoly a Další oblasti mají od 4. 10. 2026 na notebooku
+     * i desktopu STEJNÉ rozložení jako tablet (přání uživatele): popisek
+     * u tečky nahoře, pod ním obsah pod sebou (nadpis → text → odkaz), jen
+     * s desktopovými velikostmi. Dřív byl popisek vlevo a obsah ve sloupcích
+     * vedle sebe. Obsah začíná pod textem popisku (osa + zářez + mezera),
+     * šířka textu omezená kvůli čitelnosti dlouhých řádků.
+     */
     .sluzby-router {
       padding: 80px 96px 0;
-      display: flex;
-      align-items: flex-start;
-      gap: 48px;
     }
 
-    .sluzby-router__bar {
-      flex: none;
-      width: 180px;
+    .sluzby-router__list,
+    .sluzby-chapter__content,
+    .sluzby-areas__columns {
+      padding-left: calc(56px + var(--sluzby-shift, 0px));
     }
 
     .sluzby-router__list {
-      flex: 1;
-      margin-top: 0;
-      padding-left: 0;
-    }
-
-    .sluzby-router__row {
-      grid-template-columns: 340px 1fr;
-      grid-template-areas: 'situace desc' 'target desc';
-      column-gap: 48px;
-      row-gap: 5px;
-      align-items: baseline;
-    }
-
-    /*
-     * Notebook+ (1200px): `.sluzby-router` je od tohoto stupně řádek vedle
-     * sebe (`.sluzby-router__bar` a `.sluzby-router__list`, `align-items:
-     * flex-start`) — beze zvláštního zásahu by první nadpis seznamu
-     * („Chci řešit bydlení“) seděl o `.sluzby-router__row`'s vlastní
-     * `padding-top` (22px) níž než nadpis pruhu („Začněte tím, co právě
-     * řešíte.“), přestože oba mají stejný horní okraj kontejneru — zjištěno
-     * 26. 8. 2026 na screenshotu uživatele. První řádek proto dostává
-     * `padding-top: 0`, aby jeho nadpis začínal na stejné výšce jako pruh;
-     * ostatní řádky pod ním pokračují v původním rozestupu beze změny.
-     */
-    .sluzby-router__list li:first-child .sluzby-router__row {
-      padding-top: 0;
+      max-width: 880px;
     }
 
     .sluzby-router__situation {
@@ -1743,36 +1725,14 @@ const areas: Area[] = [
     .sluzby-chapter--dominant {
       margin-top: 100px;
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 48px;
     }
 
     .sluzby-chapter--plan {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 48px;
-    }
-
-    .sluzby-chapter__bar {
-      flex: none;
-      width: 180px;
-      margin-bottom: 0;
     }
 
     .sluzby-chapter__content {
-      flex: 1;
-      flex-direction: row;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 60px;
-      padding-left: 0;
-    }
-
-    .sluzby-chapter__lead-col {
-      flex: none;
-      width: 540px;
+      max-width: 880px;
     }
 
     .sluzby-chapter__lead-col h2 {
@@ -1783,67 +1743,28 @@ const areas: Area[] = [
       font-size: 44px;
     }
 
-    .sluzby-chapter__list-col {
-      flex: 1;
-    }
-
-    .sluzby-chapter--plan .sluzby-chapter__content {
-      border-top: none;
-    }
-
-    .sluzby-chapter--plan .sluzby-chapter__statement-col {
-      flex: 1;
-      padding-top: 8px;
-    }
-
     .sluzby-chapter__statement {
       font-size: 34px;
     }
 
     .sluzby-areas {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 48px;
-    }
-
-    .sluzby-areas__bar {
-      flex: none;
-      width: 180px;
-      margin-bottom: 0;
     }
 
     .sluzby-areas__bar p {
       font-size: 26px;
     }
 
+    /* Tři oblasti vedle sebe (na tabletu 2 + 1) — bez dělicích čar jako tablet. */
     .sluzby-areas__columns {
-      flex: 1;
-      display: flex;
-      flex-direction: row;
-      gap: 48px;
-      padding-left: 0;
-    }
-
-    .sluzby-areas__col {
-      flex: 1;
-      border-top: none;
-      padding: 0;
-    }
-
-    .sluzby-areas__col:not(:last-child) {
-      border-right: 1px solid rgba(27, 74, 138, .14);
-      padding-right: 48px;
-    }
-
-    .sluzby-areas__col:nth-child(2) {
-      padding-left: 0;
-      border-right: 1px solid rgba(27, 74, 138, .14);
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: 48px;
     }
 
     .sluzby-areas__col:nth-child(3) {
+      grid-column: auto;
       max-width: none;
-      padding-left: 0;
+      padding-top: 0;
     }
 
     .sluzby-areas__col h2 {
@@ -1941,6 +1862,13 @@ const areas: Area[] = [
       padding-left: calc(76px + var(--sluzby-shift, 0px));
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .sluzby-router__list,
+    .sluzby-chapter__content,
+    .sluzby-areas__columns {
+      padding-left: calc(76px + var(--sluzby-shift, 0px));
+    }
+
     .sluzby-hero {
       padding: 120px 100px 90px;
       gap: 80px;
@@ -1974,10 +1902,6 @@ const areas: Area[] = [
       padding: 96px 100px 0;
     }
 
-    .sluzby-router__bar {
-      width: 240px;
-    }
-
     .sluzby-chapter--dominant {
       margin-top: 120px;
       padding: 88px 100px;
@@ -1985,14 +1909,6 @@ const areas: Area[] = [
 
     .sluzby-chapter--plan {
       padding: 88px 100px;
-    }
-
-    .sluzby-chapter__bar {
-      width: 240px;
-    }
-
-    .sluzby-chapter__lead-col {
-      width: 600px;
     }
 
     .sluzby-chapter__lead-col h2 {
@@ -2005,10 +1921,6 @@ const areas: Area[] = [
 
     .sluzby-areas {
       padding: 88px 100px;
-    }
-
-    .sluzby-areas__bar {
-      width: 240px;
     }
 
     .sluzby-areas__bar p {

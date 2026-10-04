@@ -187,6 +187,54 @@ const steps = [
   const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
 
   const section = document.querySelector('.process');
+
+  /*
+   * Mobil: kroky jdou za sebou s pevnou mezerou podle skutečné výšky textu
+   * (box kroku → další krok 60 px, poslední krok → tlačítko 56 px, tlačítko →
+   * konec sekce 72 px — hodnoty schváleného mobilu 375 px, 4. 10. 2026).
+   * Pevné --y z CSS platí jen na 360–430 px; na širším telefonu se popisky
+   * vejdou na jeden řádek a mezery rostly (~85 px), na 320 px se zmenšily.
+   * Tečka (--y) leží na prvním řádku názvu (--oy), osa a viewBox se
+   * prodlužují spolu se sekcí (svislé měřítko trasy zůstává 1).
+   */
+  const processMobile = section?.querySelector<SVGSVGElement>('.process__route--mobile');
+  const layoutMobileSteps = () => {
+    if (!section || !processMobile) return;
+    const stepEls = Array.from(section.querySelectorAll<HTMLElement>('.process__step'));
+    const ctaEl = section.querySelector<HTMLElement>('.process__cta');
+    if (getComputedStyle(processMobile).display === 'none') {
+      stepEls.forEach((el) => el.style.removeProperty('--y'));
+      ctaEl?.style.removeProperty('top');
+      (section as HTMLElement).style.removeProperty('height');
+      return;
+    }
+    const STEP_GAP = 60;
+    const CTA_GAP = 56;
+    const END_GAP = 72;
+    let bottom = 0;
+    stepEls.forEach((el, i) => {
+      const oy = parseFloat(getComputedStyle(el).getPropertyValue('--oy')) || 0;
+      let y = parseFloat(getComputedStyle(el).getPropertyValue('--y')) || 0;
+      if (i > 0) {
+        y = bottom + STEP_GAP - oy;
+        el.style.setProperty('--y', String(y));
+      }
+      processMobile.querySelector(`.process__dot--pos-${i + 1}`)?.setAttribute('cy', String(y));
+      bottom = el.offsetTop + el.offsetHeight;
+    });
+    if (!ctaEl) return;
+    ctaEl.style.top = `${bottom + CTA_GAP}px`;
+    const height = Math.round(bottom + CTA_GAP + ctaEl.offsetHeight + END_GAP);
+    (section as HTMLElement).style.height = `${height}px`;
+    processMobile.setAttribute('viewBox', `0 0 390 ${height}`);
+    processMobile.querySelector('.process__route-path')?.setAttribute('d', `M 24 -20 V ${height}`);
+  };
+  if (section) {
+    layoutMobileSteps();
+    document.fonts.ready.then(layoutMobileSteps);
+    window.addEventListener('resize', layoutMobileSteps);
+  }
+
   if (section && !disableAnimation) {
     const activeSvg = Array.from(section.querySelectorAll('.process__route')).find(
       (svg) => getComputedStyle(svg).display !== 'none'

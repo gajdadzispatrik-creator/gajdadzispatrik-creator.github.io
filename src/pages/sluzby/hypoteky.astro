@@ -1739,6 +1739,7 @@ const faqs: Faq[] = [
   @media (min-width: 768px) and (max-width: 1199px) {
     .hyp-hero {
       padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       /* Místo pod tlačítky pro oblouk linky (ohyb 40 px pod textem). */
       padding-bottom: 64px;
     }
@@ -1780,8 +1781,18 @@ const faqs: Faq[] = [
       padding-left: calc(56px + var(--hyp-shift, 0px));
     }
 
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, vzor `sluzby.astro`): popisek u tečky
+     * nahoře, pod ním obsah pod sebou (nadpis → text → seznam/řádky), jen
+     * s desktopovými velikostmi. Dřív byl popisek vlevo (240px sloupec)
+     * a obsah ve sloupcích vedle sebe. Obsah začíná pod textem popisku
+     * (osa + zářez + mezera), šířka omezená kvůli čitelnosti.
+     */
     .hyp-chapter__content {
-      padding-left: 0;
+      padding-left: calc(56px + var(--hyp-shift, 0px));
+      max-width: 880px;
+      gap: 40px;
     }
 
     .hyp-hero__text {
@@ -1815,58 +1826,6 @@ const faqs: Faq[] = [
 
     .hyp-chapter {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 56px;
-    }
-
-    /*
-     * OPRAVA 1. 9. 2026: 180px (§7 zadání) je pro jednoslovné popisky
-     * „Rozhodnutí"/„Souvislosti" příliš úzké — `<p>` je flex potomek
-     * (align-self:stretch), takže se text nezalomí (jde o JEDNO slovo bez
-     * mezery, kde se zalomit), místo toho PŘETEČE za hranici sloupce a
-     * sežere mezeru ke sloupci obsahu (56px klesne na ~26px, uživatel to
-     * nahlásil jako „text namačkaný"). Sjednoceno na 240px — stejná
-     * hodnota jako `.sluzby-chapter__bar`/`.sluzby-areas__bar` na
-     * `/sluzby` (tam už ověřeno bezpečné i pro nejdelší popisek „Finanční
-     * plán", reálná mezera ≥59px na všech čtyřech pruzích).
-     */
-    .hyp-chapter__bar {
-      flex: none;
-      width: 240px;
-      margin-bottom: 0;
-    }
-
-    .hyp-chapter__content {
-      flex: 1;
-      flex-direction: row;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 60px;
-    }
-
-    /* OPRAVA: `display:block` tu dřív zahodilo `gap` z base pravidla
-       `.hyp-chapter__content { display:flex; ...; gap:32px }` — úvodní
-       blok (Oblasti/Průběh) pak seděl přímo nalepený na navazující seznam
-       bez jakékoli mezery („text na sobě namačkaný"). Zůstává flex column,
-       jen s vlastní větší mezerou (oddělení dvou různých bloků, ne jen
-       nadpis→odstavec). */
-    .hyp-chapter__content--single {
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
-    }
-
-    /*
-     * OPRAVA 1. 9. 2026 (uživatel: chce raději „roztáhlejší" styl, jako má
-     * `/sluzby` — 540px notebook / 600px desktop, ne 340px). Platí jednotně
-     * pro všechny kapitoly (dvousloupcové i `--single`) — samostatný,
-     * užší override pro `.hyp-chapter__content--single .hyp-chapter__lead-col`
-     * byl proto odstraněn, Oblasti teď dědí stejnou šířku jako ostatní.
-     */
-    .hyp-chapter__lead-col {
-      flex: none;
-      width: 540px;
     }
 
     .hyp-h2--faze {
@@ -1881,23 +1840,13 @@ const faqs: Faq[] = [
       font-size: 40px;
     }
 
-    .hyp-chapter__list-col {
-      flex: 1;
-    }
-
+    /* Pod sebou je mezera k bloku nad ním jen z `gap` rodiče (jeden zdroj). */
     .hyp-chapter__statement-col {
-      flex: 1;
-      padding-top: 8px;
+      padding-top: 0;
     }
 
     .hyp-chapter__statement {
       font-size: 30px;
-    }
-
-    /* Fáze: lead-col (340px) + seznam fází (flex:1), gap 64px — vlastní
-       hodnota nezávislá na obecném `.hyp-chapter__content` gapu 60px. */
-    .hyp-chapter__content--faze {
-      gap: 64px;
     }
 
     .hyp-phase h3 {
@@ -1908,14 +1857,7 @@ const faqs: Faq[] = [
       font-size: 30px;
     }
 
-    /* Oblasti: řádky jako grid 340px (název) + 1fr (popis). */
-    .hyp-areas__row {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      gap: 0 32px; /* dřív column-gap + gap: 0 = mezera 0 (4. 10. 2026) */
-      align-items: baseline;
-    }
-
+    /* Oblasti: název nad popisem jako na tabletu (gap 14 px z base). */
     .hyp-areas__name {
       font-size: 24px;
     }
@@ -1924,27 +1866,12 @@ const faqs: Faq[] = [
       font-size: 17px;
     }
 
-    /*
-     * OPRAVA 1. 9. 2026 (uživatel si všiml, že sloupce na stránce nesedí) —
-     * `#steps-heading` (Průběh) není zabalený v `.hyp-chapter__lead-col`
-     * (má vlastní H2 mimo něj, sdílí sloupec se seznamem kroků), takže
-     * neměl ŽÁDNÝ strop šířky a táhl se přes celou šířku obsahu (799px) —
-     * širší než vlastní obsah pod ním (`.hyp-steps`, 640px). Sjednoceno na
-     * stejnou šířku jako `.hyp-steps`, aby nadpis a jeho vlastní obsah
-     * sdílely stejnou pravou hranu (640px zůstává i po přechodu ostatních
-     * kapitol na „roztáhlejší" styl — je to prakticky stejná šířka jako
-     * jejich 600px na desktopu).
-     */
-    #steps-heading {
-      max-width: 640px;
-    }
-
     /* Průběh: kotva top:15px (účaří nadpisu), osa odbočky 56px vlevo od
        textu, spojnice bottom: -(mezera 44 + odsazení 15) = -59px — `gap`
        MUSÍ být přesně 44px, jinak spojnice nedosáhne (nebo přesáhne) střed
-       následující kotvy. */
+       následující kotvy. Šířku nadpisu i kroků drží `max-width` kapitoly
+       (880px) jako na tabletu, žádný vlastní strop. */
     .hyp-steps {
-      max-width: 640px;
       gap: 44px;
     }
 
@@ -1974,18 +1901,7 @@ const faqs: Faq[] = [
       font-size: 19px;
     }
 
-    /* Otázky: otázka vlevo 340px / odpověď vpravo. */
-    .hyp-faq {
-      max-width: 900px;
-    }
-
-    .hyp-faq__row {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      column-gap: 56px;
-      align-items: baseline;
-    }
-
+    /* Otázky: otázka nad odpovědí jako na tabletu (gap 14 px z base). */
     .hyp-faq dt {
       font-size: 22px;
     }
@@ -2054,6 +1970,11 @@ const faqs: Faq[] = [
       padding-left: calc(76px + var(--hyp-shift, 0px));
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .hyp-chapter__content {
+      padding-left: calc(76px + var(--hyp-shift, 0px));
+    }
+
     .hyp-hero {
       padding: 120px 100px 90px;
     }
@@ -2091,9 +2012,6 @@ const faqs: Faq[] = [
       padding: 88px 100px;
     }
 
-    /* `.hyp-chapter__bar` width beze změny (240px, zděděno z notebooku
-       výš) — sjednoceno na obou stupních, viz oprava tam. */
-
     .hyp-h2--faze {
       font-size: 56px;
     }
@@ -2104,11 +2022,6 @@ const faqs: Faq[] = [
 
     .hyp-h2--context {
       font-size: 44px;
-    }
-
-    /* Sjednoceno s /sluzby (600px desktop, „roztáhlejší" styl, 1. 9. 2026). */
-    .hyp-chapter__lead-col {
-      width: 600px;
     }
 
     .hyp-chapter__statement {

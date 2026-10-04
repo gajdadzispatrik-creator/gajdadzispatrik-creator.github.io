@@ -224,13 +224,36 @@ const areas = [
    */
   const mobileAxis = section?.querySelector<SVGSVGElement>('.router__axis--mobile');
   const lastArea = section?.querySelector<HTMLElement>('.router__area--pos-5');
+  /*
+   * Oblasti jdou za sebou s pevnou mezerou podle skutečné výšky textu (box
+   * oblasti → další oblast 75 px po dominantě, jinak 40 px — hodnoty
+   * schváleného mobilu 375 px, 4. 10. 2026). Pevné --y z CSS platí jen na
+   * 360–430 px: na širším telefonu mezera po dominantě rostla na 100 px, na
+   * 320 px se dlouhý popisek přiblížil další oblasti na 16 px. Tečka (--y)
+   * leží na prvním řádku názvu (--oy).
+   */
+  const AREA_GAPS = [75, 40, 40, 40];
+  const areaEls = section ? Array.from(section.querySelectorAll<HTMLElement>('.router__area')) : [];
+  const layoutMobileAreas = (mobile: boolean) => {
+    areaEls.forEach((el, i) => {
+      if (!mobile) { el.style.removeProperty('--y'); return; }
+      if (i === 0) return;
+      const prev = areaEls[i - 1];
+      const oy = parseFloat(getComputedStyle(el).getPropertyValue('--oy')) || 0;
+      const y = prev.offsetTop + prev.offsetHeight + AREA_GAPS[i - 1] - oy;
+      el.style.setProperty('--y', String(y));
+      mobileAxis?.querySelector(`.router__dot--pos-${i + 1}`)?.setAttribute('cy', String(y));
+    });
+  };
   const syncMobileHeight = () => {
     if (!section || !mobileAxis || !lastArea) return;
     if (getComputedStyle(mobileAxis).display === 'none') {
+      layoutMobileAreas(false);
       section.style.removeProperty('height');
       return;
     }
-    const height = Math.round(lastArea.getBoundingClientRect().bottom - section.getBoundingClientRect().top + 72);
+    layoutMobileAreas(true);
+    const height = Math.round(lastArea.offsetTop + lastArea.offsetHeight + 72);
     section.style.height = `${height}px`;
     mobileAxis.setAttribute('viewBox', `0 0 390 ${height}`);
     mobileAxis.querySelector('.router__axis-path')?.setAttribute('d', `M 24 -20 V ${height}`);

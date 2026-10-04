@@ -1486,6 +1486,7 @@ const ARTICLES_PAGE_SIZE = 6;
   @media (min-width: 768px) and (max-width: 1199px) {
     .cla-hero {
       padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       /* Místo pod tlačítky pro oblouk linky (ohyb 40 px pod textem). */
       padding-bottom: 64px;
     }
@@ -1514,27 +1515,22 @@ const ARTICLES_PAGE_SIZE = 6;
 
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
-    /* Dva sloupce vedle sebe (dřív už od tabletu, teď od notebooku). */
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, vzor /sluzby): popisek u tečky nahoře,
+     * pod ním obsah pod sebou (nadpis → text → výpis/odkaz), jen
+     * s desktopovými velikostmi. Dřív byl popisek vlevo (240 px), nadpis
+     * s textem ve dvou sloupcích vedle sebe a řádek článku jako mřížka
+     * kategorie | titulek. Obsah začíná pod textem popisku, šířka omezená
+     * kvůli čitelnosti dlouhých řádků.
+     */
     .cla-chapter__top {
       max-width: none;
     }
 
-    .cla-chapter__top {
-      max-width: none;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-    }
-
-    .cla-chapter--clanky .cla-chapter__lead-col,
-    .cla-chapter--sluzby .cla-chapter__lead-col {
-      flex: none;
-      width: 300px;
-    }
-
-    .cla-chapter--clanky .cla-chapter__support-col,
-    .cla-chapter--sluzby .cla-chapter__support-col {
-      flex: 1;
+    .cla-chapter__content {
+      padding-left: calc(56px + var(--cla-shift, 0px));
+      max-width: 880px;
     }
 
     .cla__route-svg--tablet {
@@ -1581,24 +1577,10 @@ const ARTICLES_PAGE_SIZE = 6;
 
     .cla-chapter {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 56px;
-    }
-
-    .cla-chapter__bar {
-      flex: none;
-      width: 240px;
-      margin-bottom: 0;
     }
 
     .cla-chapter__bar p {
       font-size: 24px;
-    }
-
-    .cla-chapter__content {
-      flex: 1;
-      padding-left: 0;
     }
 
     .cla-h2--dominant {
@@ -1607,59 +1589,6 @@ const ARTICLES_PAGE_SIZE = 6;
 
     .cla-h2--std {
       font-size: 44px;
-    }
-
-    .cla-chapter__top {
-      gap: 60px;
-    }
-
-    .cla-chapter--clanky .cla-chapter__lead-col,
-    .cla-chapter--sluzby .cla-chapter__lead-col {
-      width: 540px;
-    }
-
-    .cla-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .cla-chapter__support-col {
-      flex: 1;
-    }
-
-    /* Řádkový výpis: vlevo kategorie+datum, vpravo titulek+perex — stejný
-       vzor jako `.rec-review` na /recenze (pevný levý sloupec + 1fr),
-       stacked na tabletu/mobilu (pořadí titulek → perex → metadata,
-       zadání §11), přepnuto na dvousloupcový grid až tady. */
-    .cla-article {
-      display: grid;
-      grid-template-columns: 200px 1fr;
-      column-gap: 40px;
-      align-items: start;
-    }
-
-    .cla-article__meta {
-      grid-column: 1;
-      order: 2;
-    }
-
-    .cla-article__body,
-    .cla-article__placeholder {
-      grid-column: 2;
-      order: 1;
-    }
-
-    .cla-article--featured {
-      display: flex;
-    }
-
-    .cla-article--featured .cla-article__meta {
-      order: 1;
-    }
-
-    .cla-article--featured .cla-article__body,
-    .cla-article--featured .cla-article__placeholder {
-      order: 2;
     }
 
     .cla-empty__text {
@@ -1723,6 +1652,11 @@ const ARTICLES_PAGE_SIZE = 6;
       padding-left: calc(76px + var(--cla-shift, 0px));
     }
 
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .cla-chapter__content {
+      padding-left: calc(76px + var(--cla-shift, 0px));
+    }
+
     .cla-hero {
       padding: 120px 100px 90px;
     }
@@ -1754,11 +1688,6 @@ const ARTICLES_PAGE_SIZE = 6;
 
     .cla-chapter {
       padding: 88px 100px;
-      gap: 56px;
-    }
-
-    .cla-chapter__bar {
-      width: 240px;
     }
 
     .cla-chapter__bar p {
@@ -1771,17 +1700,6 @@ const ARTICLES_PAGE_SIZE = 6;
 
     .cla-h2--std {
       font-size: 48px;
-    }
-
-    .cla-chapter--clanky .cla-chapter__lead-col,
-    .cla-chapter--sluzby .cla-chapter__lead-col,
-    .cla-chapter__lead-col {
-      width: 600px;
-    }
-
-    .cla-article {
-      grid-template-columns: 240px 1fr;
-      column-gap: 48px;
     }
 
     .cla-closing {

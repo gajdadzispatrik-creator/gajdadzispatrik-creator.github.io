@@ -1549,7 +1549,7 @@ const faqs: Faq[] = [
 
     /* Na tabletu nadpis kapitoly NAD textem přes celou šířku (ne dva sloupce
        vedle sebe) — stejně jako /o-mne (28. 9. 2026, přání uživatele).
-       Vedle sebe až od notebooku (pravidla přesunutá do bloku 1200+). */
+       Od 4. 10. 2026 platí totéž i na notebooku a desktopu (blok 1200+). */
     .pri-chapter__top {
       max-width: 640px;
     }
@@ -1675,6 +1675,7 @@ const faqs: Faq[] = [
     .pri-hero {
       position: relative;
       padding: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px) 40px 0;
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
       min-height: clamp(656px, calc(656px + 0.255639 * (100vw - 834px)), 792px);
     }
 
@@ -1748,33 +1749,6 @@ const faqs: Faq[] = [
 
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
-    /* Dva sloupce vedle sebe (dřív už od tabletu, teď od notebooku). */
-    .pri-chapter__top {
-      max-width: none;
-    }
-
-    .pri-chapter__top {
-      max-width: none;
-      flex-direction: row;
-      align-items: flex-start;
-      gap: 40px;
-    }
-
-    .pri-chapter--vstup .pri-chapter__lead-col,
-    .pri-chapter--doporuceni .pri-chapter__lead-col,
-    .pri-chapter--realizace .pri-chapter__lead-col,
-    .pri-chapter--pece .pri-chapter__lead-col {
-      flex: none;
-      width: 300px;
-    }
-
-    .pri-chapter--vstup .pri-chapter__support-col,
-    .pri-chapter--doporuceni .pri-chapter__support-col,
-    .pri-chapter--realizace .pri-chapter__support-col,
-    .pri-chapter--pece .pri-chapter__support-col {
-      flex: 1;
-    }
-
     .pri__route-svg--tablet {
       display: none;
     }
@@ -1854,17 +1828,16 @@ const faqs: Faq[] = [
       padding: 88px 96px;
     }
 
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, stejně jako /sluzby): popisek u tečky
+     * nahoře, pod ním obsah pod sebou (nadpis → text → věta/kroky/otázky),
+     * jen s desktopovými velikostmi. Dřív byl popisek v úzkém sloupci vlevo
+     * a nadpis s textem ve dvou sloupcích vedle sebe. Obsah začíná pod
+     * textem popisku (osa + zářez + mezera), šířka omezená kvůli čitelnosti.
+     */
     .pri-chapter {
       padding: 88px 96px;
-      display: flex;
-      align-items: flex-start;
-      gap: 56px;
-    }
-
-    .pri-chapter__bar {
-      flex: none;
-      width: 240px;
-      margin-bottom: 0;
     }
 
     .pri-chapter__bar p {
@@ -1876,8 +1849,10 @@ const faqs: Faq[] = [
     }
 
     .pri-chapter__content {
-      flex: 1;
-      padding-left: 0;
+      padding-left: calc(56px + var(--pri-shift, 0px));
+      /* + posun osy: šířka textu zůstává stejná i nad --stage-max, kde
+         se obsah s osou posouvá doprava (jinak by se sloupec zužoval). */
+      max-width: calc(880px + var(--pri-shift, 0px));
     }
 
     .pri-chapter__content--single {
@@ -1897,32 +1872,8 @@ const faqs: Faq[] = [
       font-size: 28px;
     }
 
-    .pri-chapter__top {
-      gap: 60px;
-    }
-
-    .pri-chapter--vstup .pri-chapter__lead-col,
-    .pri-chapter--doporuceni .pri-chapter__lead-col,
-    .pri-chapter--realizace .pri-chapter__lead-col,
-    .pri-chapter--pece .pri-chapter__lead-col {
-      width: 540px;
-    }
-
-    .pri-chapter__lead-col {
-      flex: none;
-      width: 540px;
-    }
-
-    .pri-chapter__support-col {
-      flex: 1;
-    }
-
     .pri-steps {
       max-width: 600px;
-    }
-
-    .pri-step {
-      padding-left: 56px;
     }
 
     .pri-step__marker {
@@ -1946,17 +1897,7 @@ const faqs: Faq[] = [
       max-width: 600px;
     }
 
-    .pri-faq {
-      max-width: 900px;
-    }
-
-    .pri-faq__row {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      column-gap: 56px;
-      align-items: baseline;
-    }
-
+    /* Otázka nad odpovědí jako na tabletu (dřív dva sloupce vedle sebe). */
     .pri-faq dt {
       font-size: 22px;
     }
@@ -1965,19 +1906,12 @@ const faqs: Faq[] = [
       font-size: 17px;
     }
 
+    /* Věta + kulatý portrét vedle sebe jako na tabletu (row zděděný). */
     .pri-pece__closing {
-      flex-direction: row;
-      align-items: center;
       gap: 40px;
     }
 
-    .pri-pece__closing .pri-chapter__statement {
-      flex: 1;
-    }
-
     .pri-pece__photo {
-      display: block;
-      flex: none;
       width: 220px;
       height: 220px;
       border-radius: 50%;
@@ -2101,11 +2035,11 @@ const faqs: Faq[] = [
 
     .pri-chapter {
       padding: 88px 100px;
-      gap: 56px;
     }
 
-    .pri-chapter__bar {
-      width: 240px;
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .pri-chapter__content {
+      padding-left: calc(76px + var(--pri-shift, 0px));
     }
 
     .pri-chapter__bar p {
@@ -2126,14 +2060,6 @@ const faqs: Faq[] = [
 
     .pri-chapter__statement {
       font-size: 30px;
-    }
-
-    .pri-chapter--vstup .pri-chapter__lead-col,
-    .pri-chapter--doporuceni .pri-chapter__lead-col,
-    .pri-chapter--realizace .pri-chapter__lead-col,
-    .pri-chapter--pece .pri-chapter__lead-col,
-    .pri-chapter__lead-col {
-      width: 600px;
     }
 
     .pri-steps {

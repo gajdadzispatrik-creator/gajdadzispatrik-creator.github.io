@@ -293,6 +293,14 @@ import HeroPhoto from './HeroPhoto.astro';
     }
   }
 
+  /* Tablet: nadpis na stejné svislé jako logo v hlavičce a začátek linky —
+     40 px na 834, úměrně šířce okna (4. 10. 2026). Notebook má vlastní. */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .hero__inner {
+      padding-inline-start: calc(40 * 100% / 834);
+    }
+  }
+
   /* ============ Laptop/Desktop: 1200+ ============ */
   @media (min-width: 1200px) {
     .hero__inner {

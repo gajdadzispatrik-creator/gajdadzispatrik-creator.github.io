@@ -128,6 +128,9 @@ function measure() {
       family: family(s),
       top: Math.min(...rs.map((q) => q.top)) - sr.top,
       bottom: sr.bottom - Math.max(...rs.map((q) => q.bottom)),
+      // Fotka záměrně dosedá na spodní hranu sekce (Důvěra na O mně, jako hero
+      // na homepage) — konec sekce pak neurčuje padding, kontrola se přeskočí.
+      bleed: [...s.querySelectorAll("img")].some((i) => vis(i) && Math.abs(i.getBoundingClientRect().bottom - sr.bottom) < 1.5),
     });
   }
   return { heads, ends };
@@ -149,12 +152,14 @@ const mode = (vals) => {
 const browser = await chromium.launch();
 const fails = [];
 let headCount = 0, endCount = 0;
-const pages = ['/', ...EXTRA_PATHS];
+// ONLY=/o-mne,/pristup — zkontrolovat jen vybrané stránky (po úpravě jedné stránky).
+const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
+const pages = ONLY || ['/', ...EXTRA_PATHS];
 
 try {
   const crawler = await browser.newPage();
   const seen = new Set(pages);
-  for (let i = 0; i < pages.length; i++) {
+  for (let i = 0; !ONLY && i < pages.length; i++) {
     await crawler.goto(ORIGIN + pages[i], { waitUntil: 'networkidle' });
     for (const link of await crawler.evaluate(collectLinks, ORIGIN)) if (!seen.has(link)) { seen.add(link); pages.push(link); }
   }
@@ -211,7 +216,7 @@ try {
       if (list.length < 2) continue;
       for (const side of ['bottom']) {
         const m = mode(list.map((x) => x[side]));
-        for (const x of list) if (Math.abs(x[side] - m) > TOL_END) fails.push(`${w}px ${x.where}: obsah → konec sekce ${x[side].toFixed(0)} px, ostatní ${fam} mají ${m} px`);
+        for (const x of list) if (!x.bleed && Math.abs(x[side] - m) > TOL_END) fails.push(`${w}px ${x.where}: obsah → konec sekce ${x[side].toFixed(0)} px, ostatní ${fam} mají ${m} px`);
       }
     }
     await ctx.close();
