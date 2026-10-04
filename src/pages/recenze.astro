@@ -47,7 +47,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
-import { GOOGLE_REVIEWS_URL } from '../data/entity';
+import { BOOKING_URL, GOOGLE_REVIEWS_URL } from '../data/entity';
 
 interface Review {
   author: string | null;
@@ -623,6 +623,8 @@ const REVIEWS_SHOWN = 3;
               <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
             </a>
           </div>
+
+          <a class="closing-booking" href={BOOKING_URL} target="_blank" rel="noopener">Nebo si rovnou vyberte termín online</a>
         </div>
       </div>
     </section>

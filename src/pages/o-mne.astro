@@ -112,7 +112,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
-import { SITE_URL, PERSON_ID, breadcrumbList } from '../data/entity';
+import { BOOKING_URL, SITE_URL, PERSON_ID, breadcrumbList } from '../data/entity';
 import duveraPhoto from '../assets/photos/patrik-omne-hero.webp';
 import heroPhoto from '../assets/photos/patrik-omne-hero-top.png';
 
@@ -605,6 +605,8 @@ const facts: FactRow[] = [
               <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
             </a>
           </div>
+
+          <a class="closing-booking" href={BOOKING_URL} target="_blank" rel="noopener">Nebo si rovnou vyberte termín online</a>
         </div>
       </div>
     </section>

@@ -62,6 +62,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
+import { BOOKING_URL } from '../data/entity';
 
 interface Situation {
   situation: string;
@@ -346,6 +347,8 @@ const areas: Area[] = [
               <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
             </a>
           </div>
+
+          <a class="closing-booking" href={BOOKING_URL} target="_blank" rel="noopener">Nebo si rovnou vyberte termín online</a>
         </div>
       </div>
     </section>

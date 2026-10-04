@@ -43,6 +43,8 @@
  * interakce). V `npm run dev` PHP neběží — lokálně skončí odeslání chybovou
  * hláškou, funkční test až na hostingu.
  */
+import { BOOKING_URL, WHATSAPP_URL } from '../data/entity';
+
 interface RadioOption {
   value: string;
   label: string;
@@ -104,7 +106,13 @@ const bandDetails = [
         <!-- Rezervace přes Google Kalendář (plán schůzek, hlídá obsazené časy). Odkaz, ne vložené okno — rychlost, cookies, design. -->
         <div class="kontakt__form-intro">
           <p class="kontakt__form-intro-label">Rezervace online</p>
-          <a class="kontakt__booking-link" href="https://calendar.app.google/995121nUYKycJ5aNA" target="_blank" rel="noopener">Vybrat volný termín v&nbsp;kalendáři</a>
+          <a class="kontakt__booking-link" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat volný termín v&nbsp;kalendáři</a>
+        </div>
+
+        <!-- WhatsApp jen na dotykových zařízeních (na počítači ho skoro nikdo nemá). Ne plovoucí tlačítko (brief §24). -->
+        <div class="kontakt__form-intro kontakt__whatsapp">
+          <p class="kontakt__form-intro-label">WhatsApp</p>
+          <a class="kontakt__booking-link" href={WHATSAPP_URL} target="_blank" rel="noopener">Napsat zprávu na&nbsp;WhatsApp</a>
         </div>
 
         <div class="kontakt__form-intro">
@@ -834,6 +842,12 @@ const bandDetails = [
   .kontakt__booking-link:focus-visible {
     outline: 2px solid var(--emerald);
     outline-offset: 3px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .kontakt__whatsapp {
+      display: none;
+    }
   }
 
   .kontakt__address {

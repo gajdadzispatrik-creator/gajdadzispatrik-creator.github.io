@@ -88,6 +88,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
 import heroPhoto from '../assets/photos/patrik-pristup.png';
 import pecePhoto from '../assets/photos/patrik-pristup-pece.png';
+import { BOOKING_URL } from '../data/entity';
 
 // Prázdné = placeholder. Jediné místo pro vložení skutečné fotografie —
 // stejný vzor jako `photoSrc` v `AboutSection.astro`.
@@ -441,6 +442,8 @@ const faqs: Faq[] = [
               <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
             </a>
           </div>
+
+          <a class="closing-booking" href={BOOKING_URL} target="_blank" rel="noopener">Nebo si rovnou vyberte termín online</a>
         </div>
       </div>
     </section>

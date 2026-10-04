@@ -98,6 +98,44 @@ button {
   }
 }
 
+/* Online rezervace pod tlačítky v závěrečném tmavém pásu podstránek
+   (`*-closing__body`, flex sloupec s gap 16). Na mobilu na střed pod
+   telefonem (tlačítka jsou tam přes celou šířku), od tabletu vlevo. */
+.closing-booking {
+  position: relative;
+  align-self: center;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--white);
+  text-decoration: underline;
+  text-decoration-color: var(--emerald-light);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  transition: color var(--duration-hover) var(--ease-out);
+}
+
+.closing-booking::after {
+  content: '';
+  position: absolute;
+  inset: -13px 0;
+}
+
+.closing-booking:hover {
+  color: var(--emerald-light);
+}
+
+.closing-booking:focus-visible {
+  outline: 2px solid var(--emerald-light);
+  outline-offset: 3px;
+}
+
+@media (min-width: 768px) {
+  .closing-booking {
+    align-self: flex-start;
+  }
+}
+
 /* Tečky na dekorativní trase: kulaté a skutečně velké přesně `r` px na každé
    šířce, v každé sekci — zpětné měřítko roztažení SVG počítá BaseLayout.astro
    (CLAUDE.md „Konvence: velikost teček a délka zářezů"). Vlastnost `scale` se skládá

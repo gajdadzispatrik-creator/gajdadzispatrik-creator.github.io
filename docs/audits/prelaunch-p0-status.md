@@ -272,7 +272,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
    >
    > Rozhodl jsem se proto začít ve finančním poradenství podnikat a dál se v oboru vzdělávat.
 6. **Pás se statistikami pod hero — probrat celý** (uživatel 4. 10. 2026: „to chci celé ještě probrat“). Mimo jiné dnes ukazuje „5,0 Google recenze“, brief §7 chce „42 recenzí s hodnocením 5★“ (počet je silnější důkaz než samotná známka).
-6a. **Online rezervace úvodní konzultace** (domluveno 4. 10. 2026): uživatel založí v Google Kalendáři „Plán schůzek“ (bezplatná verze, kontroluje obsazenost hlavního kalendáře) a pošle odkaz. Claude pak: textový odkaz „Vybrat termín online“ v kontaktní sekci jako třetí cesta vedle telefonu a formuláře (bez vloženého okna — rychlost, cookies, design), událost do GA4, zmínka o Google Kalendáři jako zpracovateli v zásadách zpracování OÚ.
+6a. ~~**Online rezervace úvodní konzultace**~~ — **HOTOVO 4. 10. 2026:** odkaz v kontaktní sekci + v závěrečných pásech všech podstránek (`.closing-booking`, global.css), WhatsApp odkaz v kontaktu jen na dotykových zařízeních, URL v `src/data/entity.ts` (`BOOKING_URL`, `WHATSAPP_URL`), zmínka v zásadách OÚ. Původní zadání: (domluveno 4. 10. 2026): uživatel založí v Google Kalendáři „Plán schůzek“ (bezplatná verze, kontroluje obsazenost hlavního kalendáře) a pošle odkaz. Claude pak: textový odkaz „Vybrat termín online“ v kontaktní sekci jako třetí cesta vedle telefonu a formuláře (bez vloženého okna — rychlost, cookies, design), událost do GA4, zmínka o Google Kalendáři jako zpracovateli v zásadách zpracování OÚ.
 
 **B) Při spouštění webu (spolu, podle `docs/deploy-wedos.md`)**
 7. Wedos: SSL certifikát (před nahráním), PHP 8.1+, schránka `poptavka@patrikgajdadzis.cz`.
@@ -284,7 +284,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 11. **Google profil: změnit web z `pafinga.cz` na `patrikgajdadzis.cz`** (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí.
 12. **Co s `pafinga.cz`?** — rozhodnout: pokud na ní běží web nebo na ni vedou odkazy, nastavit trvalé přesměrování (301) na `patrikgajdadzis.cz`, aby se neztratila návštěvnost ani pozice ve vyhledávání.
 13. **Google Search Console** + Bing Webmaster Tools — ověřit doménu, odeslat `https://patrikgajdadzis.cz/sitemap-index.xml` (generuje se automaticky při buildu, `@astrojs/sitemap`).
-14. **Google Analytics 4 — měření od prvního dne:** založit, vložit ID do `CookieConsent.astro` (`loadAnalytics()`), **uchovávání dat nastavit na 14 měsíců** (výchozí 2 — jinak nesedí se zásadami OÚ), události: odeslání formuláře, kliknutí na telefon (a rezervace termínu, pokud bude).
+14. **Google Analytics 4 — měření od prvního dne:** založit, vložit ID do `CookieConsent.astro` (`loadAnalytics()`), **uchovávání dat nastavit na 14 měsíců** (výchozí 2 — jinak nesedí se zásadami OÚ), události: odeslání formuláře, kliknutí na telefon, kliknutí na online rezervaci (`calendar.app.google`) a na WhatsApp (`wa.me`).
 15. Hlídání dostupnosti webu (např. UptimeRobot, zdarma).
 
 **D) Po spuštění**
