@@ -45,11 +45,6 @@
  */
 import { BOOKING_URL, WHATSAPP_URL } from '../data/entity';
 
-interface RadioOption {
-  value: string;
-  label: string;
-}
-
 const interestAreas = [
   'Finanční plán',
   'Hypotéka a bydlení',
@@ -58,12 +53,6 @@ const interestAreas = [
   'Penze',
   'Kontrola současných financí',
   'Jiné',
-];
-
-const contactPreferences: RadioOption[] = [
-  { value: 'telefon', label: 'Telefon' },
-  { value: 'email', label: 'E-mail' },
-  { value: 'whatsapp', label: 'WhatsApp' },
 ];
 
 // Dvě části — na mobilu každá na vlastním řádku (bez „·“). „Termín po předchozí
@@ -163,20 +152,6 @@ const bandDetails = [
             <p class="kontakt__field-error" id="kontakt-oblast-chyba" hidden></p>
           </div>
         </div>
-
-        <fieldset class="kontakt__fieldset">
-          <legend>Preferovaný způsob kontaktu <span class="kontakt__required" aria-hidden="true">*</span></legend>
-          <div class="kontakt__radios" role="group" aria-describedby="kontakt-preferovany-chyba">
-            {contactPreferences.map((option) => (
-              <label class="kontakt__radio">
-                <input type="radio" name="preferovany-kontakt" value={option.value} required />
-                <span class="kontakt__radio-mark" aria-hidden="true"></span>
-                {option.label}
-              </label>
-            ))}
-          </div>
-          <p class="kontakt__field-error" id="kontakt-preferovany-chyba" hidden></p>
-        </fieldset>
 
         <div class="kontakt__field">
           <label for="kontakt-situace">Stručně popište svou situaci <span class="kontakt__optional">(nepovinné)</span></label>
@@ -509,9 +484,6 @@ const bandDetails = [
       const errorSummary = form.querySelector('.kontakt__form-errors') as HTMLElement | null;
       const successStatus = form.querySelector('.kontakt__status--success') as HTMLElement | null;
       const errorStatus = form.querySelector('.kontakt__status--error') as HTMLElement | null;
-      const radiosGroup = form.querySelector('.kontakt__radios') as HTMLElement | null;
-      const radiosError = form.querySelector('#kontakt-preferovany-chyba') as HTMLElement | null;
-
       const fieldMessages: Record<string, string> = {
         jmeno: 'Vyplňte prosím jméno a příjmení.',
         telefon: 'Vyplňte prosím telefonní číslo.',
@@ -545,22 +517,6 @@ const bandDetails = [
         if (input) input.addEventListener('blur', () => validateField(input));
       });
 
-      const validateRadios = () => {
-        const radios = Array.from(form.querySelectorAll('input[name="preferovany-kontakt"]')) as HTMLInputElement[];
-        const checked = radios.some((r) => r.checked);
-        if (radiosError) {
-          radiosError.textContent = checked ? '' : 'Vyberte prosím preferovaný způsob kontaktu.';
-          radiosError.hidden = checked;
-        }
-        radiosGroup?.setAttribute('aria-invalid', checked ? 'false' : 'true');
-        return checked;
-      };
-      form.querySelectorAll('input[name="preferovany-kontakt"]').forEach((r) => {
-        r.addEventListener('blur', () => {
-          if (document.activeElement?.getAttribute('name') !== 'preferovany-kontakt') validateRadios();
-        });
-      });
-
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (submitButton?.disabled) return;
@@ -572,7 +528,6 @@ const bandDetails = [
           const input = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
           if (input && !validateField(input)) allValid = false;
         });
-        if (!validateRadios()) allValid = false;
 
         if (!allValid) {
           if (errorSummary) {
@@ -904,8 +859,7 @@ const bandDetails = [
     gap: 8px;
   }
 
-  .kontakt__field label,
-  .kontakt__fieldset legend {
+  .kontakt__field label {
     font-weight: 600;
     font-size: 13.5px;
     color: var(--navy);
@@ -958,68 +912,6 @@ const bandDetails = [
     font-weight: 500;
     font-size: 13px;
     color: #B3261E;
-  }
-
-  .kontakt__fieldset {
-    margin: 0;
-    padding: 0;
-    border: none;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .kontakt__radios {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 22px;
-  }
-
-  .kontakt__radio {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 48px;
-    font-weight: 400;
-    font-size: 15px;
-    color: var(--navy);
-    cursor: pointer;
-  }
-
-  .kontakt__radio input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-  }
-
-  .kontakt__radio-mark {
-    flex: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: 1.5px solid var(--border);
-    box-sizing: border-box;
-    position: relative;
-    transition: border-color var(--duration-hover) var(--ease-out);
-  }
-
-  .kontakt__radio input:checked + .kontakt__radio-mark {
-    border-color: var(--emerald);
-  }
-
-  .kontakt__radio input:checked + .kontakt__radio-mark::after {
-    content: '';
-    position: absolute;
-    inset: 3px;
-    border-radius: 50%;
-    background: var(--emerald);
-  }
-
-  .kontakt__radio input:focus-visible + .kontakt__radio-mark {
-    outline: 2px solid var(--emerald);
-    outline-offset: 3px;
   }
 
   .kontakt__submit {

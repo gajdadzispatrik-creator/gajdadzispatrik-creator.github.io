@@ -82,10 +82,6 @@ export const privacyPage: LegalPageData = {
             [['E-mail'], ['Písemné potvrzení termínu a navazující komunikace.']],
             [['Oblast zájmu'], ['Připravím se na konzultaci podle tématu, které vás zajímá.']],
             [
-              ['Preferovaný způsob kontaktu'],
-              ['Ozvu se způsobem, který vám vyhovuje: telefonicky, e-mailem nebo přes WhatsApp.'],
-            ],
-            [
               ['Popis situace (nepovinné)'],
               ['Pomůže mi rychleji se zorientovat ještě před tím, než se poprvé ozvu.'],
             ],

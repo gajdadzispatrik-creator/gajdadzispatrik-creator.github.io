@@ -38,11 +38,6 @@ const INTEREST_AREAS = [
     'Kontrola současných financí',
     'Jiné',
 ];
-const CONTACT_PREFERENCES = [
-    'telefon' => 'Telefon',
-    'email' => 'E-mail',
-    'whatsapp' => 'WhatsApp',
-];
 
 $wantsJson = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
 
@@ -160,7 +155,6 @@ $name = oneLine(field('jmeno', 100));
 $phone = oneLine(field('telefon', 60));
 $email = oneLine(field('email', 254));
 $area = oneLine(field('oblast', 60));
-$preference = oneLine(field('preferovany-kontakt', 20));
 $situation = field('situace', 3000);
 
 // Kontroly jsou záměrně stejně volné jako v prohlížeči (pole jen povinná) —
@@ -168,8 +162,7 @@ $situation = field('situace', 3000);
 $valid = $name !== ''
     && preg_match_all('/\d/', $phone) >= 6
     && filter_var($email, FILTER_VALIDATE_EMAIL) !== false
-    && in_array($area, INTEREST_AREAS, true)
-    && array_key_exists($preference, CONTACT_PREFERENCES);
+    && in_array($area, INTEREST_AREAS, true);
 
 if (!$valid) {
     respond(false, 400, $wantsJson);
@@ -186,7 +179,6 @@ $body = implode("\n", [
     "Telefon: {$phone}",
     "E-mail: {$email}",
     "Oblast zájmu: {$area}",
-    'Preferovaný kontakt: ' . CONTACT_PREFERENCES[$preference],
     '',
     'Situace:',
     $situation !== '' ? $situation : '(nevyplněno)',

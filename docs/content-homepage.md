@@ -418,10 +418,13 @@ Doplňující informace
 
 * Osobně v Ostravě-Porubě
 * Online přes Google Meet nebo WhatsApp
-* Termín po předchozí domluvě
 
-Adresa konzultací
-17. listopadu 599/30, Ostrava-Poruba
+(Od 4. 10. 2026 bez „Termín po předchozí domluvě“ a bez adresy — adresa je v patičce.)
+
+Online
+
+* Vybrat volný termín v kalendáři (Google Kalendář, plán schůzek)
+* Napsat na WhatsApp (jen mobil a tablet, předvyplněná zpráva)
 
 Kontaktní formulář
 Povinná pole:
@@ -430,7 +433,6 @@ Povinná pole:
 * Telefon
 * E-mail
 * Oblast zájmu
-* Preferovaný způsob kontaktu
 
 Nepovinné pole:
 
@@ -446,11 +448,7 @@ Oblasti zájmu
 * Kontrola současných financí
 * Jiné
 
-Preferovaný kontakt
-
-* Telefon
-* E-mail
-* WhatsApp
+(Pole „Preferovaný způsob kontaktu“ odstraněno 4. 10. 2026 — povinné pole navíc, telefon je povinný a WhatsApp/kalendář jsou nad formulářem.)
 
 Informace o osobních údajích
 Pod formulářem zobrazit krátkou informaci, že údaje budou použity pouze pro vyřízení poptávky a navazující komunikaci.
