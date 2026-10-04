@@ -197,9 +197,15 @@ const config = {
 
         <!-- Otázky -->
         <div class="chk-step chk-quiz" data-step="quiz" hidden>
-          <div class="chk-progress" aria-hidden="true">
-            {questions.map(() => <span class="chk-progress__dot"></span>)}
-          </div>
+          {/* Postup jako trasa webu: SVG v pevné velikosti (bez roztažení),
+              tečky jako <circle> s poloměry podle CLAUDE.md „Konvence: velikost
+              teček" — aktuální otázka = hlavní (zelená) tečka. */}
+          <svg class="chk-progress" width="260" height="10" viewBox="0 0 260 10" aria-hidden="true" focusable="false">
+            <path d="M5 5H255" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" fill="none" />
+            {questions.map((_, i) => (
+              <circle class="chk-progress__dot" cx={5 + (i * 250) / (questions.length - 1)} cy="5" r="2.4" />
+            ))}
+          </svg>
           <p class="chk-quiz__count" aria-live="polite">Otázka <span data-count>1</span> z&nbsp;{questions.length}</p>
 
           {
@@ -282,7 +288,7 @@ const config = {
 
     const steps = root.querySelectorAll<HTMLElement>('[data-step]');
     const questionEls = root.querySelectorAll<HTMLElement>('[data-question]');
-    const dots = root.querySelectorAll<HTMLElement>('.chk-progress__dot');
+    const dots = root.querySelectorAll<SVGCircleElement>('.chk-progress__dot');
     const countEl = root.querySelector<HTMLElement>('[data-count]');
     const backBtn = root.querySelector<HTMLButtonElement>('[data-back]');
     const areaOrder = Array.from(root.querySelectorAll<HTMLElement>('[data-area]'));
@@ -431,8 +437,10 @@ const config = {
   }
 
   /* Nadpis otázky dostává fokus jen kvůli čtečkám — bez rámečku. */
-  .chk-question__title:focus,
-  .chk-result__heading:focus {
+  .chk .chk-question__title:focus,
+  .chk .chk-question__title:focus-visible,
+  .chk .chk-result__heading:focus,
+  .chk .chk-result__heading:focus-visible {
     outline: none;
   }
 
@@ -513,46 +521,38 @@ const config = {
     transform: translateY(1px);
   }
 
-  /* --- Postup: linka s tečkami jako trasa webu --- */
+  /* --- Postup: linka s tečkami jako trasa webu ---
+     Poloměry: ostatní 2,4 / hlavní 3,2 (mobil, tablet), 2,6 / 3,5 (1200+). */
   .chk-progress {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 260px;
-    height: 8px;
-  }
-
-  .chk-progress::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 1px;
-    background: var(--line);
-    opacity: .18;
+    display: block;
+    overflow: visible;
   }
 
   .chk-progress__dot {
-    position: relative;
-    width: 4.8px;
-    height: 4.8px;
-    border-radius: 50%;
-    background: var(--line);
-    opacity: .35;
+    r: 2.4px;
+    fill: var(--line);
+    fill-opacity: .5;
   }
 
   .chk-progress__dot.is-done {
-    background: var(--emerald);
-    opacity: 1;
+    fill: var(--emerald);
+    fill-opacity: 1;
   }
 
   .chk-progress__dot.is-current {
-    width: 6.4px;
-    height: 6.4px;
-    background: var(--emerald);
-    opacity: 1;
+    r: 3.2px;
+    fill: var(--emerald);
+    fill-opacity: 1;
+  }
+
+  @media (min-width: 1200px) {
+    .chk-progress__dot {
+      r: 2.6px;
+    }
+
+    .chk-progress__dot.is-current {
+      r: 3.5px;
+    }
   }
 
   .chk-quiz__count {
