@@ -153,8 +153,8 @@ a je nezávazná.
 - Projít znovu (textový odkaz)
 
 **Upozornění pod výsledkem:** Přehled je orientační a vychází jen z vašich
-odpovědí. Nejde o doporučení konkrétního řešení ani produktu. To je možné až
-po společném projití vaší situace.
+odpovědí. Konkrétní doporučení je možné až poté, co společně probereme vaši
+situaci i to, jak máte nastavené současné smlouvy.
 
 ---
 
