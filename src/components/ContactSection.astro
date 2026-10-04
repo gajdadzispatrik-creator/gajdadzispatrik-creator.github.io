@@ -109,7 +109,7 @@ const bandDetails = [
           <a class="kontakt__booking-link" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat volný termín v&nbsp;kalendáři</a>
         </div>
 
-        <!-- WhatsApp jen na dotykových zařízeních (na počítači ho skoro nikdo nemá). Ne plovoucí tlačítko (brief §24). -->
+        <!-- WhatsApp na mobilu a tabletu (na počítači ho skoro nikdo nemá). Ne plovoucí tlačítko (brief §24). -->
         <div class="kontakt__form-intro kontakt__whatsapp">
           <p class="kontakt__form-intro-label">WhatsApp</p>
           <a class="kontakt__booking-link" href={WHATSAPP_URL} target="_blank" rel="noopener">Napsat zprávu na&nbsp;WhatsApp</a>
@@ -844,7 +844,9 @@ const bandDetails = [
     outline-offset: 3px;
   }
 
-  @media (hover: hover) and (pointer: fine) {
+  /* Skryté jen na počítači s myší (notebook/desktop šířka) — mobil a tablet
+     vždy, i v úzkém okně prohlížeče. */
+  @media (min-width: 1200px) and (hover: hover) and (pointer: fine) {
     .kontakt__whatsapp {
       display: none;
     }
