@@ -370,7 +370,7 @@ i všechny podstránky, mobil, tablet i desktop:
   Výhody na mobilu): 74 px.
 - Tečky ležící přímo na lince (bez zářezu — Connections, Router, Process na
   mobilu/desktopu) mají stejné velikosti, jen bez zářezu.
-- Výjimka: velká zelená tečka na konci linky v patičce u značky (logo, není
+- Výjimka: konec linky v patičce — od 4. 10. 2026 končí u loga PG (zelená tečka loga je konec linky, vlastní tečka trasy skrytá; logo, není
   součást trasy).
 
 **Kontrola:** `npm run check:dots` (`scripts/check-dots.mjs`) — projde všechny

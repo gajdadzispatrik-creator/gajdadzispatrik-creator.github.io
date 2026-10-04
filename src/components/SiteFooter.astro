@@ -104,7 +104,16 @@ const socialIcons: Record<string, string> = {
   <div class="footer__inner">
     <div class="footer__band footer__top">
       <div class="footer__identity">
-        <p class="footer__brand footer__reveal-up">Patrik Gajdadzis</p>
+        <p class="footer__brand footer__reveal-up">
+          <svg class="footer__mark" viewBox="133 122 1729 1537" aria-hidden="true" focusable="false">
+            <g fill="none" stroke="currentColor" stroke-width="112" stroke-linejoin="round">
+              <path d="M133 178H1100A150 150 0 0 1 1250 328V460A150 150 0 0 1 1100 610H347A150 150 0 0 0 197 760V1530" />
+              <path d="M1545 833H725A150 150 0 0 0 575 983V1453A150 150 0 0 0 725 1603H1558A150 150 0 0 0 1708 1453V1310A150 150 0 0 0 1558 1160H1278" />
+            </g>
+            <circle cx="1742" cy="833" r="120" fill="var(--emerald)" />
+          </svg>
+          <span>Patrik Gajdadzis</span>
+        </p>
         <p class="footer__desc footer__reveal-up">Osobní finanční partner pro&nbsp;důležitá rozhodnutí.</p>
       </div>
 
@@ -247,7 +256,7 @@ const socialIcons: Record<string, string> = {
     focusable="false"
     data-entry="120"
     data-radius="28"
-    data-gap="22"
+    data-gap="0"
   >
     <path
       class="footer__route-path"
@@ -273,7 +282,7 @@ const socialIcons: Record<string, string> = {
     focusable="false"
     data-entry="96"
     data-radius="28"
-    data-gap="22"
+    data-gap="0"
   >
     <path
       class="footer__route-path"
@@ -299,7 +308,7 @@ const socialIcons: Record<string, string> = {
     focusable="false"
     data-entry="40"
     data-radius="22"
-    data-gap="22"
+    data-gap="0"
   >
     <path
       class="footer__route-path"
@@ -330,7 +339,7 @@ const socialIcons: Record<string, string> = {
     focusable="false"
     data-entry="24"
     data-radius="18"
-    data-gap="20"
+    data-gap="0"
     data-straight="true"
   >
     <path
@@ -414,16 +423,22 @@ const socialIcons: Record<string, string> = {
       const r = parseFloat(svg.dataset.radius ?? '28');
       const gap = parseFloat(svg.dataset.gap ?? '22');
 
-      const brandRect = brand.getBoundingClientRect();
+      // Linka končí u loga PG (4. 10. 2026): vodorovně ve výšce horního tahu
+      // písmene P (178 z viewBoxu 122–1659), jako by do loga vplula — konec
+      // linky tvoří zelená tečka loga, vlastní koncová tečka trasy je skrytá.
+      const mark = brand.querySelector('.footer__mark') as SVGSVGElement | null;
+      const brandRect = (mark ?? brand).getBoundingClientRect();
       const endXReal = brandRect.left - gap;
       const endX = (endXReal - svgRect.left) / scaleX;
-      const bendYReal = brandRect.top + brandRect.height / 2;
+      const bendYReal = mark
+        ? brandRect.top + brandRect.height * (178 - 122) / 1537
+        : brandRect.top + brandRect.height / 2;
       const bendY = (bendYReal - svgRect.top) / scaleY;
 
       const straight = svg.dataset.straight === 'true';
       // Mobil: značka stojí na ose (zarovnaná s kontakty), trasa proto končí
       // tečkou 18 px NAD ní, ne ve výšce jejího středu (tečka by byla na „P").
-      const straightEndY = (brandRect.top - 18 - svgRect.top) / scaleY;
+      const straightEndY = (brandRect.top - gap - svgRect.top) / scaleY;
       if (path) {
         const d = straight
           ? `M ${entryX} -20 V ${straightEndY}`
@@ -870,7 +885,22 @@ const socialIcons: Record<string, string> = {
     stroke-linecap: round;
   }
 
+  /* Logo PG před jménem — bílé, zelená tečka loga je konec linky. */
+  .footer__brand {
+    display: flex;
+    align-items: center;
+    gap: .45em;
+  }
+
+  .footer__mark {
+    flex: none;
+    width: 1.41em;
+    height: 1.25em;
+    color: #FFFFFF;
+  }
+
   .footer__dot {
+    display: none;
     transform-box: fill-box;
     transform-origin: center;
   }

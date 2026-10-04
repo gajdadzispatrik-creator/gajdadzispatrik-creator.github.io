@@ -11,7 +11,13 @@ const navLinks = [
   <div class="site-header__inner">
     <!-- Přístupný název musí obsahovat viditelný text loga (WCAG 2.5.3 Label in Name). -->
     <a class="brand" href="/" aria-label="PG Patrik Gajdadzis, domů">
-      <span class="brand__mark">PG</span>
+      <svg class="brand__mark" viewBox="133 122 1729 1537" aria-hidden="true" focusable="false">
+        <g fill="none" stroke="currentColor" stroke-width="112" stroke-linejoin="round">
+          <path d="M133 178H1100A150 150 0 0 1 1250 328V460A150 150 0 0 1 1100 610H347A150 150 0 0 0 197 760V1530" />
+          <path d="M1545 833H725A150 150 0 0 0 575 983V1453A150 150 0 0 0 725 1603H1558A150 150 0 0 0 1708 1453V1310A150 150 0 0 0 1558 1160H1278" />
+        </g>
+        <circle cx="1742" cy="833" r="120" fill="var(--emerald)" />
+      </svg>
       <span class="brand__divider" aria-hidden="true"></span>
       <span class="brand__word">Patrik Gajdadzis</span>
     </a>
@@ -126,10 +132,12 @@ const navLinks = [
     color: var(--navy);
   }
 
+  /* Logo PG — monogram z linky (src/assets/brand/pg-monogram.svg, 4. 10. 2026). */
   .brand__mark {
-    font-weight: 700;
-    font-size: 18px;
-    letter-spacing: .14em;
+    flex: none;
+    width: 32px;
+    height: 28px;
+    color: var(--navy);
   }
 
   .brand__divider {
@@ -269,7 +277,8 @@ const navLinks = [
     }
 
     .brand__mark {
-      font-size: 20px;
+      width: 40px;
+      height: 36px;
     }
 
     .brand__divider {
