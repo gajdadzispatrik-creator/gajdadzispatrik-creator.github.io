@@ -69,7 +69,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
-import { BOOKING_URL, PERSON_ID, breadcrumbList } from '../../data/entity';
+import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
 
 const SERVICE_NAME = 'Plánování penze a důchodu';
 const SERVICE_DESCRIPTION =
@@ -144,7 +144,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Plánování penze a důchodu | Patrik Gajdadzis"
   description={SERVICE_DESCRIPTION}
-  jsonLd={penzeJsonLd}
+  jsonLd={[...penzeJsonLd, faqPage(faqs)]}
 >
   <Header />
   <main id="hero" class="pen">

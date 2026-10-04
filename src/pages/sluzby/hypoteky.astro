@@ -51,7 +51,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
-import { BOOKING_URL, PERSON_ID, breadcrumbList } from '../../data/entity';
+import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
 
 const SERVICE_NAME = 'Hypotéky a financování bydlení';
 const SERVICE_DESCRIPTION =
@@ -172,7 +172,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Hypoteční poradce Ostrava | Patrik Gajdadzis"
   description={SERVICE_DESCRIPTION}
-  jsonLd={hypotekyJsonLd}
+  jsonLd={[...hypotekyJsonLd, faqPage(faqs)]}
 >
   <Header />
   <main id="hero" class="hyp">

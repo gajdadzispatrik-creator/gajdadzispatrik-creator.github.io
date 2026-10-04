@@ -55,7 +55,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
-import { BOOKING_URL, PERSON_ID, breadcrumbList } from '../../data/entity';
+import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
 
 const SERVICE_NAME = 'Investiční poradenství a plánování';
 const SERVICE_DESCRIPTION =
@@ -139,7 +139,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Investiční poradenství a plánování | Patrik Gajdadzis"
   description={SERVICE_DESCRIPTION}
-  jsonLd={investiceJsonLd}
+  jsonLd={[...investiceJsonLd, faqPage(faqs)]}
 >
   <Header />
   <main id="hero" class="inv">

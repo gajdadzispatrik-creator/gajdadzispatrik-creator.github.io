@@ -88,7 +88,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
 import heroPhoto from '../assets/photos/patrik-pristup.png';
 import pecePhoto from '../assets/photos/patrik-pristup-pece.png';
-import { BOOKING_URL } from '../data/entity';
+import { BOOKING_URL, faqPage } from '../data/entity';
 
 // Prázdné = placeholder. Jediné místo pro vložení skutečné fotografie —
 // stejný vzor jako `photoSrc` v `AboutSection.astro`.
@@ -128,6 +128,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Jak pracuji | Patrik Gajdadzis, finanční poradce"
   description="Zjistěte, jak se mnou probíhá spolupráce. Od první konzultace přes doporučení a realizaci až po dlouhodobou péči. Ostrava i online."
+  jsonLd={[faqPage(faqs)]}
 >
   <Header />
   <main id="hero" class="pri">

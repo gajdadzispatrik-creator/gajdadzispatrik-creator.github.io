@@ -283,7 +283,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 **C) Hned po spuštění na Wedosu — nastavit Google a zprovoznit měření**
 11. **Google profil: změnit web z `pafinga.cz` na `patrikgajdadzis.cz`** (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí.
 12. **Co s `pafinga.cz`?** — rozhodnout: pokud na ní běží web nebo na ni vedou odkazy, nastavit trvalé přesměrování (301) na `patrikgajdadzis.cz`, aby se neztratila návštěvnost ani pozice ve vyhledávání.
-13. **Google Search Console** + Bing Webmaster Tools — ověřit doménu, odeslat `https://patrikgajdadzis.cz/sitemap-index.xml` (generuje se automaticky při buildu, `@astrojs/sitemap`).
+13. **Google Search Console** + Bing Webmaster Tools — ověřit doménu, odeslat `https://patrikgajdadzis.cz/sitemap-index.xml` (generuje se automaticky při buildu, `@astrojs/sitemap`). Strukturovaná data ověřit v Google Rich Results Test (search.google.com/test/rich-results) — homepage, /pristup a 5 detailů služeb mají FAQPage (od 4. 10. 2026, `faqPage()` v `src/data/entity.ts`).
 14. **Google Analytics 4 — měření od prvního dne:** založit, vložit ID do `CookieConsent.astro` (`loadAnalytics()`), **uchovávání dat nastavit na 14 měsíců** (výchozí 2 — jinak nesedí se zásadami OÚ), události: odeslání formuláře, kliknutí na telefon, kliknutí na online rezervaci (`calendar.app.google`) a na WhatsApp (`wa.me`).
 15. Hlídání dostupnosti webu (např. UptimeRobot, zdarma).
 

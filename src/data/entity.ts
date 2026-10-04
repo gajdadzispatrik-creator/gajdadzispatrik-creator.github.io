@@ -43,6 +43,23 @@ const GOOGLE_MAPS_CID_URL = 'https://maps.google.com/?cid=341825168554410688';
 // Online rezervace úvodní konzultace (Google Kalendář, plán schůzek — hlídá
 // obsazené časy) a WhatsApp s předvyplněnou první zprávou. Kontakt + závěrečné
 // pásy podstránek.
+/**
+ * Strukturovaná data FAQPage z TÝCHŽ otázek, které stránka vykresluje
+ * (jeden zdroj — text v JSON-LD se nemůže rozejít s viditelným). Typografické
+ * znaky (nezlomitelná mezera, word joiner) se převádí na prostý text.
+ */
+export function faqPage(items: { q: string; a: string }[]) {
+  const plain = (text: string) => text.replace(/ /g, ' ').replace(/⁠/g, '');
+  return {
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: plain(item.q),
+      acceptedAnswer: { '@type': 'Answer', text: plain(item.a) },
+    })),
+  };
+}
+
 export const BOOKING_URL = 'https://calendar.app.google/995121nUYKycJ5aNA';
 export const WHATSAPP_URL = `https://wa.me/420775217721?text=${encodeURIComponent('Dobrý den, mám zájem o nezávaznou konzultaci.')}`;
 

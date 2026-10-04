@@ -16,11 +16,14 @@ import ArticlesSection from '../components/ArticlesSection.astro';
 import FaqSection from '../components/FaqSection.astro';
 import ContactSection from '../components/ContactSection.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import { faqPage } from '../data/entity';
+import { homeFaqs } from '../data/homeFaqs';
 ---
 
 <BaseLayout
   title="Finanční poradce Ostrava | Patrik Gajdadzis"
   description="Finance se nemají řešit po částech. Bydlení, ochranu, investice a penzi propojuji do jednoho plánu, který dává smysl dnes i za několik let."
+  jsonLd={[faqPage(homeFaqs)]}
 >
   <Header />
   <main>
