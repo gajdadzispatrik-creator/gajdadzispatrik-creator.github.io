@@ -189,6 +189,7 @@ const benefits: Benefit[] = [
 </section>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -264,13 +265,12 @@ const benefits: Benefit[] = [
       const svgRect = activeSvg.getBoundingClientRect();
       const viewBox = activeSvg.viewBox.baseVal;
       // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
-      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // přechodné `Infinity`/`NaN` (dělení nulou), když má SVG
       // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
       // (oprava 14. 9. 2026).
       if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
       const scaleY = svgRect.height / viewBox.height;
       const scaleX = svgRect.width / viewBox.width;
-      activeSvg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
       const notchOffsetPx = parseFloat(activeSvg.dataset.notchOffset ?? '0');
 
@@ -278,10 +278,9 @@ const benefits: Benefit[] = [
         const dot = dots[i];
         const notch = notches[i];
         if (!dot && !notch) return;
-        // Zarovnáno na střed celého bloku (název + popisek dohromady) —
-        // viz „Konvence: zarovnání tečky k textu“ v CLAUDE.md.
-        const rect = item.getBoundingClientRect();
-        const centerY = rect.top + rect.height / 2;
+        // Tečka v ose prvního řádku názvu (CLAUDE.md „Konvence: velikost
+        // teček a délka zářezů“ — jedno pravidlo pro celý web, 4. 10. 2026).
+        const centerY = firstLineCenterY(item.querySelector('.benefits__name') ?? item);
         const localY = (centerY - svgRect.top) / scaleY;
         if (dot) dot.setAttribute('cy', String(localY));
         if (notch) {
@@ -463,7 +462,7 @@ const benefits: Benefit[] = [
    */
   .benefits__stage {
     position: relative;
-    padding-top: 362px;
+    padding-top: 72px;
     padding-bottom: 72px;
   }
 
@@ -475,12 +474,12 @@ const benefits: Benefit[] = [
    * 42/56/84/92 px (ověřeno živě) — čísla níže jsou pod touto hranicí na
    * celém rozsahu příslušného stupně, ne jen v kalibračním bodě.
    */
+  /* Mobil: nadpis v toku (ne absolutně) — mezera nadpis → první přínos
+     74 px stejně jako Rozcestník a Proces, i když se nadpis zalomí na víc
+     řádků (4. 10. 2026; dřív pevných 171 px). Od tabletu absolutně. */
   .benefits__heading {
-    position: absolute;
-    left: 56px;
-    right: 24px;
-    top: 112px;
-    margin: 0;
+    position: static;
+    margin: 0 24px 74px 56px;
     font-weight: 700;
     line-height: 1.04;
     letter-spacing: -.05em;
@@ -519,8 +518,10 @@ const benefits: Benefit[] = [
     margin: 0;
   }
 
+  /* Mobil: viditelná mezera popis → další položka 56 px, stejně jako
+     ProcessSection (4. 10. 2026). */
   .benefits__item + .benefits__item {
-    margin-top: 110px;
+    margin-top: 60px;
   }
 
   .benefits__item.is-pending {
@@ -535,7 +536,7 @@ const benefits: Benefit[] = [
   }
 
   .benefits__name {
-    margin: 0 0 5px;
+    margin: 0 0 14px;
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: -.03em;
@@ -547,7 +548,7 @@ const benefits: Benefit[] = [
     margin: 0;
     font-weight: 400;
     line-height: 1.5;
-    font-size: 15px;
+    font-size: 16px;
     color: rgba(255, 255, 255, .62);
   }
 
@@ -568,29 +569,22 @@ const benefits: Benefit[] = [
     stroke-linecap: round;
   }
 
-  /*
-   * --dot-fix se nastavuje na <svg> (JS, syncMarkers) a sem se dědí — proto
-   * se NESMÍ deklarovat lokálně na .benefits__dot (ani jako výchozí hodnota
-   * mimo var()), protože vlastní deklarace na prvku by zdědění z nadřazeného
-   * SVG přebila a tečka by vždy použila natvrdo 1 (to byl původní bug —
-   * korekce se v kódu počítala správně, ale k tečce se nikdy nedostala).
-   * Výchozí hodnota 1 je proto uvnitř var(), ne jako samostatná deklarace.
-   */
+  /* Skutečnou velikost a kulatost tečky drží globální pravidlo
+     (global.css + BaseLayout.astro, CLAUDE.md „Konvence: velikost teček a délka zářezů"). */
   .benefits__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .benefits__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
   .benefits__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -625,6 +619,8 @@ const benefits: Benefit[] = [
     }
 
     .benefits__heading {
+      position: absolute;
+      margin: 0;
       left: 96px;
       right: 40px;
       top: 120px;
@@ -633,7 +629,7 @@ const benefits: Benefit[] = [
 
     /* left procentuální — stejný důvod jako v base stupni výše (dělítko x=40, viewBox 834). */
     .benefits__list {
-      margin: 0 40px 0 calc(40 * 100% / 834 + 70px);
+      margin: 0 40px 0 calc(40 * 100% / 834 + 64px);
     }
 
     .benefits__item + .benefits__item {
@@ -641,7 +637,7 @@ const benefits: Benefit[] = [
     }
 
     .benefits__name {
-      margin: 0 0 6px;
+      margin: 0 0 14px;
       font-size: 30px;
     }
 
@@ -690,7 +686,7 @@ const benefits: Benefit[] = [
     }
 
     .benefits__name {
-      margin: 0 0 6px;
+      margin: 0 0 14px;
       font-size: 26px;
     }
 
@@ -742,7 +738,7 @@ const benefits: Benefit[] = [
     }
 
     .benefits__name {
-      margin: 0 0 6px;
+      margin: 0 0 14px;
       font-size: 26px;
     }
 

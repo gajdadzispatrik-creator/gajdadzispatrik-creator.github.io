@@ -583,7 +583,7 @@ const REVIEWS_SHOWN = 3;
       <div class="rec-chapter__content">
         <div class="rec-chapter__top">
           <div class="rec-chapter__lead-col" data-reveal>
-            <h2 id="pristup-heading" class="rec-h2--std">Recenze vám ukážou zkušenosti. Přístup vysvětluje, jak pracuji.</h2>
+            <h2 id="pristup-heading" class="rec-h2--std">Recenze vám ukážou zkušenosti.<br class="br-mobile" /> Přístup vysvětluje, jak pracuji.</h2>
           </div>
           <div class="rec-chapter__support-col" data-reveal>
             <p class="rec-support__text">
@@ -631,6 +631,7 @@ const REVIEWS_SHOWN = 3;
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -823,7 +824,6 @@ const REVIEWS_SHOWN = 3;
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -832,8 +832,7 @@ const REVIEWS_SHOWN = 3;
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.rec__notch');
           const dot = group.querySelector('.rec__dot');
@@ -989,19 +988,18 @@ const REVIEWS_SHOWN = 3;
   }
 
   .rec__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .rec__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .rec__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1281,6 +1279,11 @@ const REVIEWS_SHOWN = 3;
   .rec-review:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .rec-review:last-child {
+    padding-bottom: 0;
   }
 
   .rec-review__placeholder,

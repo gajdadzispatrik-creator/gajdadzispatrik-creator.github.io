@@ -64,9 +64,10 @@ const contactPreferences: RadioOption[] = [
   { value: 'whatsapp', label: 'WhatsApp' },
 ];
 
+// První řádek má dvě části — na mobilu každá na vlastním řádku (bez „·“).
 const bandDetails = [
-  'Osobně v Ostravě-⁠Porubě · Online přes Google Meet nebo WhatsApp',
-  'Termín po předchozí domluvě',
+  ['Osobně v Ostravě-⁠Porubě', 'Online přes Google Meet nebo WhatsApp'],
+  ['Termín po předchozí domluvě'],
 ];
 ---
 
@@ -87,11 +88,12 @@ const bandDetails = [
         <span class="kontakt__band-number">+420&nbsp;775&nbsp;217&nbsp;721</span>
       </span>
       <span class="kontakt__band-meta">
-        <span class="kontakt__band-label">Nejrychlejší cesta - ozvu se&nbsp;osobně</span>
         <span class="kontakt__band-divider" aria-hidden="true"></span>
         <ul class="kontakt__band-details">
-          {bandDetails.map((line) => (
-            <li>{line}</li>
+          {bandDetails.map((parts) => (
+            <li>{parts.map((part, i) => (
+              <>{i > 0 && <span class="kontakt__band-sep">{' · '}</span>}<span class="kontakt__band-part">{part}</span></>
+            ))}</li>
           ))}
         </ul>
       </span>
@@ -295,6 +297,7 @@ const bandDetails = [
 </section>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -349,16 +352,14 @@ const bandDetails = [
       const svgRect = svg.getBoundingClientRect();
       const viewBox = svg.viewBox.baseVal;
       // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
-      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // přechodné `Infinity`/`NaN` (dělení nulou), když má SVG
       // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
       // (oprava 14. 9. 2026).
       if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
       const scaleY = svgRect.height / viewBox.height;
       const scaleX = svgRect.width / viewBox.width;
-      svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
-      const labelRect = introLabel.getBoundingClientRect();
-      const dotY = (labelRect.top + labelRect.height / 2 - svgRect.top) / scaleY;
+      const dotY = (firstLineCenterY(introLabel) - svgRect.top) / scaleY;
       if (dot) dot.setAttribute('cy', String(dotY));
 
       if (svg.dataset.bend === 'true' && path && heading) {
@@ -622,7 +623,7 @@ const bandDetails = [
        komentář): vodorovné odsazení dávají přímé děti svým vlastním
        procentuálně kotveným marginem, jinak by se % uvnitř vnořených
        dětí počítalo z content-boxu `.kontakt__inner`, ne z viewportu. */
-    padding: 96px 0 80px;
+    padding: 72px 0 72px;
   }
 
   .kontakt__intro {
@@ -684,6 +685,10 @@ const bandDetails = [
     background: linear-gradient(150deg, #16324F 0%, #0F2747 62%, #0B1D36 100%);
     color: #FFFFFF;
     transition: filter var(--duration-hover) var(--ease-out);
+    /* Mobil: pás jde přes celou šířku a trasu (x=24) záměrně zakrývá —
+       linka se v pásu přeruší. */
+    position: relative;
+    z-index: 1;
   }
 
   .kontakt__band:hover,
@@ -722,14 +727,12 @@ const bandDetails = [
     gap: 6px;
   }
 
-  .kontakt__band-label {
-    font-weight: 400;
-    font-size: 13.5px;
-    color: rgba(255, 255, 255, .66);
-  }
-
+  /* Mobil: tenká čára mezi číslem a údaji. */
   .kontakt__band-divider {
-    display: none;
+    display: block;
+    height: 1px;
+    margin: 4px 0;
+    background: rgba(255, 255, 255, .14);
   }
 
   .kontakt__band-details {
@@ -738,14 +741,23 @@ const bandDetails = [
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
   }
 
   .kontakt__band-details li {
     font-weight: 400;
     line-height: 1.4;
-    font-size: 13.5px;
+    font-size: 14px;
     color: rgba(255, 255, 255, .72);
+  }
+
+  /* Mobil: každá část na vlastním řádku, bez oddělovače „·“. */
+  .kontakt__band-sep {
+    display: none;
+  }
+
+  .kontakt__band-part {
+    display: block;
   }
 
   /* --- Postranní sloupec / formulář --- */
@@ -1061,20 +1073,19 @@ const bandDetails = [
   }
 
   .kontakt__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .kontakt__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
   .kontakt__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1131,6 +1142,30 @@ const bandDetails = [
 
     .kontakt__band-number {
       font-size: 30px;
+    }
+
+    /* Od tabletu pás začíná až na ose trasy — nepřekrývá ji. */
+    .kontakt__band {
+      z-index: auto;
+    }
+
+    /* Od tabletu původní podoba: údaje v řádku s „·“, bez čáry na šířku. */
+    .kontakt__band-divider {
+      display: none;
+      margin: 0;
+    }
+
+    .kontakt__band-details {
+      gap: 2px;
+    }
+
+    .kontakt__band-details li {
+      font-size: 13.5px;
+    }
+
+    .kontakt__band-sep,
+    .kontakt__band-part {
+      display: inline;
     }
 
     .kontakt__body {
@@ -1195,17 +1230,6 @@ const bandDetails = [
       flex-direction: row;
       align-items: center;
       gap: 14px;
-    }
-
-    /*
-     * Popisek "Nejrychlejší cesta - ozvu se osobně" má vlastní přirozený
-     * zlom u pomlčky ("Nejrychlejší cesta -" / "ozvu se osobně") — omezením
-     * šířky na dva řádky uvolní místo pro řádek dostupnosti vpravo, který
-     * musí zůstat na jednom řádku beze zbytku (viz .kontakt__band-details
-     * níže). Zadání uživatele 24. 8. 2026.
-     */
-    .kontakt__band-label {
-      max-width: 150px;
     }
 
     .kontakt__band-divider {

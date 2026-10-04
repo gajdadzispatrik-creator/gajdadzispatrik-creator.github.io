@@ -200,6 +200,7 @@ const { photoSrc = '' } = Astro.props;
 </section>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -219,7 +220,7 @@ const { photoSrc = '' } = Astro.props;
      * (nalezeno tam 25. 8. 2026, doplněno sem 14. 9. 2026 po nahlášení
      * zdeformovaných/neokrouhlých teček). Bez převázání skript po změně
      * šířky okna přes hranici stupně (resize, ne jen reload) dál zapisoval
-     * `--dot-fix` do SKRYTÉHO SVG předchozího stupně.
+     * výpočty do SKRYTÉHO SVG předchozího stupně.
      */
     let currentSvg: SVGSVGElement | undefined;
     let path: SVGPathElement | null = null;
@@ -239,7 +240,7 @@ const { photoSrc = '' } = Astro.props;
      * Jediná tečka musí sedět VE VÝŠCE prvního řádku textu (vedle něj), ne
      * nad blokem s mezerou — stejná konvence jako `.reviews__dot`
      * (`itemRect.top + 8`, viz ReviewsSection.astro). Výška sekce plyne
-     * z obsahu (Odchylka 2), takže svislé měřítko SVG (--dot-fix, scaleY)
+     * z obsahu (Odchylka 2), takže svislé měřítko SVG (scaleY)
      * není známé předem — po vykreslení proto přepočítáváme cílovou
      * souřadnici (dot cy, u zakřivených variant i lom trasy) na skutečnou
      * pozici začátku `.about__row` + data-gap px (stejných 8 px jako
@@ -254,18 +255,15 @@ const { photoSrc = '' } = Astro.props;
       const svgRect = activeSvg.getBoundingClientRect();
       const viewBox = activeSvg.viewBox.baseVal;
       // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
-      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // přechodné `Infinity`/`NaN` (dělení nulou), když má SVG
       // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
       // (oprava 14. 9. 2026).
       if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
       const scaleY = svgRect.height / viewBox.height;
       const scaleX = svgRect.width / viewBox.width;
-      activeSvg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
-      const gapPx = parseFloat(activeSvg.dataset.gap ?? '8');
       const dotOffset = parseFloat(activeSvg.dataset.dotOffset ?? '56');
-      const rowRect = row.getBoundingClientRect();
-      const dotY = (rowRect.top + gapPx - svgRect.top) / scaleY;
+      const dotY = (firstLineCenterY(row) - svgRect.top) / scaleY;
 
       const hasBend = activeSvg.dataset.bend === 'true';
       if (hasBend && currentPath) {
@@ -436,8 +434,8 @@ const { photoSrc = '' } = Astro.props;
      * z-index, založil by novou stacking context a fotka by se dostala NAD
      * trasu bez ohledu na pořadí v DOM — trasa by ji pak nemohla „přecházet“.
      */
-    padding-top: 104px;
-    padding-bottom: 64px;
+    padding-top: 72px;
+    padding-bottom: 72px;
   }
 
   /* --- Nadpis --- */
@@ -660,20 +658,19 @@ const { photoSrc = '' } = Astro.props;
   }
 
   .about__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .about__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
   .about__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 

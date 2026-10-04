@@ -252,6 +252,7 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
 </section>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -325,13 +326,12 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
       const svgRect = svg.getBoundingClientRect();
       const viewBox = svg.viewBox.baseVal;
       // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
-      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // přechodné `Infinity`/`NaN` (dělení nulou), když má SVG
       // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
       // (oprava 14. 9. 2026).
       if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
       const scaleX = svgRect.width / viewBox.width;
       const scaleY = svgRect.height / viewBox.height;
-      svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
       const gapPx = parseFloat(svg.dataset.gap ?? '22');
 
@@ -351,7 +351,7 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
           // Bez posunu z animace odhalení (translateY na položce) — jinak by
           // tečka zůstala o posun níž, když se přepočet trefí před odhalením.
           const t = new DOMMatrixReadOnly(getComputedStyle(item).transform === 'none' ? undefined : getComputedStyle(item).transform);
-          const y = (r.top - t.m42 + r.height / 2 - svgRect.top) / scaleY;
+          const y = (firstLineCenterY(label) - t.m42 - svgRect.top) / scaleY;
           const x = (r.left - t.m41 - 14 - svgRect.left) / scaleX;
           dot.setAttribute('cx', String(x));
           dot.setAttribute('cy', String(y));
@@ -529,8 +529,8 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
   }
 
   .articles__inner {
-    padding-top: 96px;
-    padding-bottom: 96px;
+    padding-top: 72px;
+    padding-bottom: 72px;
   }
 
   /* --- Nadpis / úvod / témata --- */
@@ -625,7 +625,7 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     display: flex;
     flex-direction: column;
     gap: 40px;
-    margin: 40px 24px 0 calc(24 * 100% / 390 + 32px);
+    margin: 40px 24px 0 calc(24 * 100% / 390 + 36px);
     padding: 0;
     list-style: none;
   }
@@ -723,10 +723,18 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     margin: 40px 24px 0 calc(24 * 100% / 390 + 32px);
   }
 
+  /* Výška odkazů podle textu; plochu pro prst (48 px) drží neviditelný ::after. */
+  .articles__cta::after,
+  .articles__external-link::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
   .articles__cta {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    min-height: 48px;
     font-weight: 600;
     font-size: 17px;
     color: var(--navy);
@@ -766,9 +774,9 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    min-height: 48px;
+    position: relative;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--navy);
     transition: color var(--duration-hover) var(--ease-out);
   }
@@ -804,20 +812,19 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
   }
 
   .articles__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .articles__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
   .articles__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 

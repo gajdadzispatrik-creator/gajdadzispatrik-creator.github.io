@@ -57,7 +57,7 @@ const faqs: Faq[] = [
 
 <section class="faq" aria-labelledby="faq">
   <div class="faq__inner">
-    <h2 id="faq" class="faq__heading faq__reveal-clip">Na&nbsp;co se&nbsp;často ptáte</h2>
+    <h2 id="faq" class="faq__heading faq__reveal-clip">Na&nbsp;co se&nbsp;často ptáte?</h2>
 
     <dl class="faq__list">
       {faqs.map((item) => (
@@ -164,6 +164,7 @@ const faqs: Faq[] = [
 </section>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -183,7 +184,7 @@ const faqs: Faq[] = [
      * (nalezeno tam 25. 8. 2026, doplněno sem 14. 9. 2026 po nahlášení
      * zdeformovaných/neokrouhlých teček). Bez převázání skript po změně
      * šířky okna přes hranici stupně (resize, ne jen reload) dál zapisoval
-     * `--dot-fix` do SKRYTÉHO SVG předchozího stupně.
+     * výpočty do SKRYTÉHO SVG předchozího stupně.
      */
     let currentSvg: SVGSVGElement | undefined;
     let path: SVGPathElement | null = null;
@@ -217,16 +218,14 @@ const faqs: Faq[] = [
       const svgRect = activeSvg.getBoundingClientRect();
       const viewBox = activeSvg.viewBox.baseVal;
       // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
-      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // přechodné `Infinity`/`NaN` (dělení nulou), když má SVG
       // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
       // (oprava 14. 9. 2026).
       if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
       const scaleY = svgRect.height / viewBox.height;
       const scaleX = svgRect.width / viewBox.width;
-      const itemRect = firstQuestion.getBoundingClientRect();
-      const localY = (itemRect.top + 8 - svgRect.top) / scaleY;
+      const localY = (firstLineCenterY(firstQuestion) - svgRect.top) / scaleY;
       currentDot.setAttribute('cy', String(localY));
-      currentDot.style.setProperty('--dot-fix', String(scaleY / scaleX));
     };
     syncDotPosition();
     window.addEventListener('resize', syncDotPosition);
@@ -359,7 +358,7 @@ const faqs: Faq[] = [
   .faq__inner {
     position: relative;
     z-index: 1;
-    padding: 112px 24px 96px calc(24 * 100% / 390 + 32px);
+    padding: 72px 24px 72px calc(24 * 100% / 390 + 32px);
   }
 
   /* --- Nadpis --- */
@@ -406,7 +405,7 @@ const faqs: Faq[] = [
   }
 
   .faq__answer {
-    margin: 7px 0 26px;
+    margin: 14px 0 26px;
     font-weight: 400;
     line-height: 1.6;
     font-size: 16px;
@@ -461,11 +460,13 @@ const faqs: Faq[] = [
     color: rgba(255, 255, 255, .62);
   }
 
+  /* Výška podle textu jako „Více o mně“; plochu pro prst (48 px) drží
+     neviditelný ::after, takže nemění mezery. */
   .faq__offer-link {
+    position: relative;
     display: inline-flex;
     align-items: center;
     align-self: flex-start;
-    min-height: 48px;
     font-weight: 600;
     font-size: 16px;
     color: #FFFFFF;
@@ -474,6 +475,12 @@ const faqs: Faq[] = [
     text-decoration-thickness: 1px;
     text-underline-offset: 6px;
     transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .faq__offer-link::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
   }
 
   .faq__offer-link:hover {
@@ -497,21 +504,19 @@ const faqs: Faq[] = [
   }
 
   .faq__dot {
-    --dot-fix: 1;
-    transform: scaleX(var(--dot-fix));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .faq__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix)) scale(.4);
+    transform: scale(.4);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
   .faq__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -561,7 +566,7 @@ const faqs: Faq[] = [
     }
 
     .faq__answer {
-      margin: 8px 0 28px;
+      margin: 14px 0 28px;
       font-size: 16.5px;
       max-width: 580px;
     }

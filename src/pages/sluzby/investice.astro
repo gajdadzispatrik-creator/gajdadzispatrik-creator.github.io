@@ -101,10 +101,10 @@ const rizikoRows: RowItem[] = [
 ];
 
 const cilItems: string[] = [
-  'vlastní bydlení,',
-  'budoucí větší výdaje,',
-  'tvorba dlouhodobého majetku,',
-  'penze.',
+  'vlastní bydlení',
+  'budoucí větší výdaje',
+  'tvorba dlouhodobého majetku',
+  'penze',
 ];
 
 interface Step {
@@ -234,7 +234,7 @@ const faqs: Faq[] = [
       <div class="inv-chapter__content">
         <div class="inv-chapter__top">
           <div class="inv-chapter__lead-col" data-reveal>
-            <h2 id="cil-heading" class="inv-h2--dominant">Jinak se&nbsp;investuje na&nbsp;několik let. Jinak na&nbsp;několik desetiletí.</h2>
+            <h2 id="cil-heading" class="inv-h2--dominant">Jinak se&nbsp;investuje na&nbsp;několik let.<br class="br-mobile" /> Jinak na&nbsp;několik desetiletí.</h2>
           </div>
           <div class="inv-chapter__support-col" data-reveal>
             <div class="inv-support__body">
@@ -462,6 +462,7 @@ const faqs: Faq[] = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -661,7 +662,6 @@ const faqs: Faq[] = [
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -670,8 +670,7 @@ const faqs: Faq[] = [
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.inv__notch');
           const dot = group.querySelector('.inv__dot');
@@ -803,19 +802,18 @@ const faqs: Faq[] = [
   }
 
   .inv__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .inv__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .inv__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1111,6 +1109,7 @@ const faqs: Faq[] = [
 
   .inv-chapter__list li:last-child {
     border-bottom: none;
+    padding-bottom: 0;
   }
 
   /* Stejná škála pro VŠECHNY ohraničené výrazné věty na téhle stránce
@@ -1159,6 +1158,11 @@ const faqs: Faq[] = [
     padding-top: 0;
   }
 
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .inv-rows__row:last-child {
+    padding-bottom: 0;
+  }
+
   .inv-rows__name {
     font-size: 18px;
     font-weight: 700;
@@ -1191,7 +1195,7 @@ const faqs: Faq[] = [
     padding-left: 22px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
   }
 
   .inv-step__marker {
@@ -1262,6 +1266,11 @@ const faqs: Faq[] = [
   .inv-faq__row:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .inv-faq__row:last-child {
+    padding-bottom: 0;
   }
 
   .inv-faq dt {
@@ -1743,7 +1752,7 @@ const faqs: Faq[] = [
       grid-template-columns: 1fr;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 14px;
       padding: 16px 0;
     }
 

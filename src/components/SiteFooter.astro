@@ -409,7 +409,6 @@ const socialIcons: Record<string, string> = {
       if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
       const scaleY = svgRect.height / viewBox.height;
       const scaleX = svgRect.width / viewBox.width;
-      svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
       const entryX = parseFloat(svg.dataset.entry ?? '0');
       const r = parseFloat(svg.dataset.radius ?? '28');
@@ -872,20 +871,19 @@ const socialIcons: Record<string, string> = {
   }
 
   .footer__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .footer__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
   .footer__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 

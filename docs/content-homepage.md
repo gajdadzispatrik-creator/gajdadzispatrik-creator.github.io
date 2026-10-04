@@ -355,7 +355,7 @@ Pravidla
 ## 11. Časté otázky
 
 Nadpis
-Na co se často ptáte
+Na co se často ptáte?
 
 Otázka 1
 Kolik stojí spolupráce se mnou?

@@ -306,7 +306,9 @@ const areas: Area[] = [
         {
           areas.map((area) => (
             <div class="sluzby-areas__col" data-reveal>
-              <h2>{area.heading}</h2>
+              <h2>{area.heading.split(/(?<=\.) /).map((part, i) => (
+                <>{i > 0 && <><br class="br-mobile" />{' '}</>}{part}</>
+              ))}</h2>
               <p>{area.text}</p>
               <a href={area.href}>{area.cta}</a>
             </div>
@@ -352,6 +354,7 @@ const areas: Area[] = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -619,7 +622,6 @@ const areas: Area[] = [
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         // `axisScaled` (ne holé `axis`) — zářezy/tečky musí sedět na STEJNÉ ose
         // jako trasa samotná (viz OPRAVA výše), jinak by tečka zůstala na staré
@@ -631,8 +633,7 @@ const areas: Area[] = [
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.sluzby__notch');
           const dot = group.querySelector('.sluzby__dot');
@@ -807,19 +808,18 @@ const areas: Area[] = [
   }
 
   .sluzby__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .sluzby__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .sluzby__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1016,6 +1016,11 @@ const areas: Area[] = [
     padding: 20px 0;
   }
 
+  /* Poslední řádek bez spodního odsazení — konec sekce určuje její padding. */
+  .sluzby-router__list li:last-child .sluzby-router__row {
+    padding-bottom: 0;
+  }
+
   .sluzby-router__list li:not(:last-child) .sluzby-router__row {
     border-bottom: 1px solid rgba(27, 74, 138, .14);
   }
@@ -1069,13 +1074,13 @@ const areas: Area[] = [
    * `margin-top` (ne `padding`) je tu VĚDOMÁ výjimka z „Konvence: mezera
    * mezi sekcemi" (CLAUDE.md) — dává první „velké" kapitole (Hypotéky)
    * záměrně větší odstup od Rozcestníku než mají ostatní přechody na
-   * stránce (128 vs. 112px na mobilu), aby vizuálně oddělila „výběr
+   * stránce (120 vs. 112px na mobilu; margin sjednocen s ostatními podstránkami 4. 10. 2026), aby vizuálně oddělila „výběr
    * situace" od „obsahu kapitol". Ověřeno auditem 1. 9. 2026 — na
    * desktopu/notebooku vypadá výsledný rytmus v pořádku, měnit jen
    * mechanismus bez viditelné potřeby nebyl důvod.
    */
   .sluzby-chapter--dominant {
-    margin-top: 72px;
+    margin-top: 64px;
     background: var(--bg);
   }
 
@@ -1173,6 +1178,7 @@ const areas: Area[] = [
 
   .sluzby-chapter__list li:last-child {
     border-bottom: none;
+    padding-bottom: 0;
   }
 
   .sluzby-chapter__statement-col {
@@ -1197,7 +1203,7 @@ const areas: Area[] = [
   /* ---------- Další oblasti ---------- */
 
   .sluzby-areas {
-    padding: 56px 24px 0;
+    padding: 56px 24px;
   }
 
   .sluzby-areas__bar {
@@ -1238,6 +1244,10 @@ const areas: Area[] = [
   .sluzby-areas__col:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  .sluzby-areas__col:last-child {
+    padding-bottom: 0;
   }
 
   .sluzby-areas__col h2 {
@@ -1283,7 +1293,7 @@ const areas: Area[] = [
    */
   .sluzby-closing {
     position: relative;
-    margin-top: 72px;
+    margin-top: 64px;
     padding-block: 56px;
     overflow: hidden;
     /* Tokeny místo natvrdo zapsaných hex hodnot (audit obsahu 1. 9. 2026) —
@@ -1473,7 +1483,7 @@ const areas: Area[] = [
     }
 
     .sluzby-chapter--dominant {
-      margin-top: 90px;
+      margin-top: 80px;
       padding: 72px 40px;
     }
 
@@ -1517,7 +1527,7 @@ const areas: Area[] = [
     }
 
     .sluzby-areas {
-      padding: 72px 40px 0;
+      padding: 72px 40px;
     }
 
     .sluzby-areas__bar p {
@@ -1554,7 +1564,7 @@ const areas: Area[] = [
     }
 
     .sluzby-closing {
-      margin-top: 90px;
+      margin-top: 80px;
       padding-block: 76px;
     }
 
@@ -1731,7 +1741,7 @@ const areas: Area[] = [
     }
 
     .sluzby-chapter--dominant {
-      margin-top: 110px;
+      margin-top: 100px;
       padding: 88px 96px;
       display: flex;
       align-items: flex-start;
@@ -1791,7 +1801,7 @@ const areas: Area[] = [
     }
 
     .sluzby-areas {
-      padding: 88px 96px 0;
+      padding: 88px 96px;
       display: flex;
       align-items: flex-start;
       gap: 48px;
@@ -1841,7 +1851,7 @@ const areas: Area[] = [
     }
 
     .sluzby-closing {
-      margin-top: 110px;
+      margin-top: 100px;
       padding-block: 88px;
     }
 
@@ -1969,6 +1979,7 @@ const areas: Area[] = [
     }
 
     .sluzby-chapter--dominant {
+      margin-top: 120px;
       padding: 88px 100px;
     }
 
@@ -1993,7 +2004,7 @@ const areas: Area[] = [
     }
 
     .sluzby-areas {
-      padding: 88px 100px 0;
+      padding: 88px 100px;
     }
 
     .sluzby-areas__bar {

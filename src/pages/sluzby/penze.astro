@@ -94,11 +94,11 @@ const penzeJsonLd = [
 ];
 
 const prijemItems: string[] = [
-  'požadovaný měsíční příjem,',
-  'očekávané výdaje,',
-  'bydlení a závazky,',
-  'předpokládaný věk odchodu do penze,',
-  'dobu, po kterou má vlastní majetek sloužit.',
+  'požadovaný měsíční příjem',
+  'očekávané výdaje',
+  'bydlení a závazky',
+  'předpokládaný věk odchodu do penze',
+  'dobu, po kterou má vlastní majetek sloužit',
 ];
 
 interface RowItem {
@@ -340,7 +340,7 @@ const faqs: Faq[] = [
       <div class="pen-chapter__content">
         <div class="pen-chapter__top">
           <div class="pen-chapter__lead-col" data-reveal>
-            <h2 id="role-heading" class="pen-h2--std">Penzijní produkt je jedna z&nbsp;možností. Ne celý plán.</h2>
+            <h2 id="role-heading" class="pen-h2--std">Penzijní produkt je jedna z&nbsp;možností.<br class="br-mobile" /> Ne celý plán.</h2>
           </div>
           <div class="pen-chapter__support-col" data-reveal>
             <p class="pen-support__text">
@@ -503,6 +503,7 @@ const faqs: Faq[] = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -703,7 +704,6 @@ const faqs: Faq[] = [
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -712,8 +712,7 @@ const faqs: Faq[] = [
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.pen__notch');
           const dot = group.querySelector('.pen__dot');
@@ -845,19 +844,18 @@ const faqs: Faq[] = [
   }
 
   .pen__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .pen__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .pen__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1143,6 +1141,7 @@ const faqs: Faq[] = [
 
   .pen-chapter__list li:last-child {
     border-bottom: none;
+    padding-bottom: 0;
   }
 
   /* Stejná škála pro VŠECHNY ohraničené výrazné věty na téhle stránce
@@ -1220,6 +1219,11 @@ const faqs: Faq[] = [
     padding-top: 0;
   }
 
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .pen-rows__row:last-child {
+    padding-bottom: 0;
+  }
+
   .pen-rows__name {
     margin: 0;
     font-size: 18px;
@@ -1253,7 +1257,7 @@ const faqs: Faq[] = [
     padding-left: 22px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
   }
 
   .pen-step__marker {
@@ -1324,6 +1328,11 @@ const faqs: Faq[] = [
   .pen-faq__row:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .pen-faq__row:last-child {
+    padding-bottom: 0;
   }
 
   .pen-faq dt {
@@ -1817,7 +1826,7 @@ const faqs: Faq[] = [
       grid-template-columns: 1fr;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 14px;
       padding: 16px 0;
     }
 

@@ -40,7 +40,7 @@ const steps = [
 ---
 
 <section class="process" aria-labelledby="jak-probiha">
-  <h2 id="jak-probiha" class="process__heading">Jednoduše. Bez tlaku.</h2>
+  <h2 id="jak-probiha" class="process__heading">Jednoduše.<br class="process__br" /> Bez&nbsp;tlaku.</h2>
 
   <ol class="process__steps">
     {steps.map((step) => (
@@ -121,6 +121,8 @@ const steps = [
     preserveAspectRatio="none"
     aria-hidden="true"
     focusable="false"
+    data-notch-axis="40"
+    data-notch-px="44"
   >
     <path
       class="process__route-path"
@@ -134,6 +136,7 @@ const steps = [
     ></path>
     <path
       class="process__route-notches"
+      data-notch
       d="M 40 340 H 90 M 40 552 H 90 M 40 764 H 90"
       fill="none"
       stroke="var(--line)"
@@ -141,29 +144,27 @@ const steps = [
       stroke-width="1"
       stroke-linecap="round"
     ></path>
-    <circle class="process__dot process__dot--pos-1" cx="90" cy="340" r="3.2" fill="var(--emerald)"></circle>
-    <circle class="process__dot process__dot--pos-2" cx="90" cy="552" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
-    <circle class="process__dot process__dot--pos-3" cx="90" cy="764" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="process__dot process__dot--pos-1" data-notch cx="90" cy="340" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="process__dot process__dot--pos-2" data-notch cx="90" cy="552" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="process__dot process__dot--pos-3" data-notch cx="90" cy="764" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
   </svg>
 
   <!--
-    Mobil <768 — „had" (29. 9. 2026, přání uživatele: tečky přímo na lince
-    jako na desktopu, bez zářezů z rovné osy). RouterSection na mobilu
-    KONČÍ vpravo na x=378, trasa tu proto vstupuje po pravém kraji a u
-    každého kroku přejde vodorovně přes šířku (doleva, doprava, doleva);
-    tečka na vodorovném úseku, text pod ní zarovnaný vlevo. Po třetím kroku
-    je trasa zpět na ose x=24, kde navazuje ReviewsSection.
+    Mobil <768 — časová osa (1. 10. 2026, stejně jako RouterSection): rovná
+    osa x=24 bez zákrutu (RouterSection na ní končí, ReviewsSection na ni
+    navazuje), tečky přímo na ose ve výšce středu názvu kroku, text vpravo
+    ve sloupci nadpisu (osa + 32 px).
   -->
   <svg
     class="process__route process__route--mobile"
-    viewBox="0 0 390 1020"
+    viewBox="0 0 390 808"
     preserveAspectRatio="none"
     aria-hidden="true"
     focusable="false"
   >
     <path
       class="process__route-path"
-      d="M 378 -20 V 282 A 18 18 0 0 1 360 300 H 42 A 18 18 0 0 0 24 318 V 468 A 18 18 0 0 0 42 486 H 360 A 18 18 0 0 1 378 504 V 654 A 18 18 0 0 1 360 672 H 42 A 18 18 0 0 0 24 690 V 1020"
+      d="M 24 -20 V 808"
       fill="none"
       stroke="var(--line)"
       stroke-opacity=".18"
@@ -171,9 +172,9 @@ const steps = [
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
-    <circle class="process__dot process__dot--pos-1" cx="60" cy="300" r="3.2" fill="var(--emerald)"></circle>
-    <circle class="process__dot process__dot--pos-2" cx="60" cy="486" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
-    <circle class="process__dot process__dot--pos-3" cx="60" cy="672" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="process__dot process__dot--pos-1" cx="24" cy="242" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="process__dot process__dot--pos-2" cx="24" cy="394" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="process__dot process__dot--pos-3" cx="24" cy="546" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
   </svg>
 </section>
 
@@ -269,22 +270,13 @@ const steps = [
   .process {
     position: relative;
     overflow: hidden;
-    height: 1020px;
+    /* Mobil: 808 = obsah 72 px od horní i spodní hrany; mezera mezi kroky i krok → tlačítko 56 px (4. 10. 2026). */
+    height: 808px;
     background: var(--bg);
     --vb: 390;
-    /*
-     * Trasa je neuniformně roztahované SVG (preserveAspectRatio="none") —
-     * šířka roste s viewportem, výška sekce přesně sedí s výškou viewBoxu na
-     * všech stupních, takže svislé měřítko je vždy 1. Vodorovné měřítko ale
-     * mimo kalibrační šířku (390/834/1366/1440) roste, takže by z kruhových
-     * teček vyšly elipsy. --dot-fix dopočítá násobek pro zpětné doškálování
-     * na kruh.
-     */
-    --dot-fix: calc(var(--vb) * 1px / 100vw);
   }
 
   .process__dot {
-    transform: scaleX(var(--dot-fix));
     transform-box: fill-box;
     transform-origin: center;
   }
@@ -299,7 +291,7 @@ const steps = [
     position: absolute;
     left: calc((var(--axis-x) * 100% / var(--vb)) + (var(--offset) * 1px));
     right: 24px;
-    top: 120px;
+    top: 72px;
     margin: 0;
     font-weight: 700;
     line-height: 1.02;
@@ -343,11 +335,11 @@ const steps = [
     top: calc((var(--y) + var(--oy)) * 1px);
     margin: 0;
     transform: translateY(var(--reveal-y, 0px));
-    /* Mobil: text POD tečkou na vodorovném úseku, levá hrana = tečka;
-       vpravo 40 = odstup od pravé svislice trasy (x=378). */
-    --ox: 0;
-    --oy: 14;
-    --rx: 40;
+    /* Mobil: text ve sloupci nadpisu (osa + 32 px), tečka na ose ve výšce
+       středu názvu (26 px × 1,1 / 2 → −14). */
+    --ox: 32;
+    --oy: -14;
+    --rx: 24;
   }
 
   .process__step.is-pending {
@@ -371,7 +363,7 @@ const steps = [
   }
 
   .process__desc {
-    margin: 7px 0 0;
+    margin: 14px 0 0;
     font-size: 16px;
     line-height: 1.55;
     color: var(--text-muted);
@@ -381,7 +373,7 @@ const steps = [
     position: absolute;
     left: calc((var(--axis-x) * 100% / var(--vb)) + (var(--offset) * 1px));
     right: 24px;
-    top: 882px;
+    top: 680px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -443,20 +435,21 @@ const steps = [
     }
   }
 
-  /* Kotvy — mobil (base), shodné s tečkami na vodorovných úsecích „hada". */
+  /* Kotvy — mobil (base), shodné s tečkami na ose. Horní hrany textů stejné
+     228/380/532 (nadpis 72 px od horní hrany, 4. 10. 2026). */
   .process__step--pos-1 {
-    --x: 60;
-    --y: 300;
+    --x: 24;
+    --y: 242;
   }
 
   .process__step--pos-2 {
-    --x: 60;
-    --y: 486;
+    --x: 24;
+    --y: 394;
   }
 
   .process__step--pos-3 {
-    --x: 60;
-    --y: 672;
+    --x: 24;
+    --y: 546;
   }
 
   /* ============ Tablet: 768–1199 ============ */
@@ -464,6 +457,11 @@ const steps = [
     .process {
       height: 1080px;
       --vb: 834;
+    }
+
+    /* Zalomení za „Jednoduše.“ jen na mobilu. */
+    .process__br {
+      display: none;
     }
 
     .process__heading {
@@ -475,11 +473,14 @@ const steps = [
       --offset: 56;
     }
 
+    /* Text 20 px za tečkou na konci 44px zářezu (osa x=40 + 64 px),
+       CLAUDE.md „Konvence: velikost teček a délka zářezů". */
     .process__step {
       right: auto;
       width: calc(684 * 100% / var(--vb));
-      --ox: 20;
-      --oy: -26;
+      --ox: 64;
+      /* Tečka v ose prvního řádku názvu (30 px × 1,1 → střed 16,5 px). */
+      --oy: -16.5;
     }
 
     .process__name {
@@ -501,17 +502,17 @@ const steps = [
     }
 
     .process__step--pos-1 {
-      --x: 90;
+      --x: 40;
       --y: 340;
     }
 
     .process__step--pos-2 {
-      --x: 90;
+      --x: 40;
       --y: 552;
     }
 
     .process__step--pos-3 {
-      --x: 90;
+      --x: 40;
       --y: 764;
     }
 
@@ -566,9 +567,8 @@ const steps = [
      * linkou“) — --ox: 0 zarovná levou hranu textu přesně pod tečku (stejná
      * konvence jako `.router__area` v RouterSection.astro: `left` bez
      * přidaného px odsazení, text visí přímo pod tečkou, ne vpravo od ní).
-     * Krok 2 leží na SVISLÉM úseku (text „vedle linky“) — ponechává si
-     * vodorovné odsazení (--ox: 24) a dostává vlastní svislé vystředění
-     * přes transform, ne přes --oy.
+     * Krok 2 leží na SVISLÉM úseku (text „vedle linky“) — odsazení 20 px
+     * a tečka v ose prvního řádku názvu (viz pravidlo u .process__step--pos-2).
      */
     .process__step {
       --ox: 24;
@@ -580,9 +580,12 @@ const steps = [
       --ox: 0;
     }
 
+    /* Krok 2 na svislém úseku: text 20 px vpravo od tečky, tečka v ose
+       prvního řádku názvu (34 px × 1,1 → střed 18,7 px) — CLAUDE.md
+       „Konvence: velikost teček a délka zářezů" (4. 10. 2026). */
     .process__step--pos-2 {
-      --oy: 0;
-      transform: translateY(calc(-50% + var(--reveal-y, 0px)));
+      --ox: 20;
+      --oy: -18.7;
     }
 
     .process__step--pos-1 {

@@ -428,12 +428,12 @@ Text: `Podíváme se, zda dává smysl refinancování, změna úvěru, navýše
 `Sazba je důležitá. Ale sama o sobě neříká, jestli je financování nastavené dobře.`
 `Při návrhu řešení proto sleduji i:`
 
-- kolik vlastních prostředků použít,
-- jak vysoká splátka je dlouhodobě rozumná,
-- jakou rezervu si ponechat,
-- podmínky jednotlivých možností financování,
-- termíny obchodu a čerpání,
-- možnosti budoucích změn hypotéky.
+- kolik vlastních prostředků použít
+- jak vysoká splátka je dlouhodobě rozumná
+- jakou rezervu si ponechat
+- podmínky jednotlivých možností financování
+- termíny obchodu a čerpání
+- možnosti budoucích změn hypotéky
 
 **Zvýrazněná věta**
 `Cílem není dostat od banky co nejvyšší úvěr. Cílem je financovat bydlení tak, aby vám po zaplacení splátky dál fungoval život.`
@@ -736,14 +736,14 @@ ne od příjmu.)*
 
 **Projdeme například**
 
-- příjmy a běžné výdaje,
-- rezervy a dostupné peníze,
-- úvěry a další závazky,
-- majetek,
-- současné pojištění,
-- investice,
-- zajištění na penzi,
-- krátkodobé a dlouhodobé cíle.
+- příjmy a běžné výdaje
+- rezervy a dostupné peníze
+- úvěry a další závazky
+- majetek
+- současné pojištění
+- investice
+- zajištění na penzi
+- krátkodobé a dlouhodobé cíle
 
 **Zvýrazněná věta**
 `Některé věci mohou zůstat přesně tak, jak jsou.`
@@ -1141,14 +1141,14 @@ beze změny)*
 
 **Podíváme se na**
 
-- rozdíl mezi pojištěním nemovitosti a domácnosti,
-- správnou pojistnou částku,
-- riziko podpojištění,
-- rozsah krytí,
-- limity a výluky,
-- spoluúčast,
-- odpovědnost,
-- potřebu aktualizace po rekonstrukci nebo jiné větší změně majetku.
+- rozdíl mezi pojištěním nemovitosti a domácnosti
+- správnou pojistnou částku
+- riziko podpojištění
+- rozsah krytí
+- limity a výluky
+- spoluúčast
+- odpovědnost
+- potřebu aktualizace po rekonstrukci nebo jiné větší změně majetku
 
 **Závěr**
 `Pojištění má odpovídat tomu, co dnes vlastníte a jaká rizika potřebujete skutečně pokrýt.`
@@ -1476,10 +1476,10 @@ se na" v kapitole Majetek na `/sluzby/pojisteni`)*
 karty** (vykreslené jako tichý výčet na vlasových řádcích pod eyebrow,
 stejné provedení jako seznam v kapitole Majetek na `/sluzby/pojisteni`)
 
-- vlastní bydlení,
-- budoucí větší výdaje,
-- tvorba dlouhodobého majetku,
-- penze.
+- vlastní bydlení
+- budoucí větší výdaje
+- tvorba dlouhodobého majetku
+- penze
 
 **Výrazný statement** *(na smaragdové svislici)*
 `Stejná investice nemusí dávat smysl pro dva různé cíle.`
@@ -1923,11 +1923,11 @@ služby).*
 
 **Při plánování řešíme**
 
-- požadovaný měsíční příjem,
-- očekávané výdaje,
-- bydlení a závazky,
-- předpokládaný věk odchodu do penze,
-- dobu, po kterou má vlastní majetek sloužit.
+- požadovaný měsíční příjem
+- očekávané výdaje
+- bydlení a závazky
+- předpokládaný věk odchodu do penze
+- dobu, po kterou má vlastní majetek sloužit
 
 **Text**
 `Důležité je počítat také s tím, že za několik desetiletí budou mít peníze jinou kupní sílu než dnes.`

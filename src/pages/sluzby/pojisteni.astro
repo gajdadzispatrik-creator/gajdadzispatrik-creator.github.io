@@ -101,14 +101,14 @@ const risks: RowItem[] = [
 ];
 
 const majetekItems: string[] = [
-  'rozdíl mezi pojištěním nemovitosti a domácnosti,',
-  'správnou pojistnou částku,',
-  'riziko podpojištění,',
-  'rozsah krytí,',
-  'limity a výluky,',
-  'spoluúčast,',
-  'odpovědnost,',
-  'potřebu aktualizace po rekonstrukci nebo jiné větší změně majetku.',
+  'rozdíl mezi pojištěním nemovitosti a domácnosti',
+  'správnou pojistnou částku',
+  'riziko podpojištění',
+  'rozsah krytí',
+  'limity a výluky',
+  'spoluúčast',
+  'odpovědnost',
+  'potřebu aktualizace po rekonstrukci nebo jiné větší změně majetku',
 ];
 
 interface Step {
@@ -238,7 +238,7 @@ const faqs: Faq[] = [
       <div class="poj-chapter__content poj-chapter__content--dopad">
         <div class="poj-chapter__top">
           <div class="poj-chapter__lead-col" data-reveal>
-            <h2 id="dopad-heading" class="poj-h2--dominant">Nejdřív finanční dopad. Potom pojistná částka.</h2>
+            <h2 id="dopad-heading" class="poj-h2--dominant">Nejdřív finanční dopad.<br class="br-mobile" /> Potom pojistná částka.</h2>
           </div>
           <div class="poj-chapter__support-col" data-reveal>
             <p class="poj-support__text">
@@ -468,6 +468,7 @@ const faqs: Faq[] = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -654,7 +655,6 @@ const faqs: Faq[] = [
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -663,8 +663,7 @@ const faqs: Faq[] = [
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.poj__notch');
           const dot = group.querySelector('.poj__dot');
@@ -796,19 +795,18 @@ const faqs: Faq[] = [
   }
 
   .poj__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .poj__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .poj__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1022,6 +1020,12 @@ const faqs: Faq[] = [
     gap: 20px;
   }
 
+  /* Péče nemá __top wrapper — nadpis → text 20 px jako ostatní kapitoly
+     (dřív 32 px z gapu __content). Od notebooku přebíjí řádkový gap 60. */
+  .poj-chapter--pece .poj-chapter__content {
+    gap: 20px;
+  }
+
   .poj-chapter__lead-col {
     display: flex;
     flex-direction: column;
@@ -1112,6 +1116,7 @@ const faqs: Faq[] = [
 
   .poj-chapter__list li:last-child {
     border-bottom: none;
+    padding-bottom: 0;
   }
 
   /* Zadání dává pro VŠECHNY ohraničené výrazné věty na téhle stránce
@@ -1162,6 +1167,11 @@ const faqs: Faq[] = [
     padding-top: 0;
   }
 
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .poj-rows__row:last-child {
+    padding-bottom: 0;
+  }
+
   .poj-rows__name {
     font-size: 18px;
     font-weight: 700;
@@ -1198,7 +1208,7 @@ const faqs: Faq[] = [
     padding-left: 22px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
   }
 
   .poj-step__marker {
@@ -1269,6 +1279,11 @@ const faqs: Faq[] = [
   .poj-faq__row:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .poj-faq__row:last-child {
+    padding-bottom: 0;
   }
 
   .poj-faq dt {
@@ -1753,7 +1768,7 @@ const faqs: Faq[] = [
       grid-template-columns: 1fr;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 14px;
       padding: 16px 0;
     }
 

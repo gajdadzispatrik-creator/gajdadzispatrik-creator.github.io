@@ -23,7 +23,18 @@ npm run build        # astro check + astro build → dist/
 npm run preview      # náhled buildu
 npm run check:layout # automatická kontrola pravidel z „Konvence" níže (vyžaduje běžící npm run dev)
 npm run check:typo   # kontrola zalamování řádků v textu (vyžaduje běžící npm run dev)
+npm run check:dots   # velikost teček, délka zářezů a mezera k textu (vyžaduje běžící npm run dev)
+npm run check:spacing # mezery nadpis → text a konce sekcí na všech stránkách (vyžaduje běžící npm run dev)
 ```
+
+`check:spacing` (`scripts/check-spacing.mjs`, od 4. 10. 2026) měří na
+vykreslené stránce skutečnou vzdálenost nadpisu (h2/h3/dt/`*__name`) od
+prvního textu pod ním — i když text leží v jiném bloku/sloupci markupu
+(dřívější ruční měření bralo jen sourozence a minulo text přilepený pod
+nadpisem na `/sluzby/financni-plan`). Stejná role (typ sekce + úroveň
+nadpisu + text/seznam) musí mít na jednom stupni všude stejnou mezeru, nikde
+pod 8 px. Dál hlídá konce sekcí: homepage na mobilu 72 px nahoře i dole,
+kapitoly a závěrečné pásy podstránek na každém stupni všude stejně.
 
 `check:typo` (`scripts/check-typography.mjs`) projde **všechny stránky, na
 které web odkazuje** (plus `/clanky` a stránku 404), a hledá ve vykresleném
@@ -238,7 +249,14 @@ opravu:
    (`--ox: 0`, žádný `translateX(-50%)`, `text-align: left`). Ne vystředit na
    tečku, ne odsadit vpravo.
 2. **Text u tečky na svislém úseku trasy** (text „vedle tečky"): odsadit
-   **vpravo** o pevný počet px (typicky 16–24) a **svisle vycentrovat** na
+   **vpravo** (14 px mobil, 20 px výš — viz „Konvence: velikost teček a délka
+   zářezů") a tečka leží **v ose PRVNÍHO řádku** textu vedle ní (název
+   položky, popisek kapitoly) — **platí od 4. 10. 2026 pro celý web**
+   a nahrazuje starší znění níže (centrování na celý blok / na celý nadpis),
+   které je ponechané jen pro dohledatelnost historie. Tečka se v JS počítá
+   jedinou společnou funkcí `firstLineCenterY()` (`src/scripts/first-line.ts`),
+   u pevně pozicovaných položek přes `--oy` = −(výška řádku názvu / 2).
+   Původní znění: svisle vycentrovat na
    tečku (`transform: translateY(-50%)` nebo ekvivalentní `--ty: -50%`).
    Skládá-li se text z **nadpisu + popisku dohromady** (ne jeden řádek),
    vycentrovat na **celý blok** (nadpis i popisek), ne jen na nadpis —
@@ -309,6 +327,56 @@ opravu:
 Referenční implementace: `ProcessSection.astro` (`--ox`/`--oy` na kotvě),
 `RouterSection.astro` (`left: calc(var(--x) * 100% / var(--vb))` bez offsetu
 pro dominantní/vodorovné položky), `ConnectionsSection.astro`.
+
+## Konvence: velikost teček a délka zářezů
+
+Doplněno 1. 10. 2026 na výslovné přání uživatele („musí to všude sedět podle
+pravidel"). Tečky byly v každé sekci jinak velké (na mobilu 3,4–9,6 px,
+mimo kalibrační šířku elipsy) a zářezy jinak dlouhé (18–72 px) — každá
+sekce si roztažení SVG korigovala po svém (`--dot-fix`), jen do kulata,
+ne na skutečnou velikost. Platí **globálně a automaticky** pro homepage
+i všechny podstránky, mobil, tablet i desktop:
+
+| | mobil (<768) | tablet (768–1199) | notebook + desktop (1200+) |
+|---|---|---|---|
+| hlavní (zelená) tečka — `r` | 3,2 → průměr 6,4 px | 3,2 → 6,4 px | 3,5 → 7 px |
+| ostatní tečky — `r` | 2,4 → 4,8 px | 2,4 → 4,8 px | 2,6 → 5,2 px |
+| zářez (osa → tečka) | 22 px | 44 px | 36 px |
+| mezera tečka → text vedle ní | 14 px | 20 px | 20 px |
+
+- **Tečka má na obrazovce vždy poloměr přesně `r` px a je kulatá** — v každé
+  sekci, na každé šířce. Zajišťuje to JEDNO globální pravidlo:
+  `global.css` (`svg[preserveAspectRatio='none'] circle { scale: var(--dot-sx)
+  var(--dot-sy) }`) + skript v `BaseLayout.astro`, který na každé takové SVG
+  zapisuje zpětné měřítko roztažení. Sekce tečky nijak nedoškálovávají
+  (žádný `--dot-fix`, žádný `scaleX` na tečce) — u nové sekce stačí
+  `<circle r="3.2|2.4|3.5|2.6">` ve SVG s `preserveAspectRatio="none"`.
+- **Zářez má pevnou délku v px, ne v lokálních jednotkách SVG.** Sekce, které
+  polohu tečky počítají v JS, to dělají přes `data-notch-offset`
+  (BenefitsSection, CasesSection, podstránky — `dotOffset`). Statický zářez
+  stačí označit: `data-notch-axis="<x osy>" data-notch-px="44"` na SVG
+  a `data-notch` na zářezu (`path` s `M x y H x2`) i jeho tečkách — konec
+  dopočítá skript v `BaseLayout.astro` (RouterSection/ProcessSection tablet).
+- Text u tečky na konci zářezu začíná na `osa + zářez + mezera`
+  (mobil `+ 36px`, tablet `+ 64px`, desktop `+ 56px`).
+- **Svislá poloha (od 4. 10. 2026):** tečka s textem vedle sebe leží v ose
+  PRVNÍHO řádku tohoto textu — ne na středu celého bloku (název + popis),
+  ne na středu víceřádkového nadpisu. Společná funkce `firstLineCenterY()`
+  v `src/scripts/first-line.ts` (všechny sekce i podstránky).
+- **Tečka na vodorovném úseku** (text nad ní nebo pod ní): levá hrana textu
+  přesně na tečce (bod 1 konvence výše).
+- **Mezera nadpis sekce → první položka na lince** (Rozcestník, Proces,
+  Výhody na mobilu): 74 px.
+- Tečky ležící přímo na lince (bez zářezu — Connections, Router, Process na
+  mobilu/desktopu) mají stejné velikosti, jen bez zářezu.
+- Výjimka: velká zelená tečka na konci linky v patičce u značky (logo, není
+  součást trasy).
+
+**Kontrola:** `npm run check:dots` (`scripts/check-dots.mjs`) — projde všechny
+stránky (odkazy od homepage) na 17 šířkách a změří každou tečku, zářez,
+mezeru k textu, svislou polohu tečky vůči prvnímu řádku textu vedle ní
+a levou hranu textu pod tečkou. **Spusť ho po každé úpravě trasy nebo nové sekci/stránce
+s tečkami** — teprve s 0 nálezy je hotovo.
 
 ## Konvence: běžný text nikdy pod 16px
 
@@ -498,6 +566,17 @@ tak měl dvojnásobnou mezeru (padding obou sekcí) oproti přechodu Finanční
 plán→Další oblasti (jen padding jedné sekce, protože druhá strana měla 0) —
 uživatel to popsal jako „moc namačkané". Oprava: `padding-bottom` sjednocen
 s `padding-top` na všech stupních (base/tablet/notebook/desktop).
+
+**Homepage na mobilu (<768) — 72 px nahoře i dole u každé sekce**
+(sjednoceno 1. 10. 2026 na 96 px, 4. 10. 2026 na přání uživatele zmenšeno
+na 72 px — mezi sekcemi se stejným pozadím působilo 192 px prázdně; mezery
+mezi položkami v Procesu, Výhodách a hodnocení → první recenze 56 px): od horní hrany sekce k prvnímu
+obsahu (nadpis) a od posledního obsahu (text, odkaz, tlačítko, u fotky
+s rozpuštěním konec viditelné části) ke spodní hraně, Connections až
+Kontakt. U sekcí s pevnou výškou (Connections, Router, Process) to drží
+souřadnice + výška sekce; RouterSection výšku na mobilu dopočítává v JS
+(popisky se na úzkých telefonech zalamují). Hero, statistický pás
+a patička mají vlastní rytmus.
 
 **Kontrola při tvorbě/úpravě sekce:** neposuzuj jen CSS hodnoty izolovaně —
 změř v prohlížeči skutečnou mezeru mezi POSLEDNÍM viditelným prvkem jedné

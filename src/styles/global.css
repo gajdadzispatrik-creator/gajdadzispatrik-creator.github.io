@@ -91,6 +91,23 @@ button {
   border: 0;
 }
 
+/* Zalomení jen na mobilu — nadpis ze dvou vět: každá věta na vlastním řádku. */
+@media (min-width: 768px) {
+  .br-mobile {
+    display: none;
+  }
+}
+
+/* Tečky na dekorativní trase: kulaté a skutečně velké přesně `r` px na každé
+   šířce, v každé sekci — zpětné měřítko roztažení SVG počítá BaseLayout.astro
+   (CLAUDE.md „Konvence: velikost teček a délka zářezů"). Vlastnost `scale` se skládá
+   s případným `transform` sekce (reveal scale(.4) → scale(1)). */
+svg[preserveAspectRatio='none'] circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  scale: var(--dot-sx, 1) var(--dot-sy, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

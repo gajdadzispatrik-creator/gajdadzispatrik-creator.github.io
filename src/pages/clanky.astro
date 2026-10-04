@@ -351,6 +351,7 @@ const ARTICLES_PAGE_SIZE = 6;
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -543,7 +544,6 @@ const ARTICLES_PAGE_SIZE = 6;
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -552,8 +552,7 @@ const ARTICLES_PAGE_SIZE = 6;
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.cla__notch');
           const dot = group.querySelector('.cla__dot');
@@ -754,19 +753,18 @@ const ARTICLES_PAGE_SIZE = 6;
   }
 
   .cla__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .cla__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .cla__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -989,11 +987,18 @@ const ARTICLES_PAGE_SIZE = 6;
     color: var(--text);
   }
 
+  /* Výška podle textu; plochu pro prst (48 px) drží neviditelný ::after. */
+  .cla-text-link::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
   .cla-text-link {
+    position: relative;
     display: inline-flex;
     align-items: center;
     width: fit-content;
-    min-height: 48px;
     font-weight: 600;
     font-size: 16px;
     color: var(--emerald);

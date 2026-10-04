@@ -135,7 +135,7 @@ const routeVariants = [
                 stroke-linecap="round"
               />
             )}
-            <circle class="legal__dot" cx={variant.dotX} cy={variant.dotY} r="3.5" fill="var(--emerald)" />
+            <circle class="legal__dot" cx={variant.dotX} cy={variant.dotY} r={variant.tier === 'mobile' || variant.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
           </svg>
         ))
       }
@@ -184,6 +184,8 @@ const routeVariants = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
+
   const legal = document.querySelector('.legal') as HTMLElement | null;
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
@@ -222,6 +224,18 @@ const routeVariants = [
         if (dot) dot.setAttribute('cx', String(targetLocalX));
         const notch = svg.querySelector('.legal__notch');
         if (notch) notch.setAttribute('x2', String(targetLocalX));
+
+        // Mobil/tablet (zářez z rovné osy, bez ohybu): tečka vedle nadpisu,
+        // v ose jeho prvního řádku — stejné pravidlo jako všude jinde
+        // (CLAUDE.md „Konvence: velikost teček a délka zářezů", 4. 10. 2026).
+        // Notebook/desktop: tečka na vodorovném ohybu, nadpis pod ní.
+        const heading = legal.querySelector('.legal__heading');
+        if (notch && heading && svgRect.height > 0) {
+          const localY = String((firstLineCenterY(heading) - svgRect.top) / (svgRect.height / height));
+          dot?.setAttribute('cy', localY);
+          notch.setAttribute('y1', localY);
+          notch.setAttribute('y2', localY);
+        }
       });
     };
 
@@ -356,9 +370,12 @@ const routeVariants = [
     display: none;
   }
 
+  /* Text 14 px za tečkou na konci 22px zářezu (osa 24 + 36 px), tablet
+     20 px za 44px zářezem (osa 40 + 64 px) — CLAUDE.md „Konvence: velikost
+     teček a délka zářezů", stejně jako kapitoly podstránek. */
   .legal__content {
     position: relative;
-    margin-left: calc(24 * 100% / 390 + 32px);
+    margin-left: calc(24 * 100% / 390 + 36px);
     margin-right: calc(24 * 100% / 390);
   }
 
@@ -389,7 +406,7 @@ const routeVariants = [
 
   .legal__meta-date {
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--text-muted);
   }
 
@@ -477,7 +494,7 @@ const routeVariants = [
     }
 
     .legal__content {
-      margin-left: calc(40 * 100% / 834 + 56px);
+      margin-left: calc(40 * 100% / 834 + 64px);
       margin-right: calc(40 * 100% / 834);
     }
 

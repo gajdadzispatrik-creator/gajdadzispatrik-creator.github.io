@@ -89,7 +89,7 @@ const areas = [
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
-    <circle class="router__dot router__dot--pos-1" cx="260" cy="560" r="4" fill="var(--emerald)"></circle>
+    <circle class="router__dot router__dot--pos-1" cx="260" cy="560" r="3.5" fill="var(--emerald)"></circle>
     <circle class="router__dot router__dot--pos-2" cx="480" cy="560" r="2.6" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
     <circle class="router__dot router__dot--pos-3" cx="700" cy="560" r="2.6" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
     <circle class="router__dot router__dot--pos-4" cx="920" cy="560" r="2.6" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
@@ -103,6 +103,8 @@ const areas = [
     preserveAspectRatio="none"
     aria-hidden="true"
     focusable="false"
+    data-notch-axis="40"
+    data-notch-px="44"
   >
     <path
       class="router__axis-path"
@@ -116,6 +118,7 @@ const areas = [
     ></path>
     <path
       class="router__axis-notches"
+      data-notch
       d="M 40 336 H 90 M 40 560 H 90 M 40 700 H 90 M 40 840 H 90 M 40 980 H 90"
       fill="none"
       stroke="var(--line-on-dark)"
@@ -123,11 +126,11 @@ const areas = [
       stroke-width="1"
       stroke-linecap="round"
     ></path>
-    <circle class="router__dot router__dot--pos-1" cx="90" cy="336" r="3.4" fill="var(--emerald)"></circle>
-    <circle class="router__dot router__dot--pos-2" cx="90" cy="560" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-3" cx="90" cy="700" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-4" cx="90" cy="840" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-5" cx="90" cy="980" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-1" data-notch cx="90" cy="336" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="router__dot router__dot--pos-2" data-notch cx="90" cy="560" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-3" data-notch cx="90" cy="700" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-4" data-notch cx="90" cy="840" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-5" data-notch cx="90" cy="980" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
   </svg>
 
   <!--
@@ -153,7 +156,7 @@ const areas = [
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
-    <circle class="router__dot router__dot--pos-1" cx="233" cy="560" r="4" fill="var(--emerald)"></circle>
+    <circle class="router__dot router__dot--pos-1" cx="233" cy="560" r="3.5" fill="var(--emerald)"></circle>
     <circle class="router__dot router__dot--pos-2" cx="448" cy="560" r="2.6" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
     <circle class="router__dot router__dot--pos-3" cx="663" cy="560" r="2.6" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
     <circle class="router__dot router__dot--pos-4" cx="878" cy="560" r="2.6" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
@@ -171,23 +174,22 @@ const areas = [
     obě sekce sdílí stejnou osu už na zdroji.)
   -->
   <!--
-    „Had" (29. 9. 2026, přání uživatele: tečky přímo na lince jako na
-    desktopu, bez zářezů z rovné osy). Z osy x=24 u každé oblasti vodorovně
-    přes šířku, střídavě doprava/doleva; tečka na vodorovném úseku, text pod
-    ní zarovnaný vlevo. Po páté oblasti trasa končí vpravo na x=378 — tam
-    na ni navazuje ProcessSection.astro. Poloměry 18 jako ostatní mobilní
-    trasy.
+    Časová osa (1. 10. 2026, přání uživatele: tečky přímo na lince, ale bez
+    proplétání „hadem"). Rovná osa x=24 shora dolů, tečky leží přímo na ní,
+    text vpravo ve sloupci nadpisu (osa + 32 px), tečka svisle na středu
+    názvu oblasti (výjimka z „celého bloku" — dominanta má výrazně vyšší
+    blok, viz CLAUDE.md bod 2). Končí na x=24, kde navazuje ProcessSection.
   -->
   <svg
     class="router__axis router__axis--mobile"
-    viewBox="0 0 390 1060"
+    viewBox="0 0 390 998"
     preserveAspectRatio="none"
     aria-hidden="true"
     focusable="false"
   >
     <path
       class="router__axis-path"
-      d="M 24 -20 V 212 A 18 18 0 0 0 42 230 H 360 A 18 18 0 0 1 378 248 V 402 A 18 18 0 0 1 360 420 H 42 A 18 18 0 0 0 24 438 V 556 A 18 18 0 0 0 42 574 H 360 A 18 18 0 0 1 378 592 V 710 A 18 18 0 0 1 360 728 H 42 A 18 18 0 0 0 24 746 V 864 A 18 18 0 0 0 42 882 H 360 A 18 18 0 0 1 378 900 V 1060"
+      d="M 24 -20 V 998"
       fill="none"
       stroke="var(--line-on-dark)"
       stroke-opacity=".3"
@@ -195,11 +197,11 @@ const areas = [
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
-    <circle class="router__dot router__dot--pos-1" cx="60" cy="230" r="3.2" fill="var(--emerald)"></circle>
-    <circle class="router__dot router__dot--pos-2" cx="60" cy="420" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-3" cx="60" cy="574" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-4" cx="60" cy="728" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
-    <circle class="router__dot router__dot--pos-5" cx="60" cy="882" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-1" cx="24" cy="208" r="3.2" fill="var(--emerald)"></circle>
+    <circle class="router__dot router__dot--pos-2" cx="24" cy="419" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-3" cx="24" cy="559" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-4" cx="24" cy="699" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
+    <circle class="router__dot router__dot--pos-5" cx="24" cy="839" r="2.4" fill="var(--line-on-dark)" fill-opacity=".65"></circle>
   </svg>
 </section>
 
@@ -211,7 +213,35 @@ const areas = [
   // stavu, bez postupné animace — na zadání uživatele 24. 8. 2026.
   const disableAnimation = reduceMotion || window.matchMedia('(min-width: 768px)').matches;
 
-  const section = document.querySelector('.router');
+  const section = document.querySelector<HTMLElement>('.router');
+
+  /*
+   * Mobil: výška sekce = konec poslední oblasti + 72 px (rozestup sekcí,
+   * 4. 10. 2026). Popisky se na úzkých telefonech zalamují na víc řádků,
+   * pevná výška by dole nechávala pokaždé jinou mezeru. ViewBox a osa se
+   * prodlužují spolu se sekcí, takže svislé měřítko trasy zůstává 1 a tečky
+   * sedí na svých --y. CSS výška zůstává jako výchozí stav bez JS.
+   */
+  const mobileAxis = section?.querySelector<SVGSVGElement>('.router__axis--mobile');
+  const lastArea = section?.querySelector<HTMLElement>('.router__area--pos-5');
+  const syncMobileHeight = () => {
+    if (!section || !mobileAxis || !lastArea) return;
+    if (getComputedStyle(mobileAxis).display === 'none') {
+      section.style.removeProperty('height');
+      return;
+    }
+    const height = Math.round(lastArea.getBoundingClientRect().bottom - section.getBoundingClientRect().top + 72);
+    section.style.height = `${height}px`;
+    mobileAxis.setAttribute('viewBox', `0 0 390 ${height}`);
+    mobileAxis.querySelector('.router__axis-path')?.setAttribute('d', `M 24 -20 V ${height}`);
+  };
+  if (section) {
+    syncMobileHeight();
+    document.fonts.ready.then(syncMobileHeight);
+    new ResizeObserver(syncMobileHeight).observe(lastArea ?? section);
+    window.addEventListener('resize', syncMobileHeight);
+  }
+
   if (section && !disableAnimation) {
     const activeSvg = Array.from(section.querySelectorAll('.router__axis')).find(
       (svg) => getComputedStyle(svg).display !== 'none'
@@ -288,21 +318,15 @@ const areas = [
   .router {
     position: relative;
     overflow: hidden;
-    height: 1060px;
+    /* Mobil: obsah 72 px od horní i spodní hrany (na 375–430 px), položky
+       po 140 px — popisky 16 px se na 320 px zalomí a nesmí se dotknout
+       další položky (1. 10. 2026). */
+    height: 998px;
     background: linear-gradient(196deg, var(--router-grad-1) 0%, var(--navy) 52%, var(--router-grad-2) 100%);
     --vb: 390;
-    /*
-     * Osa je neuniformně roztahované SVG (preserveAspectRatio="none") — šířka
-     * roste s viewportem, výška sekce přesně sedí s výškou viewBoxu na všech
-     * stupních, takže svislé měřítko je vždy 1. Vodorovné měřítko ale mimo
-     * kalibrační šířku (390/834/1366/1440) roste, takže by z kruhových teček
-     * vyšly elipsy. --dot-fix dopočítá násobek pro zpětné doškálování na kruh.
-     */
-    --dot-fix: calc(var(--vb) * 1px / 100vw);
   }
 
   .router__dot {
-    transform: scaleX(var(--dot-fix));
     transform-box: fill-box;
     transform-origin: center;
   }
@@ -312,7 +336,7 @@ const areas = [
     position: absolute;
     left: 0;
     right: 0;
-    top: 200px;
+    top: 150px;
     height: 420px;
     background: radial-gradient(74% 44% at 30% 40%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
     pointer-events: none;
@@ -345,7 +369,7 @@ const areas = [
   .router__heading {
     position: absolute;
     left: calc((var(--axis-x) * 100% / var(--vb)) + (var(--offset) * 1px));
-    top: 122px;
+    top: 72px;
     margin: 0;
     font-weight: 700;
     line-height: 1;
@@ -383,14 +407,16 @@ const areas = [
    */
   .router__area {
     position: absolute;
-    left: calc(var(--x) * 100% / var(--vb));
+    left: calc(var(--x) * 100% / var(--vb) + var(--tx, 0px));
     right: calc(var(--rx) * 100% / var(--vb));
     top: calc((var(--y) + var(--oy)) * 1px);
     transform: translateY(calc(var(--reveal-mag, 0px) * var(--reveal-dir, 1)));
     margin: 0;
-    --x: 60;
-    /* Mobil: 40 = odstup textu od pravé svislice „hada" (x=378). */
-    --rx: 40;
+    /* Mobil: text ve sloupci nadpisu — osa x=24 + 32 px (stejně jako
+       .router__heading), tečka leží přímo na ose. */
+    --x: 24;
+    --tx: 32px;
+    --rx: 24;
     --reveal-dir: 1;
   }
 
@@ -408,7 +434,7 @@ const areas = [
   .router__link {
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 14px;
     min-height: 80px;
   }
 
@@ -422,15 +448,14 @@ const areas = [
   }
 
   .router__desc {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.5;
     color: rgba(255, 255, 255, .56);
     transition: color var(--duration-hover) var(--ease-out);
   }
 
   .router__more {
-    margin-top: 2px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--emerald-light);
     transition: color var(--duration-hover) var(--ease-out);
@@ -451,7 +476,7 @@ const areas = [
 
   /* Dominanta (Bydlení) — dvojnásobné písmo, vlastní gap, trvalá vlasová linka pod „Více“. */
   .router__area--dominant .router__link {
-    gap: 10px;
+    gap: 14px;
   }
 
   .router__area--dominant .router__name {
@@ -469,7 +494,7 @@ const areas = [
   .router__area--dominant .router__more {
     display: inline-block;
     width: fit-content;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--white);
     padding-bottom: 3px;
     border-bottom: 1px solid var(--emerald);
@@ -482,7 +507,7 @@ const areas = [
 
   /* Tečka na ose roste o 1 px v hoveru odpovídající oblasti. */
   .router:has(.router__area--pos-1 .router__link:hover) .router__dot--pos-1 {
-    r: 5;
+    r: 4.5;
   }
 
   .router:has(.router__area--pos-2 .router__link:hover) .router__dot--pos-2 {
@@ -527,31 +552,32 @@ const areas = [
     }
   }
 
-  /* Kotvy — mobil (base): tečka na vodorovném úseku „hada", text 14 px
-     pod ní, levá hrana = tečka (x=60). */
+  /* Kotvy — mobil (base): tečka na ose ve výšce středu názvu oblasti
+     (název 24 px × 1,1 → −13; dominanta 36 px × 1,1 → −20). Horní hrany
+     textů 188/406/546/686/826 (nadpis 72 px od horní hrany, 4. 10. 2026). */
   .router__area--pos-1 {
-    --y: 230;
-    --oy: 14;
+    --y: 208;
+    --oy: -20;
   }
 
   .router__area--pos-2 {
-    --y: 420;
-    --oy: 14;
+    --y: 419;
+    --oy: -13;
   }
 
   .router__area--pos-3 {
-    --y: 574;
-    --oy: 14;
+    --y: 559;
+    --oy: -13;
   }
 
   .router__area--pos-4 {
-    --y: 728;
-    --oy: 14;
+    --y: 699;
+    --oy: -13;
   }
 
   .router__area--pos-5 {
-    --y: 882;
-    --oy: 14;
+    --y: 839;
+    --oy: -13;
   }
 
   /* ============ Tablet: 768–1199 ============ */
@@ -574,8 +600,11 @@ const areas = [
       font-size: 56px;
     }
 
+    /* Text 20 px za tečkou na konci 44px zářezu (osa x=40 + 64 px),
+       CLAUDE.md „Konvence: velikost teček a délka zářezů". */
     .router__area {
-      --x: 110;
+      --x: 40;
+      --tx: 64px;
       --rx: 40;
     }
 
@@ -585,27 +614,27 @@ const areas = [
 
     .router__area--pos-1 {
       --y: 336;
-      --oy: -36;
+      --oy: -21.5;
     }
 
     .router__area--pos-2 {
       --y: 560;
-      --oy: -26;
+      --oy: -15;
     }
 
     .router__area--pos-3 {
       --y: 700;
-      --oy: -26;
+      --oy: -15;
     }
 
     .router__area--pos-4 {
       --y: 840;
-      --oy: -26;
+      --oy: -15;
     }
 
     .router__area--pos-5 {
       --y: 980;
-      --oy: -26;
+      --oy: -15;
     }
 
     .router__area--dominant .router__name {
@@ -663,10 +692,11 @@ const areas = [
     .router__area {
       right: auto;
       --y: 560;
+      --tx: 0px;
     }
 
     .router__link {
-      gap: 7px;
+      gap: 14px;
       min-height: auto;
     }
 
@@ -676,11 +706,11 @@ const areas = [
     }
 
     .router__desc {
-      font-size: 15px;
+      font-size: 16px;
     }
 
     .router__more {
-      font-size: 14px;
+      font-size: 16px;
     }
 
     .router__area--dominant .router__name {
@@ -700,7 +730,7 @@ const areas = [
      */
     .router__area--pos-1 {
       --x: 233;
-      --oy: -208;
+      --oy: -218;
       width: calc(220 * 100% / var(--vb));
     }
 
@@ -713,7 +743,7 @@ const areas = [
 
     .router__area--pos-3 {
       --x: 663;
-      --oy: -156;
+      --oy: -174;
       width: calc(200 * 100% / var(--vb));
     }
 
@@ -726,7 +756,7 @@ const areas = [
 
     .router__area--pos-5 {
       --x: 1074;
-      --oy: -156;
+      --oy: -174;
       width: calc(200 * 100% / var(--vb));
     }
 

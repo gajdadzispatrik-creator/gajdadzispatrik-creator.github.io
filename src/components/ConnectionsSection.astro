@@ -151,7 +151,7 @@ const areas = [
   -->
   <svg
     class="connections__route connections__route--mobile"
-    viewBox="0 0 390 900"
+    viewBox="0 0 390 863"
     preserveAspectRatio="none"
     aria-hidden="true"
     focusable="false"
@@ -167,18 +167,18 @@ const areas = [
          škálují s šířkou, texty ne). -->
     <path
       class="connections__route-path"
-      d="M24,0 V354 A18,18 0 0 0 42,372 H182 A18,18 0 0 1 200,390 V544 A18,18 0 0 0 218,562 H360 A18,18 0 0 1 378,580 V842 A18,18 0 0 1 360,860 H42 A18,18 0 0 0 24,878 V900"
+      d="M24,0 V340 A18,18 0 0 0 42,358 H182 A18,18 0 0 1 200,376 V598 A18,18 0 0 0 218,616 H360 A18,18 0 0 1 378,634 V804 A18,18 0 0 1 360,822 H42 A18,18 0 0 0 24,840 V863"
       fill="none"
       stroke="#1B4A8A"
       stroke-opacity=".18"
       stroke-width="1"
       stroke-linecap="round"
     ></path>
-    <circle cx="72" cy="372" r="3.2" fill="#1E7A5C"></circle>
-    <circle cx="200" cy="446" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
-    <circle cx="200" cy="516" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
-    <circle cx="240" cy="562" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
-    <circle cx="378" cy="656" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="72" cy="358" r="3.2" fill="#1E7A5C"></circle>
+    <circle cx="200" cy="456" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="200" cy="546" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="240" cy="616" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
+    <circle cx="378" cy="704" r="2.4" fill="#1B4A8A" fill-opacity=".5"></circle>
   </svg>
 </section>
 
@@ -254,7 +254,8 @@ const areas = [
     position: relative;
     overflow: hidden;
     background: var(--bg);
-    height: 900px;
+    /* Mobil: 863 = obsah 72 px od horní i spodní hrany (4. 10. 2026). */
+    height: 863px;
     /*
      * Šířka viewBoxu aktuální trasy (SVG i kotvy oblastí jsou definované ve
      * stejném souřadném prostoru). Trasa se kreslí přes width:100% — roztahuje
@@ -266,27 +267,16 @@ const areas = [
      */
     --vb: 390;
     /*
-     * Tečky na trase (<circle>) leží ve stejném neuniformně roztahovaném SVG
-     * jako trasa sama (preserveAspectRatio="none" — šířka roste s viewportem
-     * přes width:100%, výška sekce je na každém stupni pevná a přesně sedí
-     * s výškou viewBoxu, takže svislé měřítko je vždy 1). Vodorovné měřítko
-     * ale s viewportem roste, takže by z kruhu mimo kalibrační šířku
-     * (390/834/1366/1440) vyšla elipsa. --dot-fix dopočítá násobek, kterým
-     * se tečka doškáluje ve vodorovném směru zpět na kruh.
-     */
-    --dot-fix: calc(var(--vb) * 1px / 100vw);
-    /*
      * Mobil: velikost nadpisu. „Neřeším produkty." je 8,17 em široké, sloupec
      * 100vw − 94 px (left 70 + right 24) — pod ~373 px by se řádek zalomil
      * a nadpis přetekl přes text pod sebou (absolutní pozice). Proto 34 px,
      * jen pod 375 px menší (8,2 em = malá rezerva). Text pod nadpisem
-     * počítá top ze stejné hodnoty: 86 + 2 řádky × 1,06 + 14 px (29. 9. 2026).
+     * počítá top ze stejné hodnoty: 96 + 2 řádky × 1,06 + 14 px (29. 9. 2026).
      */
     --conn-h: min(34px, calc((100vw - 94px) / 8.2));
   }
 
   .connections__route circle {
-    transform: scaleX(var(--dot-fix));
     transform-box: fill-box;
     transform-origin: center;
   }
@@ -295,7 +285,7 @@ const areas = [
     position: absolute;
     left: 70px;
     right: 24px;
-    top: 86px;
+    top: 72px;
     margin: 0;
     font-weight: 700;
     font-size: var(--conn-h);
@@ -313,7 +303,7 @@ const areas = [
        webem (1. 9. 2026) stejně jako CasesSection/ArticlesSection/
        ContactSection/podstránky; původní 222px byl reziduum z doby před
        touto konvencí, 3–6× větší než ustálená hodnota. */
-    top: calc(86px + 2.12 * var(--conn-h) + 14px);
+    top: calc(72px + 2.12 * var(--conn-h) + 14px);
     margin: 0;
     font-weight: 500;
     font-size: 16.5px;
@@ -361,7 +351,7 @@ const areas = [
    */
   .connections__area--pos-1 {
     --x: 72;
-    --y: 372;
+    --y: 358;
     --ox: 0;
     --oy: 12;
     --ty: 0;
@@ -372,7 +362,7 @@ const areas = [
 
   .connections__area--pos-2 {
     --x: 200;
-    --y: 446;
+    --y: 456;
     font-weight: 600;
     font-size: 22px;
     color: var(--navy-ink);
@@ -380,7 +370,7 @@ const areas = [
 
   .connections__area--pos-3 {
     --x: 200;
-    --y: 516;
+    --y: 546;
     font-weight: 600;
     font-size: 22px;
     color: var(--navy-ink);
@@ -388,7 +378,7 @@ const areas = [
 
   .connections__area--pos-4 {
     --x: 240;
-    --y: 562;
+    --y: 616;
     --ox: 0;
     --oy: 12;
     --ty: 0;
@@ -399,7 +389,7 @@ const areas = [
 
   .connections__area--pos-5 {
     --x: 378;
-    --y: 656;
+    --y: 704;
     font-weight: 600;
     font-size: 22px;
     color: var(--navy-ink);
@@ -432,7 +422,7 @@ const areas = [
     .connections__end-label {
       left: auto;
       right: calc(100% - 378 * 100% / 390 + 14px);
-      top: 772px;
+      top: 776px;
     }
   }
 

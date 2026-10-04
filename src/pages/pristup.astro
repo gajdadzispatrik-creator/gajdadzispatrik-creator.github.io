@@ -449,6 +449,7 @@ const faqs: Faq[] = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -659,7 +660,6 @@ const faqs: Faq[] = [
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -668,8 +668,7 @@ const faqs: Faq[] = [
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.pri__notch');
           const dot = group.querySelector('.pri__dot');
@@ -801,19 +800,18 @@ const faqs: Faq[] = [
   }
 
   .pri__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .pri__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .pri__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1216,7 +1214,7 @@ const faqs: Faq[] = [
     padding-left: 22px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
   }
 
   .pri-step__marker {
@@ -1295,6 +1293,11 @@ const faqs: Faq[] = [
   .pri-faq__row:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .pri-faq__row:last-child {
+    padding-bottom: 0;
   }
 
   .pri-faq dt {
@@ -1405,13 +1408,13 @@ const faqs: Faq[] = [
     .pri-pece__photo {
       display: block;
       flex: none;
-      width: 160px;
-      height: 160px;
+      width: 220px;
+      height: 220px;
       border-radius: 50%;
       /* Na střed stránky (ne sloupce textu): levý kraj obsahu kapitoly je
-         24 + 36 px (+ posun osy), polovina fotky 80 px. */
+         24 + 36 px (+ posun osy), polovina fotky 110 px (220 px, zvětšeno 4. 10. 2026). */
       align-self: flex-start;
-      margin-left: calc(50vw - 60px - var(--pri-shift, 0px) - 80px);
+      margin-left: calc(50vw - 60px - var(--pri-shift, 0px) - 110px);
       /* Na mobilu fotka NAD závěrečnou větou (přání uživatele 28. 9. 2026). */
       order: -1;
     }

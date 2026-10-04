@@ -246,7 +246,7 @@ const facts: FactRow[] = [
     <section class="om-hero" aria-labelledby="om-hero-heading">
       <div class="om-hero__row">
         <div class="om-hero__text">
-          <h1 id="om-hero-heading" data-reveal>Jsem&nbsp;Patrik Gajdadzis. Finanční poradce z&nbsp;Ostravy.</h1>
+          <h1 id="om-hero-heading" data-reveal>Jsem&nbsp;Patrik Gajdadzis.<br class="br-mobile" /> Finanční poradce z&nbsp;Ostravy.</h1>
           <p class="om-hero__lead" data-reveal>
             Vedu finanční část Mint reality &amp;&nbsp;finance a&nbsp;zároveň dál osobně pracuji s&nbsp;klienty. Baví mě
             hledat řešení, která dávají smysl nejen sama o&nbsp;sobě, ale i&nbsp;ve&nbsp;spojení s&nbsp;ostatními
@@ -615,6 +615,7 @@ const facts: FactRow[] = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -839,7 +840,6 @@ const facts: FactRow[] = [
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -848,8 +848,7 @@ const facts: FactRow[] = [
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.om__notch');
           const dot = group.querySelector('.om__dot');
@@ -1003,19 +1002,18 @@ const facts: FactRow[] = [
   }
 
   .om__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .om__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .om__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1420,11 +1418,19 @@ const facts: FactRow[] = [
     color: rgba(255, 255, 255, .72);
   }
 
+  /* Výška odkazů podle textu; plochu pro prst (48 px) drží neviditelný ::after. */
+  .om-text-link::after,
+  .om-external-link::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
   .om-text-link {
+    position: relative;
     display: inline-flex;
     align-items: center;
     width: fit-content;
-    min-height: 48px;
     font-weight: 600;
     font-size: 16px;
     color: var(--emerald);
@@ -1444,7 +1450,7 @@ const facts: FactRow[] = [
     align-items: center;
     gap: 8px;
     width: fit-content;
-    min-height: 48px;
+    position: relative;
     font-weight: 600;
     font-size: 16px;
     color: var(--emerald);
@@ -1486,6 +1492,13 @@ const facts: FactRow[] = [
     display: flex;
     flex-direction: column;
     gap: 32px;
+  }
+
+  /* Nadpis → první text 20 px jako u ostatních kapitol podstránek
+     (om/pri/inv-chapter__top); mezi dalšími bloky zůstává 32. Od notebooku
+     je nadpis vedle textu (grid), tam se neuplatní. */
+  .om-zacatek__heading {
+    margin-bottom: -12px;
   }
 
   .om-zacatek__block {
@@ -1540,12 +1553,17 @@ const facts: FactRow[] = [
     border-top: 1px solid rgba(27, 74, 138, .14);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
   }
 
   .om-facts__row:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .om-facts__row:last-child {
+    padding-bottom: 0;
   }
 
   .om-facts__row h3 {
@@ -2234,6 +2252,7 @@ const facts: FactRow[] = [
     .om-zacatek__heading {
       grid-column: 1;
       grid-row: 1;
+      margin-bottom: 0;
     }
 
     .om-zacatek__block--1 {

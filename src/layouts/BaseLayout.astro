@@ -83,5 +83,44 @@ const jsonLdGraph = {
     <slot />
     <CookieConsent />
     <slot name="footer" />
+    <script>
+      /*
+       * Tečky na dekorativní trase (CLAUDE.md „Konvence: velikost teček
+       * a délka zářezů"):
+       * trasy jsou SVG s preserveAspectRatio="none", které se roztahují
+       * s šířkou okna i výškou sekce — tečka by se roztáhla s nimi (jinak
+       * velká v každé sekci, mimo kalibrační šířku elipsa). Na každé takové
+       * SVG se zapisuje zpětné měřítko (--dot-sx/--dot-sy), global.css jím
+       * tečku doškáluje, takže na obrazovce má vždy poloměr přesně `r` px.
+       * Přepočet při změně velikosti SVG (ResizeObserver — i přepnutí
+       * stupně z display:none) a při změně viewBoxu ze skriptů sekcí.
+       */
+      const syncDots = (svg: SVGSVGElement) => {
+        const vb = svg.viewBox.baseVal;
+        const rect = svg.getBoundingClientRect();
+        if (!vb || !vb.width || !vb.height || !rect.width || !rect.height) return;
+        svg.style.setProperty('--dot-sx', String(vb.width / rect.width));
+        svg.style.setProperty('--dot-sy', String(vb.height / rect.height));
+        // Statické zářezy (data-notch-axis + data-notch-px na SVG, data-notch
+        // na zářezu a jeho tečkách): konec zářezu = osa + přesně N px na
+        // obrazovce, ne N lokálních jednotek roztažených se šířkou okna.
+        const notchPx = parseFloat(svg.dataset.notchPx ?? '');
+        if (notchPx) {
+          const x = parseFloat(svg.dataset.notchAxis ?? '0') + (notchPx * vb.width) / rect.width;
+          svg.querySelectorAll('[data-notch]').forEach((el) => {
+            if (el instanceof SVGCircleElement) el.setAttribute('cx', String(x));
+            else el.setAttribute('d', (el.getAttribute('d') ?? '').replace(/H\s*[\d.]+/g, `H ${x}`));
+          });
+        }
+      };
+      const resizeObserver = new ResizeObserver((entries) => entries.forEach((e) => syncDots(e.target as SVGSVGElement)));
+      const viewBoxObserver = new MutationObserver((records) => records.forEach((r) => syncDots(r.target as SVGSVGElement)));
+      document.querySelectorAll<SVGSVGElement>('svg[preserveAspectRatio="none"]').forEach((svg) => {
+        if (!svg.querySelector('circle')) return;
+        resizeObserver.observe(svg);
+        viewBoxObserver.observe(svg, { attributes: true, attributeFilter: ['viewBox'] });
+        syncDots(svg);
+      });
+    </script>
   </body>
 </html>

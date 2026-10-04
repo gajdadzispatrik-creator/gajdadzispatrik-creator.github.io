@@ -141,7 +141,7 @@ const cases: CaseStudy[] = [
     data-entry="940"
     data-axis="120"
     data-radius="28"
-    data-notch-offset="44"
+    data-notch-offset="36"
   >
     <path
       class="cases__route-path"
@@ -153,12 +153,12 @@ const cases: CaseStudy[] = [
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
-    <line class="cases__notch" x1="120" y1="380" x2="164" y2="380"></line>
-    <line class="cases__notch" x1="120" y1="700" x2="164" y2="700"></line>
-    <line class="cases__notch" x1="120" y1="850" x2="164" y2="850"></line>
-    <circle class="cases__dot cases__dot--0" cx="164" cy="380" r="3.5" fill="var(--emerald)"></circle>
-    <circle class="cases__dot cases__dot--1" cx="164" cy="700" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
-    <circle class="cases__dot cases__dot--2" cx="164" cy="850" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <line class="cases__notch" x1="120" y1="380" x2="156" y2="380"></line>
+    <line class="cases__notch" x1="120" y1="700" x2="156" y2="700"></line>
+    <line class="cases__notch" x1="120" y1="850" x2="156" y2="850"></line>
+    <circle class="cases__dot cases__dot--0" cx="156" cy="380" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="cases__dot cases__dot--1" cx="156" cy="700" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="cases__dot cases__dot--2" cx="156" cy="850" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
   </svg>
 
   <!-- Notebook 1200–1399 (kalibrace 1366). Vstup x=890, osa x=96, radius 28 — stejná logika jako desktop výše. -->
@@ -172,7 +172,7 @@ const cases: CaseStudy[] = [
     data-entry="890"
     data-axis="96"
     data-radius="28"
-    data-notch-offset="44"
+    data-notch-offset="36"
   >
     <path
       class="cases__route-path"
@@ -184,12 +184,12 @@ const cases: CaseStudy[] = [
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
-    <line class="cases__notch" x1="96" y1="364" x2="140" y2="364"></line>
-    <line class="cases__notch" x1="96" y1="664" x2="140" y2="664"></line>
-    <line class="cases__notch" x1="96" y1="806" x2="140" y2="806"></line>
-    <circle class="cases__dot cases__dot--0" cx="140" cy="364" r="3.5" fill="var(--emerald)"></circle>
-    <circle class="cases__dot cases__dot--1" cx="140" cy="664" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
-    <circle class="cases__dot cases__dot--2" cx="140" cy="806" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <line class="cases__notch" x1="96" y1="364" x2="132" y2="364"></line>
+    <line class="cases__notch" x1="96" y1="664" x2="132" y2="664"></line>
+    <line class="cases__notch" x1="96" y1="806" x2="132" y2="806"></line>
+    <circle class="cases__dot cases__dot--0" cx="132" cy="364" r="3.5" fill="var(--emerald)"></circle>
+    <circle class="cases__dot cases__dot--1" cx="132" cy="664" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="cases__dot cases__dot--2" cx="132" cy="806" r="2.6" fill="var(--line)" fill-opacity=".5"></circle>
   </svg>
 
   <!--
@@ -254,6 +254,7 @@ const cases: CaseStudy[] = [
 </section>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -300,13 +301,12 @@ const cases: CaseStudy[] = [
       const svgRect = svg.getBoundingClientRect();
       const viewBox = svg.viewBox.baseVal;
       // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
-      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // přechodné `Infinity`/`NaN` (dělení nulou), když má SVG
       // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
       // (oprava 14. 9. 2026).
       if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
       const scaleY = svgRect.height / viewBox.height;
       const scaleX = svgRect.width / viewBox.width;
-      svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
       /*
        * Vodorovné odsazení zářezu/tečky od osy (`data-notch-offset`, reálné
@@ -314,7 +314,7 @@ const cases: CaseStudy[] = [
        * jednotek v markupu — SVG se neuniformně roztahuje
        * (`preserveAspectRatio="none"`), takže lokální offset (44/22) mimo
        * kalibrační šířku rostl úměrně se šířkou okna, zatímco `.cases__list`
-       * má odsazení pevné v px (`calc(... + 68px)` apod.) — na 1920 px byla
+       * má odsazení pevné v px (`calc(... + 56px)` apod.) — na 1920 px byla
        * mezera zářez↔text jen ~10 px místo ~24 px. Stejná oprava jako
        * `syncMarkers` v BenefitsSection.astro (viz CLAUDE.md bod 6).
        */
@@ -327,8 +327,7 @@ const cases: CaseStudy[] = [
         const notch = notches[i];
         const dot = dots[i];
         if (!title || (!notch && !dot)) return;
-        const rect = title.getBoundingClientRect();
-        const centerY = rect.top + rect.height / 2;
+        const centerY = firstLineCenterY(title);
         const localY = (centerY - svgRect.top) / scaleY;
         if (notch) {
           notch.setAttribute('y1', String(localY));
@@ -522,7 +521,7 @@ const cases: CaseStudy[] = [
      * stejná chyba jako `grid-template-columns` s `%` ve FaqSection.astro
      * (zjištěno auditem odsazení, viz CLAUDE.md).
      */
-    padding: 104px 0 96px;
+    padding: 72px 0 72px;
   }
 
   .cases__intro {
@@ -659,7 +658,7 @@ const cases: CaseStudy[] = [
 
   .cases__triad-value p {
     margin: 0;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.55;
     color: var(--text-body);
   }
@@ -688,7 +687,7 @@ const cases: CaseStudy[] = [
     margin: 0;
     font-weight: 400;
     line-height: 1.55;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--text-body);
   }
 
@@ -703,11 +702,18 @@ const cases: CaseStudy[] = [
 
   /* --- CTA --- */
 
+  /* Výška podle textu; plochu pro prst (48 px) drží neviditelný ::after. */
+  .cases__cta::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
   .cases__cta {
     display: inline-flex;
     align-items: center;
     align-self: flex-start;
-    min-height: 48px;
+    position: relative;
     margin: 32px 24px 0 calc(24 * 100% / 390 + 36px);
     font-weight: 600;
     font-size: 16px;
@@ -747,20 +753,19 @@ const cases: CaseStudy[] = [
   }
 
   .cases__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .cases__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
   .cases__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -813,7 +818,7 @@ const cases: CaseStudy[] = [
     }
 
     .cases__list {
-      margin: 56px 40px 0 calc(40 * 100% / 834 + 70px);
+      margin: 56px 40px 0 calc(40 * 100% / 834 + 64px);
       max-width: 684px;
       gap: 32px;
     }
@@ -887,7 +892,7 @@ const cases: CaseStudy[] = [
     }
 
     .cases__cta {
-      margin: 40px 40px 0 calc(40 * 100% / 834 + 70px);
+      margin: 40px 40px 0 calc(40 * 100% / 834 + 64px);
     }
   }
 
@@ -921,7 +926,7 @@ const cases: CaseStudy[] = [
     }
 
     .cases__list {
-      margin: 190px 96px 0 calc(96 * 100% / 1366 + 68px);
+      margin: 190px 96px 0 calc(96 * 100% / 1366 + 56px);
       max-width: 1106px;
       gap: 40px;
     }
@@ -1007,7 +1012,7 @@ const cases: CaseStudy[] = [
     }
 
     .cases__cta {
-      margin: 48px 96px 0 calc(96 * 100% / 1366 + 68px);
+      margin: 48px 96px 0 calc(96 * 100% / 1366 + 56px);
     }
   }
 
@@ -1060,7 +1065,7 @@ const cases: CaseStudy[] = [
     }
 
     .cases__list {
-      margin: 190px 120px 0 calc(120 * 100% / 1440 + 68px);
+      margin: 190px 120px 0 calc(120 * 100% / 1440 + 56px);
       max-width: 1132px;
       gap: 48px;
     }
@@ -1095,7 +1100,7 @@ const cases: CaseStudy[] = [
     }
 
     .cases__triad-value p {
-      font-size: 15px;
+      font-size: 16px;
     }
 
     .cases__row-desc {
@@ -1107,7 +1112,7 @@ const cases: CaseStudy[] = [
     }
 
     .cases__cta {
-      margin: 56px 120px 0 calc(120 * 100% / 1440 + 68px);
+      margin: 56px 120px 0 calc(120 * 100% / 1440 + 56px);
     }
   }
 </style>

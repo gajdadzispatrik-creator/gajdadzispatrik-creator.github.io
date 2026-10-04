@@ -119,14 +119,14 @@ const connectionChain: ChainSegment[] = [
 ];
 
 const situationList: string[] = [
-  'příjmy a běžné výdaje,',
-  'rezervy a dostupné peníze,',
-  'úvěry a další závazky,',
-  'majetek,',
-  'současné pojištění,',
-  'investice,',
-  'zajištění na penzi,',
-  'krátkodobé a dlouhodobé cíle.',
+  'příjmy a běžné výdaje',
+  'rezervy a dostupné peníze',
+  'úvěry a další závazky',
+  'majetek',
+  'současné pojištění',
+  'investice',
+  'zajištění na penzi',
+  'krátkodobé a dlouhodobé cíle',
 ];
 
 interface PriorityPoint {
@@ -470,6 +470,7 @@ const faqs: Faq[] = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -664,7 +665,6 @@ const faqs: Faq[] = [
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -673,8 +673,7 @@ const faqs: Faq[] = [
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.fp__notch');
           const dot = group.querySelector('.fp__dot');
@@ -806,19 +805,18 @@ const faqs: Faq[] = [
   }
 
   .fp__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .fp__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .fp__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1033,6 +1031,14 @@ const faqs: Faq[] = [
     gap: 0;
   }
 
+  /* Souvislosti: nadpis → text pod ním 20 px jako ostatní podstránky
+     (inv/poj/pen-chapter__top) — dřív block bez mezery, text přilepený. */
+  .fp-chapter__content--souvislosti .fp-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
   .fp-chapter__lead-col {
     display: flex;
     flex-direction: column;
@@ -1101,6 +1107,7 @@ const faqs: Faq[] = [
 
   .fp-chapter__list li:last-child {
     border-bottom: none;
+    padding-bottom: 0;
   }
 
   .fp-chapter__statement {
@@ -1172,6 +1179,11 @@ const faqs: Faq[] = [
     padding-top: 0;
   }
 
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .fp-rows__row:last-child {
+    padding-bottom: 0;
+  }
+
   .fp-rows--priority .fp-rows__name {
     font-size: 18px;
     font-weight: 700;
@@ -1229,7 +1241,7 @@ const faqs: Faq[] = [
     padding-left: 22px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
   }
 
   .fp-step__marker {
@@ -1317,6 +1329,11 @@ const faqs: Faq[] = [
   .fp-faq__row:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .fp-faq__row:last-child {
+    padding-bottom: 0;
   }
 
   .fp-faq dt {
@@ -1666,6 +1683,7 @@ const faqs: Faq[] = [
     .fp-chapter__content--souvislosti .fp-chapter__top {
       max-width: none;
       display: flex;
+      flex-direction: row;
       align-items: flex-start;
       gap: 40px;
     }
@@ -1825,7 +1843,7 @@ const faqs: Faq[] = [
       grid-template-columns: 1fr;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 14px;
       padding: 16px 0;
     }
 

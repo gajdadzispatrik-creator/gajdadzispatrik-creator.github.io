@@ -106,12 +106,12 @@ const phases: Phase[] = [
 ];
 
 const decisionPoints: string[] = [
-  'kolik vlastních prostředků použít,',
-  'jak vysoká splátka je dlouhodobě rozumná,',
-  'jakou rezervu si ponechat,',
-  'podmínky jednotlivých možností financování,',
-  'termíny obchodu a čerpání,',
-  'možnosti budoucích změn hypotéky.',
+  'kolik vlastních prostředků použít',
+  'jak vysoká splátka je dlouhodobě rozumná',
+  'jakou rezervu si ponechat',
+  'podmínky jednotlivých možností financování',
+  'termíny obchodu a čerpání',
+  'možnosti budoucích změn hypotéky',
 ];
 
 interface AreaRow {
@@ -464,6 +464,7 @@ const faqs: Faq[] = [
 </BaseLayout>
 
 <script>
+  import { firstLineCenterY } from '../../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -662,7 +663,6 @@ const faqs: Faq[] = [
         if (svgRect.height === 0 || svgRect.width === 0) return;
         const scaleY = svgRect.height / totalHeight;
         const scaleX = svgRect.width / vb;
-        svg.style.setProperty('--dot-fix', String(scaleY / scaleX));
 
         const axisRealX = svgRect.left + axisScaled * scaleX;
         const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
@@ -671,8 +671,7 @@ const faqs: Faq[] = [
           const target = markerTargets[key];
           const group = svg.querySelector(`[data-marker="${key}"]`);
           if (!target || !group) return;
-          const rect = target.getBoundingClientRect();
-          const centerY = rect.top + rect.height / 2;
+          const centerY = firstLineCenterY(target);
           const localY = (centerY - svgRect.top) / scaleY;
           const notch = group.querySelector('.hyp__notch');
           const dot = group.querySelector('.hyp__dot');
@@ -809,19 +808,18 @@ const faqs: Faq[] = [
   }
 
   .hyp__dot {
-    transform: scaleX(var(--dot-fix, 1));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .hyp__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix, 1)) scale(.4);
+    transform: scale(.4);
   }
 
   .hyp__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix, 1)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
@@ -1001,7 +999,7 @@ const faqs: Faq[] = [
   }
 
   .hyp-chapter--faze {
-    margin-top: 72px;
+    margin-top: 64px;
     background: var(--bg);
   }
 
@@ -1122,6 +1120,7 @@ const faqs: Faq[] = [
 
   .hyp-chapter__list li:last-child {
     border-bottom: none;
+    padding-bottom: 0;
   }
 
   .hyp-decision__quote {
@@ -1263,7 +1262,7 @@ const faqs: Faq[] = [
      1200px `.hyp-areas__row` přechází na dvousloupcový grid vedle sebe
      (`gap: 0` tam, viz níže), kde svislá mezera nedává smysl. */
   .hyp-areas__row {
-    padding: 20px 0;
+    padding: 18px 0;
     border-top: 1px solid rgba(27, 74, 138, .14);
     display: flex;
     flex-direction: column;
@@ -1273,6 +1272,11 @@ const faqs: Faq[] = [
   .hyp-areas__row:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .hyp-areas__row:last-child {
+    padding-bottom: 0;
   }
 
   .hyp-areas__name {
@@ -1401,7 +1405,7 @@ const faqs: Faq[] = [
      do notebooku — od 1200px `.hyp-faq__row` přechází na dvousloupcový
      grid vedle sebe (viz níže), kde svislá mezera nedává smysl. */
   .hyp-faq__row {
-    padding: 20px 0;
+    padding: 18px 0;
     border-top: 1px solid rgba(27, 74, 138, .14);
     display: flex;
     flex-direction: column;
@@ -1411,6 +1415,11 @@ const faqs: Faq[] = [
   .hyp-faq__row:first-child {
     border-top: none;
     padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .hyp-faq__row:last-child {
+    padding-bottom: 0;
   }
 
   .hyp-faq dt {
@@ -1430,7 +1439,7 @@ const faqs: Faq[] = [
 
   .hyp-closing {
     position: relative;
-    margin-top: 72px;
+    margin-top: 64px;
     padding-block: 56px;
     overflow: hidden;
     background: linear-gradient(174deg, #16324F 0%, #0F2747 44%, #0B1D36 100%);
@@ -1646,7 +1655,7 @@ const faqs: Faq[] = [
     }
 
     .hyp-closing {
-      margin-top: 90px;
+      margin-top: 80px;
       padding-block: 76px;
     }
 
@@ -1800,7 +1809,7 @@ const faqs: Faq[] = [
     }
 
     .hyp-chapter--faze {
-      margin-top: 110px;
+      margin-top: 100px;
       padding: 88px 96px;
     }
 
@@ -1987,7 +1996,7 @@ const faqs: Faq[] = [
     }
 
     .hyp-closing {
-      margin-top: 110px;
+      margin-top: 100px;
       padding-block: 88px;
     }
 
@@ -2075,6 +2084,7 @@ const faqs: Faq[] = [
     }
 
     .hyp-chapter--faze {
+      margin-top: 120px;
       padding: 88px 100px;
     }
 

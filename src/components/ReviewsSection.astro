@@ -212,6 +212,7 @@ const googleReviewUrl = GOOGLE_REVIEWS_URL;
 </section>
 
 <script>
+  import { firstLineCenterY } from '../scripts/first-line';
   // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
   // zobrazí hned (stejná cesta jako prefers-reduced-motion).
   const reduceMotion = true;
@@ -231,10 +232,7 @@ const googleReviewUrl = GOOGLE_REVIEWS_URL;
      * (nalezeno tam 25. 8. 2026, doplněno sem 14. 9. 2026 po nahlášení
      * zdeformovaných/neokrouhlých teček). Bez převázání skript po změně
      * šířky okna přes hranici stupně (resize, ne jen reload) dál zapisoval
-     * `--dot-fix` do SKRYTÉHO SVG předchozího stupně — nově zobrazené SVG
-     * tak zůstalo na výchozí hodnotě `--dot-fix: 1`, což tečku při
-     * neuniformním roztažení (`preserveAspectRatio="none"`) zplošťuje do
-     * elipsy.
+     * výpočty do SKRYTÉHO SVG předchozího stupně.
      */
     let currentSvg: SVGSVGElement | undefined;
     let path: SVGPathElement | null = null;
@@ -268,16 +266,14 @@ const googleReviewUrl = GOOGLE_REVIEWS_URL;
       const svgRect = activeSvg.getBoundingClientRect();
       const viewBox = activeSvg.viewBox.baseVal;
       // Chybějící `svgRect.width === 0` je zdokumentovaná pojistka proti
-      // přechodné `Infinity`/`NaN` v `--dot-fix` (dělení nulou), když má SVG
+      // přechodné `Infinity`/`NaN` (dělení nulou), když má SVG
       // na některých načteních dočasně nulovou šířku — viz SiteFooter.astro
       // (oprava 14. 9. 2026).
       if (svgRect.height === 0 || svgRect.width === 0 || viewBox.height === 0 || viewBox.width === 0) return;
       const scaleY = svgRect.height / viewBox.height;
       const scaleX = svgRect.width / viewBox.width;
-      const itemRect = firstItem.getBoundingClientRect();
-      const localY = (itemRect.top + 8 - svgRect.top) / scaleY;
+      const localY = (firstLineCenterY(firstItem) - svgRect.top) / scaleY;
       currentDot.setAttribute('cy', String(localY));
-      currentDot.style.setProperty('--dot-fix', String(scaleY / scaleX));
     };
     syncDotPosition();
     window.addEventListener('resize', syncDotPosition);
@@ -428,7 +424,7 @@ const googleReviewUrl = GOOGLE_REVIEWS_URL;
     position: relative;
     overflow: hidden;
     background: var(--bg);
-    padding-top: 330px;
+    padding-top: 250px;
     padding-bottom: 72px;
     --reviews-divider-x: 24;
   }
@@ -450,7 +446,7 @@ const googleReviewUrl = GOOGLE_REVIEWS_URL;
     position: absolute;
     left: 56px;
     right: 24px;
-    top: 112px;
+    top: 72px;
     margin: 0;
     font-weight: 700;
     line-height: 1.02;
@@ -465,13 +461,14 @@ const googleReviewUrl = GOOGLE_REVIEWS_URL;
     position: absolute;
     left: 56px;
     right: 24px;
-    top: 179px;
+    top: 139px;
   }
 
   .reviews__rating-visible {
     margin: 0;
     display: flex;
-    align-items: flex-end;
+    /* „Google hodnocení“ na stejné lince jako 5,0 a ★. */
+    align-items: baseline;
     gap: 12px;
   }
 
@@ -504,7 +501,7 @@ const googleReviewUrl = GOOGLE_REVIEWS_URL;
   .reviews__rating-source {
     font-weight: 500;
     color: var(--text-muted);
-    font-size: 15px;
+    font-size: 16px;
   }
 
   /*
@@ -643,30 +640,22 @@ const googleReviewUrl = GOOGLE_REVIEWS_URL;
     pointer-events: none;
   }
 
-  /*
-   * --dot-fix (nastaveno v JS, viz syncDotPosition) doškáluje tečku ve
-   * vodorovném směru zpět na kruh — SVG trasy je neuniformně roztahované
-   * (preserveAspectRatio="none") a výška téhle sekce plyne z obsahu, ne z
-   * pevného vzorce, takže poměr vodorovného a svislého měřítka nejde
-   * spočítat čistě v CSS jako u ostatních sekcí. Kombinuje se v jedné
-   * transform hodnotě s reveal škálou (.4 → 1), aby se navzájem nepřepisovaly.
-   */
+  /* Skutečnou velikost a kulatost tečky drží globální pravidlo
+     (global.css + BaseLayout.astro, CLAUDE.md „Konvence: velikost teček a délka zářezů"). */
   .reviews__dot {
-    --dot-fix: 1;
-    transform: scaleX(var(--dot-fix));
     transform-box: fill-box;
     transform-origin: center;
   }
 
   .reviews__dot.is-pending {
     opacity: 0;
-    transform: scaleX(var(--dot-fix)) scale(.4);
+    transform: scale(.4);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
   .reviews__dot.is-visible {
     opacity: 1;
-    transform: scaleX(var(--dot-fix)) scale(1);
+    transform: scale(1);
     transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
   }
 
