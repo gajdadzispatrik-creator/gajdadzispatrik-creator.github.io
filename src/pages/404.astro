@@ -4,8 +4,9 @@
  * (`ErrorDocument 404 /404.html` v public/.htaccess). Text schválil Patrik
  * 24. 9. 2026.
  *
- * Záměrně BEZ dekorativní trasy: jde o technickou stránku, ne o kapitolu
- * webu — proto ani záznam v `PAGES` (scripts/audit-layout.mjs). Typografie
+ * Bez kapitol s trasou (technická stránka) — proto ani záznam v `PAGES`
+ * (scripts/audit-layout.mjs). Linku do patičky kreslí StandaloneRoute.astro
+ * (od 4. 10. 2026, jinak v patičce začínala odnikud). Typografie
  * a odsazení hero jsou 1:1 převzaté z hero sourozeneckých podstránek
  * (`.cla-hero` v clanky.astro), takže H1 sedí na stejné ose jako logo
  * v hlavičce na všech stupních, nad 1400 px v centrovaném plátně
@@ -17,6 +18,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import StandaloneRoute from '../components/StandaloneRoute.astro';
 ---
 
 <BaseLayout
@@ -27,8 +29,9 @@ import SiteFooter from '../components/SiteFooter.astro';
 >
   <Header />
   <main id="hero" class="nf">
+    <StandaloneRoute />
     <section class="nf-hero" aria-labelledby="nf-heading">
-      <div class="nf-hero__text">
+      <div class="nf-hero__text" data-route-content>
         <h1 id="nf-heading">Tuhle stránku jsem nenašel.</h1>
         <p class="nf-hero__lead">Možná se&nbsp;změnila adresa nebo je v&nbsp;odkazu překlep.</p>
         <div class="nf-hero__actions">
@@ -55,6 +58,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 
 <style>
   .nf {
+    position: relative;
     background: var(--bg);
   }
 
@@ -65,6 +69,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 
   /* Symetrický padding (CLAUDE.md „Konvence: mezera mezi sekcemi"). */
   .nf-hero {
+    position: relative;
     padding: 64px 24px;
   }
 

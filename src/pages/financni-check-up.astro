@@ -4,9 +4,10 @@
  * nic se neodesílá. Texty schválil Patrik 4. 10. 2026
  * (docs/financni-check-up-navrh.md — tam jsou i pravidla vyhodnocení).
  *
- * Záměrně BEZ dekorativní trasy (nástroj, ne kapitola webu — stejně jako
- * 404.astro), proto ani záznam v `PAGES` (scripts/audit-layout.mjs). Hero
- * odsazení a typografie 1:1 jako 404.astro / sourozenecké podstránky.
+ * Bez kapitol s trasou (nástroj, ne kapitola webu — stejně jako 404.astro),
+ * proto ani záznam v `PAGES` (scripts/audit-layout.mjs). Linku do patičky
+ * kreslí StandaloneRoute.astro. Hero odsazení a typografie 1:1 jako
+ * 404.astro / sourozenecké podstránky.
  *
  * Všechny otázky i varianty výsledku jsou ve statickém HTML (skryté), JS
  * jen přepíná, co je vidět — check:typo tak vidí celý text. Výsledek lze
@@ -17,7 +18,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import LineGradientDefs from '../components/LineGradientDefs.astro';
+import StandaloneRoute from '../components/StandaloneRoute.astro';
 import { Image } from 'astro:assets';
 import { BOOKING_URL } from '../data/entity';
 import pecePhoto from '../assets/photos/patrik-pristup-pece.png';
@@ -203,26 +204,10 @@ const config = {
 >
   <Header />
   <main id="hero" class="chk">
-    {/*
-      Linka (4. 10. 2026): stránka nemá kapitoly, ale patička linku přebírá —
-      bez tohohle by v patičce začínala odnikud. Stejný vzor jako /pristup,
-      /o-mne a /clanky: nájezd shora u pravého kraje (nájezdový
-      gradient, CLAUDE.md „Nájezdový gradient jen na skutečném začátku"),
-      pod obsahem obloukem k ose a po ose do patičky (mobil jako /pristup). Výška obsahu se mění (otázky → výsledek),
-      tvar proto počítá skript níže; viewBox = skutečné px, oblouky kulaté.
-    */}
-    <div class="chk__route" aria-hidden="true">
-      <svg class="chk__route-svg" preserveAspectRatio="none" focusable="false">
-        <defs>
-          <LineGradientDefs id="chk-line-entry" tier="laptop" x1={0} y1={40} x2={0} y2={140} />
-        </defs>
-        <path class="chk__route-path" d="M 0 0" fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-        <path class="chk__route-entry" d="M 0 0" fill="none" stroke="url(#chk-line-entry)" stroke-width="1" stroke-linecap="round" />
-      </svg>
-    </div>
+    <StandaloneRoute />
 
     <section class="chk-hero" aria-labelledby="chk-heading">
-      <div class="chk-hero__text" data-checkup data-config={JSON.stringify(config)}>
+      <div class="chk-hero__text" data-route-content data-checkup data-config={JSON.stringify(config)}>
         <h1 id="chk-heading">Jak na&nbsp;tom jsou vaše finance?</h1>
 
         <!-- Úvod -->
@@ -255,6 +240,9 @@ const config = {
           </svg>
           <p class="chk-quiz__count" aria-live="polite">Otázka <span data-count>1</span> z&nbsp;{questions.length}</p>
 
+          {/* Všechny otázky v jedné buňce mřížky: výška = nejdelší otázka, takže
+              „Zpět“ a vše pod ním při proklikávání neposkakuje. */}
+          <div class="chk-questions">
           {
             questions.map((q, qi) => (
               <fieldset class="chk-question" data-question={qi} hidden>
@@ -270,6 +258,7 @@ const config = {
               </fieldset>
             ))
           }
+          </div>
 
           <button class="chk-back" type="button" data-back>Zpět</button>
         </div>
@@ -376,63 +365,6 @@ const config = {
 </BaseLayout>
 
 <script>
-  // --- Linka do patičky (popis u .chk__route v markupu) ---
-  {
-    const main = document.querySelector<HTMLElement>('.chk');
-    const svg = document.querySelector<SVGSVGElement>('.chk__route-svg');
-    const content = document.querySelector<HTMLElement>('.chk-hero__text');
-    const path = svg?.querySelector<SVGPathElement>('.chk__route-path');
-    const entry = svg?.querySelector<SVGPathElement>('.chk__route-entry');
-    const gradient = svg?.querySelector<SVGLinearGradientElement>('linearGradient');
-    // Osa a poloměr = SiteFooter.astro (vstup trasy patičky) na každém stupni.
-    // Nájezd: na tabletu a výš zrcadlově k ose (stejný odstup od pravého kraje
-    // jako osa od levého — drží odstup od panelu s nabídkou), na mobilu
-    // x = 378 (vb 390) a ohyb 28 px pod obsahem jako /pristup.
-    const TIERS = [
-      { min: 1400, vb: 1440, axis: 120, r: 28, gap: 40, entryX: (w: number) => w - (120 * w) / 1440 },
-      { min: 1200, vb: 1366, axis: 96, r: 28, gap: 40, entryX: (w: number) => w - (96 * w) / 1366 },
-      { min: 768, vb: 834, axis: 40, r: 22, gap: 40, entryX: (w: number) => w - (40 * w) / 834 },
-      { min: 0, vb: 390, axis: 24, r: 18, gap: 28, entryX: (w: number) => (378 * w) / 390 },
-    ];
-    const ENTRY_Y = 40;
-    const ENTRY_LENGTH = 100;
-
-    const sync = () => {
-      if (!main || !svg || !content || !path || !entry || !gradient) return;
-      const w = svg.clientWidth;
-      const h = main.clientHeight;
-      if (!w || !h) return;
-      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      const tier = TIERS.find((t) => window.innerWidth >= t.min) ?? TIERS[TIERS.length - 1];
-      const axis = (tier.axis * w) / tier.vb;
-      const svgTop = svg.getBoundingClientRect().top;
-      const contentBottom = content.getBoundingClientRect().bottom - svgTop;
-      const setGradient = (x: number, y1: number, y2: number) => {
-        gradient.setAttribute('x1', String(x));
-        gradient.setAttribute('x2', String(x));
-        gradient.setAttribute('y1', String(y1));
-        gradient.setAttribute('y2', String(y2));
-      };
-
-      const x = tier.entryX(w);
-      const r = tier.r;
-      const turnY = Math.min(contentBottom + tier.gap, h - r - 8);
-      const startY = ENTRY_Y + ENTRY_LENGTH;
-      entry.setAttribute('d', `M ${x} ${ENTRY_Y} L ${x} ${startY}`);
-      setGradient(x, ENTRY_Y, startY);
-      path.setAttribute(
-        'd',
-        `M ${x} ${startY} V ${turnY - r} A ${r} ${r} 0 0 1 ${x - r} ${turnY} H ${axis + r} A ${r} ${r} 0 0 0 ${axis} ${turnY + r} V ${h}`,
-      );
-    };
-
-    sync();
-    document.fonts.ready.then(sync);
-    if (content) new ResizeObserver(sync).observe(content);
-    if (main) new ResizeObserver(sync).observe(main);
-    window.addEventListener('resize', sync);
-  }
-
   interface Config {
     questions: { id: string; title: string; options: string[] }[];
   }
@@ -645,25 +577,6 @@ const config = {
     background: var(--bg);
   }
 
-  .chk__route {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-
-  /* Strop jako trasa patičky (CLAUDE.md „wide desktop"): stejná šířka a střed. */
-  .chk__route-svg {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 100%;
-    max-width: var(--stage-max);
-    height: 100%;
-    transform: translateX(-50%);
-    overflow: visible;
-  }
-
   .chk-hero {
     position: relative;
   }
@@ -808,8 +721,18 @@ const config = {
     min-width: 0;
   }
 
+  .chk-questions {
+    display: grid;
+  }
+
+  .chk-questions > .chk-question {
+    grid-area: 1 / 1;
+  }
+
+  /* Skrytá otázka drží místo (výšku), jen není vidět ani klikatelná. */
   .chk-question[hidden] {
-    display: none;
+    display: block;
+    visibility: hidden;
   }
 
   .chk-question__title {

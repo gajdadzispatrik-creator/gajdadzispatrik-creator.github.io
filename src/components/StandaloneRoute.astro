@@ -1,0 +1,102 @@
+---
+/**
+ * Linka pro stránky BEZ kapitol (/financni-check-up, 404) — 4. 10. 2026.
+ * Patička linku vždy přebírá shora; bez tohohle by v ní začínala odnikud.
+ *
+ * Stejný vzor jako hero na /pristup, /o-mne a /clanky: nájezd shora u pravého
+ * kraje (nájezdový gradient — skutečný začátek linky, CLAUDE.md „Nájezdový
+ * gradient jen na skutečném začátku"), pod obsahem obloukem k ose a po ose
+ * do patičky. Tablet a výš: nájezd zrcadlově k ose, ohyb 40 px pod obsahem;
+ * mobil: x = 378 (vb 390), ohyb 28 px (jako /pristup). Osa a poloměr =
+ * vstup trasy SiteFooter.astro na každém stupni, šev 0 px.
+ *
+ * Použití: vložit jako první dítě `<main>` (main i obsahová sekce potřebují
+ * `position: relative`, sekce nad linkou) a obsahu, pod kterým se linka
+ * stáčí, dát `data-route-content`. Výška obsahu se může měnit (check-up:
+ * otázky → výsledek) — tvar se přepočítává; viewBox = skutečné px, takže
+ * oblouky jsou kulaté a tah přesně 1 px.
+ */
+import LineGradientDefs from './LineGradientDefs.astro';
+---
+
+<div class="standalone-route" aria-hidden="true" data-standalone-route>
+  <svg class="standalone-route__svg" preserveAspectRatio="none" focusable="false">
+    <defs>
+      <LineGradientDefs id="standalone-route-entry" tier="laptop" x1={0} y1={40} x2={0} y2={140} />
+    </defs>
+    <path class="standalone-route__path" d="M 0 0" fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+    <path class="standalone-route__entry" d="M 0 0" fill="none" stroke="url(#standalone-route-entry)" stroke-width="1" stroke-linecap="round" />
+  </svg>
+</div>
+
+<script>
+  const route = document.querySelector<HTMLElement>('[data-standalone-route]');
+  const main = route?.parentElement;
+  const svg = route?.querySelector<SVGSVGElement>('svg');
+  const content = main?.querySelector<HTMLElement>('[data-route-content]');
+  const path = svg?.querySelector<SVGPathElement>('.standalone-route__path');
+  const entry = svg?.querySelector<SVGPathElement>('.standalone-route__entry');
+  const gradient = svg?.querySelector<SVGLinearGradientElement>('linearGradient');
+
+  const TIERS = [
+    { min: 1400, vb: 1440, axis: 120, r: 28, gap: 40, entryX: (w: number) => w - (120 * w) / 1440 },
+    { min: 1200, vb: 1366, axis: 96, r: 28, gap: 40, entryX: (w: number) => w - (96 * w) / 1366 },
+    { min: 768, vb: 834, axis: 40, r: 22, gap: 40, entryX: (w: number) => w - (40 * w) / 834 },
+    { min: 0, vb: 390, axis: 24, r: 18, gap: 28, entryX: (w: number) => (378 * w) / 390 },
+  ];
+  const ENTRY_Y = 40;
+  const ENTRY_LENGTH = 100;
+
+  const sync = () => {
+    if (!main || !svg || !content || !path || !entry || !gradient) return;
+    const w = svg.clientWidth;
+    const h = main.clientHeight;
+    if (!w || !h) return;
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    const tier = TIERS.find((t) => window.innerWidth >= t.min) ?? TIERS[TIERS.length - 1];
+    const axis = (tier.axis * w) / tier.vb;
+    const contentBottom = content.getBoundingClientRect().bottom - svg.getBoundingClientRect().top;
+    const x = tier.entryX(w);
+    const r = tier.r;
+    const turnY = Math.min(contentBottom + tier.gap, h - r - 8);
+    const startY = ENTRY_Y + ENTRY_LENGTH;
+
+    // Nájezd a hlavní cesta na sebe navazují bez překryvu (CLAUDE.md, „zub").
+    entry.setAttribute('d', `M ${x} ${ENTRY_Y} L ${x} ${startY}`);
+    gradient.setAttribute('x1', String(x));
+    gradient.setAttribute('x2', String(x));
+    gradient.setAttribute('y1', String(ENTRY_Y));
+    gradient.setAttribute('y2', String(startY));
+    path.setAttribute(
+      'd',
+      `M ${x} ${startY} V ${turnY - r} A ${r} ${r} 0 0 1 ${x - r} ${turnY} H ${axis + r} A ${r} ${r} 0 0 0 ${axis} ${turnY + r} V ${h}`,
+    );
+  };
+
+  sync();
+  document.fonts.ready.then(sync);
+  if (content) new ResizeObserver(sync).observe(content);
+  if (main) new ResizeObserver(sync).observe(main);
+  window.addEventListener('resize', sync);
+</script>
+
+<style>
+  .standalone-route {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* Strop jako trasa patičky (CLAUDE.md „wide desktop"): stejná šířka a střed. */
+  .standalone-route__svg {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    max-width: var(--stage-max);
+    height: 100%;
+    transform: translateX(-50%);
+    overflow: visible;
+  }
+</style>
