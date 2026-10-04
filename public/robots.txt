@@ -1,4 +1,4 @@
-User-agent: *
+﻿User-agent: *
 Allow: /
 
 User-agent: Googlebot
@@ -39,4 +39,4 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-Sitemap: https://patrikgajdadzis.cz/sitemap.xml
+Sitemap: https://patrikgajdadzis.cz/sitemap-index.xml

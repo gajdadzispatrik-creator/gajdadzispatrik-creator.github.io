@@ -271,26 +271,27 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
    > Po pár týdnech se mě zeptal, jestli bych se tím nechtěl začít živit. Bavilo mě to, připadalo mi to zajímavé a dávalo mi smysl pomáhat lidem řešit podobné otázky, které jsem předtím začal řešit sám.
    >
    > Rozhodl jsem se proto začít ve finančním poradenství podnikat a dál se v oboru vzdělávat.
+6. **Pás se statistikami pod hero — probrat celý** (uživatel 4. 10. 2026: „to chci celé ještě probrat“). Mimo jiné dnes ukazuje „5,0 Google recenze“, brief §7 chce „42 recenzí s hodnocením 5★“ (počet je silnější důkaz než samotná známka).
 
 **B) Při spouštění webu (spolu, podle `docs/deploy-wedos.md`)**
-6. Wedos: SSL certifikát (před nahráním), PHP 8.1+, schránka `poptavka@patrikgajdadzis.cz`.
-7. DNS: SPF, DKIM, DMARC (doručitelnost poptávek).
-8. Nahrát `dist/` včetně skrytých `.htaccess` a `api/.htaccess`.
-9. Živé testy: přesměrování (www/http/lomítko), bezpečnostní hlavičky, stránka 404 vrací kód 404, **zkušební poptávka dorazí do obou schránek** (ne do spamu), `api/limity/` vrací 403, web projít na skutečném iPhonu.
+7. Wedos: SSL certifikát (před nahráním), PHP 8.1+, schránka `poptavka@patrikgajdadzis.cz`.
+8. DNS: SPF, DKIM, DMARC (doručitelnost poptávek).
+9. Nahrát `dist/` včetně skrytých `.htaccess` a `api/.htaccess`.
+10. Živé testy (**Claude připomene**): přesměrování (www/http/lomítko), bezpečnostní hlavičky, stránka 404 vrací kód 404, **zkušební poptávka dorazí do obou schránek** (ne do spamu), `api/limity/` vrací 403, web projít na skutečném iPhonu, **rychlost v PageSpeed Insights (mobil i desktop) — znovu po nahrání finálních fotek**.
 
-**C) V den spuštění**
-10. **Google profil: změnit web z `pafinga.cz` na `patrikgajdadzis.cz`** (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí.
-11. **Co s `pafinga.cz`?** — rozhodnout: pokud na ní běží web nebo na ni vedou odkazy, nastavit trvalé přesměrování (301) na `patrikgajdadzis.cz`, aby se neztratila návštěvnost ani pozice ve vyhledávání.
-12. Google Search Console + Bing Webmaster Tools — ověřit doménu, odeslat `sitemap.xml`.
-13. Google Analytics 4 — založit, vložit ID do `CookieConsent.astro` (`loadAnalytics()`), **uchovávání dat nastavit na 14 měsíců** (výchozí 2 — jinak nesedí se zásadami OÚ), události: odeslání formuláře, kliknutí na telefon.
-14. Hlídání dostupnosti webu (např. UptimeRobot, zdarma).
+**C) Hned po spuštění na Wedosu — nastavit Google a zprovoznit měření**
+11. **Google profil: změnit web z `pafinga.cz` na `patrikgajdadzis.cz`** (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí.
+12. **Co s `pafinga.cz`?** — rozhodnout: pokud na ní běží web nebo na ni vedou odkazy, nastavit trvalé přesměrování (301) na `patrikgajdadzis.cz`, aby se neztratila návštěvnost ani pozice ve vyhledávání.
+13. **Google Search Console** + Bing Webmaster Tools — ověřit doménu, odeslat `https://patrikgajdadzis.cz/sitemap-index.xml` (generuje se automaticky při buildu, `@astrojs/sitemap`).
+14. **Google Analytics 4 — měření od prvního dne:** založit, vložit ID do `CookieConsent.astro` (`loadAnalytics()`), **uchovávání dat nastavit na 14 měsíců** (výchozí 2 — jinak nesedí se zásadami OÚ), události: odeslání formuláře, kliknutí na telefon (a rezervace termínu, pokud bude).
+15. Hlídání dostupnosti webu (např. UptimeRobot, zdarma).
 
 **D) Po spuštění**
-15. Články: obsah + stránka detailu článku + `Article` schema; `/clanky` zapnout (odstranit `noindex`, přidat do menu, patičky a `sitemap.xml`).
-16. Otevírací doba do strukturovaných dat (`openingHoursSpecification`) — dodat celý týden (profil ukazuje 8–18).
-17. Vrátit „Kariéra“ do patičky, až bude cílová stránka.
+16. Články (uživatel plánuje 1 článek měsíčně): stránka článků + detail článku + `Article` schema; `/clanky` zapnout (odstranit `noindex`, přidat do menu a patičky, odebrat `/clanky` ze `SITEMAP_EXCLUDE` v `astro.config.mjs` — sitemap se pak doplní sama).
+17. Otevírací doba do strukturovaných dat (`openingHoursSpecification`) — dodat celý týden (profil ukazuje 8–18).
+18. Vrátit „Kariéra“ do patičky, až bude cílová stránka.
 
 **E) Doporučené (kdykoli, nejlépe brzy)**
-18. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.
-19. Přesunout projekt mimo OneDrive — synchronizace `node_modules` způsobuje hromadné dotazy na mazání a hrozí promíchání knihoven.
-20. Drobnosti bez dopadu na návštěvníka: hláška Vite „Failed to scan for dependencies“ v dev režimu, blokující CSS ~0,5 s při simulaci pomalého mobilu (rychlost i tak 98–100).
+19. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.
+20. Přesunout projekt mimo OneDrive — synchronizace `node_modules` způsobuje hromadné dotazy na mazání a hrozí promíchání knihoven.
+21. Drobnosti bez dopadu na návštěvníka: hláška Vite „Failed to scan for dependencies“ v dev režimu, blokující CSS ~0,5 s při simulaci pomalého mobilu (rychlost i tak 98–100).

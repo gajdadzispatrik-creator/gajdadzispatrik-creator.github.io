@@ -1,5 +1,5 @@
 # Kanonická adresa webu: https://patrikgajdadzis.cz (bez www, bez koncového
-# lomítka kromě domovské stránky) — shodně s canonical, sitemap.xml, og:url
+# lomítka kromě domovské stránky) — shodně s canonical, sitemapou, og:url
 # a JSON-LD (astro.config.mjs `site`, src/data/entity.ts).
 #
 # Wedos: tenhle soubor leží v /www/domains/patrikgajdadzis.cz/ a hostingová

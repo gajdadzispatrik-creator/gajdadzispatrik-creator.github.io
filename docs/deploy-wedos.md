@@ -84,7 +84,7 @@ běžné požadavky).
 
 ### Ostatní
 
-- `robots.txt` a `sitemap.xml` se otevírají.
+- `robots.txt` a `sitemap-index.xml` (+ `sitemap-0.xml`) se otevírají.
 - Web jednou projít na skutečném iPhonu (Safari) — hlavně tučné nadpisy
   a dekorativní linky (testovací WebKit pro Windows tučnost variabilního
   fontu nevykresluje věrně).

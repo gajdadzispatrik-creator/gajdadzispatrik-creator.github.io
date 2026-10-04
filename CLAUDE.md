@@ -1091,7 +1091,8 @@ na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
   (doručení, spam složka, SPF domény). Hodnoty ve formuláři obsahují U+00A0
   (typografie) — PHP je normalizuje před kontrolou whitelistu.
 - SEO/GEO vrstva (brief §23): favicon a Open Graph / Twitter meta HOTOVO (4. 10. 2026), canonical,
-  `sitemap.xml`, `robots.txt`, strukturovaná data (JSON-LD `FinancialService`).
+  sitemap (od 4. 10. 2026 automaticky `@astrojs/sitemap` → `sitemap-index.xml`,
+  vyřazené stránky v `SITEMAP_EXCLUDE` v `astro.config.mjs`), `robots.txt`, strukturovaná data (JSON-LD `FinancialService`).
 - Právní/regulatorní: registr ČNB, zásady zpracování OÚ, cookies — ověřit dle §8.
 - Nahradit `HeroPhotoPlaceholder` a placeholder fotku v AboutSection skutečnými
   fotkami; nahradit zástupné texty v CasesSection a ArticlesSection skutečným
