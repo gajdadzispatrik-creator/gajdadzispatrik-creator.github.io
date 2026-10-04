@@ -17,6 +17,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import LineGradientDefs from '../components/LineGradientDefs.astro';
 import { Image } from 'astro:assets';
 import { BOOKING_URL } from '../data/entity';
 import pecePhoto from '../assets/photos/patrik-pristup-pece.png';
@@ -202,6 +203,25 @@ const config = {
 >
   <Header />
   <main id="hero" class="chk">
+    {/*
+      Linka (4. 10. 2026): stránka nemá kapitoly, ale patička linku přebírá —
+      bez tohohle by v patičce začínala odnikud. Stejný vzor jako /pristup,
+      /o-mne a /clanky: na tabletu a výš nájezd shora u pravého kraje, zrcadlově k ose (nájezdový
+      gradient, CLAUDE.md „Nájezdový gradient jen na skutečném začátku"),
+      40 px pod obsahem obloukem k ose a po ose do patičky. Na mobilu linka
+      začíná pod obsahem na ose. Výška obsahu se mění (otázky → výsledek),
+      tvar proto počítá skript níže; viewBox = skutečné px, oblouky kulaté.
+    */}
+    <div class="chk__route" aria-hidden="true">
+      <svg class="chk__route-svg" preserveAspectRatio="none" focusable="false">
+        <defs>
+          <LineGradientDefs id="chk-line-entry" tier="laptop" x1={0} y1={40} x2={0} y2={140} />
+        </defs>
+        <path class="chk__route-path" d="M 0 0" fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+        <path class="chk__route-entry" d="M 0 0" fill="none" stroke="url(#chk-line-entry)" stroke-width="1" stroke-linecap="round" />
+      </svg>
+    </div>
+
     <section class="chk-hero" aria-labelledby="chk-heading">
       <div class="chk-hero__text" data-checkup data-config={JSON.stringify(config)}>
         <h1 id="chk-heading">Jak na&nbsp;tom jsou vaše finance?</h1>
@@ -357,6 +377,71 @@ const config = {
 </BaseLayout>
 
 <script>
+  // --- Linka do patičky (popis u .chk__route v markupu) ---
+  {
+    const main = document.querySelector<HTMLElement>('.chk');
+    const svg = document.querySelector<SVGSVGElement>('.chk__route-svg');
+    const content = document.querySelector<HTMLElement>('.chk-hero__text');
+    const path = svg?.querySelector<SVGPathElement>('.chk__route-path');
+    const entry = svg?.querySelector<SVGPathElement>('.chk__route-entry');
+    const gradient = svg?.querySelector<SVGLinearGradientElement>('linearGradient');
+    // Osa a poloměr = SiteFooter.astro (vstup trasy patičky) na každém stupni.
+    const TIERS = [
+      { min: 1400, vb: 1440, axis: 120, r: 28, hero: true },
+      { min: 1200, vb: 1366, axis: 96, r: 28, hero: true },
+      { min: 768, vb: 834, axis: 40, r: 22, hero: true },
+      { min: 0, vb: 390, axis: 24, r: 18, hero: false },
+    ];
+    const ENTRY_Y = 40;
+    const ENTRY_LENGTH = 100;
+
+    const sync = () => {
+      if (!main || !svg || !content || !path || !entry || !gradient) return;
+      const w = svg.clientWidth;
+      const h = main.clientHeight;
+      if (!w || !h) return;
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      const tier = TIERS.find((t) => window.innerWidth >= t.min) ?? TIERS[TIERS.length - 1];
+      const axis = (tier.axis * w) / tier.vb;
+      const svgTop = svg.getBoundingClientRect().top;
+      const contentBottom = content.getBoundingClientRect().bottom - svgTop;
+      const setGradient = (x: number, y1: number, y2: number) => {
+        gradient.setAttribute('x1', String(x));
+        gradient.setAttribute('x2', String(x));
+        gradient.setAttribute('y1', String(y1));
+        gradient.setAttribute('y2', String(y2));
+      };
+
+      if (tier.hero) {
+        // Nájezd zrcadlově k ose (stejný odstup od pravého kraje jako osa od levého) —
+        // na tabletu tak drží odstup od panelu s nabídkou.
+        const x = w - axis;
+        const r = tier.r;
+        const turnY = Math.min(contentBottom + 40, h - r - 8);
+        const startY = ENTRY_Y + ENTRY_LENGTH;
+        entry.setAttribute('d', `M ${x} ${ENTRY_Y} L ${x} ${startY}`);
+        setGradient(x, ENTRY_Y, startY);
+        path.setAttribute(
+          'd',
+          `M ${x} ${startY} V ${turnY - r} A ${r} ${r} 0 0 1 ${x - r} ${turnY} H ${axis + r} A ${r} ${r} 0 0 0 ${axis} ${turnY + r} V ${h}`,
+        );
+      } else {
+        // Mobil: začátek linky pod obsahem, nájezd po celé krátké délce.
+        const startY = Math.min(contentBottom + 20, h - 24);
+        const endEntry = Math.min(startY + ENTRY_LENGTH, h);
+        entry.setAttribute('d', `M ${axis} ${startY} L ${axis} ${endEntry}`);
+        setGradient(axis, startY, endEntry);
+        path.setAttribute('d', endEntry < h ? `M ${axis} ${endEntry} V ${h}` : 'M 0 0');
+      }
+    };
+
+    sync();
+    document.fonts.ready.then(sync);
+    if (content) new ResizeObserver(sync).observe(content);
+    if (main) new ResizeObserver(sync).observe(main);
+    window.addEventListener('resize', sync);
+  }
+
   interface Config {
     questions: { id: string; title: string; options: string[] }[];
   }
@@ -565,7 +650,31 @@ const config = {
 
 <style>
   .chk {
+    position: relative;
     background: var(--bg);
+  }
+
+  .chk__route {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* Strop jako trasa patičky (CLAUDE.md „wide desktop"): stejná šířka a střed. */
+  .chk__route-svg {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    max-width: var(--stage-max);
+    height: 100%;
+    transform: translateX(-50%);
+    overflow: visible;
+  }
+
+  .chk-hero {
+    position: relative;
   }
 
   .chk :focus-visible {
