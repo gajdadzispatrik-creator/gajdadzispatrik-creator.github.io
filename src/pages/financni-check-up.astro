@@ -206,10 +206,9 @@ const config = {
     {/*
       Linka (4. 10. 2026): stránka nemá kapitoly, ale patička linku přebírá —
       bez tohohle by v patičce začínala odnikud. Stejný vzor jako /pristup,
-      /o-mne a /clanky: na tabletu a výš nájezd shora u pravého kraje, zrcadlově k ose (nájezdový
+      /o-mne a /clanky: nájezd shora u pravého kraje (nájezdový
       gradient, CLAUDE.md „Nájezdový gradient jen na skutečném začátku"),
-      40 px pod obsahem obloukem k ose a po ose do patičky. Na mobilu linka
-      začíná pod obsahem na ose. Výška obsahu se mění (otázky → výsledek),
+      pod obsahem obloukem k ose a po ose do patičky (mobil jako /pristup). Výška obsahu se mění (otázky → výsledek),
       tvar proto počítá skript níže; viewBox = skutečné px, oblouky kulaté.
     */}
     <div class="chk__route" aria-hidden="true">
@@ -386,11 +385,14 @@ const config = {
     const entry = svg?.querySelector<SVGPathElement>('.chk__route-entry');
     const gradient = svg?.querySelector<SVGLinearGradientElement>('linearGradient');
     // Osa a poloměr = SiteFooter.astro (vstup trasy patičky) na každém stupni.
+    // Nájezd: na tabletu a výš zrcadlově k ose (stejný odstup od pravého kraje
+    // jako osa od levého — drží odstup od panelu s nabídkou), na mobilu
+    // x = 378 (vb 390) a ohyb 28 px pod obsahem jako /pristup.
     const TIERS = [
-      { min: 1400, vb: 1440, axis: 120, r: 28, hero: true },
-      { min: 1200, vb: 1366, axis: 96, r: 28, hero: true },
-      { min: 768, vb: 834, axis: 40, r: 22, hero: true },
-      { min: 0, vb: 390, axis: 24, r: 18, hero: false },
+      { min: 1400, vb: 1440, axis: 120, r: 28, gap: 40, entryX: (w: number) => w - (120 * w) / 1440 },
+      { min: 1200, vb: 1366, axis: 96, r: 28, gap: 40, entryX: (w: number) => w - (96 * w) / 1366 },
+      { min: 768, vb: 834, axis: 40, r: 22, gap: 40, entryX: (w: number) => w - (40 * w) / 834 },
+      { min: 0, vb: 390, axis: 24, r: 18, gap: 28, entryX: (w: number) => (378 * w) / 390 },
     ];
     const ENTRY_Y = 40;
     const ENTRY_LENGTH = 100;
@@ -412,27 +414,16 @@ const config = {
         gradient.setAttribute('y2', String(y2));
       };
 
-      if (tier.hero) {
-        // Nájezd zrcadlově k ose (stejný odstup od pravého kraje jako osa od levého) —
-        // na tabletu tak drží odstup od panelu s nabídkou.
-        const x = w - axis;
-        const r = tier.r;
-        const turnY = Math.min(contentBottom + 40, h - r - 8);
-        const startY = ENTRY_Y + ENTRY_LENGTH;
-        entry.setAttribute('d', `M ${x} ${ENTRY_Y} L ${x} ${startY}`);
-        setGradient(x, ENTRY_Y, startY);
-        path.setAttribute(
-          'd',
-          `M ${x} ${startY} V ${turnY - r} A ${r} ${r} 0 0 1 ${x - r} ${turnY} H ${axis + r} A ${r} ${r} 0 0 0 ${axis} ${turnY + r} V ${h}`,
-        );
-      } else {
-        // Mobil: začátek linky pod obsahem, nájezd po celé krátké délce.
-        const startY = Math.min(contentBottom + 20, h - 24);
-        const endEntry = Math.min(startY + ENTRY_LENGTH, h);
-        entry.setAttribute('d', `M ${axis} ${startY} L ${axis} ${endEntry}`);
-        setGradient(axis, startY, endEntry);
-        path.setAttribute('d', endEntry < h ? `M ${axis} ${endEntry} V ${h}` : 'M 0 0');
-      }
+      const x = tier.entryX(w);
+      const r = tier.r;
+      const turnY = Math.min(contentBottom + tier.gap, h - r - 8);
+      const startY = ENTRY_Y + ENTRY_LENGTH;
+      entry.setAttribute('d', `M ${x} ${ENTRY_Y} L ${x} ${startY}`);
+      setGradient(x, ENTRY_Y, startY);
+      path.setAttribute(
+        'd',
+        `M ${x} ${startY} V ${turnY - r} A ${r} ${r} 0 0 1 ${x - r} ${turnY} H ${axis + r} A ${r} ${r} 0 0 0 ${axis} ${turnY + r} V ${h}`,
+      );
     };
 
     sync();
