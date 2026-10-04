@@ -205,11 +205,12 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
       ve 2. sloupci pod druhým, linka police vede pod ním — odbočka pak mířila
       zespodu nahoru a tečka končila uprostřed článku přes jeho řádky.
       Třetí tečka zůstává (JS podle ní odhaluje třetí článek); sedí na polici
-      ve stejném sloupci jako druhá, takže splývá s ní.
+      ve stejném sloupci jako druhá — skrytá (visibility), jinak by se dvě
+      poloprůhledné tečky přes sebe sečetly do tmavší (4. 10. 2026).
     -->
     <circle class="articles__dot articles__dot--lead" cx="140" cy="470" r="3.2" fill="var(--emerald)"></circle>
     <circle class="articles__dot" cx="470" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
-    <circle class="articles__dot" cx="470" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
+    <circle class="articles__dot" cx="470" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5" visibility="hidden"></circle>
   </svg>
 
   <!--

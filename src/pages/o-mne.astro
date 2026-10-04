@@ -2274,8 +2274,7 @@ const facts: FactRow[] = [
     .om-facts__row {
       display: grid;
       grid-template-columns: 300px 1fr;
-      column-gap: 32px;
-      gap: 0;
+      gap: 0 32px; /* dřív column-gap + gap: 0 = mezera 0 (4. 10. 2026) */
       align-items: baseline;
       padding: 22px 0;
     }

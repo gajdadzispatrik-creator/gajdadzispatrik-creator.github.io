@@ -1516,8 +1516,8 @@ const faqs: Faq[] = [
     .poj-rows__row {
       display: grid;
       grid-template-columns: 250px 1fr;
-      column-gap: 32px;
-      gap: 0;
+      /* gap: 0 za column-gap ho dřív vynuloval — text těsně u názvu (4. 10. 2026). */
+      gap: 0 32px;
       align-items: baseline;
     }
 

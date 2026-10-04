@@ -1356,7 +1356,9 @@ const REVIEWS_SHOWN = 3;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-top: 12px;
+    /* Poslední recenze → tlačítko 32 px (8 gap rodiče + 24) jako seznam → odkaz
+       na homepage (CasesSection); poslední recenze nemá spodní padding. */
+    margin-top: 24px;
     height: 48px;
     padding-inline: 24px;
     border: 1px solid var(--border);

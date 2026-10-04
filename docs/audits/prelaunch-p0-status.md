@@ -265,26 +265,32 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 2. **Úpravy zobrazení pro mobil a desktop** (spolu s Claude — po každé úpravě `npm run check:layout` + `npm run check:typo`).
 3. **Favicon + obrázek pro sdílení (OG, 1200×630)** — uživatel dodá logo/fotku, Claude z nich připraví všechny velikosti a doplní meta značky. Bez faviconu hlásí každá stránka 404 v konzoli (jediná výtka Lighthouse).
 4. **Sekce Články na homepage** — dnes 3 zástupné řádky („Titulek - placeholder“), návštěvník je uvidí. Uživatel chce články dodat před spuštěním; **pokud nebudou hotové, sekci před spuštěním skrýt**.
+5. **/o-mne — doplnit nebo přepsat pasáž o začátku v oboru** (uživatel se k ní chce ještě vrátit, 4. 10. 2026). Jde o tyto tři odstavce:
+   > Jeden můj známý tehdy pracoval jako ředitel v poradenské společnosti. Ozval jsem se mu a domluvili jsme se, že za ním budu po práci chodit a učit se, jak finance a finanční poradenství fungují v praxi.
+   >
+   > Po pár týdnech se mě zeptal, jestli bych se tím nechtěl začít živit. Bavilo mě to, připadalo mi to zajímavé a dávalo mi smysl pomáhat lidem řešit podobné otázky, které jsem předtím začal řešit sám.
+   >
+   > Rozhodl jsem se proto začít ve finančním poradenství podnikat a dál se v oboru vzdělávat.
 
 **B) Při spouštění webu (spolu, podle `docs/deploy-wedos.md`)**
-5. Wedos: SSL certifikát (před nahráním), PHP 8.1+, schránka `poptavka@patrikgajdadzis.cz`.
-6. DNS: SPF, DKIM, DMARC (doručitelnost poptávek).
-7. Nahrát `dist/` včetně skrytých `.htaccess` a `api/.htaccess`.
-8. Živé testy: přesměrování (www/http/lomítko), bezpečnostní hlavičky, stránka 404 vrací kód 404, **zkušební poptávka dorazí do obou schránek** (ne do spamu), `api/limity/` vrací 403, web projít na skutečném iPhonu.
+6. Wedos: SSL certifikát (před nahráním), PHP 8.1+, schránka `poptavka@patrikgajdadzis.cz`.
+7. DNS: SPF, DKIM, DMARC (doručitelnost poptávek).
+8. Nahrát `dist/` včetně skrytých `.htaccess` a `api/.htaccess`.
+9. Živé testy: přesměrování (www/http/lomítko), bezpečnostní hlavičky, stránka 404 vrací kód 404, **zkušební poptávka dorazí do obou schránek** (ne do spamu), `api/limity/` vrací 403, web projít na skutečném iPhonu.
 
 **C) V den spuštění**
-9. **Google profil: změnit web z `pafinga.cz` na `patrikgajdadzis.cz`** (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí.
-10. **Co s `pafinga.cz`?** — rozhodnout: pokud na ní běží web nebo na ni vedou odkazy, nastavit trvalé přesměrování (301) na `patrikgajdadzis.cz`, aby se neztratila návštěvnost ani pozice ve vyhledávání.
-11. Google Search Console + Bing Webmaster Tools — ověřit doménu, odeslat `sitemap.xml`.
-12. Google Analytics 4 — založit, vložit ID do `CookieConsent.astro` (`loadAnalytics()`), **uchovávání dat nastavit na 14 měsíců** (výchozí 2 — jinak nesedí se zásadami OÚ), události: odeslání formuláře, kliknutí na telefon.
-13. Hlídání dostupnosti webu (např. UptimeRobot, zdarma).
+10. **Google profil: změnit web z `pafinga.cz` na `patrikgajdadzis.cz`** (business.google.com → Upravit profil → Web). Jinak Google profil a nový web nespojí.
+11. **Co s `pafinga.cz`?** — rozhodnout: pokud na ní běží web nebo na ni vedou odkazy, nastavit trvalé přesměrování (301) na `patrikgajdadzis.cz`, aby se neztratila návštěvnost ani pozice ve vyhledávání.
+12. Google Search Console + Bing Webmaster Tools — ověřit doménu, odeslat `sitemap.xml`.
+13. Google Analytics 4 — založit, vložit ID do `CookieConsent.astro` (`loadAnalytics()`), **uchovávání dat nastavit na 14 měsíců** (výchozí 2 — jinak nesedí se zásadami OÚ), události: odeslání formuláře, kliknutí na telefon.
+14. Hlídání dostupnosti webu (např. UptimeRobot, zdarma).
 
 **D) Po spuštění**
-14. Články: obsah + stránka detailu článku + `Article` schema; `/clanky` zapnout (odstranit `noindex`, přidat do menu, patičky a `sitemap.xml`).
-15. Otevírací doba do strukturovaných dat (`openingHoursSpecification`) — dodat celý týden (profil ukazuje 8–18).
-16. Vrátit „Kariéra“ do patičky, až bude cílová stránka.
+15. Články: obsah + stránka detailu článku + `Article` schema; `/clanky` zapnout (odstranit `noindex`, přidat do menu, patičky a `sitemap.xml`).
+16. Otevírací doba do strukturovaných dat (`openingHoursSpecification`) — dodat celý týden (profil ukazuje 8–18).
+17. Vrátit „Kariéra“ do patičky, až bude cílová stránka.
 
 **E) Doporučené (kdykoli, nejlépe brzy)**
-17. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.
-18. Přesunout projekt mimo OneDrive — synchronizace `node_modules` způsobuje hromadné dotazy na mazání a hrozí promíchání knihoven.
-19. Drobnosti bez dopadu na návštěvníka: hláška Vite „Failed to scan for dependencies“ v dev režimu, blokující CSS ~0,5 s při simulaci pomalého mobilu (rychlost i tak 98–100).
+18. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.
+19. Přesunout projekt mimo OneDrive — synchronizace `node_modules` způsobuje hromadné dotazy na mazání a hrozí promíchání knihoven.
+20. Drobnosti bez dopadu na návštěvníka: hláška Vite „Failed to scan for dependencies“ v dev režimu, blokující CSS ~0,5 s při simulaci pomalého mobilu (rychlost i tak 98–100).

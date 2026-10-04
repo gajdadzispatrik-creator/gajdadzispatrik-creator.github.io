@@ -78,6 +78,15 @@ function measure() {
     if (!vis(h) || h.closest('[class*="hero"]')) continue;
     const hr = h.getBoundingClientRect();
     const next = lines.find(({ el }) => !h.contains(el) && (h.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING));
+    // Text VEDLE nadpisu/názvu (řádek ve dvou sloupcích): vodorovná mezera
+    // mezi nejdelším řádkem názvu a textem musí být aspoň 16 px.
+    if (next && next.q.top < hr.bottom - 1 && next.q.left > hr.left + 40) {
+      const rg = document.createRange(); rg.selectNodeContents(h);
+      const nameRight = Math.max(...[...rg.getClientRects()].map((q) => q.right));
+      const gapX = next.q.left - nameRight;
+      if (gapX < 16) heads.push({ role: 'vedle', gapX, gap: 99, txt: h.textContent.trim().replace(/\s+/g, ' ').slice(0, 40) });
+      continue;
+    }
     if (!next || next.q.top < hr.bottom - 1 || Math.abs(next.q.left - hr.left) > 48 || next.q.top - hr.bottom > 200) continue;
     let blk = next.blk;
     // Text uvnitř rámečku/podbarveného boxu (např. identita na právních
@@ -168,6 +177,7 @@ try {
       const { heads, ends } = await page.evaluate(measure);
       for (const h of heads) {
         headCount++;
+        if (h.role === 'vedle') { fails.push(`${w}px ${path}: „${h.txt}“ → text vedle jen ${h.gapX.toFixed(1)} px (má být aspoň 16)`); continue; }
         if (h.gap < 8) fails.push(`${w}px ${path}: nadpis „${h.txt}“ → text jen ${h.gap.toFixed(1)} px (přilepené)`);
         const key = `${path === '/' ? 'home' : 'sub'} ${h.role}`;
         if (!headRoles.has(key)) headRoles.set(key, []);
