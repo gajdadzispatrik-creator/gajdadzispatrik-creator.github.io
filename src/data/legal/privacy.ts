@@ -91,6 +91,12 @@ export const privacyPage: LegalPageData = {
             ],
           ],
         },
+        {
+          type: 'p',
+          content: [
+            'Termín konzultace si můžete rezervovat i online přes Google Kalendář. Rezervace sbírá jméno, příjmení, e-mail, telefon a případně téma, se kterým potřebujete pomoct. Údaje použiji jen k domluvě a uskutečnění konzultace a platí pro ně stejná pravidla jako pro kontaktní formulář.',
+          ],
+        },
       ],
     },
     {
@@ -128,6 +134,7 @@ export const privacyPage: LegalPageData = {
           items: [
             ['Poskytovatel hostingu a e-mailu tohoto webu (WEDOS Internet, a.s.), přes kterého se poptávka z formuláře odesílá.'],
             ['Poskytovatel e-mailové schránky, do které poptávky přicházejí (Google Workspace, Google Ireland Limited).'],
+            ['Google Kalendář (Google Ireland Limited), pokud si termín rezervujete online.'],
             [
               'Google Analytics, jen pokud udělíte souhlas s analytickými cookies.',
             ],

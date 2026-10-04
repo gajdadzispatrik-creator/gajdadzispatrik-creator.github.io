@@ -101,6 +101,12 @@ const bandDetails = [
 
     <div class="kontakt__body">
       <div class="kontakt__side">
+        <!-- Rezervace přes Google Kalendář (plán schůzek, hlídá obsazené časy). Odkaz, ne vložené okno — rychlost, cookies, design. -->
+        <div class="kontakt__form-intro">
+          <p class="kontakt__form-intro-label">Rezervace online</p>
+          <a class="kontakt__booking-link" href="https://calendar.app.google/995121nUYKycJ5aNA" target="_blank" rel="noopener">Vybrat volný termín v&nbsp;kalendáři</a>
+        </div>
+
         <div class="kontakt__form-intro">
           <p class="kontakt__form-intro-label">Nebo napište</p>
           <p class="kontakt__form-intro-text">Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</p>
@@ -797,6 +803,37 @@ const bandDetails = [
     line-height: 1.6;
     font-size: 16px;
     color: var(--text-muted);
+  }
+
+  /* Textový odkaz stejně jako .cases__cta; ::after zvětšuje plochu pro dotyk. */
+  .kontakt__booking-link {
+    align-self: flex-start;
+    position: relative;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .kontakt__booking-link::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
+  .kontakt__booking-link:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+
+  .kontakt__booking-link:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
   }
 
   .kontakt__address {
