@@ -305,13 +305,9 @@ const config = {
           </div>
 
           {/* Výsledek jako linka se zastávkami (hlavní grafický prvek webu):
-              nahoře oblasti k projití, pod nimi v pořádku. Rozbalená je jen
-              první k projití („Začal bych tady"). */}
+              nahoře oblasti k projití, pod nimi ty se základem. Rozbalená je
+              jen první k projití („Tady bych začal"). */}
           <div class="chk-map-wrap">
-            <p class="chk-legend" aria-hidden="true">
-              <span><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.2" class="chk-dot chk-dot--check" /></svg>Vyplatí se&nbsp;podívat</span>
-              <span><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.2" class="chk-dot chk-dot--ok" /></svg>Základ máte</span>
-            </p>
             <ol class="chk-map" data-map>
               {
                 areas.map((area) => (
@@ -321,7 +317,6 @@ const config = {
                     </svg>
                     <h3 class="chk-stop__name">
                       {nb(area.name)}
-                      <span class="chk-stop__tag">Začal bych tady</span>
                     </h3>
                     <p class="chk-stop__status" data-status-ok>Základ máte</p>
                     <p class="chk-stop__status chk-stop__status--check" data-status-check>Vyplatí se&nbsp;podívat</p>
@@ -329,6 +324,7 @@ const config = {
                       <p class="chk-stop__short" data-short={key} hidden>{nb(text)}</p>
                     ))}
                     <div class="chk-stop__detail">
+                      <p class="chk-stop__lead">Tady bych začal</p>
                       {Object.entries(area.texts).map(([key, text]) => (
                         <p data-text={key} hidden>{nb(text)}</p>
                       ))}
@@ -965,7 +961,6 @@ const config = {
   .chk-map-wrap {
     display: flex;
     flex-direction: column;
-    gap: 24px;
     max-width: 600px;
   }
 
@@ -977,27 +972,6 @@ const config = {
   .chk-dot--check,
   .chk-stop.is-check .chk-dot {
     fill: var(--pending-review);
-  }
-
-  .chk-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.4;
-    color: var(--text-muted);
-  }
-
-  .chk-legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .chk-legend svg {
-    flex: none;
-    overflow: visible;
   }
 
   .chk-map {
@@ -1057,23 +1031,6 @@ const config = {
     color: var(--navy);
   }
 
-  .chk-stop__tag {
-    display: none;
-    padding: 3px 10px;
-    border-radius: 999px;
-    background: rgba(30, 122, 92, .1);
-    font-weight: 700;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    font-size: 10.5px;
-    line-height: 16px;
-    color: var(--emerald);
-  }
-
-  .chk-stop.is-first .chk-stop__tag {
-    display: inline-block;
-  }
-
   /* Stav jen pro čtečky — barvu tečky vidící čtenář chápe z legendy. */
   .chk-stop__status {
     position: absolute;
@@ -1110,6 +1067,17 @@ const config = {
   .chk-stop.is-first .chk-stop__short {
     color: var(--navy);
     font-weight: 600;
+  }
+
+  /* Popisek jako ostatní popisky webu (kontakt, kroky) — ne štítek. */
+  .chk-stop__detail .chk-stop__lead {
+    margin: 0 0 2px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: var(--emerald);
   }
 
   .chk-stop__detail p {
