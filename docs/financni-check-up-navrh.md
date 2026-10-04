@@ -18,7 +18,7 @@ nebo upravit.
 
 **Nadpis:** Jak na tom jsou vaše finance?
 
-**Text:** Osm krátkých otázek, zhruba dvě minuty. Na konci uvidíte, co máte
+**Text:** Stačí 8 krátkých otázek a zhruba 2 minuty. Na konci uvidíte, co máte
 nastavené dobře a kde se vyplatí podívat blíž. Odpovědi zůstávají jen ve
 vašem prohlížeči, nikam se neodesílají.
 
