@@ -40,9 +40,6 @@ export const GOOGLE_REVIEWS_URL =
   'https://www.google.com/maps/place/Patrik+Gajdadzis+%7C+Hypot%C3%A9ky+a+finance/data=!4m8!3m7!1s0x4713e37436aeb17b:0x4be682e02f942c0!8m2!3d49.8290121!4d18.1635271!9m1!1b1!16s%2Fg%2F11sghfvss6';
 const GOOGLE_MAPS_CID_URL = 'https://maps.google.com/?cid=341825168554410688';
 
-// Online rezervace úvodní konzultace (Google Kalendář, plán schůzek — hlídá
-// obsazené časy) a WhatsApp s předvyplněnou první zprávou. Kontakt + závěrečné
-// pásy podstránek.
 /**
  * Strukturovaná data FAQPage z TÝCHŽ otázek, které stránka vykresluje
  * (jeden zdroj — text v JSON-LD se nemůže rozejít s viditelným). Typografické
@@ -60,6 +57,9 @@ export function faqPage(items: { q: string; a: string }[]) {
   };
 }
 
+// Online rezervace úvodní konzultace (Google Kalendář, plán schůzek — hlídá
+// obsazené časy) a WhatsApp s předvyplněnou první zprávou. Kontakt + závěrečné
+// pásy podstránek.
 export const BOOKING_URL = 'https://calendar.app.google/995121nUYKycJ5aNA';
 export const WHATSAPP_URL = `https://wa.me/420775217721?text=${encodeURIComponent('Dobrý den, mám zájem o nezávaznou konzultaci.')}`;
 
