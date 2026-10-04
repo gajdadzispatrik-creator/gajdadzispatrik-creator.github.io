@@ -59,6 +59,9 @@ const navLinks = [
     // Progressive enhancement: only collapse the menu once JS can drive it.
     // Without JS, `hidden` is never set and the nav stays visible as a static list.
     menu.hidden = true;
+    // S JS se menu vysouvá PŘES stránku (absolutně pod hlavičkou), takže
+    // obsah pod ním neposkočí; bez JS zůstává statický seznam v toku.
+    toggle.closest('.site-header')?.classList.add('has-js-menu');
 
     const close = () => {
       menu.hidden = true;
@@ -78,6 +81,9 @@ const navLinks = [
         open();
       }
     });
+
+    // Klepnutí na odkaz menu zavře (i kotva #kontakt na téže stránce).
+    menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
@@ -174,6 +180,15 @@ const navLinks = [
     padding: 16px 24px 24px;
   }
 
+  /* Menu přes obsah pod hlavičkou, stránka se neposouvá (4. 10. 2026). */
+  .site-header.has-js-menu .mobile-nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    box-shadow: var(--shadow-header-mobile);
+  }
+
   .mobile-nav__list li + li {
     border-top: 1px solid var(--rule);
   }
@@ -181,6 +196,7 @@ const navLinks = [
   .mobile-nav__list a {
     display: block;
     padding: 14px 4px;
+    text-align: center; /* odkazy na střed (mobil i tablet), 4. 10. 2026 */
     font-weight: 600;
     font-size: 16px;
     color: var(--text-nav);

@@ -2489,4 +2489,134 @@ const facts: FactRow[] = [
     }
   }
 
+  /* ============ Důvěra — fotka jako v hero (mobil + tablet) ============
+     4. 10. 2026, přání uživatele: na mobilu fotka nahoře v pozadí za
+     nadpisem a textem (jako hero O mně), spodek se rozpouští do tmavého
+     pozadí; na tabletu fotka vpravo, spodek postavy (konec výřezu u stehen)
+     na spodní hraně sekce bez rozpouštění — stejně jako desktop. Hlava
+     stejně velká jako v hero (mobil ~95 px, tablet ~85 px; výřez
+     patrik-omne-hero.webp: hlava 155 px, střed 353 px, temeno 11 px).
+     Fotka se pozicuje vůči .om-chapter__inner — sloupec s nadpisem
+     (.om-chapter__lead-col) proto nesmí být pozicovaný. */
+  @media (max-width: 1199px) {
+    .om-chapter--duvera .om-chapter__inner {
+      position: relative;
+    }
+
+    .om-chapter--duvera .om-chapter__lead-col {
+      position: static;
+      transform: none;
+    }
+
+    .om-chapter--duvera .om-chapter__bar,
+    .om-chapter--duvera .om-chapter__lead-col h2,
+    .om-chapter--duvera .om-chapter__support-col {
+      position: relative;
+      z-index: 1;
+    }
+
+    .om-chapter--duvera .om-duvera__photo,
+    .om-chapter--duvera .om-duvera__photo.is-visible {
+      position: absolute;
+      z-index: 0;
+      margin: 0;
+      max-width: none;
+      aspect-ratio: auto;
+      overflow: visible;
+      clip-path: none;
+      pointer-events: none;
+    }
+
+    .om-chapter--duvera .om-duvera__photo img {
+      position: absolute;
+      max-width: none;
+      height: auto;
+      object-fit: fill;
+    }
+  }
+
+  @media (max-width: 767px) {
+    /* Rám přes celou šířku sekce od horní hrany obsahu (56 px), výřez
+       měřítkem 0,613 (hlava 95 px), hlava na středu šířky. */
+    .om-chapter--duvera .om-duvera__photo {
+      top: 56px;
+      left: 0;
+      width: 100%;
+      height: 470px;
+    }
+
+    .om-chapter--duvera .om-duvera__photo img {
+      top: 0;
+      left: -7.7%;
+      width: 107.2%;
+      /* Rozpuštění 255 → 435 px rámu (jako hero) = 38,5 → 65,7 % výšky výřezu. */
+      -webkit-mask-image: linear-gradient(180deg, #000 38.5%, rgba(0, 0, 0, .96) 41.9%, rgba(0, 0, 0, .85) 45.3%, rgba(0, 0, 0, .69) 48.7%, rgba(0, 0, 0, .5) 52.1%, rgba(0, 0, 0, .31) 55.5%, rgba(0, 0, 0, .15) 58.9%, rgba(0, 0, 0, .04) 62.3%, transparent 65.7%);
+              mask-image: linear-gradient(180deg, #000 38.5%, rgba(0, 0, 0, .96) 41.9%, rgba(0, 0, 0, .85) 45.3%, rgba(0, 0, 0, .69) 48.7%, rgba(0, 0, 0, .5) 52.1%, rgba(0, 0, 0, .31) 55.5%, rgba(0, 0, 0, .15) 58.9%, rgba(0, 0, 0, .04) 62.3%, transparent 65.7%);
+    }
+
+    /* Nadpis až pod obličejem (hero: text 260 px pod horní hranou fotky). */
+    .om-chapter--duvera .om-chapter__lead-col h2 {
+      margin-top: 208px;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    /* Text přes celou šířku jako ostatní kapitoly, fotka AŽ POD textem
+       (přání uživatele 4. 10. 2026) — vpravo, spodkem postavy na spodní
+       hraně sekce bez rozpouštění. Nadpis, text a fotka jsou díky
+       `display: contents` sourozenci v jednom sloupci (.om-chapter__top). */
+    /* Mřížka: nadpis a odstavce přes celou šířku, poslední řádek =
+       závěrečná věta vlevo vedle fotky (přání uživatele 4. 10. 2026). */
+    .om-chapter--duvera .om-chapter__top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      column-gap: 32px;
+      row-gap: 8px;
+    }
+
+    .om-chapter--duvera .om-chapter__lead-col,
+    .om-chapter--duvera .om-chapter__support-col {
+      display: contents;
+    }
+
+    .om-chapter--duvera .om-chapter__lead-col h2 {
+      grid-column: 1 / -1;
+      order: 1;
+      /* nadpis → text 20 px (8 row-gap + 12) */
+      margin-bottom: 12px;
+    }
+
+    .om-chapter--duvera .om-support__text {
+      grid-column: 1 / -1;
+      order: 2;
+    }
+
+    .om-chapter--duvera .om-chapter__statement {
+      grid-column: 1;
+      order: 3;
+      align-self: center;
+      margin-top: 24px;
+    }
+
+    /* Výřez měřítkem 0,548 (hlava 85 px) = 360 × 592 px; záporný spodní
+       margin = spodní padding sekce (72 px). */
+    .om-chapter--duvera .om-duvera__photo,
+    .om-chapter--duvera .om-duvera__photo.is-visible {
+      position: relative;
+      grid-column: 2;
+      order: 4;
+      width: 360px;
+      height: 592px;
+      margin: 24px 0 -72px;
+    }
+
+    .om-chapter--duvera .om-duvera__photo img {
+      top: 0;
+      left: 0;
+      width: 100%;
+      -webkit-mask-image: none;
+              mask-image: none;
+    }
+  }
+
 </style>
