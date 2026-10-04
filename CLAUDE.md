@@ -1066,7 +1066,7 @@ cookies" (`#footer-cookie-settings`) ho otevírá).
 **Chybí / TODO (nespuštěno):**
 
 **Aktuální seznam úkolů do spuštění je v `docs/audits/prelaunch-p0-status.md`,
-sekce 20 („ÚKOLY DO SPUŠTĚNÍ“)** — fotky, favicon + OG obrázek, sekce Články
+sekce 20 („ÚKOLY DO SPUŠTĚNÍ“)** — fotky, sekce Články
 na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
 `patrikgajdadzis.cz`), Search Console, GA4. Tam se udržuje, tady jen stručně:
 
@@ -1090,7 +1090,7 @@ na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
   server. Lokálně PHP neběží → **po nasazení otestovat skutečné odeslání**
   (doručení, spam složka, SPF domény). Hodnoty ve formuláři obsahují U+00A0
   (typografie) — PHP je normalizuje před kontrolou whitelistu.
-- SEO/GEO vrstva (brief §23): favicon, Open Graph / Twitter meta, canonical,
+- SEO/GEO vrstva (brief §23): favicon a Open Graph / Twitter meta HOTOVO (4. 10. 2026), canonical,
   `sitemap.xml`, `robots.txt`, strukturovaná data (JSON-LD `FinancialService`).
 - Právní/regulatorní: registr ČNB, zásady zpracování OÚ, cookies — ověřit dle §8.
 - Nahradit `HeroPhotoPlaceholder` a placeholder fotku v AboutSection skutečnými

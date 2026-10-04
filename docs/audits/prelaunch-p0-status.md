@@ -177,7 +177,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 
 1. **Kontaktní formulář neodesílá lead nikam** (bod 11) — jediný skutečně tvrdý blocker. Vyžaduje tvoje rozhodnutí (cíl doručení, hosting, anti-spam).
 2. **`/recenze` ukazuje jen placeholdery** (bod 10) — technicky funkční, ale slabý dojem; ne blokující v technickém smyslu, ale zadání ho žádá nahlásit jako blocker obsahu.
-3. **Chybí favicon a OG obrázek** — `public/` neobsahuje žádný favicon ani sociální náhledový obrázek; podle zadání jsem NEVYTVÁŘEL žádný nahodilý/AI asset. Web bude v záložce prohlížeče bez ikony a sdílení odkazu na sítích bude bez náhledu, dokud nedodáš finální logo/fotku.
+3. **~~Chybí favicon a OG obrázek~~ (vyřešeno 4. 10. 2026, viz Úkoly do spuštění bod 3)** — `public/` neobsahuje žádný favicon ani sociální náhledový obrázek; podle zadání jsem NEVYTVÁŘEL žádný nahodilý/AI asset. Web bude v záložce prohlížeče bez ikony a sdílení odkazu na sítích bude bez náhledu, dokud nedodáš finální logo/fotku.
 4. **`LocalBusiness`/`FinancialService` schema chybí** (bod 13) — bezpečně odloženo, dokud nepotvrdíš právní/provozní subjekt.
 5. **Finální právní sign-off** — `/pristup` „Odměna“ + retenční lhůty v `privacy.ts`/`cookies.ts` (bod 13).
 
@@ -263,7 +263,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 **A) Dodá uživatel před spuštěním**
 1. **Fotky** místo zástupných obrázků: homepage hero („FOTO PATRIKA - PLACEHOLDER“), sekce O mně na homepage, `/o-mne`, `/pristup`.
 2. **Úpravy zobrazení pro mobil a desktop** (spolu s Claude — po každé úpravě `npm run check:layout` + `npm run check:typo`).
-3. **Favicon + obrázek pro sdílení (OG, 1200×630)** — uživatel dodá logo/fotku, Claude z nich připraví všechny velikosti a doplní meta značky. Bez faviconu hlásí každá stránka 404 v konzoli (jediná výtka Lighthouse).
+3. ~~**Favicon + obrázek pro sdílení (OG, 1200×630)**~~ — **HOTOVO 4. 10. 2026:** logo PG (monogram z linky, `src/assets/brand/`), favicon SVG + ICO 16/32/48 + PNG 192/512 + ikona pro iPhone + `site.webmanifest`, `public/og-image.png` (og:image, twitter:card summary_large_image). Logo je i v hlavičce a patičce.
 4. **Sekce Články na homepage** — dnes 3 zástupné řádky („Titulek - placeholder“), návštěvník je uvidí. Uživatel chce články dodat před spuštěním; **pokud nebudou hotové, sekci před spuštěním skrýt**.
 5. **/o-mne — doplnit nebo přepsat pasáž o začátku v oboru** (uživatel se k ní chce ještě vrátit, 4. 10. 2026). Jde o tyto tři odstavce:
    > Jeden můj známý tehdy pracoval jako ředitel v poradenské společnosti. Ozval jsem se mu a domluvili jsme se, že za ním budu po práci chodit a učit se, jak finance a finanční poradenství fungují v praxi.
