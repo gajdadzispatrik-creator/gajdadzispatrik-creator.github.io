@@ -165,3 +165,22 @@ situaci i to, jak máte nastavené současné smlouvy.
 2. Formulace s (potvrzeno) — souhlasí čísla a tvrzení?
 3. Kde má být check-up na webu vidět: homepage (např. pod hero nebo
    u rozcestníku), menu, závěrečné pásy podstránek?
+
+---
+
+## Podoba výsledku (4. 10. 2026, přání uživatele: prémiově, vést ke konzultaci)
+
+1. **Skóre:** „Váš výsledek“, velké číslo „X z 6“ + řada 6 teček (zelená
+   v pořádku, okrová k projití) a celkové hodnocení podle počtu oblastí
+   v pořádku: 6 = „Finance máte nastavené dobře.“, 4–5 = „Základ máte
+   dobrý.“, 2–3 = „Některé důležité věci se vyplatí projít.“, 0–1 = „Ve
+   financích je prostor udělat pořádek.“ (texty v `verdicts`).
+2. **Vyplatí se podívat:** celé texty s odkazem na službu, pořadí rezerva →
+   příjem → bydlení → smlouvy → penze → investice; první oblast má štítek
+   „Začal bych tady“.
+3. **V pořádku:** stručně, bez odkazu.
+4. **Tmavý panel s nabídkou:** fotka + jméno, nadpis na míru („Pojďme se
+   společně podívat na rezervu a penzi.“; vše v pořádku → „Chcete mít
+   jistotu, že to tak zůstane?“), text o konzultaci, rezervace + „Poslat
+   výsledek Patrikovi“, pod tím 5,0 na Google · 150+ osobních klientů.
+5. Pod panelem „Projít znovu“ a upozornění.
