@@ -304,6 +304,9 @@ import HeroPhoto from './HeroPhoto.astro';
   /* ============ Laptop/Desktop: 1200+ ============ */
   @media (min-width: 1200px) {
     .hero__inner {
+      /* Nadpis pod logem v hlavičce — stejný okraj jako .site-header__inner
+         (96 px na 1366, od 1400 px roste do 120 px; dřív 40 px, 4. 10. 2026). */
+      padding-inline-start: clamp(96px, calc(96px + 0.324324 * (100vw - 1366px)), 120px);
       padding-top: clamp(84px, calc(84px + 0.054054 * (100vw - 1366px)), 88px);
     }
 
