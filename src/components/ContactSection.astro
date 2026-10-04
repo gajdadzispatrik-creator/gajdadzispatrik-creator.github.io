@@ -64,10 +64,10 @@ const contactPreferences: RadioOption[] = [
   { value: 'whatsapp', label: 'WhatsApp' },
 ];
 
-// První řádek má dvě části — na mobilu každá na vlastním řádku (bez „·“).
+// Dvě části — na mobilu každá na vlastním řádku (bez „·“). „Termín po předchozí
+// domluvě“ zůstává jen u adresy (4. 10. 2026, vedle online rezervace navíc).
 const bandDetails = [
   ['Osobně v Ostravě-⁠Porubě', 'Online přes Google Meet nebo WhatsApp'],
-  ['Termín po předchozí domluvě'],
 ];
 ---
 
@@ -1280,8 +1280,7 @@ const bandDetails = [
      * "Osobně v Ostravě-Porubě · Online přes Google Meet nebo WhatsApp" musí
      * držet jeden řádek na noteboku i desktopu — bez max-width capu (dřívější
      * 340/380px ho lámaly) a s explicitním nowrap na prvním řádku, aby se
-     * nezalomil ani na hranici odstavce. Druhý řádek ("Termín po předchozí
-     * domluvě") je krátký a nowrap nepotřebuje.
+     * nezalomil ani na hranici odstavce.
      */
     .kontakt__band-details {
       max-width: none;
