@@ -52,7 +52,6 @@ export const regulatoryPage: LegalPageData = {
           lines: [
             ['Patrik Gajdadzis'],
             ['IČO 09214526'],
-            ['Hlavní třída 568/73, 708 00 Ostrava'],
             ['Telefon: ', link('tel:+420775217721', '+420 775 217 721')],
           ],
         },

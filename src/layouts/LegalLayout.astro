@@ -434,10 +434,16 @@ const routeVariants = [
     color: var(--text-quiet);
   }
 
+  /* Obsah pod sebou, bez viditelného číslování (CLAUDE.md „žádné viditelné
+     číslování“) — dřív řádek s wrapem: krátké položky se slepily vedle sebe
+     („Kdo jsem2. Oprávnění…“) a čísla 1.–7. zůstala vidět (4. 10. 2026). */
   .legal__toc ol {
     display: flex;
-    flex-wrap: wrap;
-    gap: 9px 18px;
+    flex-direction: column;
+    gap: 13px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .legal__toc a {
@@ -504,10 +510,6 @@ const routeVariants = [
 
     .legal__heading {
       font-size: 44px;
-    }
-
-    .legal__toc ol {
-      gap: 10px 24px;
     }
 
     .legal__article {
