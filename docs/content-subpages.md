@@ -719,7 +719,9 @@ nepoužívá ani tam.*
 *(tahle věta pochází z původně přesunutého textu z `/sluzby`, zachována
 beze změny)*
 
-`Výdaje určují rezervu, rezerva rozhoduje o bydlení, závazek vyžaduje ochranu, přebytek jde do investic a z nich postupně vzniká majetek na penzi.`
+`Výdaje určují rezervu, rezerva určuje, kolik můžete dát do bydlení, závazek vyžaduje ochranu, přebytek jde do investic a z nich postupně vzniká majetek na penzi.`
+
+*(5. 10. 2026: „rezerva rozhoduje o bydlení" nahrazeno za „rezerva určuje, kolik můžete dát do bydlení" — původní znění nebylo srozumitelné.)*
 *(schváleno uživatelem 2. 9. 2026 — nahrazuje dřívější obecný pokyn
 „Obsahově lze pracovat s návazností: Příjem → Rezerva → Bydlení → Ochrana →
 Investice → Penze". Opraveno 14. 9. 2026: „Příjem určuje rezervu" nahrazeno
