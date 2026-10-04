@@ -99,6 +99,9 @@ interface Area {
   id: string;
   name: string;
   link: { label: string; href: string };
+  /** Jedna krátká věta na lince výsledku. */
+  short: Record<string, string>;
+  /** Delší vysvětlení — jen u oblasti „Začal bych tady". */
   texts: Record<string, string>;
 }
 
@@ -107,6 +110,7 @@ const areas: Area[] = [
     id: 'rezerva',
     name: 'Rezerva',
     link: { label: 'Finanční plán', href: '/sluzby/financni-plan' },
+    short: { ok: 'Rezervu máte.', check: 'Rezerva je menší, než je bezpečné.' },
     texts: {
       ok: 'Máte rezervu, která vás podrží i při nečekaném výpadku příjmu.',
       check:
@@ -117,6 +121,7 @@ const areas: Area[] = [
     id: 'prijem',
     name: 'Příjem a rodina',
     link: { label: 'Pojištění', href: '/sluzby/pojisteni' },
+    short: { ok: 'Pojištění příjmu máte, vyplatí se ověřit částky.', check: 'Příjem nemáte jistě pojištěný.' },
     texts: {
       ok: 'Máte pojištěné to nejdůležitější, svůj příjem.',
       check:
@@ -129,6 +134,12 @@ const areas: Area[] = [
     id: 'bydleni',
     name: 'Bydlení a hypotéka',
     link: { label: 'Hypotéky', href: '/sluzby/hypoteky' },
+    short: {
+      ok: 'Nic akutního neřešíte.',
+      okFix: 'Víte, kdy končí fixace.',
+      checkFix: 'Nevíte, kdy končí fixace.',
+      checkPlan: 'Chystáte bydlení, vyplatí se znát čísla předem.',
+    },
     texts: {
       ok: 'V oblasti bydlení teď nic akutního neřešíte.',
       okFix: 'Víte, kdy vám končí fixace, to je dobrý základ. Začít se vyplatí klidně i rok před tímto datem a zjistit, jaká je situace na trhu.',
@@ -142,6 +153,7 @@ const areas: Area[] = [
     id: 'investice',
     name: 'Dlouhodobé peníze',
     link: { label: 'Investice', href: '/sluzby/investice' },
+    short: { ok: 'Pravidelně investujete, vyplatí se ověřit nastavení.', check: 'Peníze vám leží na účtu.' },
     texts: {
       ok: 'Pravidelně odkládáte na delší dobu. Vyplatí se jen občas zkontrolovat, jestli investice pořád odpovídají vašim cílům.',
       check: 'Peníze, které nebudete potřebovat pět a více let, na běžném účtu časem ztrácejí hodnotu kvůli inflaci.',
@@ -151,6 +163,7 @@ const areas: Area[] = [
     id: 'penze',
     name: 'Penze',
     link: { label: 'Penze', href: '/sluzby/penze' },
+    short: { ok: 'Na penzi si odkládáte.', check: 'Penzi zatím nemáte spočítanou.' },
     texts: {
       ok: 'Na penzi myslíte s předstihem, to je velká výhoda.',
       check: 'Čím dřív víte, kolik budete na penzi potřebovat, tím menší částky stačí odkládat.',
@@ -160,6 +173,7 @@ const areas: Area[] = [
     id: 'smlouvy',
     name: 'Přehled o smlouvách',
     link: { label: 'Finanční plán', href: '/sluzby/financni-plan' },
+    short: { ok: 'Smlouvy jste nedávno procházeli.', check: 'Smlouvy dlouho nikdo neprošel.' },
     texts: {
       ok: 'Smlouvy máte zkontrolované nedávno.',
       check:
@@ -173,8 +187,8 @@ const areas: Area[] = [
 const verdicts = [
   {
     id: 'all',
-    title: 'Finance máte nastavené dobře.',
-    text: 'Ve všech oblastech jste odpověděli tak, jak to má být. I dobře nastavené finance se ale vyplatí jednou za čas zkontrolovat, protože život se mění.',
+    title: 'Základ máte ve všech oblastech.',
+    text: 'To je dobrý start. Jestli je všechno nastavené správně, ale ukáže až pohled do smluv: pojištění nebo investice můžete mít, a přesto na nevhodné částky nebo za zbytečně vysokou cenu.',
   },
   {
     id: 'good',
@@ -200,7 +214,7 @@ const config = {
 
 <BaseLayout
   title="Finanční check-up | Patrik Gajdadzis"
-  description="Stačí 8 krátkých otázek a zhruba 2 minuty. Zjistěte, co máte ve financích nastavené dobře a kde se vyplatí podívat blíž."
+  description="Stačí 8 krátkých otázek a zhruba 2 minuty. Zjistěte, kde ve financích máte základ a kde se vyplatí podívat blíž."
 >
   <Header />
   <main id="hero" class="chk">
@@ -213,7 +227,7 @@ const config = {
         <!-- Úvod -->
         <div class="chk-step chk-intro" data-step="intro">
           <p class="chk-hero__lead">
-            Stačí 8&nbsp;krátkých otázek a&nbsp;zhruba 2&nbsp;minuty. Na&nbsp;konci uvidíte, co máte nastavené dobře a&nbsp;kde se&nbsp;vyplatí
+            Stačí 8&nbsp;krátkých otázek a&nbsp;zhruba 2&nbsp;minuty. Na&nbsp;konci uvidíte, kde máte základ a&nbsp;kde se&nbsp;vyplatí
             podívat blíž.
           </p>
           <p class="chk-intro__meta">Odpovědi zůstávají jen ve&nbsp;vašem prohlížeči, nikam se&nbsp;neodesílají.</p>
@@ -276,7 +290,7 @@ const config = {
                   <path d={`M5 5H${5 + (areas.length - 1) * 18}`} stroke="var(--line)" stroke-opacity=".18" stroke-width="1" fill="none" />
                   {areas.map((_, i) => <circle class="chk-score__dot" cx={5 + i * 18} cy="5" r="3.2" />)}
                 </svg>
-                <p class="chk-score__caption">oblastí máte v&nbsp;pořádku</p>
+                <p class="chk-score__caption">oblastí, kde máte základ</p>
               </div>
             </div>
             <p class="sr-only" data-score-sr></p>
@@ -290,35 +304,40 @@ const config = {
             }
           </div>
 
-          <div class="chk-group chk-group--check" data-group="check">
-            <p class="chk-group__label">
-              <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true" focusable="false"><circle cx="4" cy="4" r="3.2" /></svg>
-              Vyplatí se&nbsp;podívat
+          {/* Výsledek jako linka se zastávkami (hlavní grafický prvek webu):
+              nahoře oblasti k projití, pod nimi v pořádku. Rozbalená je jen
+              první k projití („Začal bych tady"). */}
+          <div class="chk-map-wrap">
+            <p class="chk-legend" aria-hidden="true">
+              <span><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.2" class="chk-dot chk-dot--check" /></svg>Vyplatí se&nbsp;podívat</span>
+              <span><svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.2" class="chk-dot chk-dot--ok" /></svg>Základ máte</span>
             </p>
-            <ul class="chk-areas" data-list="check"></ul>
-          </div>
-
-          <div class="chk-group chk-group--ok" data-group="ok">
-            <p class="chk-group__label">
-              <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true" focusable="false"><circle cx="4" cy="4" r="3.2" /></svg>
-              V&nbsp;pořádku
-            </p>
-            <ul class="chk-areas" data-list="ok">
+            <ol class="chk-map" data-map>
               {
                 areas.map((area) => (
-                  <li class="chk-area" data-area={area.id}>
-                    <p class="chk-area__tag">Začal bych tady</p>
-                    <h3 class="chk-area__name">{nb(area.name)}</h3>
-                    <div class="chk-area__texts">
+                  <li class="chk-stop" data-area={area.id}>
+                    <svg class="chk-stop__dot" width="8" height="8" viewBox="0 0 8 8" aria-hidden="true" focusable="false">
+                      <circle cx="4" cy="4" r="3.2" class="chk-dot" />
+                    </svg>
+                    <h3 class="chk-stop__name">
+                      {nb(area.name)}
+                      <span class="chk-stop__tag">Začal bych tady</span>
+                    </h3>
+                    <p class="chk-stop__status" data-status-ok>Základ máte</p>
+                    <p class="chk-stop__status chk-stop__status--check" data-status-check>Vyplatí se&nbsp;podívat</p>
+                    {Object.entries(area.short).map(([key, text]) => (
+                      <p class="chk-stop__short" data-short={key} hidden>{nb(text)}</p>
+                    ))}
+                    <div class="chk-stop__detail">
                       {Object.entries(area.texts).map(([key, text]) => (
                         <p data-text={key} hidden>{nb(text)}</p>
                       ))}
+                      <a class="chk-stop__link" href={area.link.href}>{area.link.label}</a>
                     </div>
-                    <a class="chk-area__link" href={area.link.href}>{area.link.label}</a>
                   </li>
                 ))
               }
-            </ul>
+            </ol>
           </div>
 
           <div class="chk-offer">
@@ -338,8 +357,8 @@ const config = {
               30&nbsp;minut, je nezávazná a&nbsp;zdarma.
             </p>
             <p class="chk-offer__text" data-offer-text="ok" hidden>
-              Finance se&nbsp;mění s&nbsp;životem. Na&nbsp;úvodní konzultaci zkontrolujeme, jestli smlouvy a&nbsp;investice pořád
-              odpovídají tomu, co potřebujete. Trvá přibližně 30&nbsp;minut, je nezávazná a&nbsp;zdarma.
+              Na&nbsp;úvodní konzultaci projdeme vaše smlouvy a&nbsp;ověříme, jestli částky a&nbsp;podmínky odpovídají tomu,
+              co skutečně potřebujete. Trvá přibližně 30&nbsp;minut, je nezávazná a&nbsp;zdarma.
             </p>
             <div class="chk-offer__actions">
               <a class="chk-cta" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat termín online</a>
@@ -465,21 +484,31 @@ const config = {
         dot.classList.remove('is-shown');
       });
       const sr = root.querySelector<HTMLElement>('[data-score-sr]');
-      if (sr) sr.textContent = `V pořádku máte ${okCount} z ${ids.length} oblastí.`;
+      if (sr) sr.textContent = `Základ máte v ${okCount} z ${ids.length} oblastí.`;
 
       const verdict = okCount === ids.length ? 'all' : okCount >= 4 ? 'good' : okCount >= 2 ? 'some' : 'many';
       root.querySelectorAll<HTMLElement>('[data-verdict]').forEach((el) => (el.hidden = el.dataset.verdict !== verdict));
 
-      // Oblasti do skupin; v pořádku zůstává pořadí z markupu.
-      const checkList = root.querySelector<HTMLElement>('[data-list="check"]');
-      const okList = root.querySelector<HTMLElement>('[data-list="ok"]');
+      // Zastávky na lince: k projití podle priority, pak v pořádku v pořadí
+      // z markupu. Krátká věta podle odpovědí, detail jen u první k projití.
+      const map = root.querySelector<HTMLElement>('[data-map]');
       const byId = new Map(areaOrder.map((el) => [el.dataset.area ?? '', el]));
-      checkIds.forEach((id) => checkList?.appendChild(byId.get(id)!));
-      areaOrder.filter((el) => okIds.includes(el.dataset.area ?? '')).forEach((el) => okList?.appendChild(el));
-      root.querySelector<HTMLElement>('[data-group="check"]')!.hidden = checkIds.length === 0;
-      root.querySelector<HTMLElement>('[data-group="ok"]')!.hidden = okIds.length === 0;
+      const ordered = [...checkIds, ...areaOrder.map((el) => el.dataset.area ?? '').filter((id) => okIds.includes(id))];
+      ordered.forEach((id) => map?.appendChild(byId.get(id)!));
+      const shortKey = (id: string): string => {
+        const r = result[id];
+        if (id === 'bydleni') return r.ok ? (a('hypoteka') === 1 ? 'okFix' : 'ok') : a('hypoteka') === 2 ? 'checkFix' : 'checkPlan';
+        return r.ok ? 'ok' : 'check';
+      };
       areaOrder.forEach((el) => {
-        const r = result[el.dataset.area ?? ''];
+        const id = el.dataset.area ?? '';
+        const r = result[id];
+        el.classList.toggle('is-check', !r.ok);
+        el.classList.toggle('is-first', id === checkIds[0]);
+        el.querySelector<HTMLElement>('[data-status-ok]')!.hidden = !r.ok;
+        el.querySelector<HTMLElement>('[data-status-check]')!.hidden = r.ok;
+        const key = shortKey(id);
+        el.querySelectorAll<HTMLElement>('[data-short]').forEach((p) => (p.hidden = p.dataset.short !== key));
         el.querySelectorAll<HTMLElement>('[data-text]').forEach((p) => (p.hidden = !r.texts.includes(p.dataset.text ?? '')));
       });
 
@@ -489,7 +518,7 @@ const config = {
         const names = checkIds.map((id) => ACCUSATIVE[id]);
         heading.textContent = nbsp(
           names.length === 0
-            ? 'Chcete mít jistotu, že to tak zůstane?'
+            ? 'Ověříme, že je všechno nastavené správně?'
             : names.length <= 3
               ? `Pojďme se společně podívat na ${joinCs(names)}.`
               : `Pojďme se společně podívat na ${names.slice(0, 2).join(', ')} a další oblasti.`,
@@ -499,11 +528,11 @@ const config = {
         p.hidden = p.dataset.offerText !== (checkIds.length ? 'check' : 'ok');
       });
 
-      const nameOf = (id: string) => byId.get(id)?.querySelector('.chk-area__name')?.textContent?.replace(/ /g, ' ') ?? id;
+      const nameOf = (id: string) => (byId.get(id)?.querySelector('.chk-stop__name')?.firstChild?.textContent ?? id).replace(/\u00A0/g, ' ').trim();
       summaryText = [
         'Výsledek finančního check-upu z webu:',
         checkIds.length ? `Vyplatí se podívat: ${checkIds.map(nameOf).join(', ')}` : '',
-        okIds.length ? `V pořádku: ${okIds.map(nameOf).join(', ')}` : '',
+        okIds.length ? `Základ má: ${okIds.map(nameOf).join(', ')}` : '',
         '',
         'Odpovědi:',
         ...config.questions.map((q, i) => `${q.title}: ${q.options[answers[i]]}`),
@@ -832,8 +861,7 @@ const config = {
     gap: 14px;
   }
 
-  .chk-score__label,
-  .chk-group__label {
+  .chk-score__label {
     margin: 0;
     font-weight: 700;
     letter-spacing: .16em;
@@ -932,41 +960,47 @@ const config = {
     max-width: 560px;
   }
 
-  /* Skupiny oblastí */
-  .chk-group {
+  /* Výsledek na lince: legenda + zastávky. Tečky jako trasa webu
+     (CLAUDE.md „Konvence: velikost teček" — hlavní 3,2 / 3,5 px). */
+  .chk-map-wrap {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
     max-width: 600px;
   }
 
-  .chk-group__label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .chk-group__label svg {
-    flex: none;
-  }
-
-  .chk-group--check .chk-group__label {
-    color: var(--pending-review);
-  }
-
-  .chk-group--check .chk-group__label circle {
-    fill: var(--pending-review);
-  }
-
-  .chk-group--ok .chk-group__label {
-    color: var(--emerald);
-  }
-
-  .chk-group--ok .chk-group__label circle {
+  .chk-dot {
+    r: 3.2px;
     fill: var(--emerald);
   }
 
-  .chk-areas {
+  .chk-dot--check,
+  .chk-stop.is-check .chk-dot {
+    fill: var(--pending-review);
+  }
+
+  .chk-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-muted);
+  }
+
+  .chk-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chk-legend svg {
+    flex: none;
+    overflow: visible;
+  }
+
+  .chk-map {
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -974,73 +1008,121 @@ const config = {
     list-style: none;
   }
 
-  .chk-area {
+  /* Zastávka: tečka v ose prvního řádku názvu (24 px řádek → střed 12 px),
+     linka k tečce další zastávky. Mezi zastávkami 22 px. */
+  .chk-stop {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 24px 0;
-    border-top: 1px solid var(--rule);
+    gap: 4px;
+    padding: 0 0 22px 30px;
   }
 
-  .chk-area:first-child {
-    border-top: none;
-    padding-top: 0;
-  }
-
-  .chk-area:last-child {
+  .chk-stop:last-child {
     padding-bottom: 0;
   }
 
-  /* „Začal bych tady" — jen první oblast k projití; krátký zářez jako na trase. */
-  .chk-area__tag {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 -4px;
-    font-weight: 700;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    font-size: 11.5px;
-    line-height: 18px;
-    color: var(--emerald);
-  }
-
-  .chk-area__tag::before {
+  .chk-stop::before {
     content: '';
-    width: 22px;
-    height: 1px;
-    background: var(--emerald);
+    position: absolute;
+    left: 3.5px;
+    top: 12px;
+    bottom: -12px;
+    width: 1px;
+    background: var(--line);
+    opacity: .18;
   }
 
-  .chk-group--check .chk-area:first-child .chk-area__tag {
+  .chk-stop:last-child::before {
+    display: none;
+  }
+
+  .chk-stop__dot {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    overflow: visible;
+  }
+
+  .chk-stop__name {
     display: flex;
-  }
-
-  .chk-area__name {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
     margin: 0;
-    font-size: 22px;
-    line-height: 1.25;
+    font-size: 19px;
+    line-height: 24px;
     font-weight: 700;
-    letter-spacing: -.03em;
+    letter-spacing: -.02em;
     color: var(--navy);
   }
 
-  .chk-area__texts {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  .chk-stop__tag {
+    display: none;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(30, 122, 92, .1);
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    line-height: 16px;
+    color: var(--emerald);
   }
 
-  .chk-area__texts p {
+  .chk-stop.is-first .chk-stop__tag {
+    display: inline-block;
+  }
+
+  /* Stav jen pro čtečky — barvu tečky vidící čtenář chápe z legendy. */
+  .chk-stop__status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .chk-stop__short {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  /* Rozbalený detail jen u „Začal bych tady". */
+  .chk-stop__detail {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 18px 20px;
+    border-radius: var(--radius-field);
+    background: var(--white);
+    border: 1px solid var(--rule);
+  }
+
+  .chk-stop.is-first .chk-stop__detail {
+    display: flex;
+  }
+
+  .chk-stop.is-first .chk-stop__short {
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .chk-stop__detail p {
     margin: 0;
     font-size: 16px;
     line-height: 1.6;
     color: var(--text-muted);
   }
 
-  .chk-area__link {
+  .chk-stop__link {
     position: relative;
     align-self: flex-start;
+    margin-top: 6px;
     font-weight: 600;
     font-size: 16px;
     color: var(--navy);
@@ -1051,36 +1133,21 @@ const config = {
     transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
   }
 
-  .chk-area__link::after {
+  .chk-stop__link::after {
     content: '';
     position: absolute;
     inset: -13px 0;
   }
 
-  .chk-area__link:hover {
+  .chk-stop__link:hover {
     color: var(--emerald-hover);
     text-decoration-color: var(--emerald-hover);
   }
 
-  /* V pořádku: stručně, bez odkazu — pozornost patří oblastem k projití. */
-  .chk-group--ok .chk-area {
-    padding: 18px 0;
-  }
-
-  .chk-group--ok .chk-area:first-child {
-    padding-top: 0;
-  }
-
-  .chk-group--ok .chk-area:last-child {
-    padding-bottom: 0;
-  }
-
-  .chk-group--ok .chk-area__name {
-    font-size: 18px;
-  }
-
-  .chk-group--ok .chk-area__link {
-    display: none;
+  @media (min-width: 1200px) {
+    .chk-dot {
+      r: 3.5px;
+    }
   }
 
   /* Nabídka konzultace — tmavý panel jako závěrečné pásy podstránek. */

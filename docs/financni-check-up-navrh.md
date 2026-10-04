@@ -19,7 +19,7 @@ nebo upravit.
 **Nadpis:** Jak na tom jsou vaše finance?
 
 **Text:** Stačí 8 krátkých otázek a zhruba 2 minuty. Na konci uvidíte, co máte
-nastavené dobře a kde se vyplatí podívat blíž. Odpovědi zůstávají jen ve
+kde máte základ a kde se vyplatí podívat blíž. Odpovědi zůstávají jen ve
 vašem prohlížeči, nikam se neodesílají.
 
 **Tlačítko:** Začít
@@ -184,3 +184,16 @@ situaci i to, jak máte nastavené současné smlouvy.
    jistotu, že to tak zůstane?“), text o konzultaci, rezervace + „Poslat
    výsledek Patrikovi“, pod tím 5,0 na Google · 150+ osobních klientů.
 5. Pod panelem „Projít znovu“ a upozornění.
+
+### Úprava 4. 10. 2026 (večer) — linka a „základ máte"
+
+- Výsledek je **linka se zastávkami**: u každé oblasti tečka (zelená / okrová),
+  název a jedna krátká věta (`short` v datech). Rozbalená je jen první oblast
+  k projití („Začal bych tady": delší text + odkaz na službu).
+- **Nikdy netvrdit „v pořádku"** (Patrik: bez smluv nevím, jestli je to
+  nastavené dobře — pojištění invalidity může být na 100 000 Kč místo
+  4 milionů). Zelená = **„Základ máte"**, skóre „X z 6 oblastí, kde máte
+  základ", hodnocení pro 6/6 „Základ máte ve všech oblastech." + věta, že
+  správnost ukáže až pohled do smluv; nabídka pro 6/6 „Ověříme, že je všechno
+  nastavené správně?". Krátké věty u základu jsou fakt z odpovědi
+  („Pojištění příjmu máte, vyplatí se ověřit částky.").
