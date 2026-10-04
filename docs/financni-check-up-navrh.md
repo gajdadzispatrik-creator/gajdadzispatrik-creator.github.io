@@ -134,8 +134,8 @@ je platná odpověď, ne slepá ulička.)
 - **V pořádku** (otázka 8: Během posledního roku):
   Smlouvy máte zkontrolované nedávno.
 - **Vyplatí se podívat** (před více lety, ještě nikdy):
-  Život se mění rychleji než smlouvy. Co dávalo smysl před lety, dnes nemusí
-  odpovídat vaší situaci.
+  Starší smlouvy často neodpovídají tomu, co dnes potřebujete. Chybí v nich
+  důležité krytí a platíte v nich za věci, které nevyužijete.
 
 ---
 
