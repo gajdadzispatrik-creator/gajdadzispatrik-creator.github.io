@@ -197,3 +197,8 @@ situaci i to, jak máte nastavené současné smlouvy.
   správnost ukáže až pohled do smluv; nabídka pro 6/6 „Ověříme, že je všechno
   nastavené správně?". Krátké věty u základu jsou fakt z odpovědi
   („Pojištění příjmu máte, vyplatí se ověřit částky.").
+- 5. 10. 2026: rezerva bez počtu měsíců a v první osobě („Jak velká má být,
+  záleží na vašich výdajích, příjmu a na tom, kdo na vás závisí. Spočítáme ji
+  spolu."); krátké věty: pojištění „ověřit částky a nastavení", investice
+  „ověřit strategii a poplatky", smlouvy „druhý pohled se ale vyplatí"
+  (záleží, s kým je procházeli).
