@@ -50,6 +50,7 @@ import StandaloneRoute from '../components/StandaloneRoute.astro';
             <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
           </a>
         </div>
+        <p class="nf-hero__checkup">Nevíte, kde začít? <a href="/financni-check-up">Zjistěte to za&nbsp;2&nbsp;minuty</a></p>
       </div>
     </section>
   </main>
@@ -165,6 +166,39 @@ import StandaloneRoute from '../components/StandaloneRoute.astro';
     color: var(--emerald);
   }
 
+  /* Odkaz na check-up (5. 10. 2026) — stejně jako rozcestník na /sluzby. */
+  /* Na mobilu na střed pod tlačítky přes celou šířku, od tabletu vlevo. */
+  .nf-hero__checkup {
+    margin: 0;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .nf-hero__checkup a {
+    position: relative;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .nf-hero__checkup a::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
+  .nf-hero__checkup a:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+
   /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
   @media (min-width: 768px) {
     .nf-hero {
@@ -183,6 +217,10 @@ import StandaloneRoute from '../components/StandaloneRoute.astro';
     .nf-hero__lead {
       font-size: 17.5px;
       max-width: 600px;
+    }
+
+    .nf-hero__checkup {
+      text-align: left;
     }
 
     .nf-hero__actions {
@@ -227,6 +265,10 @@ import StandaloneRoute from '../components/StandaloneRoute.astro';
       margin-top: 60px;
       max-width: 520px;
       font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+
+    .nf-hero__checkup {
+      margin-top: 32px;
     }
 
     .nf-hero__actions {
