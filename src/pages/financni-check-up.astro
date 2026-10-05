@@ -120,8 +120,11 @@ const questions: Question[] = [
     title: 'Auto',
     q: 'Kdo zaplatí vaše auto, když nehodu zaviníte vy?',
     options: [
+      // Havarijní se nevyplatí vždy (starší auto) — vědomá volba je základ,
+      // okrová jen tam, kde to klient neřešil (5. 10. 2026).
       { label: 'Pojišťovna, mám havarijní', s: 'Z' },
-      { label: 'Nikdo, mám jen povinné ručení', s: 'O' },
+      { label: 'Já, a počítám s tím', s: 'Z', short: 'okAware' },
+      { label: 'Já, ale tohle mě nenapadlo', s: 'O' },
       { label: 'Netuším', s: 'O', short: 'checkUnknown' },
       { label: 'Nemám auto', s: 'N' },
     ],
@@ -252,10 +255,11 @@ const areas: Area[] = [
     link: { label: 'Pojištění', href: '/sluzby/pojisteni' },
     short: {
       ok: 'Auto máte pojištěné.',
+      okAware: 'Víte, co povinné ručení nekryje.',
       check: 'Při vlastní nehodě platíte auto sami.',
       checkUnknown: 'Nevíte, co vám pojištění kryje.',
     },
-    detail: 'Povinné ručení platí jen škody druhým. Vaše auto při vlastní nehodě ani krádeži nekryje.',
+    detail: 'Povinné ručení platí jen škody druhým. Jestli se vám vyplatí havarijní, záleží na hodnotě auta.',
   },
   {
     id: 'penze',

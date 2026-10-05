@@ -32,7 +32,7 @@ Z = základ máte · O = vyplatí se podívat · N = netýká se (oblast se neuk
 | 3 | Rodina | Zvládla by rodina bez vašeho příjmu splácet a žít jako dnes? | Ano, mám to pojištěné (Z) · Pár měsíců (O) · Netuším (O) · Nikdo na mně nezávisí (N) |
 | 4 | Majetek | Odpovídá pojistka vašeho bydlení a vybavení dnešní ceně? | Ano (Z) · Je roky stará (O) · Netuším (O) · Nemám pojištěno (O) |
 | 5 | Bydlení | Jak jste na tom s vlastním bydlením? | Bydlím ve vlastním (Z) · Chci a vím, na kolik dosáhnu (Z) · Chci, ale nevím, na kolik dosáhnu (O) · Neřeším (N) |
-| 6 | Auto | Kdo zaplatí vaše auto, když nehodu zaviníte vy? | Pojišťovna, mám havarijní (Z) · Nikdo, mám jen povinné ručení (O) · Netuším (O) · Nemám auto (N) |
+| 6 | Auto | Kdo zaplatí vaše auto, když nehodu zaviníte vy? | Pojišťovna, mám havarijní (Z) · Já, a počítám s tím (Z) · Já, ale tohle mě nenapadlo (O) · Netuším (O) · Nemám auto (N) |
 | 7 | Penze | Kolik budete mít v důchodu? | Vím přesně (Z) · Tuším (O) · Netuším (O) |
 | 8 | Investice | Vydělají vám úspory víc než inflace? | Ano (Z) · Netuším (O) · Ne, leží na účtu (O) · Nic neodkládám (O) |
 | 9 | Děti | Spoříte dětem na start do života? | Ano, pravidelně (Z) · Občas (O) · Ne (O) · Nemám děti (N) |
@@ -47,7 +47,7 @@ Z = základ máte · O = vyplatí se podívat · N = netýká se (oblast se neuk
 | Rodina | Rodina je pojištěná, ověřte částky. | Rodina by bez vás dlouho nevydržela. / *(Netuším)* Nevíte, jak dlouho by rodina vydržela. |
 | Majetek | Pojistka odpovídá dnešní ceně. | Pojistka nemusí stačit na obnovu. |
 | Bydlení | Bydlíte ve vlastním. / Víte, na kolik dosáhnete. | Nevíte, na kolik dosáhnete. |
-| Auto | Auto máte pojištěné. | Při vlastní nehodě platíte auto sami. / *(Netuším)* Nevíte, co vám pojištění kryje. |
+| Auto | Auto máte pojištěné. / *(Počítám s tím)* Víte, co povinné ručení nekryje. | Při vlastní nehodě platíte auto sami. / *(Netuším)* Nevíte, co vám pojištění kryje. |
 | Penze | Víte, s čím počítat. | Nevíte, kolik budete mít v důchodu. |
 | Investice | Úspory vám vydělávají víc než inflace. | *(Netuším)* Nevíte, jestli vaše úspory neztrácejí hodnotu. / *(Leží na účtu)* Úspory na účtu ztrácejí hodnotu. / *(Nic)* Nic si neodkládáte. |
 | Děti | Dětem spoříte. | Na start dětí nemáte plán. |
@@ -59,7 +59,8 @@ Z = základ máte · O = vyplatí se podívat · N = netýká se (oblast se neuk
 - **Rodina:** Bez vašeho příjmu by rodině chyběly peníze na život i splátky. Pojištění to umí pokrýt.
 - **Majetek:** Ceny bydlení za poslední roky vyletěly. Stará pojistka nestačí a pojišťovna plnění krátí.
 - **Bydlení:** Nejdřív čísla, pak prohlídky. Spočítáme, na co dosáhnete a jaká splátka je rozumná.
-- **Auto:** Povinné ručení platí jen škody druhým. Vaše auto při vlastní nehodě ani krádeži nekryje.
+- **Auto:** Povinné ručení platí jen škody druhým. Jestli se vám vyplatí havarijní, záleží na hodnotě auta.
+  *(5. 10. 2026: havarijní se nevyplatí vždy — vědomé „jen povinné ručení" je základ; nic nemá znít jako prodej.)*
 - **Penze:** Čím dřív víte, kolik budete potřebovat, tím menší částky stačí odkládat.
 - **Investice:** Peníze na účtu ztrácejí hodnotu. U investic rozhoduje strategie a poplatky.
 - **Děti:** Díky času stačí i malé částky. Chce to jen plán.
