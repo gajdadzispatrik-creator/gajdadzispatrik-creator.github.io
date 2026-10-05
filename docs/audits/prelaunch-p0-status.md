@@ -274,6 +274,8 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 6. ~~**Pás se statistikami pod hero — probrat celý**~~ — **HOTOVO 5. 10. 2026:** 5,0 ★ hodnocení na Google (odkaz na /recenze) · Zdarma · služba bez poplatků · 30 minut · úvodní konzultace; bez počtu recenzí (mění se). Původně: (uživatel 4. 10. 2026: „to chci celé ještě probrat“). Mimo jiné dnes ukazuje „5,0 Google recenze“, brief §7 chce „42 recenzí s hodnocením 5★“ (počet je silnější důkaz než samotná známka).
 6a. ~~**Online rezervace úvodní konzultace**~~ — **HOTOVO 4. 10. 2026:** odkaz v kontaktní sekci + v závěrečných pásech všech podstránek (`.closing-booking`, global.css), WhatsApp odkaz v kontaktu jen na dotykových zařízeních, URL v `src/data/entity.ts` (`BOOKING_URL`, `WHATSAPP_URL`), zmínka v zásadách OÚ. Původní zadání: (domluveno 4. 10. 2026): uživatel založí v Google Kalendáři „Plán schůzek“ (bezplatná verze, kontroluje obsazenost hlavního kalendáře) a pošle odkaz. Claude pak: textový odkaz „Vybrat termín online“ v kontaktní sekci jako třetí cesta vedle telefonu a formuláře (bez vloženého okna — rychlost, cookies, design), událost do GA4, zmínka o Google Kalendáři jako zpracovateli v zásadách zpracování OÚ.
 
+6b. ~~**Konverzní úpravy 5. 10. 2026**~~ — HOTOVO: finanční check-up (`/financni-check-up`, odkazy na homepage v rozcestníku, na /sluzby, na 404 a v patičce), u formuláře fotka + „nezávazně a zdarma", pás pod hero (viz bod 6), konec linky v patičce přechází do loga, ostré logo v záhlaví, `llms.txt`, FAQPage strukturovaná data.
+
 **B) Při spouštění webu (spolu, podle `docs/deploy-wedos.md`)**
 7. Wedos: SSL certifikát (před nahráním), PHP 8.1+, schránka `poptavka@patrikgajdadzis.cz`.
 8. DNS: SPF, DKIM, DMARC (doručitelnost poptávek).

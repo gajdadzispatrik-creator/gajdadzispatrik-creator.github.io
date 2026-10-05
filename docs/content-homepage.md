@@ -59,15 +59,24 @@ Během několika sekund musí být jasné:
 
 ## 3. Důkazy důvěry
 
-Položky
-150+
-osobních klientů
+Položky (aktuální stav od 5. 10. 2026 — pás pod hero, `StatsBand.astro`)
 
-42× 5★
-Google recenze
+5,0 ★
+hodnocení na Google (odkaz na /recenze)
 
-Od roku 2020
-ve financích
+Zdarma
+služba bez poplatků
+
+30 minut
+úvodní konzultace
+
+(Odpovídá na otázky klienta: dá se mu věřit, kolik to stojí, kolik času to
+zabere. Bez počtu recenzí — mění se. „Zdarma" = celá služba, ne jen úvodní
+konzultace. Hvězda za číslem na účaří jako v sekci Recenze; slova „Zdarma"
+a „30 minut" menším písmem na stejném účaří. Na mobilu pod sebou.)
+
+Původní znění (už neplatí): 150+ osobních klientů · 42× 5★ Google recenze ·
+Od roku 2020 ve financích („Od 2020" odstraněno na přání uživatele).
 
 Pravidla
 
@@ -137,6 +146,9 @@ Plán budoucího příjmu a finanční rezervy.
 
 CTA u jednotlivých oblastí
 Více
+
+Řádek pod oblastmi (od 5. 10. 2026)
+Nevíte, kde začít? Zjistěte to za 2 minuty (odkaz na /financni-check-up)
 
 Pravidla
 
@@ -425,6 +437,13 @@ Online
 
 * Vybrat volný termín v kalendáři (Google Kalendář, plán schůzek)
 * Napsat na WhatsApp (jen mobil a tablet, předvyplněná zpráva)
+
+Nebo napište (od 5. 10. 2026)
+
+* fotka v kolečku (výřez jako na /pristup; 64 px mobil, 72 px tablet, 88 px desktop)
+* Patrik Gajdadzis
+* Ozvu se do jednoho pracovního dne.
+* ★ 5,0 na Google · nezávazně a zdarma (na mobilu samostatný řádek pod fotkou)
 
 Kontaktní formulář
 Povinná pole:
