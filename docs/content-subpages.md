@@ -2446,7 +2446,8 @@ opatrnost" níže.*
 `Proto se s klienty vracím k tomu, co jsme společně nastavili. Když nastane důležitá změna, podíváme se, jestli současné řešení stále dává smysl.`
 
 `A pokud potřebujete řešit něco nového, nemusíte začínat s dalším poradcem od nuly. Můžete se na mě obrátit a navážeme na to, co už o vaší situaci víme.`
-n`Úkol poradce vidím jednoduše: klient se díky mně má majetkově posouvat dopředu. Když se po roce potkáme na servisní schůzce, má být na tom líp než rok předtím.` *(doplněno 5. 10. 2026 podle uživatele)*
+
+`Úkol poradce vidím jednoduše: klient se díky mně má majetkově posouvat dopředu. Když se po roce potkáme na servisní schůzce, má být na tom líp než rok předtím.` *(doplněno 5. 10. 2026 podle uživatele)*
 
 **Výrazný statement**
 `Chci být člověk, kterému zavoláte i při dalším finančním rozhodnutí.`
