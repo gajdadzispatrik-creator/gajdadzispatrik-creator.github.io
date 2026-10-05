@@ -105,3 +105,42 @@ Události: začátek check-upu, dokončení, odeslání výsledku, klik na rezer
   investice i pojištění mají lidé často špatně nastavené). Proto každá zelená
   věta u produktu končí krátkým „ověřte…" (děti, investice, penze, majetek,
   auto s havarijním; příjem a rodina „ověřte částky a cenu").
+
+---
+
+## Verze 3 (5. 10. 2026, „god mode") — postaveno
+
+- **Nová otázka Odpovědnost** (za majetkem): „Kdybyste nechtěně způsobili škodu
+  (vytopíte sousedy, srazíte cyklistu), kdo ji zaplatí?" — Pojišťovna, mám
+  pojištění odpovědnosti (Z) · Asi pojišťovna, nevím jistě (O) · Já (O) ·
+  Netuším (O). Věty: „Odpovědnost máte pojištěnou, ověřte limit." / „Škodu
+  způsobenou druhým byste platili sami." / „Nevíte, jestli máte odpovědnost
+  pojištěnou." Rámeček: „Škody na zdraví nebo majetku druhých jdou snadno do
+  milionů. Pojištění odpovědnosti stojí jen pár stovek ročně." (ověřeno)
+- **Penze na nastavení:** „Využíváte naplno státní příspěvek a daňové výhody na
+  penzi?" — Ano (Z) · Spořím, ale nevím (O) · Nespořím (O). Věty: „Výhody
+  využíváte, ověřte strategii fondu." / „Nevíte, jestli čerpáte vše, co vám
+  stát dá." / „Na penzi si nespoříte." Rámeček: „Stát přispívá a daňově
+  zvýhodňuje jen toho, kdo si spoří sám. U starších smluv navíc často nesedí
+  strategie." (ověřeno)
+- **„Čeho jsem si všiml"** pod hodnocením — max. 2 postřehy z kombinací
+  odpovědí (pořadí = priorita), posílají se i Patrikovi („Postřeh: …"):
+  - spoří dětem (pravidelně/občas) + příjem nebo rodina k projití →
+    „Spoříte dětem, ale váš příjem zajištěný není. Kdyby vypadl, spoření
+    skončí jako první."
+  - nemocenská + rodina k projití → „Na vašem příjmu závisí rodina, a přitom
+    spoléháte na nemocenskou. Ta pokryje jen část příjmu."
+  - výpadek z úspor + rezerva pod 3 měsíce → „Na úspory spoléhat nemůžete.
+    Vydržely by kratší dobu, než by trvala nemoc."
+  - bydlí ve vlastním + majetek k projití → „Bydlíte ve vlastním, ale pojistka
+    nemusí stačit na jeho obnovu."
+  - chce bydlení, neví na kolik + rezerva k projití → „Na vlastní bydlení
+    budete potřebovat vlastní zdroje i rezervu zároveň."
+  - rezerva přes 6 měsíců + úspory na účtu → „Na účtu máte víc, než
+    potřebujete na rezervu. Zbytek ztrácí hodnotu."
+  - nespoří na penzi + nic neodkládá → „Na důchod si nic neodkládáte. Stát
+    přitom přispívá jen tomu, kdo si spoří sám."
+  - vše se základem → „Témata máte pokrytá. Rozdíl dělá nastavení: částky,
+    limity, poplatky a strategie."
+- Celkem 11 otázek (10 oblastí + priorita). Priorita „Zajištění příjmu
+  a majetku" zahrnuje i odpovědnost.

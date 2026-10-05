@@ -1,6 +1,7 @@
 ---
 /**
- * Finanční check-up v2 — 10 otázek na klikání (9 oblastí + priorita),
+ * Finanční check-up v3 — 11 otázek na klikání (10 oblastí + priorita)
+ * a postřehy z kombinací odpovědí („Čeho jsem si všiml"),
  * vyhodnocení přímo v prohlížeči, nic se neodesílá. Otázky, texty a pravidla
  * schválil Patrik 5. 10. 2026: docs/financni-check-up-v2.md (verze 1:
  * docs/financni-check-up-navrh.md).
@@ -103,6 +104,18 @@ const questions: Question[] = [
     ],
   },
   {
+    id: 'odpovednost',
+    area: 'odpovednost',
+    title: 'Odpovědnost',
+    q: 'Kdybyste nechtěně způsobili škodu (vytopíte sousedy, srazíte cyklistu), kdo ji zaplatí?',
+    options: [
+      { label: 'Pojišťovna, mám pojištění odpovědnosti', s: 'Z' },
+      { label: 'Asi pojišťovna, nevím jistě', s: 'O', short: 'checkUnknown' },
+      { label: 'Já', s: 'O' },
+      { label: 'Netuším', s: 'O', short: 'checkUnknown' },
+    ],
+  },
+  {
     id: 'bydleni',
     area: 'bydleni',
     title: 'Bydlení',
@@ -133,11 +146,11 @@ const questions: Question[] = [
     id: 'penze',
     area: 'penze',
     title: 'Penze',
-    q: 'Kolik budete mít v důchodu?',
+    q: 'Využíváte naplno státní příspěvek a daňové výhody na penzi?',
     options: [
-      { label: 'Vím přesně', s: 'Z' },
-      { label: 'Tuším', s: 'O' },
-      { label: 'Netuším', s: 'O' },
+      { label: 'Ano', s: 'Z' },
+      { label: 'Spořím, ale nevím', s: 'O' },
+      { label: 'Nespořím', s: 'O', short: 'checkNone' },
     ],
   },
   {
@@ -183,7 +196,7 @@ const questions: Question[] = [
 // a nadpis nabídky. Poslední („celkový přehled") vyjmenuje oblasti k projití.
 const priorities = [
   { areas: ['bydleni'], heading: 'Pojďme se podívat na vaše bydlení.' },
-  { areas: ['prijem', 'majetek', 'auto'], heading: 'Pojďme se podívat na zajištění příjmu a majetku.' },
+  { areas: ['prijem', 'majetek', 'odpovednost', 'auto'], heading: 'Pojďme se podívat na zajištění příjmu a majetku.' },
   { areas: ['rodina', 'deti'], heading: 'Pojďme se podívat na rodinu a děti.' },
   { areas: ['investice'], heading: 'Pojďme se podívat na vaše investice.' },
   { areas: ['penze'], heading: 'Pojďme se podívat na vaši penzi.' },
@@ -241,6 +254,18 @@ const areas: Area[] = [
     detail: 'Ceny bydlení za poslední roky vyletěly. Stará pojistka nestačí a pojišťovna plnění krátí.',
   },
   {
+    id: 'odpovednost',
+    name: 'Odpovědnost',
+    accusative: 'pojištění odpovědnosti',
+    link: { label: 'Pojištění', href: '/sluzby/pojisteni' },
+    short: {
+      ok: 'Odpovědnost máte pojištěnou, ověřte limit.',
+      check: 'Škodu způsobenou druhým byste platili sami.',
+      checkUnknown: 'Nevíte, jestli máte odpovědnost pojištěnou.',
+    },
+    detail: 'Škody na zdraví nebo majetku druhých jdou snadno do milionů. Pojištění odpovědnosti stojí jen pár stovek ročně.',
+  },
+  {
     id: 'bydleni',
     name: 'Bydlení',
     accusative: 'bydlení',
@@ -266,8 +291,12 @@ const areas: Area[] = [
     name: 'Penze',
     accusative: 'penzi',
     link: { label: 'Penze', href: '/sluzby/penze' },
-    short: { ok: 'Víte, s čím počítat, ověřte nastavení spoření.', check: 'Nevíte, kolik budete mít v důchodu.' },
-    detail: 'Čím dřív víte, kolik budete potřebovat, tím menší částky stačí odkládat.',
+    short: {
+      ok: 'Výhody využíváte, ověřte strategii fondu.',
+      check: 'Nevíte, jestli čerpáte vše, co vám stát dá.',
+      checkNone: 'Na penzi si nespoříte.',
+    },
+    detail: 'Stát přispívá a daňově zvýhodňuje jen toho, kdo si spoří sám. U starších smluv navíc často nesedí strategie.',
   },
   {
     id: 'deti',
@@ -292,6 +321,19 @@ const areas: Area[] = [
   },
 ];
 
+// „Čeho jsem si všiml" — postřehy, které vzniknou až kombinací odpovědí
+// (podmínky ve skriptu podle `id`, pořadí = priorita, ukazují se max. 2).
+const insights = [
+  { id: 'deti-prijem', text: 'Spoříte dětem, ale váš příjem zajištěný není. Kdyby vypadl, spoření skončí jako první.' },
+  { id: 'nemocenska-rodina', text: 'Na vašem příjmu závisí rodina, a přitom spoléháte na nemocenskou. Ta pokryje jen část příjmu.' },
+  { id: 'uspory-nemoc', text: 'Na úspory spoléhat nemůžete. Vydržely by kratší dobu, než by trvala nemoc.' },
+  { id: 'vlastni-pojistka', text: 'Bydlíte ve vlastním, ale pojistka nemusí stačit na jeho obnovu.' },
+  { id: 'bydleni-rezerva', text: 'Na vlastní bydlení budete potřebovat vlastní zdroje i rezervu zároveň.' },
+  { id: 'ucet-navic', text: 'Na účtu máte víc, než potřebujete na rezervu. Zbytek ztrácí hodnotu.' },
+  { id: 'penze-nic', text: 'Na důchod si nic neodkládáte. Stát přitom přispívá jen tomu, kdo si spoří sám.' },
+  { id: 'vse-pokryte', text: 'Témata máte pokrytá. Rozdíl dělá nastavení: částky, limity, poplatky a strategie.' },
+];
+
 // Hodnocení podle podílu oblastí se základem (z těch, které se klienta týkají).
 const verdicts = [
   { id: 'all', title: 'Základ máte všude.', text: 'Jestli je nastavený správně, ukáže až pohled do smluv.' },
@@ -305,13 +347,14 @@ const config = {
   areaOrder: areas.map((a) => a.id),
   accusative: Object.fromEntries(areas.map((a) => [a.id, a.accusative])),
   names: Object.fromEntries(areas.map((a) => [a.id, a.name])),
+  insights: Object.fromEntries(insights.map((i) => [i.id, i.text])),
   priorities,
 };
 ---
 
 <BaseLayout
   title="Finanční check-up | Patrik Gajdadzis"
-  description="Stačí 10 krátkých otázek a zhruba 2 minuty. Zjistěte, kde ve financích máte základ a kde se vyplatí podívat blíž."
+  description="Stačí 11 krátkých otázek a zhruba 2 minuty. Zjistěte, kde ve financích máte základ a kde se vyplatí podívat blíž."
 >
   <Header />
   <main id="hero" class="chk">
@@ -324,7 +367,7 @@ const config = {
         <!-- Úvod -->
         <div class="chk-step chk-intro" data-step="intro">
           <p class="chk-hero__lead">
-            Stačí 10&nbsp;krátkých otázek a&nbsp;zhruba 2&nbsp;minuty. Na&nbsp;konci uvidíte, kde máte základ a&nbsp;kde se&nbsp;vyplatí
+            Stačí 11&nbsp;krátkých otázek a&nbsp;zhruba 2&nbsp;minuty. Na&nbsp;konci uvidíte, kde máte základ a&nbsp;kde se&nbsp;vyplatí
             podívat blíž.
           </p>
           <p class="chk-intro__meta">Odpovědi zůstávají jen ve&nbsp;vašem prohlížeči, nikam se&nbsp;neodesílají.</p>
@@ -401,6 +444,14 @@ const config = {
             }
           </div>
 
+          {/* Postřehy z kombinací odpovědí — to, čeho by si všiml poradce. */}
+          <div class="chk-insights" data-insights hidden>
+            <p class="chk-insights__label">Čeho jsem si všiml</p>
+            <ul class="chk-insights__list">
+              {insights.map((i) => <li data-insight={i.id} hidden>{nb(i.text)}</li>)}
+            </ul>
+          </div>
+
           {/* Výsledek jako linka se zastávkami (hlavní grafický prvek webu):
               nahoře oblasti k projití, pod nimi ty se základem. Rozbalená je
               jen první k projití („Tady bych začal"). */}
@@ -473,6 +524,7 @@ const config = {
     areaOrder: string[];
     accusative: Record<string, string>;
     names: Record<string, string>;
+    insights: Record<string, string>;
     priorities: { areas: string[]; heading: string }[];
   }
 
@@ -601,6 +653,24 @@ const config = {
         el.querySelectorAll<HTMLElement>('[data-short]').forEach((p) => (p.hidden = p.dataset.short !== r.short));
       });
 
+      // Postřehy z kombinací odpovědí (index odpovědi podle id otázky).
+      const ans = (id: string) => answers[config.questions.findIndex((q) => q.id === id)];
+      const st = (id: string) => result[id]?.status;
+      const rules: Record<string, () => boolean> = {
+        'deti-prijem': () => ans('deti') <= 1 && (st('prijem') === 'O' || st('rodina') === 'O'),
+        'nemocenska-rodina': () => ans('prijem') === 2 && st('rodina') === 'O',
+        'uspory-nemoc': () => ans('prijem') === 1 && ans('rezerva') <= 1,
+        'vlastni-pojistka': () => ans('bydleni') === 0 && st('majetek') === 'O',
+        'bydleni-rezerva': () => ans('bydleni') === 2 && st('rezerva') === 'O',
+        'ucet-navic': () => ans('rezerva') === 3 && ans('investice') === 2,
+        'penze-nic': () => ans('penze') === 2 && ans('investice') === 3,
+        'vse-pokryte': () => checkIds.length === 0,
+      };
+      const shownInsights = Object.keys(rules).filter((id) => rules[id]()).slice(0, 2);
+      root.querySelectorAll<HTMLElement>('[data-insight]').forEach((li) => (li.hidden = !shownInsights.includes(li.dataset.insight ?? '')));
+      const insightsBox = root.querySelector<HTMLElement>('[data-insights]');
+      if (insightsBox) insightsBox.hidden = shownInsights.length === 0;
+
       // Nabídka podle priority; „celkový přehled" vyjmenuje oblasti k projití.
       const heading = root.querySelector<HTMLElement>('[data-offer-heading]');
       if (heading) {
@@ -624,6 +694,7 @@ const config = {
         checkIds.length ? `Vyplatí se podívat: ${checkIds.map(name).join(', ')}` : '',
         okIds.length ? `Základ má: ${okIds.map(name).join(', ')}` : '',
         naIds.length ? `Netýká se: ${naIds.map(name).join(', ')}` : '',
+        ...shownInsights.map((id) => `Postřeh: ${config.insights[id]}`),
       ].filter(Boolean);
       summaryText = [
         ...header,
@@ -1050,6 +1121,53 @@ const config = {
     line-height: 1.6;
     color: var(--text);
     max-width: 560px;
+  }
+
+  /* „Čeho jsem si všiml" — postřehy z kombinací odpovědí. Krátká linka
+     u každého jako zářez trasy, text o stupeň výraznější než věty na lince. */
+  .chk-insights {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 600px;
+  }
+
+  .chk-insights__label {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: var(--emerald);
+  }
+
+  .chk-insights__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chk-insights__list li {
+    position: relative;
+    padding-left: 34px;
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .chk-insights__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: .75em;
+    width: 22px;
+    height: 1px;
+    background: var(--emerald);
   }
 
   /* Výsledek na lince: legenda + zastávky. Tečky jako trasa webu
