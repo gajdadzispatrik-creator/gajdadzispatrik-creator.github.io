@@ -1100,8 +1100,9 @@ na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
 
 **Známé nesrovnalosti k opravě:**
 
-- `StatsBand.astro` zobrazuje „5,0 Google recenze". Brief §7 chce
-  „42 recenzí s hodnocením 5★" (počet je silnější důkaz než samotná známka). Sjednotit.
+- ~~`StatsBand.astro` „5,0 Google recenze"~~ — vyřešeno 5. 10. 2026: pás ukazuje
+  5,0 ★ hodnocení na Google · Zdarma · 30 minut úvodní konzultace; počet recenzí
+  záměrně ne (uživatel: mění se).
 - ~~Přednačítání jen `manrope-latin.woff2`~~ — vyřešeno 24. 9. 2026:
   `BaseLayout.astro` přednačítá i `manrope-latin-ext.woff2` (ř, š, č, ž, ě, ů),
   oba soubory se stahují současně, bez probliknutí náhradního písma.
