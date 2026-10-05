@@ -39,9 +39,7 @@
  * - AKTUALIZOVÁNO (úkol „Předspouštěcí P0 technické dotažení“): `serviceLinks`
  *   propojeny na 5 hotových detailních stránek (`/sluzby/*`) — dřív `href:
  *   null`, ačkoli stránky už existovaly (nalezeno auditem 9. 9. 2026).
- * - `/clanky` dočasně odstraněna z `navLinks` (skutečné články zatím nejsou
- *   připravené, viz zadání úkolu výše) — stránka samotná dál existuje
- *   (`src/pages/clanky.astro`, `noindex`), jen bez veřejného odkazu odsud.
+ * - `/clanky` zpět v `navLinks` od 5. 10. 2026 (první tři články zveřejněné).
  * - „Kariéra" dočasně skrytá (24. 9. 2026, přání uživatele) — nemá zatím
  *   cílovou stránku. Až bude, vrátit do `navLinks` mezi „O mně" a „Kontakt".
  */
@@ -58,6 +56,7 @@ const navLinks: LinkItem[] = [
   { label: 'Jak pracuji', href: '/pristup' },
   { label: 'Recenze', href: '/recenze' },
   { label: 'O mně', href: '/o-mne' },
+  { label: 'Články', href: '/clanky' },
   { label: 'Finanční check-up', href: '/financni-check-up' },
   { label: 'Kontakt', href: '/#kontakt' },
 ];

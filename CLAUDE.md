@@ -1075,8 +1075,8 @@ na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
   hodnoty + postup + `scripts/photo-metrics.mjs`) — finální fotky usadit
   přesně podle něj. Mobil/tablet se ladí zvlášť.
 - Všechny podstránky (`/sluzby` + 5 detailů, `/pristup`, `/recenze`,
-  `/o-mne`, `/clanky`, právní stránky, 404) jsou hotové. `/clanky` je
-  `noindex` a bez odkazu, dokud nebudou články.
+  `/o-mne`, `/clanky`, právní stránky, 404) jsou hotové. `/clanky` je od
+  5. 10. 2026 zveřejněné (první tři články, odkaz v menu a patičce).
 - **Články (od 5. 10. 2026):** `src/content/clanky/*.mdx` → `/clanky/<soubor>`
   (`src/pages/clanky/[slug].astro`, data `src/data/articles.ts`, prvky
   `src/components/article/`). Postup a pravidla: `docs/clanky-navod.md`.

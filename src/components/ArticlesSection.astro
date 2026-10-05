@@ -49,7 +49,7 @@ const placeholders: Article[] = [
 // Tři nejnovější zveřejněné články (src/content/clanky, 5. 10. 2026);
 // prázdná místa doplní zástupné řádky, dokud nejsou tři.
 const published: Article[] = (await getPublishedArticles()).slice(0, 3).map((a) => ({
-  category: a.data.category,
+  category: czechNbsp(a.data.category),
   title: czechNbsp(a.data.title),
   excerpt: czechNbsp(a.data.description),
   href: articleHref(a),
@@ -107,9 +107,9 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     </ul>
 
     <div class="articles__actions">
-      <!-- „Všechny články“ CTA na /clanky dočasně odstraněno (úkol
-           „Předspouštěcí P0 technické dotažení“) — skutečné články zatím
-           nejsou připravené, /clanky se veřejně neodkazuje. -->
+      <!-- „Všechny články“ zpět od 5. 10. 2026 (zveřejněné první články). -->
+      <a class="articles__cta" href="/clanky">Všechny články</a>
+      <span class="articles__divider" aria-hidden="true"></span>
       <p class="articles__external">
         <span class="articles__external-lead">Hypoteční články také na&nbsp;</span><a class="articles__external-link" href={hypotekaOstravaHref} target="_blank" rel="noopener noreferrer">Hypotéka Ostrava
           <svg class="articles__external-icon" viewBox="0 0 11 11" aria-hidden="true" focusable="false">

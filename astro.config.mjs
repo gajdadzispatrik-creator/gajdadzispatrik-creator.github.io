@@ -3,9 +3,9 @@ import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import rehypeCzechNbsp from './src/lib/rehype-czech-nbsp.mjs';
 
-// Stránky mimo sitemap — `noindex` (dočasně skrytý `/clanky`, viz clanky.astro).
-// Po zveřejnění článků cestu odsud odebrat, zbytek se doplní sám.
-const SITEMAP_EXCLUDE = ['/clanky'];
+// Stránky mimo sitemap (cesty bez koncového lomítka) — např. stránka
+// s `noindex`. Od 5. 10. 2026 prázdné (`/clanky` zveřejněné s prvními články).
+const SITEMAP_EXCLUDE = [];
 
 export default defineConfig({
   site: 'https://patrikgajdadzis.cz',

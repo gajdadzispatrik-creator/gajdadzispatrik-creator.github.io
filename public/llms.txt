@@ -30,8 +30,15 @@ Základní fakta:
 - [O mně](https://patrikgajdadzis.cz/o-mne): kdo je Patrik Gajdadzis a proč dělá finanční poradenství
 - [Jak pracuji](https://patrikgajdadzis.cz/pristup): průběh spolupráce od první konzultace po dlouhodobou péči, časté otázky
 - [Recenze](https://patrikgajdadzis.cz/recenze): skutečné Google recenze klientů
-- [Finanční check-up](https://patrikgajdadzis.cz/financni-check-up): 8 otázek, orientační přehled, kde ve financích máte základ a kde se vyplatí podívat
+- [Finanční check-up](https://patrikgajdadzis.cz/financni-check-up): 11 otázek, orientační přehled, kde ve financích máte základ a kde se vyplatí podívat
 - [Kontakt a nezávazná konzultace](https://patrikgajdadzis.cz/#kontakt): telefon, online rezervace, formulář
+
+## Články
+
+- [Všechny články](https://patrikgajdadzis.cz/clanky) (RSS: https://patrikgajdadzis.cz/rss.xml)
+- [Finanční poradce, bankéř, nebo pojišťovák: v čem je rozdíl](https://patrikgajdadzis.cz/clanky/financni-poradce-bankar-nebo-pojistovak): z čeho kdo vybírá, jak je placený a jak poznat dobrého poradce
+- [Životní pojištění: za co lidé nejčastěji platí zbytečně](https://patrikgajdadzis.cz/clanky/zivotni-pojisteni-za-co-platite-zbytecne): kolik dá stát při nemoci a invaliditě, co má pojištění krýt a co je zbytečné
+- [Vyplatí se čekat s hypotékou na nižší úroky?](https://patrikgajdadzis.cz/clanky/vyplati-se-cekat-s-hypotekou-na-nizsi-urok): propočet na bytě za 4,5 milionu v Ostravě (2026), retence a bezpečná splátka
 
 ## Právní informace
 

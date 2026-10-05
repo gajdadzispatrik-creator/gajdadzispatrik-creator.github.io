@@ -10,7 +10,9 @@ export type Article = CollectionEntry<'clanky'>;
 
 export const SHOW_DRAFTS = import.meta.env.DEV || Boolean(import.meta.env.PUBLIC_PREVIEW);
 
-const byNewest = (a: Article, b: Article) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime();
+// Nejnovější první; při stejném datu podle názvu souboru (stabilní pořadí).
+const byNewest = (a: Article, b: Article) =>
+  b.data.publishedAt.getTime() - a.data.publishedAt.getTime() || a.id.localeCompare(b.id);
 
 /** Všechny články, které se mají sestavit jako stránka (vč. konceptů na náhledu). */
 export async function getBuildableArticles(): Promise<Article[]> {

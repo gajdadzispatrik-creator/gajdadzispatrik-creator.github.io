@@ -84,9 +84,11 @@ Text upozornění.
 1. Čísla a pravidla (státní příspěvky, limity ČNB, daně) ověřit k datu vydání.
 2. `npm run check:typo` — koncept bez odkazu přidat: `EXTRA=/clanky/<soubor> npm run check:typo`.
 3. `ONLY=/clanky/<soubor> npm run check:dots`.
-4. Po zveřejnění prvního článku: `/clanky` zapnout (odstranit `noindex`
-   v `clanky.astro`, `/clanky` ze `SITEMAP_EXCLUDE` v `astro.config.mjs`,
-   odkaz „Články“ zpět do menu a patičky, CTA „Všechny články“ v `ArticlesSection.astro`).
+4. Nový článek doplnit do `public/llms.txt` (sekce Články).
+5. Psát Patrikovým hlasem jako odborník, propojovat souvislosti a odkazovat
+   na související články přímo v textu.
+
+`/clanky` je zveřejněné od 5. 10. 2026 (menu, patička, sitemap, homepage).
 
 ## Ještě k doplnění
 

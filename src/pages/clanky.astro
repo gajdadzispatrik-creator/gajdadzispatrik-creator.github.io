@@ -85,7 +85,7 @@ interface Article {
 // Zveřejněné články z src/content/clanky (5. 10. 2026) — nejnovější první.
 // Dokud žádný není, platí prázdný stav (viz hlavičkový komentář výše).
 const articles: Article[] = (await getPublishedArticles()).map((a) => ({
-  category: a.data.category,
+  category: czechNbsp(a.data.category),
   title: czechNbsp(a.data.title),
   excerpt: czechNbsp(a.data.description),
   href: articleHref(a),
@@ -97,22 +97,21 @@ const articles: Article[] = (await getPublishedArticles()).map((a) => ({
 }));
 
 const topics = ['Hypotéky a bydlení', 'Finanční plánování', 'Pojištění', 'Investice', 'Penze'];
-const availableTopics = topics.filter((t) => articles.some((a) => a.category === t));
+// Porovnání bez ohledu na nezlomitelné mezery (v `topics` můžou být, kategorie článku je má prosté).
+const plainSpace = (s: string) => s.replace(/ /g, ' ');
+const availableTopics = topics.filter((t) => articles.some((a) => plainSpace(a.category) === plainSpace(t)));
 
 const ARTICLES_PAGE_SIZE = 6;
 ---
 
 <!--
-  robots="noindex, follow" — úkol „Předspouštěcí P0 technické dotažení“, §3.
-  Skutečné články zatím nejsou připravené; stránka zůstává technicky
-  dostupná (funkční prázdný stav), ale nemá se veřejně odkazovat ani
-  indexovat, dokud nebude mít reálný obsah. Zároveň vyřazena ze sitemap
-  (`SITEMAP_EXCLUDE` v astro.config.mjs) a odstraněna z Header/Footer/ArticlesSection navigace (viz report úkolu).
+  Zveřejněno 5. 10. 2026 s prvními třemi články: indexovatelné, v sitemap,
+  odkaz v menu, patičce a v sekci Články na homepage (dřív `noindex`
+  a bez odkazů — úkol „Předspouštěcí P0 technické dotažení“, §3).
 -->
 <BaseLayout
   title="Články o financích | Patrik Gajdadzis"
   description="Praktické články o hypotékách, finančním plánování, pojištění, investicích a penzi. Píšu je srozumitelně, jako finanční poradce z Ostravy."
-  robots="noindex, follow"
 >
   <Header />
   <main id="hero" class="cla">
@@ -221,7 +220,7 @@ const ARTICLES_PAGE_SIZE = 6;
                 </li>
                 {availableTopics.map((topic) => (
                   <li>
-                    <button type="button" class="cla-topics__btn" data-topic={topic}>
+                    <button type="button" class="cla-topics__btn" data-topic={plainSpace(topic)}>
                       {topic}
                     </button>
                   </li>
@@ -238,7 +237,7 @@ const ARTICLES_PAGE_SIZE = 6;
                     <li>
                       <article
                         class={`cla-article${article.featured ? ' cla-article--featured' : ''}`}
-                        data-category={article.category}
+                        data-category={plainSpace(article.category)}
                         data-article-index={i}
                         hidden={i >= ARTICLES_PAGE_SIZE}
                       >
@@ -1097,6 +1096,11 @@ const ARTICLES_PAGE_SIZE = 6;
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+
+  /* `display: flex` výš by jinak přebil atribut `hidden` (hláška u filtru). */
+  .cla-empty[hidden] {
+    display: none;
   }
 
   .cla-empty__heading {
