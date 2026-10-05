@@ -3678,7 +3678,7 @@ Bez roku zahájení praxe.
 **Copy**
 `Po čase mi přestaly vyhovovat prostředí a způsob fungování společnosti, ve které jsem tehdy pracoval. Rozhodl jsem se proto pokračovat jinak.`
 
-`Dlouholetý kamarád, který stojí za Mint reality, mi nabídl možnost vybudovat v rámci firmy finanční část. Když jsem svému tehdejšímu týmu oznámil, že odcházím, několik kluků se mě zeptalo, jestli mohou jít se mnou.`
+`Dlouholetý kamarád, který stojí za Mint reality, mi nabídl možnost vybudovat v rámci firmy finanční část. Když jsem svému tehdejšímu týmu oznámil, že odcházím, několik kolegů to vidělo stejně a chtěli se ke mně přidat.`
 
 `Tak vznikla finanční část Mint reality & finance, kterou dnes vedu. Vedle vedení poradců ale dál osobně pracuji se svými klienty.`
 
