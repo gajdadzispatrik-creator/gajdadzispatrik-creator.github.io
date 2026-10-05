@@ -202,3 +202,4 @@ situaci i to, jak máte nastavené současné smlouvy.
   spolu."); krátké věty: pojištění „ověřit částky a nastavení", investice
   „ověřit strategii a poplatky", smlouvy „druhý pohled se ale vyplatí"
   (záleží, s kým je procházeli).
+- 5. 10. 2026: krátká věta Příjem (okrová) „Pojištění příjmu nemáte, nebo nevíte, co kryje." (místo „Příjem nemáte jistě pojištěný.").
