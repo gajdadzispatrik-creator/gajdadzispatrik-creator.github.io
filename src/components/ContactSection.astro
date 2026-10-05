@@ -119,8 +119,8 @@ const bandDetails = [
             <p class="kontakt__person-text">
               <strong>Patrik Gajdadzis</strong>
               <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
-              <span class="kontakt__person-proof"><span class="kontakt__nowrap"><span class="kontakt__person-star" aria-hidden="true">★</span> 5,0 na&nbsp;Google&nbsp;·</span> <span class="kontakt__nowrap">150+&nbsp;osobních klientů</span></span>
             </p>
+            <p class="kontakt__person-proof"><span class="kontakt__nowrap"><span class="kontakt__person-star" aria-hidden="true">★</span> 5,0 na&nbsp;Google&nbsp;·</span> <span class="kontakt__nowrap">150+&nbsp;osobních klientů</span></p>
           </div>
         </div>
       </div>
@@ -782,15 +782,21 @@ const bandDetails = [
     color: var(--navy);
   }
 
+  /* Mřížka: fotka | jméno + kdy se ozvu; hodnocení na mobilu jako řádek
+     přes celou šířku pod nimi (vedle fotky by se zalomilo do úzkého
+     sloupce), od tabletu vedle fotky pod textem. */
   .kontakt__person {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 12px;
+    align-items: center;
     margin-top: 6px;
   }
 
   .kontakt__avatar {
-    flex: none;
+    grid-column: 1;
+    grid-row: 1;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -811,6 +817,8 @@ const bandDetails = [
   }
 
   .kontakt__person-text {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -830,20 +838,20 @@ const bandDetails = [
     color: var(--text-muted);
   }
 
-  .kontakt__person-text .kontakt__person-proof {
-    margin-top: 2px;
+  .kontakt__person-proof {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0;
     font-size: 14px;
+    line-height: 1.5;
     color: var(--text-quiet);
   }
 
-  .kontakt__person-text .kontakt__nowrap {
-    font-size: inherit;
-    color: inherit;
+  .kontakt__person-proof .kontakt__nowrap {
     white-space: nowrap;
   }
 
-  .kontakt__person-text .kontakt__person-star {
-    font-size: inherit;
+  .kontakt__person-star {
     color: var(--emerald);
   }
 
@@ -1183,6 +1191,23 @@ const bandDetails = [
       max-width: none;
     }
 
+    .kontakt__person {
+      row-gap: 2px;
+    }
+
+    .kontakt__avatar {
+      grid-row: 1 / span 2;
+    }
+
+    .kontakt__person-text {
+      align-self: end;
+    }
+
+    .kontakt__person-proof {
+      grid-column: 2;
+      align-self: start;
+    }
+
     .kontakt__grid {
       grid-template-columns: 1fr 1fr;
       column-gap: 32px;
@@ -1211,7 +1236,7 @@ const bandDetails = [
     }
 
     .kontakt__person {
-      align-items: center;
+      grid-template-columns: 88px minmax(0, 1fr);
     }
 
     .kontakt__person-text strong {
