@@ -43,7 +43,7 @@ Z = základ máte · O = vyplatí se podívat · N = netýká se (oblast se neuk
 | Oblast | Základ máte | Vyplatí se podívat |
 |---|---|---|
 | Rezerva | Rezervu máte. | Rezerva vás dlouho nepodrží. |
-| Příjem | Máte pojištění, ověřte částky. | Půl roku bez příjmu byste nepokryli. |
+| Příjem | Máte pojištění, ověřte částky a cenu. | Půl roku bez příjmu byste nepokryli. |
 | Rodina | Rodina je pojištěná, ověřte částky. | Rodina by bez vás dlouho nevydržela. / *(Netuším)* Nevíte, jak dlouho by rodina vydržela. |
 | Majetek | Pojistka odpovídá dnešní ceně. | Pojistka nemusí stačit na obnovu. |
 | Bydlení | Bydlíte ve vlastním. / Víte, na kolik dosáhnete. | Nevíte, na kolik dosáhnete. |
