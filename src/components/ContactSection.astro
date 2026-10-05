@@ -114,7 +114,7 @@ const bandDetails = [
           <p class="kontakt__form-intro-label">Nebo napište</p>
           <div class="kontakt__person">
             <span class="kontakt__avatar">
-              <Image src={personPhoto} width={160} alt="" loading="lazy" />
+              <Image src={personPhoto} width={320} alt="" loading="lazy" />
             </span>
             <p class="kontakt__person-text">
               <strong>Patrik Gajdadzis</strong>
@@ -804,6 +804,10 @@ const bandDetails = [
     height: 100%;
     object-fit: cover;
     object-position: 50% 0;
+    /* Výřez jako kulatý portrét na /pristup (.pri-pece__photo): hlava posunutá
+       o 9 % dolů a přiblížená, aby obličej kruh vyplnil. */
+    transform: translateY(9%) scale(1.25);
+    transform-origin: 50% 0;
   }
 
   .kontakt__person-text {

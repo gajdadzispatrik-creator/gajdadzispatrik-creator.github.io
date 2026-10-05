@@ -340,7 +340,7 @@ const config = {
             <div class="chk-offer__glow" aria-hidden="true"></div>
             <div class="chk-offer__person">
               <span class="chk-offer__avatar">
-                <Image src={pecePhoto} width={160} alt="" loading="lazy" />
+                <Image src={pecePhoto} width={320} alt="" loading="lazy" />
               </span>
               <p>
                 <strong>Patrik Gajdadzis</strong>
@@ -1157,7 +1157,7 @@ const config = {
     border-radius: 50%;
     overflow: hidden;
     box-shadow: 0 0 0 2px rgba(255, 255, 255, .14);
-    background: var(--about-photo-dark-1);
+    background: var(--about-photo-1);
   }
 
   .chk-offer__avatar :global(img) {
@@ -1166,6 +1166,10 @@ const config = {
     height: 100%;
     object-fit: cover;
     object-position: 50% 0;
+    /* Výřez jako kulatý portrét na /pristup (.pri-pece__photo): hlava posunutá
+       o 9 % dolů a přiblížená, aby obličej kruh vyplnil. */
+    transform: translateY(9%) scale(1.25);
+    transform-origin: 50% 0;
   }
 
   .chk-offer__person p {
