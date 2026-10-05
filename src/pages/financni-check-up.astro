@@ -652,6 +652,9 @@ const config = {
         el.querySelector<HTMLElement>('[data-status-check]')!.hidden = ok;
         el.querySelectorAll<HTMLElement>('[data-short]').forEach((p) => (p.hidden = p.dataset.short !== r.short));
       });
+      // Konec linky na poslední VIDITELNÉ zastávce (schované „netýká se" jsou v DOM za ní).
+      const lastId = [...checkIds, ...okIds].pop();
+      areaOrder.forEach((el) => el.classList.toggle('is-last', el.dataset.area === lastId));
 
       // Postřehy z kombinací odpovědí (index odpovědi podle id otázky).
       const ans = (id: string) => answers[config.questions.findIndex((q) => q.id === id)];
@@ -1206,7 +1209,8 @@ const config = {
     padding: 0 0 22px 30px;
   }
 
-  .chk-stop:last-child {
+  .chk-stop:last-child,
+  .chk-stop.is-last {
     padding-bottom: 0;
   }
 
@@ -1221,7 +1225,8 @@ const config = {
     opacity: .18;
   }
 
-  .chk-stop:last-child::before {
+  .chk-stop:last-child::before,
+  .chk-stop.is-last::before {
     display: none;
   }
 
