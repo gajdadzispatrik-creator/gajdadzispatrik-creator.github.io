@@ -69,6 +69,9 @@ const areas = [
         </li>
       ))}
     </ol>
+
+    <!-- Pro ty, kdo se v oblastech nenašli (5. 10. 2026) — stejně jako na /sluzby. -->
+    <p class="router__extra">Nevíte, kde začít? <a href="/financni-check-up">Udělejte si dvouminutový check-up</a></p>
   </div>
 
   <!-- Desktop 1200+ -->
@@ -99,7 +102,7 @@ const areas = [
   <!-- Tablet 768–1199 -->
   <svg
     class="router__axis router__axis--tablet"
-    viewBox="0 0 834 1100"
+    viewBox="0 0 834 1166"
     preserveAspectRatio="none"
     aria-hidden="true"
     focusable="false"
@@ -108,7 +111,7 @@ const areas = [
   >
     <path
       class="router__axis-path"
-      d="M 794 -20 V 56 A 22 22 0 0 1 772 78 H 62 A 22 22 0 0 0 40 100 V 1100"
+      d="M 794 -20 V 56 A 22 22 0 0 1 772 78 H 62 A 22 22 0 0 0 40 100 V 1166"
       fill="none"
       stroke="var(--line-on-dark)"
       stroke-opacity=".3"
@@ -249,11 +252,20 @@ const areas = [
     if (!section || !mobileAxis || !lastArea) return;
     if (getComputedStyle(mobileAxis).display === 'none') {
       layoutMobileAreas(false);
+      section.querySelector<HTMLElement>('.router__extra')?.style.removeProperty('--extra-y');
       section.style.removeProperty('height');
       return;
     }
     layoutMobileAreas(true);
-    const height = Math.round(lastArea.offsetTop + lastArea.offsetHeight + 72);
+    // Řádek s check-upem 40 px pod poslední oblastí (stejná mezera jako mezi
+    // oblastmi), výška sekce = jeho konec + 72 px.
+    const extra = section.querySelector<HTMLElement>('.router__extra');
+    let last: HTMLElement = lastArea;
+    if (extra) {
+      extra.style.setProperty('--extra-y', String(lastArea.offsetTop + lastArea.offsetHeight + 40));
+      last = extra;
+    }
+    const height = Math.round(last.offsetTop + last.offsetHeight + 72);
     section.style.height = `${height}px`;
     mobileAxis.setAttribute('viewBox', `0 0 390 ${height}`);
     mobileAxis.querySelector('.router__axis-path')?.setAttribute('d', `M 24 -20 V ${height}`);
@@ -497,6 +509,46 @@ const areas = [
     outline-offset: 4px;
   }
 
+  /* Řádek s odkazem na check-up pod oblastmi — ve sloupci oblastí, tlumený
+     text jako popisky, odkaz jako ostatní textové odkazy na tmavém pozadí. */
+  .router__extra {
+    position: absolute;
+    left: calc(24 * 100% / var(--vb) + 32px);
+    right: calc(24 * 100% / var(--vb));
+    top: calc(var(--extra-y) * 1px);
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, .56);
+    --extra-y: 990;
+  }
+
+  .router__extra a {
+    position: relative;
+    font-weight: 600;
+    color: var(--white);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald-light);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .router__extra a::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
+  .router__extra a:hover {
+    color: var(--emerald-light);
+  }
+
+  .router__extra a:focus-visible {
+    outline: 2px solid var(--emerald-light);
+    outline-offset: 4px;
+  }
+
   /* Dominanta (Bydlení) — dvojnásobné písmo, vlastní gap, trvalá vlasová linka pod „Více“. */
   .router__area--dominant .router__link {
     gap: 14px;
@@ -606,8 +658,15 @@ const areas = [
   /* ============ Tablet: 768–1199 ============ */
   @media (min-width: 768px) {
     .router {
-      height: 1100px;
+      /* 1100 + řádek s check-upem (40 px pod poslední oblastí), 5. 10. 2026. */
+      height: 1166px;
       --vb: 834;
+    }
+
+    .router__extra {
+      left: calc(40 * 100% / var(--vb) + 64px);
+      right: calc(40 * 100% / var(--vb));
+      --extra-y: 1110;
     }
 
     .router::before {
@@ -711,6 +770,14 @@ const areas = [
       font-size: 72px;
     }
 
+    /* Řádek s check-upem pod spodní řadou oblastí (konec 731 px), zarovnaný
+       pod první oblast (Bydlení) — výška sekce zůstává 1000 px. */
+    .router__extra {
+      left: calc(233 * 100% / var(--vb));
+      right: auto;
+      --extra-y: 811;
+    }
+
     /* Desktop kotví jednotlivé bloky individuálně přes šířku (ne right-inset). */
     .router__area {
       right: auto;
@@ -805,6 +872,10 @@ const areas = [
 
     .router__heading {
       --axis-x: 120;
+    }
+
+    .router__extra {
+      left: calc(260 * 100% / var(--vb));
     }
 
     .router__area--pos-1 {
