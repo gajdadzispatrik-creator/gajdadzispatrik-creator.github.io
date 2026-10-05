@@ -45,6 +45,22 @@ export function slugify(text) {
     .replace(/^-|-$/g, '');
 }
 
+const childElements = (node, tag) => (node.children ?? []).filter((c) => c.type === 'element' && (!tag || c.tagName === tag));
+
+function labelTableCells(table) {
+  const thead = childElements(table, 'thead')[0];
+  const headRow = thead && childElements(thead, 'tr')[0];
+  if (!headRow) return;
+  const labels = childElements(headRow).map((th) => textOf(th).trim());
+  childElements(table, 'tbody').forEach((tbody) =>
+    childElements(tbody, 'tr').forEach((tr) =>
+      childElements(tr).forEach((cell, i) => {
+        if (labels[i]) cell.properties = { ...(cell.properties ?? {}), dataLabel: labels[i] };
+      }),
+    ),
+  );
+}
+
 export default function rehypeCzechNbsp() {
   const walk = (node) => {
     if (node.type === 'element' && SKIP.has(node.tagName)) return;
@@ -58,6 +74,10 @@ export default function rehypeCzechNbsp() {
       node.value = czechNbsp(node.value);
       return;
     }
+    // Tabulka: každá buňka dostane popisek ze záhlaví svého sloupce
+    // (data-label) — na mobilu se řádky skládají pod sebe a popisek se
+    // ukáže u hodnoty (styl v src/pages/clanky/[slug].astro).
+    if (node.type === 'element' && node.tagName === 'table') labelTableCells(node);
     const isWrap = node.type === 'element' && node.properties?.className?.includes?.('table-scroll');
     if (Array.isArray(node.children) && !isWrap) {
       // Tabulka do posuvného obalu — na úzkém telefonu se posune do strany,

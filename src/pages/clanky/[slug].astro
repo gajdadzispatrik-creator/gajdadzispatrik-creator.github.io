@@ -957,6 +957,75 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     color: var(--navy);
   }
 
+  /* Mobil: tabulka jako bloky pod sebou — název řádku nahoře, pod ním
+     hodnoty s popiskem sloupce (data-label z rehype-czech-nbsp.mjs). Široké
+     tabulky (víc sloupců) by se jinak na telefonu mačkaly nebo usekly. */
+  @media (max-width: 767px) {
+    .art-prose :global(table),
+    .art-prose :global(tbody),
+    .art-prose :global(tr),
+    .art-prose :global(td) {
+      display: block;
+    }
+
+    .art-prose :global(thead) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .art-prose :global(tr) {
+      padding: 16px 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .art-prose :global(tbody tr:first-child) {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .art-prose :global(tbody tr:last-child) {
+      padding-bottom: 0;
+    }
+
+    .art-prose :global(td) {
+      padding: 0;
+      border: 0;
+    }
+
+    .art-prose :global(td:first-child) {
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: 16.5px;
+    }
+
+    .art-prose :global(td + td) {
+      display: grid;
+      grid-template-columns: minmax(0, 104px) minmax(0, 1fr);
+      gap: 12px;
+      padding: 3px 0;
+      font-size: 16px;
+    }
+
+    .art-prose :global(td + td)::before {
+      content: attr(data-label);
+      padding-top: 3px;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-quiet);
+    }
+
+    /* Tabulka bez záhlaví první buňky (| | A | B |) — prázdný popisek se neukazuje. */
+    .art-prose :global(td[data-label=""])::before {
+      content: none;
+    }
+  }
+
   .art-prose :global(hr) {
     height: 1px;
     border: 0;
