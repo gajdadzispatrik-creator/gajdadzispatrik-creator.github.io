@@ -71,7 +71,7 @@ const areas = [
     </ol>
 
     <!-- Pro ty, kdo se v oblastech nenašli (5. 10. 2026) — stejně jako na /sluzby. -->
-    <p class="router__extra">Nevíte, kde začít? <a href="/financni-check-up">Udělejte si dvouminutový check-up</a></p>
+    <p class="router__extra">Nevíte, kde začít? <a href="/financni-check-up">Zkuste check-up</a></p>
   </div>
 
   <!-- Desktop 1200+ -->
@@ -102,7 +102,7 @@ const areas = [
   <!-- Tablet 768–1199 -->
   <svg
     class="router__axis router__axis--tablet"
-    viewBox="0 0 834 1166"
+    viewBox="0 0 834 1222"
     preserveAspectRatio="none"
     aria-hidden="true"
     focusable="false"
@@ -111,7 +111,7 @@ const areas = [
   >
     <path
       class="router__axis-path"
-      d="M 794 -20 V 56 A 22 22 0 0 1 772 78 H 62 A 22 22 0 0 0 40 100 V 1166"
+      d="M 794 -20 V 56 A 22 22 0 0 1 772 78 H 62 A 22 22 0 0 0 40 100 V 1222"
       fill="none"
       stroke="var(--line-on-dark)"
       stroke-opacity=".3"
@@ -526,6 +526,7 @@ const areas = [
   .router__extra a {
     position: relative;
     font-weight: 600;
+    white-space: nowrap;
     color: var(--white);
     text-decoration: underline;
     text-decoration-color: var(--emerald-light);
@@ -658,8 +659,9 @@ const areas = [
   /* ============ Tablet: 768–1199 ============ */
   @media (min-width: 768px) {
     .router {
-      /* 1100 + řádek s check-upem (40 px pod poslední oblastí), 5. 10. 2026. */
-      height: 1166px;
+      /* Řádek s check-upem 40 px pod poslední oblastí + 88 px do konce sekce
+         (dřív 30 px — sekce dole působila utnutě), 5. 10. 2026. */
+      height: 1222px;
       --vb: 834;
     }
 
