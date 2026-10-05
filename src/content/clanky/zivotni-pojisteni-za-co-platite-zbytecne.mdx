@@ -29,10 +29,14 @@ Abyste věděli, co pojistit, musíte nejdřív vědět, kolik vám chybí. Vět
 
 Zaměstnancům prvních 14 dní nemoci platí náhradu zaměstnavatel, pak nastoupí nemocenská od státu. Ta se počítá jen z části příjmu, takže čím víc vyděláváte, tím větší díra vznikne.
 
-| Hrubá mzda | Čistá mzda | Nemocenská | Chybí vám měsíčně |
-| --- | --- | --- | --- |
-| 50 000 Kč | 39 300 Kč | 26 600 Kč | 12 700 Kč |
-| 80 000 Kč | 61 300 Kč | 36 200 Kč | 25 100 Kč |
+<GrafVypadek
+  title="Kolik vám při nemoci chybí každý měsíc"
+  rows={[
+    { label: 'Hrubá mzda 50 000 Kč', total: 39300, covered: 26600 },
+    { label: 'Hrubá mzda 80 000 Kč', total: 61300, covered: 36200 },
+  ]}
+  note="Zaměstnanec, nemocenská od 15. do 30. dne nemoci, pravidla pro rok 2026. Čistá mzda bez slev na děti."
+/>
 
 A to je jen nemoc. Při invaliditě je to ještě horší. Průměrný invalidní důchod třetího stupně, tedy při nejtěžší invaliditě, je kolem 17 600 Kč měsíčně. A musíte z něj vyžít třeba třicet let.
 

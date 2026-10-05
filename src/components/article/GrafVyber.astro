@@ -1,0 +1,162 @@
+---
+/**
+ * Schéma „z čeho kdo vybírá" — řada teček = nabídka na trhu, zelené jsou
+ * ty, ze kterých daný člověk může vybírat. Tečky jsou symbolické (ne přesný
+ * počet institucí), popis řádku nese skutečnou informaci.
+ * V MDX:
+ * <GrafVyber title="…" rows={[{ label: 'Bankéř', text: 'Produkty jedné banky', picked: 1 }]} />
+ */
+import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
+
+interface Props {
+  title: string;
+  rows: { label: string; text: string; picked: number; accent?: boolean }[];
+  total?: number;
+  note?: string;
+}
+const { title, rows, total = 12, note } = Astro.props;
+---
+
+<figure class="graf">
+  <figcaption class="graf__title">
+    <span class="graf__label">Schéma</span>
+    <span>{czechNbsp(title)}</span>
+  </figcaption>
+
+  <ul class="graf__rows">
+    {
+      rows.map((r) => (
+        <li class:list={['graf__row', { 'graf__row--accent': r.accent }]}>
+          <p class="graf__row-label">{czechNbsp(r.label)}</p>
+          <span class="graf__dots" aria-hidden="true">
+            {Array.from({ length: total }, (_, i) => (
+              <i class:list={['graf__dot', { 'is-on': i < r.picked }]} />
+            ))}
+          </span>
+          <p class="graf__row-text">{czechNbsp(r.text)}</p>
+        </li>
+      ))
+    }
+  </ul>
+
+  {note && <p class="graf__note">{czechNbsp(note)}</p>}
+</figure>
+
+<style>
+  .graf {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 0;
+    padding: 24px 20px;
+    border-radius: var(--radius-panel);
+    background: var(--white);
+    border: 1px solid var(--rule);
+  }
+
+  .graf__title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.35;
+    color: var(--navy);
+  }
+
+  .graf__label {
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: var(--emerald);
+  }
+
+  .graf__rows {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .graf__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding: 16px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .graf__row:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .graf__row:last-child {
+    padding-bottom: 0;
+  }
+
+  .graf__row-label {
+    margin: 0;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--navy);
+  }
+
+  .graf__row--accent .graf__row-label {
+    color: var(--emerald);
+  }
+
+  .graf__dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .graf__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+  }
+
+  .graf__dot.is-on {
+    border-color: var(--line);
+    background: var(--line);
+  }
+
+  .graf__row--accent .graf__dot.is-on {
+    border-color: var(--emerald);
+    background: var(--emerald);
+  }
+
+  .graf__row-text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .graf__note {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-quiet);
+  }
+
+  /* Od tabletu řádek vedle sebe: popisek | tečky | text. */
+  @media (min-width: 768px) {
+    .graf {
+      padding: 28px 32px;
+    }
+
+    .graf__row {
+      grid-template-columns: 120px auto minmax(0, 1fr);
+      align-items: center;
+      column-gap: 24px;
+    }
+  }
+</style>

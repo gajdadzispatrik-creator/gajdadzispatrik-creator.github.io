@@ -71,7 +71,29 @@ A ještě jedna věc, která lidi překvapí. I při dnešní sazbě 5,5 % zapla
 | Splátka | 20 440 Kč | 20 061 Kč |
 | Nájem během čekání | 0 Kč | 204 000 Kč |
 
-**Splátka je po roce čekání nižší jen asi o 380 Kč.** Za to jste zaplatili rok nájmu a byt je dražší. Kdyby ceny naopak klesly, mohlo by se čekání vyplatit. Jenže to nikdo nedokáže dopředu říct.
+**Splátka je po roce čekání nižší jen asi o 380 Kč.** Za to jste zaplatili rok nájmu a byt je dražší.
+
+<GrafPorovnani
+  title="Rok čekání proti úspoře na splátce"
+  rows={[
+    {
+      label: 'Co stojí rok čekání',
+      segments: [
+        { label: 'Nájem', value: 204000 },
+        { label: 'Zdražení bytu', value: 225000 },
+        { label: 'Víc vlastních peněz', value: 45000 },
+      ],
+    },
+    {
+      label: 'Co ušetříte na splátce za 5 let',
+      accent: true,
+      segments: [{ label: 'Nižší splátka', value: 22700 }],
+    },
+  ]}
+  note="Modelový příklad z tabulky výše: byt za 4,5 milionu, rok čekání, sazba z 5,5 % na 4,9 %, byt dražší o 5 %."
+/>
+
+Kdyby ceny naopak klesly, mohlo by se čekání vyplatit. Jenže to nikdo nedokáže dopředu říct.
 
 ## Proč se sazba dá změnit a cena ne?
 

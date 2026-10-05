@@ -1,0 +1,224 @@
+---
+/**
+ * Graf výpadku příjmu — kolik z celku pokryje dávka a kolik chybí
+ * (např. čistá mzda vs. nemocenská). Pruhy v poměru k největšímu celku.
+ * V MDX:
+ * <GrafVypadek title="…" rows={[{ label: 'Hrubá mzda 50 000 Kč', total: 39300, covered: 26600 }]} />
+ */
+import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
+import { kc } from './graf-format';
+
+interface Props {
+  title: string;
+  rows: { label: string; total: number; covered: number }[];
+  totalLabel?: string;
+  coveredLabel?: string;
+  gapLabel?: string;
+  note?: string;
+}
+const {
+  title,
+  rows,
+  totalLabel = 'Čistá mzda',
+  coveredLabel = 'Nemocenská',
+  gapLabel = 'Chybí',
+  note,
+} = Astro.props;
+const max = Math.max(...rows.map((r) => r.total));
+---
+
+<figure class="graf">
+  <figcaption class="graf__title">
+    <span class="graf__label">Graf</span>
+    <span>{czechNbsp(title)}</span>
+  </figcaption>
+
+  <p class="graf__legend" aria-hidden="true">
+    <span><i class="graf__swatch graf__swatch--covered"></i>{czechNbsp(coveredLabel)}</span>
+    <span><i class="graf__swatch graf__swatch--gap"></i>{czechNbsp(gapLabel)}</span>
+  </p>
+
+  <ul class="graf__rows">
+    {
+      rows.map((r) => (
+        <li class="graf__row">
+          <p class="graf__row-head" style={`--w:${(r.total / max) * 100}%`}>
+            <span class="graf__row-label">{czechNbsp(r.label)}</span>
+            <span class="graf__row-total">
+              {czechNbsp(totalLabel)} {kc(r.total)}
+            </span>
+          </p>
+          <div class="graf__track">
+            <div class="graf__bar" style={`width:${(r.total / max) * 100}%`}>
+              <span class="graf__covered" style={`width:${(r.covered / r.total) * 100}%`} />
+              <span class="graf__gap" />
+            </div>
+          </div>
+          <p class="graf__row-values" style={`--w:${(r.total / max) * 100}%`}>
+            <span>
+              {czechNbsp(coveredLabel)} {kc(r.covered)}
+            </span>
+            <strong>
+              {czechNbsp(gapLabel.toLowerCase())} {kc(r.total - r.covered)}
+            </strong>
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+
+  {note && <p class="graf__note">{czechNbsp(note)}</p>}
+</figure>
+
+<style>
+  .graf {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 0;
+    padding: 24px 20px;
+    border-radius: var(--radius-panel);
+    background: var(--white);
+    border: 1px solid var(--rule);
+  }
+
+  .graf__title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.35;
+    color: var(--navy);
+  }
+
+  .graf__label {
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: var(--emerald);
+  }
+
+  .graf__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .graf__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .graf__swatch {
+    width: 14px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  .graf__swatch--covered,
+  .graf__covered {
+    background: var(--line);
+  }
+
+  /* Chybějící část šrafovaně v barvě značky — tady pomáhá pojištění. */
+  .graf__swatch--gap,
+  .graf__gap {
+    background: repeating-linear-gradient(135deg, rgba(30, 122, 92, .3) 0 5px, rgba(30, 122, 92, .1) 5px 10px);
+  }
+
+  .graf__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .graf__row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .graf__row-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 16px;
+    margin: 0;
+  }
+
+  .graf__row-label {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--navy);
+  }
+
+  .graf__row-total {
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  .graf__bar {
+    display: flex;
+    height: 18px;
+    overflow: hidden;
+    border-radius: 5px;
+  }
+
+  .graf__covered {
+    flex: none;
+  }
+
+  .graf__gap {
+    flex: 1;
+  }
+
+  .graf__row-values {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 12px;
+    margin: 0;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  .graf__row-values strong {
+    font-weight: 700;
+    color: var(--emerald);
+  }
+
+  .graf__note {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-quiet);
+  }
+
+  @media (min-width: 768px) {
+    .graf {
+      padding: 28px 32px;
+    }
+
+    .graf__bar {
+      height: 22px;
+    }
+
+    /* Popisky končí s pruhem (na mobilu přes celou šířku, ať se nelámou). */
+    .graf__row-head,
+    .graf__row-values {
+      max-width: var(--w);
+    }
+  }
+</style>

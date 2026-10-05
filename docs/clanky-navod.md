@@ -79,6 +79,49 @@ Text upozornění.
 />
 ```
 
+### Grafy (v barvách webu, žádné fotky z fotobanky ani AI ilustrace)
+
+```mdx
+<GrafVypadek
+  title="Kolik vám při nemoci chybí každý měsíc"
+  rows={[
+    { label: 'Hrubá mzda 50 000 Kč', total: 39300, covered: 26600 },
+  ]}
+  totalLabel="Čistá mzda"
+  coveredLabel="Nemocenská"
+  note="Zdroj / předpoklady."
+/>
+
+<GrafPorovnani
+  title="Rok čekání proti úspoře na splátce"
+  rows={[
+    { label: 'Co stojí rok čekání', segments: [
+      { label: 'Nájem', value: 204000 },
+      { label: 'Zdražení bytu', value: 225000 },
+    ] },
+    { label: 'Co ušetříte', accent: true, segments: [{ label: 'Nižší splátka', value: 22700 }] },
+  ]}
+/>
+
+<GrafVyber
+  title="Z čeho kdo vybírá"
+  rows={[
+    { label: 'Bankéř', text: 'Produkty jedné banky.', picked: 1 },
+    { label: 'Poradce', text: '…', picked: 12, accent: true },
+  ]}
+/>
+```
+
+Komponentu vždy na samostatný řádek s prázdným řádkem před i za
+(jinak MDX ohlásí chybu „Could not parse expression“).
+
+## Obrázek pro sdílení
+
+Každý článek má vlastní obrázek s nadpisem (`public/og/<soubor>.png`).
+Po přidání článku nebo změně nadpisu: běžící `npm run dev` + `npm run og`
+(jen jeden: `ONLY=<soubor> npm run og`). Předloha: `src/pages/og/[slug].astro`
+(jen při vývoji). Bez obrázku se použije výchozí `og-image.png`.
+
 ## Kontrola před zveřejněním
 
 1. Čísla a pravidla (státní příspěvky, limity ČNB, daně) ověřit k datu vydání.
@@ -92,5 +135,4 @@ Text upozornění.
 
 ## Ještě k doplnění
 
-- obrázek pro sdílení s nadpisem článku (zatím společný `og-image.png`),
-- grafy v barvách webu (komponenta), až budou data k prvním článkům.
+- fotky z praxe do článků (po focení).

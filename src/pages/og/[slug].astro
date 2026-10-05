@@ -1,0 +1,163 @@
+---
+/**
+ * Předloha obrázku pro sdílení článku (1200 × 630) — existuje JEN při vývoji
+ * (`npm run dev`), do buildu se nedostane. Skript `npm run og`
+ * (scripts/generate-og.mjs) ji vyfotí a uloží do public/og/<soubor>.png;
+ * detail článku pak ten obrázek použije jako og:image.
+ * Styl navazuje na výchozí public/og-image.png: tmavé pozadí jako tmavé
+ * pásy webu, linka vlevo, logo PG, Manrope.
+ */
+import '../../styles/tokens.css';
+import '../../styles/fonts.css';
+import { getCollection } from 'astro:content';
+import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  const articles = await getCollection('clanky');
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article } }));
+}
+
+interface Props {
+  article: CollectionEntry<'clanky'>;
+}
+const { article } = Astro.props;
+const { title, category } = article.data;
+const titleSize = title.length > 58 ? 60 : title.length > 44 ? 66 : 74;
+---
+
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>OG — {title}</title>
+  </head>
+  <body>
+    <div class="og" data-og>
+      <svg class="og__route" viewBox="0 0 1200 630" aria-hidden="true">
+        <path d="M 60 0 V 630" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="2" />
+        <path d="M 60 204 H 92" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="2" />
+        <circle cx="92" cy="204" r="7" fill="var(--emerald)" />
+      </svg>
+
+      <header class="og__brand">
+        <svg class="og__logo" viewBox="133 122 1729 1537" aria-hidden="true">
+          <g fill="none" stroke="#FFFFFF" stroke-width="112" stroke-linejoin="round">
+            <path d="M133 178H1100A150 150 0 0 1 1250 328V460A150 150 0 0 1 1100 610H347A150 150 0 0 0 197 760V1530" />
+            <path d="M1545 833H725A150 150 0 0 0 575 983V1453A150 150 0 0 0 725 1603H1558A150 150 0 0 0 1708 1453V1310A150 150 0 0 0 1558 1160H1278" />
+          </g>
+          <circle cx="1742" cy="833" r="120" fill="#1E7A5C" />
+        </svg>
+        <span>Patrik Gajdadzis</span>
+      </header>
+
+      <main class="og__main">
+        <p class="og__category">{czechNbsp(category)}</p>
+        <h1 class="og__title" style={`font-size:${titleSize}px`}>{czechNbsp(title)}</h1>
+      </main>
+
+      <footer class="og__footer">
+        <span>Finanční poradce&nbsp;· Ostrava</span>
+        <span class="og__url">patrikgajdadzis.cz</span>
+      </footer>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--navy);
+  }
+
+  .og {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 1200px;
+    height: 630px;
+    padding: 64px 96px 60px 120px;
+    overflow: hidden;
+    font-family: var(--font-sans);
+    background: linear-gradient(160deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+    color: var(--white);
+  }
+
+  .og::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(44% 60% at 82% 18%, rgba(46, 152, 115, .16) 0%, rgba(46, 152, 115, 0) 74%);
+  }
+
+  .og__route {
+    position: absolute;
+    inset: 0;
+    width: 1200px;
+    height: 630px;
+  }
+
+  .og__brand {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .og__logo {
+    width: 54px;
+    height: 48px;
+  }
+
+  .og__main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-top: 76px;
+  }
+
+  .og__category {
+    margin: 0;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 32px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--emerald-light);
+  }
+
+  .og__title {
+    margin: 0;
+    max-width: 960px;
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -.04em;
+    text-wrap: balance;
+  }
+
+  .og__footer {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: auto;
+    font-weight: 500;
+    font-size: 24px;
+    color: rgba(255, 255, 255, .66);
+  }
+
+  .og__url {
+    font-weight: 600;
+    color: var(--white);
+  }
+</style>

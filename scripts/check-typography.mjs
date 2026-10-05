@@ -42,7 +42,8 @@ const RULES = [
     // letopočet („v roce 2020 jsem"), následuje předložka („4 k měření")
     // nebo další článek právního odkazu („čl. 6 odst. 1").
     name: 'číslo odtržené od slova',
-    source: `(?<![\\p{L}\\d/])(?!(?:19|20)\\d\\d${W})\\d[\\d+%]*(?:[,.]\\d+)*\\.?${W}(?!(?:${PREPOSITIONS}|odst\\.|písm\\.)[\\s\\u00a0])(?=[\\p{L}%€])`,
+    // Rok (i s tečkou na konci věty, „v roce 2026. Další…") se nehlásí.
+    source: `(?<![\\p{L}\\d/])(?!(?:19|20)\\d\\d\\.?${W})\\d[\\d+%]*(?:[,.]\\d+)*\\.?${W}(?!(?:${PREPOSITIONS}|odst\\.|písm\\.)[\\s\\u00a0])(?=[\\p{L}%€])`,
     flags: 'gu',
   },
   {

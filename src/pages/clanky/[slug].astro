@@ -27,7 +27,12 @@ import Upozorneni from '../../components/article/Upozorneni.astro';
 import Checklist from '../../components/article/Checklist.astro';
 import Priklad from '../../components/article/Priklad.astro';
 import CheckupOdkaz from '../../components/article/CheckupOdkaz.astro';
+import GrafVypadek from '../../components/article/GrafVypadek.astro';
+import GrafPorovnani from '../../components/article/GrafPorovnani.astro';
+import GrafVyber from '../../components/article/GrafVyber.astro';
 import { Image } from 'astro:assets';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { render } from 'astro:content';
 import personPhoto from '../../assets/photos/patrik-pristup-pece.png';
 import { BOOKING_URL, PERSON_ID, SITE_URL, breadcrumbList, faqPage } from '../../data/entity';
@@ -56,6 +61,9 @@ const { data } = article;
 const { Content, headings } = await render(article);
 const related = await getRelated(article);
 const minutes = readingMinutes(article);
+// Obrázek pro sdílení s nadpisem článku (public/og/<soubor>.png, `npm run og`);
+// dokud není vygenerovaný, platí výchozí /og-image.png.
+const ogImage = existsSync(join(process.cwd(), 'public', 'og', `${article.id}.png`)) ? `/og/${article.id}.png` : undefined;
 const service = SERVICE_BY_TOPIC[data.category];
 const path = articleHref(article);
 const url = `${SITE_URL}${path}`;
@@ -79,7 +87,7 @@ const jsonLd: Record<string, unknown>[] = [
     mainEntityOfPage: url,
     articleSection: data.category,
     inLanguage: 'cs-CZ',
-    image: `${SITE_URL}/og-image.png`,
+    image: `${SITE_URL}${ogImage ?? '/og-image.png'}`,
   },
   breadcrumbList([
     { name: 'Domů', path: '/' },
@@ -97,7 +105,7 @@ const share = [
   { label: 'E-mail', href: `mailto:?subject=${shareText}&body=${shareUrl}` },
 ];
 
-const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
+const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVypadek, GrafPorovnani, GrafVyber };
 ---
 
 <BaseLayout
@@ -105,6 +113,8 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
   description={data.description}
   robots={data.draft ? 'noindex, nofollow' : 'index, follow'}
   ogType="article"
+  ogImage={ogImage}
+  ogImageAlt={data.title}
   jsonLd={jsonLd}
 >
   <Header />

@@ -11,7 +11,8 @@
     "check:layout": "node scripts/audit-layout.mjs",
     "check:typo": "node scripts/check-typography.mjs",
     "check:dots": "node scripts/check-dots.mjs",
-    "check:spacing": "node scripts/check-spacing.mjs"
+    "check:spacing": "node scripts/check-spacing.mjs",
+    "og": "node scripts/generate-og.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
