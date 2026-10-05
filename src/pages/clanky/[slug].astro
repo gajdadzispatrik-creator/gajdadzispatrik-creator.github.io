@@ -224,11 +224,11 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
             <div class="art-author__text">
               <p class="art-author__name">Patrik Gajdadzis</p>
               <p class="art-author__role">Finanční poradce, Ostrava</p>
-              <p class="art-author__proof">
-                <span class="art-nowrap"><span class="art-author__star" aria-hidden="true">★</span> 5,0 na&nbsp;Google&nbsp;·</span>{' '}
-                <span class="art-nowrap">150+ osobních klientů</span>
-              </p>
             </div>
+            <p class="art-author__proof">
+              <span class="art-nowrap"><span class="art-author__star" aria-hidden="true">★</span> 5,0 na&nbsp;Google&nbsp;·</span>{' '}
+              <span class="art-nowrap">150+ osobních klientů</span>
+            </p>
             <p class="art-author__bio">
               Pomáhám lidem dát finance do&nbsp;souvislostí: bydlení, ochranu, investice i&nbsp;penzi v&nbsp;jednom plánu. Píšu
               o&nbsp;tom, co u&nbsp;klientů vidím nejčastěji.
@@ -1015,20 +1015,28 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
     color: var(--text-muted);
   }
 
+  /* Autor = stejný blok jako kontakt u formuláře (ContactSection,
+     .kontakt__person): mobil fotka 64 | jméno + role, hodnocení na celou
+     šířku pod nimi; od tabletu fotka 72 přes dva řádky a hodnocení vedle ní
+     pod textem; od notebooku fotka 88. */
   .art-author {
     display: grid;
     grid-template-columns: 64px minmax(0, 1fr);
     column-gap: 16px;
-    row-gap: 16px;
+    row-gap: 12px;
     align-items: center;
   }
 
   .art-author__avatar {
+    grid-column: 1;
+    grid-row: 1;
     width: 64px;
     height: 64px;
   }
 
   .art-author__text {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1039,20 +1047,25 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
   }
 
   .art-author__name {
-    font-weight: 700;
-    font-size: 18px;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.4;
     color: var(--navy);
   }
 
   .art-author__role {
     font-size: 16px;
+    line-height: 1.5;
     color: var(--text-muted);
   }
 
   .art-author__proof {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--navy);
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-quiet);
   }
 
   .art-author__star {
@@ -1061,7 +1074,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
 
   .art-author__bio {
     grid-column: 1 / -1;
-    margin: 0;
+    margin: 4px 0 0;
     font-size: 17px;
     line-height: 1.65;
     color: var(--text);
@@ -1320,13 +1333,31 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
     }
 
     .art-author {
-      grid-template-columns: 88px minmax(0, 1fr);
-      column-gap: 20px;
+      grid-template-columns: 72px minmax(0, 1fr);
+      row-gap: 2px;
     }
 
     .art-author__avatar {
-      width: 88px;
-      height: 88px;
+      grid-row: 1 / span 2;
+      width: 72px;
+      height: 72px;
+    }
+
+    .art-author__text {
+      align-self: end;
+    }
+
+    .art-author__proof {
+      grid-column: 2;
+      align-self: start;
+    }
+
+    .art-author__bio {
+      margin-top: 18px;
+    }
+
+    .art-author .art-text-link {
+      margin-top: 10px;
     }
 
     .art-related h2 {
@@ -1383,6 +1414,19 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
 
     .art-meta {
       margin-top: 32px;
+    }
+
+    .art-author {
+      grid-template-columns: 88px minmax(0, 1fr);
+    }
+
+    .art-author__avatar {
+      width: 88px;
+      height: 88px;
+    }
+
+    .art-author__name {
+      font-size: 17px;
     }
 
     /* Text od popisku u tečky: osa 96 + zářez 36 + mezera 20 = 152 px. */
