@@ -55,7 +55,19 @@ export default function rehypeCzechNbsp() {
       node.value = czechNbsp(node.value);
       return;
     }
-    if (Array.isArray(node.children)) node.children.forEach(walk);
+    const isWrap = node.type === 'element' && node.properties?.className?.includes?.('table-scroll');
+    if (Array.isArray(node.children) && !isWrap) {
+      // Tabulka do posuvného obalu — na úzkém telefonu se posune do strany,
+      // místo aby přetekla mimo stránku.
+      node.children = node.children.map((child) =>
+        child.type === 'element' && child.tagName === 'table'
+          ? { type: 'element', tagName: 'div', properties: { className: ['table-scroll'] }, children: [child] }
+          : child,
+      );
+      node.children.forEach(walk);
+    } else if (Array.isArray(node.children)) {
+      node.children.forEach(walk);
+    }
   };
   return (tree) => walk(tree);
 }

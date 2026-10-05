@@ -77,9 +77,13 @@ export function formatDate(date: Date): string {
     .replace(/ /g, ' ');
 }
 
-/** Související: ručně vybrané, pak stejné téma, pak nejnovější (max. `count`). */
+/**
+ * Související: ručně vybrané, pak stejné téma, pak nejnovější (max. `count`).
+ * Z článků, které se sestaví — na náhledu i koncepty (ať jde projít
+ * propojení), na webu jen zveřejněné.
+ */
 export async function getRelated(article: Article, count = 2): Promise<Article[]> {
-  const published = (await getPublishedArticles()).filter((a) => a.id !== article.id);
+  const published = (await getBuildableArticles()).filter((a) => a.id !== article.id);
   const picked: Article[] = [];
   const add = (a: Article | undefined) => {
     if (a && !picked.includes(a) && picked.length < count) picked.push(a);
