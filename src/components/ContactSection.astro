@@ -1191,12 +1191,16 @@ const bandDetails = [
       max-width: none;
     }
 
+    /* Tablet: fotka 72 px = výška tří řádků textu vedle ní. */
     .kontakt__person {
+      grid-template-columns: 72px minmax(0, 1fr);
       row-gap: 2px;
     }
 
     .kontakt__avatar {
       grid-row: 1 / span 2;
+      width: 72px;
+      height: 72px;
     }
 
     .kontakt__person-text {
