@@ -677,6 +677,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     object-fit: cover;
     object-position: 50% 0;
     transform: translateY(9%) scale(1.25);
+    transform-origin: 50% 0;
   }
 
   .art-meta__text {
@@ -1363,8 +1364,11 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
       padding: 80px 40px 88px;
     }
 
+    /* Nájezd linky je na tabletu v 90 % šířky — text končí 32 px před ní
+       (90 % obsahové šířky = 0,9 × šířka − 32 px při paddingu 40 px). */
     .art-hero__text {
       padding-right: 0;
+      max-width: min(820px, 90%);
     }
 
     .art-hero h1 {
