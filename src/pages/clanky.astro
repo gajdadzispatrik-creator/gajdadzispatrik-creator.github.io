@@ -706,6 +706,11 @@ const ARTICLES_PAGE_SIZE = 6;
         if (emptyFiltered) (emptyFiltered as HTMLElement).hidden = visibleCount > 0;
       });
     });
+
+    // Odkaz s předvybraným tématem (témata v sekci Články na homepage):
+    // /clanky?tema=Pojištění#clanky-vypis
+    const preset = new URLSearchParams(location.search).get('tema');
+    if (preset) buttons.find((b) => b.dataset.topic === preset)?.click();
   }
 
   const resetFilterBtn = document.querySelector('[data-reset-filter]');
@@ -1047,6 +1052,8 @@ const ARTICLES_PAGE_SIZE = 6;
     display: flex;
     flex-direction: column;
     gap: 32px;
+    /* Skok z odkazu #clanky-vypis (témata na homepage) — pod sticky hlavičku. */
+    scroll-margin-top: 112px;
   }
 
   /* --- Filtr témat --- */

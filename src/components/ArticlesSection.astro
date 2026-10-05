@@ -29,7 +29,7 @@
  * https://www.hypotekaostrava.cz/ je reálný, funkční web projektu, na kterém
  * Patrik Gajdadzis vystupuje jako ředitel/hypoteční specialista.
  */
-import { articleHref, getPublishedArticles } from '../data/articles';
+import { articleHref, getPublishedArticles, readingMinutes } from '../data/articles';
 import { czechNbsp } from '../lib/rehype-czech-nbsp.mjs';
 
 interface Article {
@@ -37,6 +37,7 @@ interface Article {
   title: string | null;
   excerpt: string | null;
   href: string | null;
+  minutes?: number;
   lineWidths: number[];
 }
 
@@ -48,16 +49,26 @@ const placeholders: Article[] = [
 
 // Tři nejnovější zveřejněné články (src/content/clanky, 5. 10. 2026);
 // prázdná místa doplní zástupné řádky, dokud nejsou tři.
-const published: Article[] = (await getPublishedArticles()).slice(0, 3).map((a) => ({
+const allPublished = await getPublishedArticles();
+const published: Article[] = allPublished.slice(0, 3).map((a) => ({
   category: czechNbsp(a.data.category),
   title: czechNbsp(a.data.title),
   excerpt: czechNbsp(a.data.description),
   href: articleHref(a),
+  minutes: readingMinutes(a),
   lineWidths: [],
 }));
 const articles: Article[] = [...published, ...placeholders.slice(published.length)];
 
-const topics = ['Hypotéky a bydlení', 'Finanční plánování', 'Investice', 'Pojištění', 'Penze'];
+// Témata vpravo nahoře: jen ta, ke kterým už je článek, jako odkaz na
+// /clanky s předvybraným filtrem. Bez článků celá taxonomie jako prostý text.
+const allTopics = ['Hypotéky a bydlení', 'Finanční plánování', 'Investice', 'Pojištění', 'Penze'];
+const plain = (s: string) => s.replace(/\u00A0/g, ' ');
+const usedTopics = allTopics.filter((t) => allPublished.some((a) => plain(a.data.category) === plain(t)));
+const topics = (usedTopics.length ? usedTopics : allTopics).map((t) => ({
+  label: czechNbsp(t),
+  href: usedTopics.length ? `/clanky?tema=${encodeURIComponent(plain(t))}#clanky-vypis` : null,
+}));
 
 const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
 ---
@@ -76,7 +87,7 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
         <p class="articles__topics-label">Témata</p>
         <ul class="articles__topics-list">
           {topics.map((topic) => (
-            <li>{topic}</li>
+            <li>{topic.href ? <a class="articles__topic-link" href={topic.href}>{topic.label}</a> : topic.label}</li>
           ))}
         </ul>
       </div>
@@ -85,7 +96,10 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     <ul class="articles__list">
       {articles.map((article, i) => (
         <li class={`articles__item articles__reveal-item${i === 2 ? ' articles__item--off-shelf' : ''}`}>
-          <p class="articles__category">{article.category}</p>
+          <p class="articles__category">
+            {article.category}
+            {article.minutes && <span class="articles__minutes">&nbsp;· {article.minutes}&nbsp;min čtení</span>}
+          </p>
           {article.title ? (
             <>
               <h3 class="articles__title"><a href={article.href ?? '#'}>{article.title}</a></h3>
@@ -645,10 +659,36 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     list-style: none;
   }
 
+  /* Celý článek klikací (odkaz nadpisu roztažený přes blok), při najetí
+     zezelená nadpis (5. 10. 2026). */
   .articles__item {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .articles__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .articles__item:hover .articles__title a {
+    color: var(--emerald-hover);
+  }
+
+  .articles__minutes {
+    color: var(--text-quiet);
+  }
+
+  .articles__topic-link {
+    color: inherit;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .articles__topic-link:hover {
+    color: var(--emerald);
   }
 
   .articles__category {
@@ -685,7 +725,14 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     outline-offset: 3px;
   }
 
+  /* Perex max. 3 řádky — články na polici stejně vysoké, horní hrany v řadě.
+     Celý perex je v článku a na /clanky. */
   .articles__excerpt {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
     margin: 0;
     font-size: 15px;
     line-height: 1.55;
