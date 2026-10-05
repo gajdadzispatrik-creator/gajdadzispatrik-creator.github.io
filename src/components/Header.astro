@@ -11,12 +11,26 @@ const navLinks = [
   <div class="site-header__inner">
     <!-- Přístupný název musí obsahovat viditelný text loga (WCAG 2.5.3 Label in Name). -->
     <a class="brand" href="/" aria-label="PG Patrik Gajdadzis, domů">
-      <svg class="brand__mark" viewBox="133 122 1729 1537" aria-hidden="true" focusable="false">
-        <g fill="none" stroke="currentColor" stroke-width="112" stroke-linejoin="round">
-          <path d="M133 178H1100A150 150 0 0 1 1250 328V460A150 150 0 0 1 1100 610H347A150 150 0 0 0 197 760V1530" />
-          <path d="M1545 833H725A150 150 0 0 0 575 983V1453A150 150 0 0 0 725 1603H1558A150 150 0 0 0 1708 1453V1310A150 150 0 0 0 1558 1160H1278" />
+      {/*
+        Logo PG překreslené na pixelovou mřížku své velikosti (5. 10. 2026) —
+        zmenšená původní kresba (src/assets/brand/pg-monogram.svg) dávala čáry
+        2,6 px mezi pixely, logo bylo na běžných monitorech rozmazané. Každá
+        varianta má viewBox = skutečné px, čáry celé px (2 / 3) se středem tak,
+        aby hrany ležely na celých pixelech. Tvar = původní monogram.
+      */}
+      <svg class="brand__mark brand__mark--sm" width="32" height="28" viewBox="0 0 32 28" aria-hidden="true" focusable="false">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+          <path d="M0 1H18A3 3 0 0 1 21 4V6A3 3 0 0 1 18 9H4A3 3 0 0 0 1 12V26" />
+          <path d="M26 13H11A3 3 0 0 0 8 16V24A3 3 0 0 0 11 27H26A3 3 0 0 0 29 24V22A3 3 0 0 0 26 19H21" />
         </g>
-        <circle cx="1742" cy="833" r="120" fill="var(--emerald)" />
+        <circle cx="29.75" cy="13" r="2.25" fill="var(--emerald)" />
+      </svg>
+      <svg class="brand__mark brand__mark--lg" width="40" height="36" viewBox="0 0 40 36" aria-hidden="true" focusable="false">
+        <g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round">
+          <path d="M0 1.5H22A3.5 3.5 0 0 1 25.5 5V8A3.5 3.5 0 0 1 22 11.5H5A3.5 3.5 0 0 0 1.5 15V33" />
+          <path d="M32.7 16.5H14A3.5 3.5 0 0 0 10.5 20V31A3.5 3.5 0 0 0 14 34.5H33A3.5 3.5 0 0 0 36.5 31V28A3.5 3.5 0 0 0 33 24.5H26.5" />
+        </g>
+        <circle cx="37.25" cy="16.5" r="2.75" fill="var(--emerald)" />
       </svg>
       <span class="brand__divider" aria-hidden="true"></span>
       <span class="brand__word">Patrik Gajdadzis</span>
@@ -106,6 +120,23 @@ const navLinks = [
       }
     });
   }
+
+  // Logo na celý pixel: tablet odsazuje záhlaví procentem (logo, nadpis hero
+  // a linka na jedné svislé), levá hrana loga tak padá mezi pixely a kresba
+  // se rozmaže. Posun ≤ 0,5 px na nejbližší celý pixel — zarovnání nepozná.
+  const marks = document.querySelectorAll<SVGSVGElement>('.brand__mark');
+  const snapMarks = () => {
+    marks.forEach((mark) => {
+      mark.style.translate = '';
+      const { left, top } = mark.getBoundingClientRect();
+      if (!left && !top) return;
+      const dx = Math.round(left) - left;
+      const dy = Math.round(top) - top;
+      if (dx || dy) mark.style.translate = `${dx}px ${dy}px`;
+    });
+  };
+  snapMarks();
+  window.addEventListener('resize', snapMarks);
 </script>
 
 <style>
@@ -138,6 +169,10 @@ const navLinks = [
     width: 32px;
     height: 28px;
     color: var(--navy);
+  }
+
+  .brand__mark--lg {
+    display: none;
   }
 
   .brand__divider {
@@ -276,7 +311,12 @@ const navLinks = [
       padding-inline: clamp(96px, calc(96px + 0.324324 * (100vw - 1366px)), 120px);
     }
 
-    .brand__mark {
+    .brand__mark--sm {
+      display: none;
+    }
+
+    .brand__mark--lg {
+      display: block;
       width: 40px;
       height: 36px;
     }
