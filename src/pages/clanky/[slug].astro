@@ -901,6 +901,14 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
     margin: 0;
   }
 
+  /* Zdroje čísel pod článkem: <p class="art-sources">…</p> v MDX. */
+  .art-prose > :global(.art-sources) {
+    margin-top: 32px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-quiet);
+  }
+
   /* Obal tabulky (rehype-czech-nbsp.mjs): na úzkém telefonu se posouvá do
      strany, stránka nepřeteče. */
   .art-prose :global(.table-scroll) {
