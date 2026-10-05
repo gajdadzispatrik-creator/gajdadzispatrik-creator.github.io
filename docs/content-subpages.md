@@ -3654,11 +3654,15 @@ Hero záměrně neobsahuje: rok začátku praxe, délku zkušeností, provozní
 
 `Začal jsem se proto o finance zajímat nejdřív sám pro sebe.`
 
-`Jeden můj známý tehdy pracoval jako ředitel v poradenské společnosti. Ozval jsem se mu a domluvili jsme se, že za ním budu po práci chodit a učit se, jak finance a finanční poradenství fungují v praxi.`
+`Jeden můj známý tehdy pracoval jako ředitel v poradenské společnosti. Ozval jsem se mu a domluvili jsme se, že za ním budu po práci chodit a učit se, jak finance a poradenství fungují v praxi. Bavilo mě to a šlo mi to. Rychle jsem začal chápat souvislosti mezi hypotékou, pojištěním, investicemi a tím, jak to celé ovlivňuje život člověka.`
 
-`Po pár týdnech se mě zeptal, jestli bych se tím nechtěl začít živit. Bavilo mě to, připadalo mi to zajímavé a dávalo mi smysl pomáhat lidem řešit podobné otázky, které jsem předtím začal řešit sám.`
+`Po pár týdnech se mě zeptal, jestli bych se tím nechtěl začít živit. Rozhodl jsem se začít ve finančním poradenství podnikat. Začátky nebyly jednoduché. Je to podnikání a práce s lidmi a důvěru si musíte zasloužit.`
 
-`Rozhodl jsem se proto začít ve finančním poradenství podnikat a dál se v oboru vzdělávat.`
+`Brzy jsem ale viděl, jak to v oboru často vypadá. Pod ruku mi chodí spousta smluv, které lidem sjednal bankéř, pojišťovák nebo jiný poradce, a většina z nich je nastavená špatně. Lidé za ně platí a v nejhorší chvíli by jim nepomohly. Právě proto dělám věci jinak.`
+
+`A učím se dál. Pravidelně chodíme na školení bank, pojišťoven a dalších institucí, abychom věděli o novinkách a o tom, kam se finanční trh vyvíjí. Díky spolupráci s nimi můžu klientům nabídnout slevy a výhody, ke kterým by se sami nedostali.`
+
+*(Přepsáno 5. 10. 2026 podle uživatele, úkol A5.)*
 
 **Výrazný statement**
 `Nejdřív jsem chtěl pochopit, co dělat s vlastními penězi. Dnes radím ostatním to, co sám dělám.`
