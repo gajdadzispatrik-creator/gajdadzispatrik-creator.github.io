@@ -45,12 +45,12 @@ Z = základ máte · O = vyplatí se podívat · N = netýká se (oblast se neuk
 | Rezerva | Rezervu máte. | Rezerva vás dlouho nepodrží. |
 | Příjem | Máte pojištění, ověřte částky a cenu. | Půl roku bez příjmu byste nepokryli. |
 | Rodina | Rodina je pojištěná, ověřte částky a cenu. | Rodina by bez vás dlouho nevydržela. / *(Netuším)* Nevíte, jak dlouho by rodina vydržela. |
-| Majetek | Pojistka odpovídá dnešní ceně. | Pojistka nemusí stačit na obnovu. |
+| Majetek | Pojistka odpovídá ceně, ověřte podmínky. | Pojistka nemusí stačit na obnovu. |
 | Bydlení | Bydlíte ve vlastním. / Víte, na kolik dosáhnete. | Nevíte, na kolik dosáhnete. |
-| Auto | Auto máte pojištěné. / *(Počítám s tím)* Víte, co povinné ručení nekryje. | Při vlastní nehodě platíte auto sami. / *(Netuším)* Nevíte, co vám pojištění kryje. |
-| Penze | Víte, s čím počítat. | Nevíte, kolik budete mít v důchodu. |
-| Investice | Úspory vám vydělávají víc než inflace. | *(Netuším)* Nevíte, jestli vaše úspory neztrácejí hodnotu. / *(Leží na účtu)* Úspory na účtu ztrácejí hodnotu. / *(Nic)* Nic si neodkládáte. |
-| Děti | Dětem spoříte. | Na start dětí nemáte plán. |
+| Auto | Auto máte pojištěné, ověřte podmínky a cenu. / *(Počítám s tím)* Víte, co povinné ručení nekryje. | Při vlastní nehodě platíte auto sami. / *(Netuším)* Nevíte, co vám pojištění kryje. |
+| Penze | Víte, s čím počítat, ověřte nastavení spoření. | Nevíte, kolik budete mít v důchodu. |
+| Investice | Vydělávají víc než inflace, ověřte strategii, riziko a poplatky. | *(Netuším)* Nevíte, jestli vaše úspory neztrácejí hodnotu. / *(Leží na účtu)* Úspory na účtu ztrácejí hodnotu. / *(Nic)* Nic si neodkládáte. |
+| Děti | Dětem spoříte, ověřte nástroj a nastavení. | Na start dětí nemáte plán. |
 
 ## Rámeček „Tady bych začal"
 
@@ -100,3 +100,8 @@ Skóre: „X z N oblastí, kde máte základ" (N = oblasti, které se klienta t�
 
 Události: začátek check-upu, dokončení, odeslání výsledku, klik na rezervaci
 (z panelu výsledku). Podle čísel ladit otázky (kde lidé odpadají).
+
+- 5. 10. 2026: zelená = „téma řešíte", ne „je to správně" (Patrik: spoření,
+  investice i pojištění mají lidé často špatně nastavené). Proto každá zelená
+  věta u produktu končí krátkým „ověřte…" (děti, investice, penze, majetek,
+  auto s havarijním; příjem a rodina „ověřte částky a cenu").
