@@ -3661,7 +3661,8 @@ Hero záměrně neobsahuje: rok začátku praxe, délku zkušeností, provozní
 `Rozhodl jsem se proto začít ve finančním poradenství podnikat a dál se v oboru vzdělávat.`
 
 **Výrazný statement**
-`Nejdřív jsem chtěl pochopit, co dělat s vlastními penězi. Nakonec se z toho stala moje práce.`
+`Nejdřív jsem chtěl pochopit, co dělat s vlastními penězi. Dnes radím ostatním to, co sám dělám.`
+*(5. 10. 2026, schváleno uživatelem — dřív „Nakonec se z toho stala moje práce.“)*
 
 Bez roku zahájení praxe.
 
