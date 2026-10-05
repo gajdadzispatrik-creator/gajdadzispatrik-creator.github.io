@@ -1,28 +1,52 @@
 ---
 /**
- * OPRAVA (úkol „Předspouštěcí P0 technické dotažení“): třetí položka
+ * Historie: OPRAVA (úkol „Předspouštěcí P0 technické dotažení“): třetí položka
  * (`Od 2020` / „Ve financích“) byla na výslovné přání uživatele odstraněna
  * — na veřejném webu se nemá uvádět rok zahájení finanční praxe. Nenahrazeno
  * žádnou vymyšlenou statistikou. `stats-band__list`/`stats-band__item` je
  * plynulý flex layout (`flex:1` na položce), dva prvky ho beze změny
  * rovnoměrně rozdělí — žádná další úprava layoutu nebyla potřeba.
  */
-const stats = [
-  { number: '150+', label: 'osobních klientů' },
-  { number: '5,0', label: 'Google recenze' },
+/*
+ * 5. 10. 2026 (přání uživatele): pás odpovídá na otázky klienta — dá se mu
+ * věřit, kolik to stojí, kolik času to zabere. Bez počtu recenzí (mění se).
+ * „Zdarma" = celá služba, ne jen úvodní konzultace (viz FAQ „Kolik stojí
+ * spolupráce se mnou?"). Hodnocení vede na /recenze.
+ */
+interface Stat {
+  number: string;
+  star?: boolean;
+  /** Slovo místo čísla — menší písmo, aby nebylo opticky větší než „5,0". */
+  word?: boolean;
+  label: string;
+  href?: string;
+}
+
+const stats: Stat[] = [
+  { number: '5,0', star: true, label: 'hodnocení na Google', href: '/recenze' },
+  { number: 'Zdarma', word: true, label: 'služba bez poplatků' },
+  { number: '30 minut', word: true, label: 'úvodní konzultace' },
 ];
 ---
 
 <section class="stats-band" aria-label="Klíčové údaje">
   <ul class="stats-band__list">
-    {stats.map((stat) => (
-      <li class="stats-band__item">
-        <span class="stats-band__number">
-          {stat.number}
-        </span>
-        <span class="stats-band__label">{stat.label}</span>
-      </li>
-    ))}
+    {stats.map((stat) => {
+      const inner = (
+        <>
+          <span class={stat.word ? 'stats-band__number stats-band__number--word' : 'stats-band__number'}>
+            {stat.number}
+            {stat.star && <span class="stats-band__star" aria-hidden="true">★</span>}
+          </span>
+          <span class="stats-band__label">{stat.label}</span>
+        </>
+      );
+      return (
+        <li class="stats-band__item">
+          {stat.href ? <a class="stats-band__link" href={stat.href}>{inner}</a> : <div class="stats-band__link">{inner}</div>}
+        </li>
+      );
+    })}
   </ul>
 </section>
 
@@ -39,7 +63,8 @@ const stats = [
     flex-direction: column;
   }
 
-  .stats-band__item {
+  /* Mobil: položky pod sebou (původní vzhled). */
+  .stats-band__link {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -49,13 +74,43 @@ const stats = [
     text-align: center;
   }
 
+  a.stats-band__link {
+    transition: opacity var(--duration-hover) var(--ease-out);
+  }
+
+  a.stats-band__link:hover .stats-band__label {
+    color: var(--white);
+  }
+
+  a.stats-band__link:focus-visible {
+    outline: 2px solid var(--emerald-light);
+    outline-offset: -6px;
+  }
+
+  .stats-band__star {
+    margin-left: .12em;
+    font-size: .62em;
+    vertical-align: .32em;
+    color: var(--emerald-light);
+  }
+
   .stats-band__number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
     font-weight: 700;
     letter-spacing: -.04em;
     line-height: 1;
     font-variant-numeric: tabular-nums;
     color: var(--white);
     font-size: 26px;
+    white-space: nowrap;
+  }
+
+  .stats-band__number--word {
+    font-size: 20px;
+    letter-spacing: -.03em;
   }
 
   .stats-band__label {
@@ -65,6 +120,7 @@ const stats = [
     line-height: 1;
     color: rgba(255, 255, 255, .62);
     font-size: 11.5px;
+    transition: color var(--duration-hover) var(--ease-out);
   }
 
   @media (min-width: 768px) {
@@ -79,11 +135,19 @@ const stats = [
 
     .stats-band__item {
       flex: 1;
+    }
+
+    .stats-band__link {
       height: 100px;
     }
 
     .stats-band__number {
+      height: 28px;
       font-size: 28px;
+    }
+
+    .stats-band__number--word {
+      font-size: 22px;
     }
 
     .stats-band__label {
@@ -97,12 +161,17 @@ const stats = [
       padding-inline: 96px;
     }
 
-    .stats-band__item {
+    .stats-band__link {
       height: 96px;
     }
 
     .stats-band__number {
+      height: 32px;
       font-size: 32px;
+    }
+
+    .stats-band__number--word {
+      font-size: 25px;
     }
 
     .stats-band__label {
@@ -133,7 +202,12 @@ const stats = [
     }
 
     .stats-band__number {
+      height: 34px;
       font-size: 34px;
+    }
+
+    .stats-band__number--word {
+      font-size: 26px;
     }
   }
 </style>
