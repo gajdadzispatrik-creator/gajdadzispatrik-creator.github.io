@@ -98,7 +98,7 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
         <li class={`articles__item articles__reveal-item${i === 2 ? ' articles__item--off-shelf' : ''}`}>
           <p class="articles__category">
             {article.category}
-            {article.minutes && <span class="articles__minutes">&nbsp;· {article.minutes}&nbsp;min čtení</span>}
+            {article.minutes && <span class="articles__minutes"><span class="articles__sep">&nbsp;·</span> {article.minutes}&nbsp;min čtení</span>}
           </p>
           {article.title ? (
             <>
@@ -232,13 +232,12 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
       zrušena 28. 9. 2026: třetí článek ve skutečném rozvržení stojí na polici
       ve 2. sloupci pod druhým, linka police vede pod ním — odbočka pak mířila
       zespodu nahoru a tečka končila uprostřed článku přes jeho řádky.
-      Třetí tečka zůstává (JS podle ní odhaluje třetí článek); sedí na polici
-      ve stejném sloupci jako druhá — skrytá (visibility), jinak by se dvě
-      poloprůhledné tečky přes sebe sečetly do tmavší (4. 10. 2026).
+      Od 5. 10. 2026 stojí všechny tři články vedle sebe na polici (jako na
+      desktopu), každý se svou tečkou — třetí tečka už není skrytá.
     -->
     <circle class="articles__dot articles__dot--lead" cx="140" cy="470" r="3.2" fill="var(--emerald)"></circle>
     <circle class="articles__dot" cx="470" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
-    <circle class="articles__dot" cx="470" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5" visibility="hidden"></circle>
+    <circle class="articles__dot" cx="700" cy="470" r="2.4" fill="var(--line)" fill-opacity=".5"></circle>
   </svg>
 
   <!--
@@ -945,36 +944,15 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
       font-size: 15px;
     }
 
+    /* Tablet (od 5. 10. 2026): všechny tři články vedle sebe na polici jako
+       na desktopu — každý má svou tečku 22 px pod sebou (CLAUDE.md „tečka na
+       vodorovném úseku"). Dřív dva sloupce a třetí článek pod nimi: tečka
+       prvního ležela ~240 px pod textem a druhý článek tečku neměl. */
     .articles__list {
       display: grid;
-      grid-template-columns: 300px 300px;
-      column-gap: 30px;
-      row-gap: 56px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 28px;
       margin: 56px 40px 0 calc(40 * 100% / 834 + 56px);
-    }
-
-    .articles__item {
-      height: 216px;
-      justify-content: flex-end;
-    }
-
-    .articles__item:nth-child(1) {
-      grid-column: 1;
-      grid-row: 1;
-    }
-
-    .articles__item:nth-child(2) {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .articles__item--off-shelf {
-      grid-column: 1 / -1;
-      grid-row: 2;
-      justify-self: end;
-      width: 300px;
-      height: auto;
-      justify-content: flex-start;
     }
 
     .articles__category {
@@ -1010,6 +988,38 @@ const hypotekaOstravaHref = 'https://www.hypotekaostrava.cz/';
     .articles__external-lead {
       display: inline;
       margin-right: 6px;
+    }
+  }
+
+  /* Jen tablet: užší sloupce (~195 px na 768) → nadpis o stupeň menší.
+     Řádky článků zarovnané napříč sloupci (subgrid): téma, nadpis i perex
+     začínají ve stejné výšce a články končí na polici stejně — jinak by se
+     při různém počtu řádků nadpisu rozjely horní hrany. Doba čtení na
+     vlastním řádku (vedle tématu by se v úzkém sloupci zalamovala). */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .articles__list {
+      grid-template-rows: auto auto auto;
+      row-gap: 12px;
+    }
+
+    .articles__item {
+      display: grid;
+      grid-row: span 3;
+      grid-template-rows: subgrid;
+      gap: 12px;
+    }
+
+    .articles__title {
+      font-size: 17px;
+    }
+
+    .articles__minutes {
+      display: block;
+      margin-top: 2px;
+    }
+
+    .articles__sep {
+      display: none;
     }
   }
 

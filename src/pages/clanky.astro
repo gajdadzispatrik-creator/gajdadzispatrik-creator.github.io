@@ -700,6 +700,7 @@ const ARTICLES_PAGE_SIZE = 6;
         items.forEach((item) => {
           const matches = !topic || item.dataset.category === topic;
           item.hidden = !matches;
+          item.classList.toggle('is-first', matches && visibleCount === 0);
           if (matches) visibleCount += 1;
         });
 
@@ -1150,11 +1151,17 @@ const ARTICLES_PAGE_SIZE = 6;
     border-top: 1px solid rgba(27, 74, 138, .14);
   }
 
-  li:first-child > .cla-article {
+  li:first-child > .cla-article,
+  .cla-article.is-first {
     border-top: none;
     padding-top: 0;
   }
 
+  /* `display: flex` výš by jinak přebil atribut `hidden` — filtr témat by
+     článek jen „označil“, ale nechal ho vidět (opraveno 5. 10. 2026). */
+  .cla-article[hidden] {
+    display: none;
+  }
   .cla-article__meta {
     display: flex;
     flex-direction: column;
