@@ -32,6 +32,7 @@ import { render } from 'astro:content';
 import personPhoto from '../../assets/photos/patrik-pristup-pece.png';
 import { BOOKING_URL, PERSON_ID, SITE_URL, breadcrumbList, faqPage } from '../../data/entity';
 import {
+  SERVICE_BY_TOPIC,
   articleHref,
   formatDate,
   getBuildableArticles,
@@ -55,6 +56,7 @@ const { data } = article;
 const { Content, headings } = await render(article);
 const related = await getRelated(article);
 const minutes = readingMinutes(article);
+const service = SERVICE_BY_TOPIC[data.category];
 const path = articleHref(article);
 const url = `${SITE_URL}${path}`;
 
@@ -189,6 +191,13 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
             )
           }
         </div>
+
+        <a class="art-service" href={service.href}>
+          <span class="art-label">Související služba</span>
+          <span class="art-service__name">{czechNbsp(service.name)}</span>
+          <span class="art-service__text">{czechNbsp(service.text)}</span>
+          <span class="art-service__more">Jak s&nbsp;tím pomáhám</span>
+        </a>
 
         <footer class="art-end">
           <div class="art-share">
@@ -961,6 +970,71 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
     margin: 0;
     font-size: 17px;
     line-height: 1.65;
+  }
+
+  /* ---------- Související služba (podle tématu článku) ---------- */
+
+  .art-service {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px 20px;
+    border-radius: var(--radius-panel);
+    background: var(--white);
+    border: 1px solid var(--rule);
+    transition: border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-service:hover {
+    border-color: var(--emerald);
+  }
+
+  .art-service__name {
+    margin-top: 6px;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.3;
+    letter-spacing: -.015em;
+    color: var(--navy);
+  }
+
+  .art-service__text {
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .art-service__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+  }
+
+  .art-service__more::after {
+    content: '→';
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .art-service:hover .art-service__more::after {
+    transform: translateX(3px);
+  }
+
+  @media (min-width: 768px) {
+    .art-service {
+      padding: 28px 32px;
+    }
+
+    .art-service__name {
+      font-size: 22px;
+    }
+
+    .art-service__text {
+      font-size: 17px;
+    }
   }
 
   /* ---------- Konec článku: sdílení + autor ---------- */

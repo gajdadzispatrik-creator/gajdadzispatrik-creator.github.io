@@ -26,6 +26,39 @@ export async function getPublishedArticles(): Promise<Article[]> {
 
 export const articleHref = (a: Article) => `/clanky/${a.id}`;
 
+/**
+ * Služba k tématu článku — odkaz pod článkem (čtenář pokračuje na stránku
+ * služby, Google vidí souvislost článek → služba). Název a věta = schválené
+ * texty detailů služeb (SERVICE_NAME / SERVICE_DESCRIPTION v src/pages/sluzby).
+ */
+export const SERVICE_BY_TOPIC: Record<Article['data']['category'], { href: string; name: string; text: string }> = {
+  'Hypotéky a bydlení': {
+    href: '/sluzby/hypoteky',
+    name: 'Hypotéky a financování bydlení',
+    text: 'Pomohu vám zjistit, na jakou nemovitost dosáhnete, vyřídit hypotéku, refinancování, výstavbu nebo rekonstrukci.',
+  },
+  'Finanční plánování': {
+    href: '/sluzby/financni-plan',
+    name: 'Finanční plánování',
+    text: 'Pomohu vám dát finance do souvislostí, určit priority a nastavit další kroky.',
+  },
+  Investice: {
+    href: '/sluzby/investice',
+    name: 'Investiční poradenství a plánování',
+    text: 'Pomohu vám nastavit nebo zkontrolovat investice podle vašich cílů, času a rizika.',
+  },
+  Pojištění: {
+    href: '/sluzby/pojisteni',
+    name: 'Pojištění příjmu, rodiny a majetku',
+    text: 'Pomohu vám nastavit nebo zkontrolovat životní a majetkové pojištění podle skutečných finančních rizik.',
+  },
+  Penze: {
+    href: '/sluzby/penze',
+    name: 'Plánování penze a důchodu',
+    text: 'Pomohu vám spočítat, jaký majetek budete potřebovat na penzi a jak ho postupně vytvářet.',
+  },
+};
+
 /** Doba čtení v minutách: text + „V kostce" + časté otázky, ~180 slov za minutu. */
 export function readingMinutes(article: Article): number {
   const { summary, faq } = article.data;

@@ -9,6 +9,8 @@ Bez diakritiky, slova oddělená pomlčkou.
 
 - stránka článku v designu webu (linka s tečkou u každého mezititulku,
   obsah článku, doba čtení, autor, sdílení, související články, tmavý závěr),
+- odkaz „Související služba“ pod článkem podle tématu (`SERVICE_BY_TOPIC`
+  v `src/data/articles.ts` — Pojištění → /sluzby/pojisteni atd.),
 - nezlomitelné mezery za předložkami, u čísel a před pomlčkou,
 - článek na `/clanky`, na homepage (3 nejnovější), v sitemap, v RSS (`/rss.xml`),
 - údaje pro Google: `BlogPosting` (autor, datum, téma), drobečková navigace,
