@@ -29,6 +29,9 @@
  * https://www.hypotekaostrava.cz/ je reálný, funkční web projektu, na kterém
  * Patrik Gajdadzis vystupuje jako ředitel/hypoteční specialista.
  */
+import { articleHref, getPublishedArticles } from '../data/articles';
+import { czechNbsp } from '../lib/rehype-czech-nbsp.mjs';
+
 interface Article {
   category: string;
   title: string | null;
@@ -37,11 +40,22 @@ interface Article {
   lineWidths: number[];
 }
 
-const articles: Article[] = [
+const placeholders: Article[] = [
   { category: 'Hypotéky a bydlení', title: null, excerpt: null, href: null, lineWidths: [100, 100, 62] },
   { category: 'Finanční plánování', title: null, excerpt: null, href: null, lineWidths: [100, 56] },
   { category: 'Investice', title: null, excerpt: null, href: null, lineWidths: [100, 100, 48] },
 ];
+
+// Tři nejnovější zveřejněné články (src/content/clanky, 5. 10. 2026);
+// prázdná místa doplní zástupné řádky, dokud nejsou tři.
+const published: Article[] = (await getPublishedArticles()).slice(0, 3).map((a) => ({
+  category: a.data.category,
+  title: czechNbsp(a.data.title),
+  excerpt: czechNbsp(a.data.description),
+  href: articleHref(a),
+  lineWidths: [],
+}));
+const articles: Article[] = [...published, ...placeholders.slice(published.length)];
 
 const topics = ['Hypotéky a bydlení', 'Finanční plánování', 'Investice', 'Pojištění', 'Penze'];
 

@@ -1,0 +1,189 @@
+---
+/**
+ * Seznam k odškrtání — čtenář si projde, co má/nemá. Stav se pamatuje jen
+ * v jeho prohlížeči (localStorage, kdyby nešel, funguje to i bez něj).
+ * V MDX: <Checklist title="Co si zkontrolovat" items={['…', '…']} />
+ */
+import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
+
+interface Props {
+  title?: string;
+  items: string[];
+}
+const { title = 'Co si zkontrolovat', items } = Astro.props;
+const id = `checklist-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<section class="checklist" aria-labelledby={`${id}-title`} data-checklist>
+  <div class="checklist__head">
+    <p class="checklist__title" id={`${id}-title`}>{czechNbsp(title)}</p>
+    <p class="checklist__count" aria-live="polite"><span data-checked>0</span>&nbsp;z&nbsp;{items.length}</p>
+  </div>
+  <ul class="checklist__list">
+    {
+      items.map((item, i) => (
+        <li>
+          <label class="checklist__item">
+            <input type="checkbox" data-index={i} />
+            <span class="checklist__box" aria-hidden="true">
+              <svg viewBox="0 0 12 12" focusable="false">
+                <path d="M2.5 6.2 5 8.6l4.6-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span class="checklist__text">{czechNbsp(item)}</span>
+          </label>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-checklist]').forEach((box, n) => {
+    const key = `checklist:${location.pathname}:${n}`;
+    const inputs = Array.from(box.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+    const count = box.querySelector('[data-checked]');
+    const update = () => {
+      const checked = inputs.filter((i) => i.checked).length;
+      if (count) count.textContent = String(checked);
+      box.classList.toggle('is-done', checked === inputs.length);
+      try {
+        localStorage.setItem(key, JSON.stringify(inputs.map((i) => i.checked)));
+      } catch {}
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) ?? '[]');
+      if (Array.isArray(saved)) inputs.forEach((i, idx) => (i.checked = Boolean(saved[idx])));
+    } catch {}
+    inputs.forEach((i) => i.addEventListener('change', update));
+    update();
+  });
+</script>
+
+<style>
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    border-radius: var(--radius-panel);
+    background: var(--white);
+    border: 1px solid var(--rule);
+  }
+
+  .checklist__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .checklist__title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.35;
+    color: var(--navy);
+  }
+
+  .checklist__count {
+    flex: none;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-quiet);
+  }
+
+  .checklist.is-done .checklist__count {
+    color: var(--emerald);
+  }
+
+  .checklist__list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .checklist__list li + li {
+    border-top: 1px solid var(--rule);
+  }
+
+  .checklist__item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    cursor: pointer;
+  }
+
+  .checklist__list li:first-child .checklist__item {
+    padding-top: 4px;
+  }
+
+  .checklist__list li:last-child .checklist__item {
+    padding-bottom: 0;
+  }
+
+  .checklist__item input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  /* Políčko v ose prvního řádku textu (17 px × 1,55 → řádek 26 px). */
+  .checklist__box {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    margin-top: 3px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: var(--white);
+    color: transparent;
+    transition: background-color var(--duration-hover) var(--ease-out), border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .checklist__box svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .checklist__item:hover .checklist__box {
+    border-color: var(--emerald);
+  }
+
+  .checklist__item input:checked + .checklist__box {
+    background: var(--emerald);
+    border-color: var(--emerald);
+    color: var(--white);
+  }
+
+  .checklist__item input:focus-visible + .checklist__box {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .checklist__text {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--text);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .checklist__item input:checked ~ .checklist__text {
+    color: var(--text-quiet);
+  }
+
+  @media (min-width: 768px) {
+    .checklist {
+      padding: 28px 32px;
+    }
+  }
+</style>

@@ -22,8 +22,9 @@ import { chromium } from '@playwright/test';
 
 const ORIGIN = (process.env.AUDIT_URL || 'http://localhost:4321').replace(/\/$/, '');
 
-// Stránky bez odkazu z webu (noindex `/clanky`, stránka 404).
-const EXTRA_PATHS = ['/clanky', '/neexistujici-stranka-404'];
+// Stránky bez odkazu z webu (noindex `/clanky`, stránka 404). Rozepsaný
+// článek (koncept, zatím bez odkazu) přidej přes EXTRA=/clanky/<soubor>.
+const EXTRA_PATHS = ['/clanky', '/neexistujici-stranka-404', ...(process.env.EXTRA ? process.env.EXTRA.split(',') : [])];
 
 // Pravidla běží v prohlížeči — proto jako zdrojové texty regexů.
 // W = zlomitelná mezera (včetně zalomení řádku ve zdrojové šabloně).

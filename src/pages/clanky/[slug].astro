@@ -1,0 +1,1559 @@
+---
+/**
+ * Detail článku — /clanky/<soubor>. Obsah: src/content/clanky/*.mdx
+ * (schéma src/content.config.ts, postup docs/clanky-navod.md).
+ *
+ * KOSTRA = /recenze (stránka s kapitolami): stejné odsazení hero, osa trasy,
+ * zářez a mezera k textu na každém stupni (mobil 24+36, tablet 40+64,
+ * notebook 96+56, desktop 120+56), tmavý závěrečný pás a napojení na patičku.
+ *
+ * LINKA VEDE ČLÁNKEM: nájezd shora vpravo (gradient — skutečný začátek
+ * linky), oblouk pod úvodem k ose a po ose celým článkem. Každý nadpis H2
+ * má na ose zářez s tečkou v ose prvního řádku nadpisu; tečka kapitoly, kterou
+ * čtenář právě čte, je zelená a větší (hlavní tečka), ostatní menší modré
+ * (CLAUDE.md „Konvence: velikost teček"). Stejný stav nese obsah článku
+ * vpravo (od notebooku, zůstává při posouvání vidět).
+ *
+ * ODCHYLKA od /recenze (vědomá): nadpis H1 je o stupeň menší (článek má
+ * dlouhý název, ne krátké heslo) a sloupec textu je užší (~68 znaků na
+ * řádek kvůli čtení dlouhého textu).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import LineGradientDefs from '../../components/LineGradientDefs.astro';
+import Praxe from '../../components/article/Praxe.astro';
+import Upozorneni from '../../components/article/Upozorneni.astro';
+import Checklist from '../../components/article/Checklist.astro';
+import Priklad from '../../components/article/Priklad.astro';
+import CheckupOdkaz from '../../components/article/CheckupOdkaz.astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import personPhoto from '../../assets/photos/patrik-pristup-pece.png';
+import { BOOKING_URL, PERSON_ID, SITE_URL, breadcrumbList, faqPage } from '../../data/entity';
+import {
+  articleHref,
+  formatDate,
+  getBuildableArticles,
+  getRelated,
+  readingMinutes,
+  type Article,
+} from '../../data/articles';
+import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
+
+export async function getStaticPaths() {
+  const articles = await getBuildableArticles();
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article } }));
+}
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const { data } = article;
+const { Content, headings } = await render(article);
+const related = await getRelated(article);
+const minutes = readingMinutes(article);
+const path = articleHref(article);
+const url = `${SITE_URL}${path}`;
+
+const FAQ_ID = 'caste-otazky';
+const toc = [
+  ...headings.filter((h) => h.depth === 2).map((h) => ({ id: h.slug, text: h.text })),
+  ...(data.faq.length ? [{ id: FAQ_ID, text: 'Časté otázky' }] : []),
+];
+
+const jsonLd: Record<string, unknown>[] = [
+  {
+    '@type': 'BlogPosting',
+    '@id': `${url}#article`,
+    headline: data.title,
+    description: data.description,
+    datePublished: data.publishedAt.toISOString(),
+    dateModified: (data.updatedAt ?? data.publishedAt).toISOString(),
+    author: { '@id': PERSON_ID },
+    publisher: { '@id': PERSON_ID },
+    mainEntityOfPage: url,
+    articleSection: data.category,
+    inLanguage: 'cs-CZ',
+    image: `${SITE_URL}/og-image.png`,
+  },
+  breadcrumbList([
+    { name: 'Domů', path: '/' },
+    { name: 'Články', path: '/clanky' },
+    { name: data.title, path },
+  ]),
+  ...(data.faq.length ? [faqPage(data.faq)] : []),
+];
+
+const shareText = encodeURIComponent(data.title);
+const shareUrl = encodeURIComponent(url);
+const share = [
+  { label: 'WhatsApp', href: `https://wa.me/?text=${shareText}%20${shareUrl}` },
+  { label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}` },
+  { label: 'E-mail', href: `mailto:?subject=${shareText}&body=${shareUrl}` },
+];
+
+const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz };
+---
+
+<BaseLayout
+  title={`${data.title} | Patrik Gajdadzis`}
+  description={data.description}
+  robots={data.draft ? 'noindex, nofollow' : 'index, follow'}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <Header />
+  <main id="hero" class="art">
+    <div class="art__route" aria-hidden="true">
+      <svg class="art__route-svg" preserveAspectRatio="none" focusable="false">
+        <defs>
+          <LineGradientDefs id="art-line-entry" tier="laptop" x1={0} y1={40} x2={0} y2={140} />
+        </defs>
+        <path class="art__route-path" d="M 0 0" fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+        <path class="art__route-entry" d="M 0 0" fill="none" stroke="url(#art-line-entry)" stroke-width="1" stroke-linecap="round" />
+        <path class="art__route-dark" d="M 0 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" />
+        <g class="art__markers"></g>
+      </svg>
+    </div>
+
+    <header class="art-hero">
+      <div class="art-hero__text" data-route-hero>
+        <nav class="art-breadcrumb" aria-label="Drobečková navigace">
+          <ol>
+            <li><a href="/clanky">Články</a></li>
+            <li>{czechNbsp(data.category)}</li>
+          </ol>
+        </nav>
+        {data.draft && <p class="art-draft">Koncept&nbsp;— vidět jen na&nbsp;náhledu</p>}
+        <h1>{czechNbsp(data.title)}</h1>
+        <p class="art-hero__lead">{czechNbsp(data.description)}</p>
+        <div class="art-meta">
+          <span class="art-meta__avatar"><Image src={personPhoto} width={120} alt="" /></span>
+          <p class="art-meta__text">
+            <a class="art-meta__name" href="/o-mne">Patrik Gajdadzis</a>
+            <span class="art-meta__info">
+              <time datetime={data.publishedAt.toISOString().slice(0, 10)}>{formatDate(data.publishedAt)}</time>
+              <span aria-hidden="true">&nbsp;·</span>{' '}
+              <span>{minutes}&nbsp;min čtení</span>
+            </span>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="art-body">
+      <article class="art-main">
+        <section class="art-summary" aria-labelledby="art-summary-label">
+          <p class="art-label" id="art-summary-label">V&nbsp;kostce</p>
+          <ul>
+            {data.summary.map((item) => <li>{czechNbsp(item)}</li>)}
+          </ul>
+        </section>
+
+        {
+          toc.length > 1 && (
+            <nav class="art-toc art-toc--inline" aria-label="Obsah článku">
+              <p class="art-label">V&nbsp;článku</p>
+              <ol>
+                {toc.map((item) => (
+                  <li>
+                    <a href={`#${item.id}`} data-toc-link={item.id}>
+                      {czechNbsp(item.text)}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )
+        }
+
+        <div class="art-prose" data-prose>
+          <Content components={components} />
+
+          {
+            data.faq.length > 0 && (
+              <>
+                <h2 id={FAQ_ID}>Časté otázky</h2>
+                <dl class="art-faq">
+                  {data.faq.map((item) => (
+                    <div class="art-faq__item">
+                      <dt>{czechNbsp(item.q)}</dt>
+                      <dd>{czechNbsp(item.a)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </>
+            )
+          }
+        </div>
+
+        <footer class="art-end">
+          <div class="art-share">
+            <p class="art-label">Sdílet článek</p>
+            <ul class="art-share__list">
+              <li>
+                <button class="art-share__link" type="button" data-copy-link={url}>
+                  <span data-copy-label>Kopírovat odkaz</span>
+                </button>
+              </li>
+              {
+                share.map((s) => (
+                  <li>
+                    <a class="art-share__link" href={s.href} target="_blank" rel="noopener noreferrer">
+                      {s.label}
+                      <span class="sr-only">(otevře se v&nbsp;novém okně)</span>
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+            {
+              data.updatedAt && (
+                <p class="art-updated">
+                  Aktualizováno <time datetime={data.updatedAt.toISOString().slice(0, 10)}>{formatDate(data.updatedAt)}</time>
+                </p>
+              )
+            }
+          </div>
+
+          <div class="art-author">
+            <span class="art-author__avatar"><Image src={personPhoto} width={320} alt="" loading="lazy" /></span>
+            <div class="art-author__text">
+              <p class="art-author__name">Patrik Gajdadzis</p>
+              <p class="art-author__role">Finanční poradce, Ostrava</p>
+              <p class="art-author__proof">
+                <span class="art-nowrap"><span class="art-author__star" aria-hidden="true">★</span> 5,0 na&nbsp;Google&nbsp;·</span>{' '}
+                <span class="art-nowrap">150+ osobních klientů</span>
+              </p>
+            </div>
+            <p class="art-author__bio">
+              Pomáhám lidem dát finance do&nbsp;souvislostí: bydlení, ochranu, investice i&nbsp;penzi v&nbsp;jednom plánu. Píšu
+              o&nbsp;tom, co u&nbsp;klientů vidím nejčastěji.
+            </p>
+            <a class="art-text-link" href="/o-mne">Více o&nbsp;mně</a>
+          </div>
+        </footer>
+
+        {
+          related.length > 0 && (
+            <section class="art-related" aria-labelledby="art-related-heading">
+              <h2 id="art-related-heading" data-route-marker>
+                Mohlo by vás zajímat
+              </h2>
+              <ul class="art-related__list">
+                {related.map((r) => (
+                  <li class="art-related__item">
+                    <p class="art-related__category">{czechNbsp(r.data.category)}</p>
+                    <h3 class="art-related__title">
+                      <a href={articleHref(r)}>{czechNbsp(r.data.title)}</a>
+                    </h3>
+                    <p class="art-related__excerpt">{czechNbsp(r.data.description)}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+      </article>
+
+      {
+        toc.length > 1 && (
+          <aside class="art-aside">
+            <nav class="art-toc art-toc--sticky" aria-label="Obsah článku">
+              <p class="art-label">V&nbsp;článku</p>
+              <ol>
+                {toc.map((item) => (
+                  <li>
+                    <a href={`#${item.id}`} data-toc-link={item.id}>
+                      {czechNbsp(item.text)}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+              <div class="art-aside__cta">
+                <p>Chcete to probrat na&nbsp;své situaci?</p>
+                <a class="art-text-link" href="/#kontakt">Nezávazná konzultace</a>
+              </div>
+            </nav>
+          </aside>
+        )
+      }
+    </div>
+
+    <section class="art-closing" aria-labelledby="art-closing-heading">
+      <div class="art-closing__glow" aria-hidden="true"></div>
+      <div class="art-closing__grid">
+        <h2 id="art-closing-heading">Jak je to u&nbsp;vás?</h2>
+        <div class="art-closing__body">
+          <p>
+            Na&nbsp;úvodní konzultaci projdeme vaši situaci i&nbsp;smlouvy, které máte. Ukážu vám, co dává smysl nechat
+            a&nbsp;co upravit. 30&nbsp;minut, nezávazně a&nbsp;zdarma.
+          </p>
+          <div class="art-closing__actions">
+            <a class="art-cta" href="/#kontakt">Nezávazná konzultace</a>
+            <a class="art-phone" href="tel:+420775217721">
+              <svg class="art-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+          <a class="closing-booking" href={BOOKING_URL} target="_blank" rel="noopener">Nebo si rovnou vyberte termín online</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  import { firstLineCenterY } from '../../scripts/first-line';
+
+  const main = document.querySelector<HTMLElement>('.art');
+  const svg = main?.querySelector<SVGSVGElement>('.art__route-svg');
+  const routeWrap = main?.querySelector<HTMLElement>('.art__route');
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // Osa, zářez a poloměr = /recenze a vstup patičky na každém stupni.
+  const TIERS = [
+    { min: 1400, vb: 1440, axis: 120, notch: 36, r: 28, gap: 40, entry: 1300 / 1440, dot: [3.5, 2.6] },
+    { min: 1200, vb: 1366, axis: 96, notch: 36, r: 28, gap: 40, entry: 1230 / 1366, dot: [3.5, 2.6] },
+    { min: 768, vb: 834, axis: 40, notch: 44, r: 22, gap: 40, entry: 0.9, dot: [3.2, 2.4] },
+    { min: 0, vb: 390, axis: 24, notch: 22, r: 18, gap: 28, entry: 378 / 390, dot: [3.2, 2.4] },
+  ];
+  const ENTRY_Y = 40;
+  const ENTRY_LENGTH = 100;
+
+  if (main && svg && routeWrap) {
+    const heroText = main.querySelector<HTMLElement>('[data-route-hero]');
+    const closing = main.querySelector<HTMLElement>('.art-closing');
+    const closingHeading = closing?.querySelector<HTMLElement>('h2');
+    const path = svg.querySelector<SVGPathElement>('.art__route-path')!;
+    const entry = svg.querySelector<SVGPathElement>('.art__route-entry')!;
+    const dark = svg.querySelector<SVGPathElement>('.art__route-dark')!;
+    const gradient = svg.querySelector<SVGLinearGradientElement>('linearGradient')!;
+    const markersGroup = svg.querySelector<SVGGElement>('.art__markers')!;
+
+    // Zastávky = nadpisy H2 v textu článku + „Mohlo by vás zajímat".
+    const targets = Array.from(main.querySelectorAll<HTMLElement>('[data-prose] > h2, [data-route-marker]'));
+    const markers = targets.map(() => {
+      const g = document.createElementNS(NS, 'g');
+      const notch = document.createElementNS(NS, 'path');
+      notch.setAttribute('fill', 'none');
+      notch.setAttribute('stroke', 'var(--line)');
+      notch.setAttribute('stroke-opacity', '.18');
+      notch.setAttribute('stroke-width', '1');
+      notch.setAttribute('stroke-linecap', 'round');
+      const dot = document.createElementNS(NS, 'circle');
+      dot.setAttribute('class', 'art__dot');
+      g.append(notch, dot);
+      markersGroup.append(g);
+      return { notch, dot };
+    });
+    let activeIndex = -1;
+    let tier = TIERS[TIERS.length - 1];
+
+    const paintDots = () => {
+      markers.forEach(({ dot }, i) => {
+        const active = i === activeIndex;
+        dot.setAttribute('r', String(active ? tier.dot[0] : tier.dot[1]));
+        dot.setAttribute('fill', active ? 'var(--emerald)' : 'var(--line)');
+        dot.setAttribute('fill-opacity', active ? '1' : '.5');
+      });
+    };
+
+    const sync = () => {
+      const w = svg.clientWidth;
+      const h = main.clientHeight;
+      if (!w || !h) return;
+      tier = TIERS.find((t) => window.innerWidth >= t.min) ?? TIERS[TIERS.length - 1];
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      const svgRect = svg.getBoundingClientRect();
+      const axis = (tier.axis * w) / tier.vb;
+      main.style.setProperty('--art-shift', `${axis - tier.axis}px`);
+
+      const x = tier.entry * w;
+      const r = tier.r;
+      const heroBottom = heroText ? heroText.getBoundingClientRect().bottom - svgRect.top : 260;
+      const turnY = heroBottom + tier.gap;
+      const startY = ENTRY_Y + ENTRY_LENGTH;
+      const closingTop = closing ? closing.getBoundingClientRect().top - svgRect.top : h;
+
+      // Nájezd a hlavní cesta bez překryvu (CLAUDE.md, „zub").
+      entry.setAttribute('d', `M ${x} ${ENTRY_Y} L ${x} ${startY}`);
+      gradient.setAttribute('x1', String(x));
+      gradient.setAttribute('x2', String(x));
+      gradient.setAttribute('y1', String(ENTRY_Y));
+      gradient.setAttribute('y2', String(startY));
+      path.setAttribute(
+        'd',
+        `M ${x} ${startY} V ${turnY - r} A ${r} ${r} 0 0 1 ${x - r} ${turnY} H ${axis + r} A ${r} ${r} 0 0 0 ${axis} ${turnY + r} V ${closingTop}`,
+      );
+
+      // Tmavý pás: linka na tmavé barvě, přerušená u nadpisu, pokud přes něj
+      // osa vede (stejně jako /recenze).
+      let darkD = `M ${axis} ${closingTop} V ${h}`;
+      if (closingHeading) {
+        const hr = closingHeading.getBoundingClientRect();
+        const axisReal = svgRect.left + axis;
+        if (hr.width > 0 && axisReal >= hr.left && axisReal <= hr.right) {
+          darkD = `M ${axis} ${closingTop} V ${hr.top - svgRect.top - 20} M ${axis} ${hr.bottom - svgRect.top + 20} V ${h}`;
+        }
+      }
+      dark.setAttribute('d', darkD);
+
+      const dotX = axis + tier.notch;
+      targets.forEach((t, i) => {
+        const y = firstLineCenterY(t) - svgRect.top;
+        markers[i].notch.setAttribute('d', `M ${axis} ${y} H ${dotX}`);
+        markers[i].dot.setAttribute('cx', String(dotX));
+        markers[i].dot.setAttribute('cy', String(y));
+      });
+      paintDots();
+    };
+
+    // Aktivní kapitola: poslední nadpis, který už přešel horní třetinu okna.
+    const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+    const tocIds = new Set(tocLinks.map((l) => l.dataset.tocLink));
+    const updateActive = () => {
+      const line = window.innerHeight * 0.33;
+      let idx = -1;
+      targets.forEach((t, i) => {
+        if (t.getBoundingClientRect().top <= line) idx = i;
+      });
+      // Poslední kapitola se k horní třetině okna nemusí dostat — na konci
+      // článku (nadpis už viditelný v okně) se rozsvítí i tak.
+      const last = targets.length - 1;
+      if (last >= 0 && idx < last && targets[last].getBoundingClientRect().top < window.innerHeight * 0.8) {
+        const end = main?.querySelector('.art-end')?.getBoundingClientRect().top ?? Infinity;
+        if (end < window.innerHeight) idx = last;
+      }
+      if (idx === activeIndex) return;
+      activeIndex = idx;
+      paintDots();
+      const id = idx >= 0 ? targets[idx].id : '';
+      tocLinks.forEach((l) => {
+        const on = tocIds.has(id) && l.dataset.tocLink === id;
+        l.classList.toggle('is-active', on);
+        if (on) l.setAttribute('aria-current', 'location');
+        else l.removeAttribute('aria-current');
+      });
+    };
+
+    let ticking = false;
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          updateActive();
+          ticking = false;
+        });
+      },
+      { passive: true },
+    );
+
+    sync();
+    updateActive();
+    document.fonts.ready.then(() => {
+      sync();
+      updateActive();
+    });
+    new ResizeObserver(sync).observe(main);
+    window.addEventListener('resize', sync);
+  }
+
+  // Kopírovat odkaz
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-link]').forEach((btn) => {
+    const label = btn.querySelector('[data-copy-label]');
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copyLink ?? location.href);
+        if (label) label.textContent = 'Odkaz zkopírován';
+        window.setTimeout(() => label && (label.textContent = 'Kopírovat odkaz'), 2200);
+      } catch {
+        window.prompt('Zkopírujte odkaz:', btn.dataset.copyLink ?? location.href);
+      }
+    });
+  });
+</script>
+
+<style>
+  .art {
+    position: relative;
+    background: var(--bg);
+    overflow-x: clip;
+  }
+
+  .art__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .art__route-svg {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    max-width: var(--stage-max);
+    height: 100%;
+    transform: translateX(-50%);
+    overflow: visible;
+  }
+
+  .art :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .art-nowrap {
+    white-space: nowrap;
+  }
+
+  .art-label {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: var(--emerald);
+  }
+
+  .art-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-text-link::after {
+    content: '→';
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .art-text-link:hover {
+    color: var(--emerald-hover);
+  }
+
+  .art-text-link:hover::after {
+    transform: translateX(3px);
+  }
+
+  /* ---------- Úvod ---------- */
+
+  .art-hero {
+    position: relative;
+    z-index: 2;
+    padding: 56px 24px 72px;
+  }
+
+  .art-hero__text {
+    display: flex;
+    flex-direction: column;
+    max-width: 820px;
+    /* Mobil: místo vpravo pro nájezd linky (x = 378/390). */
+    padding-right: 12px;
+  }
+
+  .art-breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .art-breadcrumb li:not(:last-child)::after {
+    content: '/';
+    margin: 0 8px;
+    color: var(--text-faint);
+  }
+
+  .art-breadcrumb a {
+    color: var(--text-quiet);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-breadcrumb a:hover {
+    color: var(--navy);
+  }
+
+  .art-draft {
+    width: fit-content;
+    margin: 16px 0 0;
+    padding: 3px 8px;
+    border-radius: var(--radius-tag);
+    background: var(--pending-review-bg);
+    color: var(--pending-review);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+
+  .art-hero h1 {
+    margin: 20px 0 0;
+    font-size: 34px;
+    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -.045em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .art-hero__lead {
+    margin: 18px 0 0;
+    max-width: 640px;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+
+  .art-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .art-meta__avatar,
+  .art-author__avatar {
+    flex: none;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--about-photo-1);
+  }
+
+  .art-meta__avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .art-meta__avatar :global(img),
+  .art-author__avatar :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0;
+    transform: translateY(9%) scale(1.25);
+  }
+
+  .art-meta__text {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .art-meta__name {
+    width: fit-content;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--navy);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-meta__name:hover {
+    color: var(--emerald);
+  }
+
+  .art-meta__info {
+    color: var(--text-muted);
+  }
+
+  /* ---------- Tělo článku ---------- */
+
+  .art-body {
+    position: relative;
+    z-index: 2;
+    padding: 0 24px 72px;
+    padding-left: calc(60px + var(--art-shift, 0px));
+  }
+
+  .art-main {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    min-width: 0;
+    max-width: 680px;
+  }
+
+  .art-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px 20px;
+    border-radius: var(--radius-panel);
+    background: var(--white);
+    border: 1px solid var(--rule);
+  }
+
+  /* Bez `margin` — mezeru od odstavce nad seznamem dává pravidlo toku textu. */
+  .art-summary ul,
+  .art-prose > :global(ul),
+  .art-prose > :global(ol) {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .art-summary ul {
+    margin: 0;
+  }
+
+  /* Odrážka = krátký zářez (jako „Čeho jsem si všiml" v check-upu), žádná čísla. */
+  .art-summary li,
+  .art-prose > :global(ul > li),
+  .art-prose > :global(ol > li) {
+    position: relative;
+    padding-left: 30px;
+  }
+
+  .art-summary li::before,
+  .art-prose > :global(ul > li)::before,
+  .art-prose > :global(ol > li)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: .8em;
+    width: 18px;
+    height: 1px;
+    background: var(--emerald);
+  }
+
+  .art-summary li {
+    font-size: 16.5px;
+    line-height: 1.55;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .art-toc {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .art-toc ol {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .art-toc--inline li + li {
+    border-top: 1px solid var(--rule);
+  }
+
+  .art-toc--inline a {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 600;
+    color: var(--navy);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-toc--inline a::after {
+    content: '↓';
+    flex: none;
+    color: var(--text-faint);
+  }
+
+  .art-toc--inline a:hover {
+    color: var(--emerald);
+  }
+
+  /* ---------- Text článku ---------- */
+
+  .art-prose {
+    font-size: 17.5px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .art-prose > :global(*) {
+    margin: 0;
+  }
+
+  .art-prose > :global(* + *) {
+    margin-top: 20px;
+  }
+
+  .art-prose :global(h2) {
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+    scroll-margin-top: 104px;
+  }
+
+  .art-prose > :global(h2) {
+    margin-top: 56px;
+  }
+
+  .art-prose > :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .art-prose :global(h3) {
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -.015em;
+    color: var(--navy);
+    scroll-margin-top: 104px;
+  }
+
+  .art-prose > :global(h3) {
+    margin-top: 36px;
+  }
+
+  /* Nadpis → text: 14 px (CLAUDE.md „mezera nadpis → úvodní text"). */
+  .art-prose > :global(h2 + *),
+  .art-prose > :global(h3 + *) {
+    margin-top: 14px;
+  }
+
+  /* Panely (Z praxe, upozornění, seznam, příklad, tabulka) víc oddělené od textu. */
+  .art-prose > :global(aside),
+  .art-prose > :global(figure),
+  .art-prose > :global(section),
+  .art-prose > :global(table),
+  .art-prose > :global(aside + *),
+  .art-prose > :global(figure + *),
+  .art-prose > :global(section + *),
+  .art-prose > :global(table + *) {
+    margin-top: 32px;
+  }
+
+  .art-prose :global(strong) {
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .art-prose > :global(p) :global(a),
+  .art-prose > :global(ul) :global(a) {
+    color: var(--emerald);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-prose > :global(p) :global(a:hover),
+  .art-prose > :global(ul) :global(a:hover) {
+    color: var(--emerald-hover);
+  }
+
+  .art-prose :global(blockquote) {
+    margin: 0;
+    padding-left: 22px;
+    border-left: 2px solid var(--emerald);
+    font-size: 19px;
+    line-height: 1.55;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  .art-prose :global(blockquote p) {
+    margin: 0;
+  }
+
+  .art-prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15.5px;
+    line-height: 1.45;
+  }
+
+  .art-prose :global(th) {
+    padding: 0 12px 10px 0;
+    text-align: left;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: var(--text-quiet);
+    border-bottom: 1.5px solid var(--navy);
+  }
+
+  .art-prose :global(td) {
+    padding: 12px 12px 12px 0;
+    vertical-align: top;
+    border-bottom: 1px solid var(--rule);
+    color: var(--text);
+  }
+
+  .art-prose :global(td:first-child) {
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .art-prose :global(hr) {
+    height: 1px;
+    border: 0;
+    background: var(--rule);
+  }
+
+  .art-faq {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .art-faq__item {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .art-faq__item:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .art-faq__item:last-child {
+    padding-bottom: 0;
+  }
+
+  .art-faq dt {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.4;
+    color: var(--navy);
+  }
+
+  .art-faq dd {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.65;
+  }
+
+  /* ---------- Konec článku: sdílení + autor ---------- */
+
+  .art-end {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding-top: 40px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .art-share {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .art-share__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .art-share__link {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding-inline: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-btn);
+    background: var(--white);
+    color: var(--navy);
+    font: inherit;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: border-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-share__link:hover {
+    border-color: var(--emerald);
+    color: var(--emerald);
+  }
+
+  .art-updated {
+    margin: 0;
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  .art-author {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 16px;
+    align-items: center;
+  }
+
+  .art-author__avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .art-author__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .art-author__text p {
+    margin: 0;
+  }
+
+  .art-author__name {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .art-author__role {
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+
+  .art-author__proof {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .art-author__star {
+    color: var(--emerald);
+  }
+
+  .art-author__bio {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+
+  .art-author .art-text-link {
+    grid-column: 1 / -1;
+  }
+
+  /* ---------- Související ---------- */
+
+  .art-related {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-top: 32px;
+  }
+
+  .art-related h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+  }
+
+  .art-related__list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .art-related__item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .art-related__item:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .art-related__category {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    color: var(--emerald);
+  }
+
+  .art-related__title {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .art-related__title a {
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-related__title a:hover {
+    color: var(--emerald);
+  }
+
+  .art-related__excerpt {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  /* Obsah vpravo jen od notebooku. */
+  .art-aside {
+    display: none;
+  }
+
+  /* ---------- Tmavý závěrečný pás (jako /recenze) ---------- */
+
+  .art-closing {
+    position: relative;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .art-closing__glow {
+    position: absolute;
+    inset: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .art-closing__grid {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-inline: 24px;
+    padding-left: calc(60px + var(--art-shift, 0px));
+  }
+
+  .art-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .art-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .art-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .art-closing__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .art-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .art-phone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    height: 48px;
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .art-phone:hover {
+    color: var(--emerald-light);
+  }
+
+  .art-phone__icon {
+    flex: none;
+    width: 19px;
+    height: 19px;
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .art-hero {
+      padding: 80px 40px 88px;
+    }
+
+    .art-hero__text {
+      padding-right: 0;
+    }
+
+    .art-hero h1 {
+      font-size: 48px;
+      line-height: 1.04;
+      max-width: 13em;
+    }
+
+    .art-hero__lead {
+      font-size: 18px;
+    }
+
+    .art-body {
+      padding: 0 40px 88px;
+      padding-left: calc(104px + var(--art-shift, 0px));
+    }
+
+    .art-main {
+      gap: 48px;
+    }
+
+    .art-summary {
+      padding: 28px 32px;
+    }
+
+    .art-summary li {
+      font-size: 18px;
+    }
+
+    .art-prose {
+      font-size: 18.5px;
+      line-height: 1.72;
+    }
+
+    .art-prose :global(h2) {
+      font-size: 36px;
+    }
+
+    .art-prose > :global(h2) {
+      margin-top: 72px;
+    }
+
+    .art-prose :global(h3) {
+      font-size: 22px;
+    }
+
+    .art-prose > :global(h3) {
+      margin-top: 40px;
+    }
+
+    .art-prose > :global(h2 + *) {
+      margin-top: 18px;
+    }
+
+    .art-prose :global(table) {
+      font-size: 16px;
+    }
+
+    .art-faq dt {
+      font-size: 19px;
+    }
+
+    .art-faq dd {
+      font-size: 18px;
+    }
+
+    .art-author {
+      grid-template-columns: 88px minmax(0, 1fr);
+      column-gap: 20px;
+    }
+
+    .art-author__avatar {
+      width: 88px;
+      height: 88px;
+    }
+
+    .art-related h2 {
+      font-size: 36px;
+    }
+
+    .art-closing {
+      padding-block: 76px;
+    }
+
+    .art-closing__grid {
+      padding-inline: 40px;
+      padding-left: calc(104px + var(--art-shift, 0px));
+    }
+
+    .art-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .art-closing__body p {
+      font-size: 17px;
+    }
+
+    .art-closing__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .art-closing__actions .art-cta {
+      padding-inline: 28px;
+    }
+
+    .art-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    .art-hero {
+      padding: 104px 96px 96px;
+    }
+
+    .art-hero h1 {
+      font-size: 56px;
+      line-height: 1.03;
+      letter-spacing: -.05em;
+    }
+
+    .art-hero__lead {
+      font-size: 19px;
+    }
+
+    .art-meta {
+      margin-top: 32px;
+    }
+
+    /* Text od popisku u tečky: osa 96 + zářez 36 + mezera 20 = 152 px. */
+    .art-body {
+      display: flex;
+      align-items: flex-start;
+      gap: 64px;
+      padding: 0 96px 96px;
+      padding-left: calc(152px + var(--art-shift, 0px));
+    }
+
+    .art-main {
+      flex: 1 1 auto;
+    }
+
+    .art-toc--inline {
+      display: none;
+    }
+
+    .art-aside {
+      display: block;
+      flex: 0 0 220px;
+      margin-left: auto;
+      align-self: stretch;
+    }
+
+    .art-toc--sticky {
+      position: sticky;
+      top: 120px;
+      gap: 16px;
+    }
+
+    .art-toc--sticky ol {
+      gap: 2px;
+    }
+
+    .art-toc--sticky ol a {
+      position: relative;
+      display: block;
+      padding: 6px 0 6px 18px;
+      font-size: 15px;
+      line-height: 1.45;
+      font-weight: 600;
+      color: var(--text-quiet);
+      transition: color var(--duration-hover) var(--ease-out);
+    }
+
+    .art-toc--sticky ol a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: calc(6px + .725em - 2.5px);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--line);
+      opacity: .35;
+      transition: background-color var(--duration-hover) var(--ease-out), opacity var(--duration-hover) var(--ease-out);
+    }
+
+    .art-toc--sticky ol a:hover {
+      color: var(--navy);
+    }
+
+    .art-toc--sticky ol a.is-active {
+      color: var(--navy);
+    }
+
+    .art-toc--sticky ol a.is-active::before {
+      background: var(--emerald);
+      opacity: 1;
+    }
+
+    .art-aside__cta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .art-aside__cta p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .art-aside__cta .art-text-link {
+      font-size: 15px;
+    }
+
+    .art-prose :global(h2),
+    .art-related h2 {
+      font-size: 38px;
+    }
+
+    .art-prose > :global(h2) {
+      margin-top: 80px;
+    }
+
+    .art-closing {
+      padding-block: 88px;
+    }
+
+    .art-closing__grid {
+      flex-direction: row;
+      gap: 60px;
+      padding-inline: 96px;
+    }
+
+    .art-closing__glow {
+      height: 320px;
+    }
+
+    .art-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .art-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .art-hero,
+    .art-body,
+    .art-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    .art-hero {
+      padding: 112px 100px 104px;
+    }
+
+    .art-hero h1 {
+      font-size: 60px;
+    }
+
+    /* Osa 120 + zářez 36 + mezera 20 = 176 px. */
+    .art-body {
+      gap: 96px;
+      padding: 0 100px 104px;
+      padding-left: calc(176px + var(--art-shift, 0px));
+    }
+
+    .art-aside {
+      flex-basis: 240px;
+    }
+
+    .art-closing {
+      padding-block: 96px;
+    }
+
+    .art-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .art-closing__glow {
+      height: 340px;
+    }
+
+    .art-closing__grid h2 {
+      width: 480px;
+      font-size: 52px;
+    }
+  }
+</style>

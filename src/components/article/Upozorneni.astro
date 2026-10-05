@@ -1,0 +1,71 @@
+---
+/**
+ * Upozornění v článku — věc, na které lidé nejčastěji narazí.
+ * V MDX: <Upozorneni title="Na co si dát pozor">Text…</Upozorneni>.
+ */
+import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
+
+interface Props {
+  title?: string;
+}
+const { title: rawTitle = 'Na co si dát pozor' } = Astro.props;
+const title = czechNbsp(rawTitle);
+---
+
+<aside class="upozorneni" aria-label={title}>
+  <p class="upozorneni__title">
+    <svg class="upozorneni__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+      <circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1.4"></circle>
+      <path d="M10 5.6v5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+      <circle cx="10" cy="14.2" r="1" fill="currentColor"></circle>
+    </svg>
+    <span>{title}</span>
+  </p>
+  <div class="upozorneni__body"><slot /></div>
+</aside>
+
+<style>
+  .upozorneni {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 24px;
+    border-radius: var(--radius-panel);
+    background: rgba(27, 74, 138, .05);
+  }
+
+  .upozorneni__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--navy);
+  }
+
+  .upozorneni__icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--line);
+  }
+
+  .upozorneni__body :global(p) {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+
+  .upozorneni__body :global(p + p) {
+    margin-top: 10px;
+  }
+
+  @media (min-width: 768px) {
+    .upozorneni {
+      padding: 24px 32px;
+    }
+  }
+</style>

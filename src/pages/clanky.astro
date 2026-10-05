@@ -67,6 +67,8 @@ import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
 import { BOOKING_URL } from '../data/entity';
+import { articleHref, formatDate, getPublishedArticles } from '../data/articles';
+import { czechNbsp } from '../lib/rehype-czech-nbsp.mjs';
 
 interface Article {
   category: string;
@@ -74,16 +76,25 @@ interface Article {
   excerpt: string | null;
   href: string | null;
   publishedAt: string | null;
+  isoDate: string | null;
   featured: boolean;
   titleLineWidth: number;
   excerptLineWidths: number[];
 }
 
-// ŽÁDNÝ ČLÁNEK ZATÍM NEEXISTUJE — prázdné pole je SKUTEČNÝ stav, ve
-// kterém stránka spouští (viz hlavičkový komentář výše). Nevyplňuj
-// placeholder položkami jen aby výpis „vypadal naplněně" — zadání §4/§7
-// to výslovně zakazuje.
-const articles: Article[] = [];
+// Zveřejněné články z src/content/clanky (5. 10. 2026) — nejnovější první.
+// Dokud žádný není, platí prázdný stav (viz hlavičkový komentář výše).
+const articles: Article[] = (await getPublishedArticles()).map((a) => ({
+  category: a.data.category,
+  title: czechNbsp(a.data.title),
+  excerpt: czechNbsp(a.data.description),
+  href: articleHref(a),
+  publishedAt: formatDate(a.data.publishedAt),
+  isoDate: a.data.publishedAt.toISOString().slice(0, 10),
+  featured: false,
+  titleLineWidth: 0,
+  excerptLineWidths: [],
+}));
 
 const topics = ['Hypotéky a bydlení', 'Finanční plánování', 'Pojištění', 'Investice', 'Penze'];
 const availableTopics = topics.filter((t) => articles.some((a) => a.category === t));
@@ -233,7 +244,7 @@ const ARTICLES_PAGE_SIZE = 6;
                       >
                         <div class="cla-article__meta">
                           <p class="cla-article__category">{article.category}</p>
-                          {article.publishedAt && <time datetime={article.publishedAt}>{article.publishedAt}</time>}
+                          {article.publishedAt && <time datetime={article.isoDate ?? undefined}>{article.publishedAt}</time>}
                         </div>
                         {article.title ? (
                           <div class="cla-article__body">

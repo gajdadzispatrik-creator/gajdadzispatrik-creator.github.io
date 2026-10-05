@@ -1,0 +1,60 @@
+---
+/**
+ * Nenásilný odkaz na finanční check-up uprostřed článku.
+ * V MDX: <CheckupOdkaz /> nebo <CheckupOdkaz text="Vlastní otázka?" />
+ */
+import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
+
+interface Props {
+  text?: string;
+}
+const { text = 'Nevíte, jak jste na tom vy?' } = Astro.props;
+---
+
+<aside class="checkup-odkaz" aria-label="Finanční check-up">
+  <p>
+    <span class="checkup-odkaz__text">{czechNbsp(text)}</span>
+    <a href="/financni-check-up">Zjistěte to za&nbsp;2&nbsp;minuty</a>
+  </p>
+</aside>
+
+<style>
+  .checkup-odkaz p {
+    margin: 0;
+    padding: 18px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .checkup-odkaz__text {
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .checkup-odkaz a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 4px;
+    font-weight: 600;
+    color: var(--emerald);
+    white-space: nowrap;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .checkup-odkaz a::after {
+    content: '→';
+    transition: transform var(--duration-hover) var(--ease-out);
+  }
+
+  .checkup-odkaz a:hover {
+    color: var(--emerald-hover);
+  }
+
+  .checkup-odkaz a:hover::after {
+    transform: translateX(3px);
+  }
+</style>

@@ -1,5 +1,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import mdx from '@astrojs/mdx';
+import rehypeCzechNbsp from './src/lib/rehype-czech-nbsp.mjs';
 
 // Stránky mimo sitemap — `noindex` (dočasně skrytý `/clanky`, viz clanky.astro).
 // Po zveřejnění článků cestu odsud odebrat, zbytek se doplní sám.
@@ -8,7 +10,12 @@ const SITEMAP_EXCLUDE = ['/clanky'];
 export default defineConfig({
   site: 'https://patrikgajdadzis.cz',
   output: 'static',
+  // Články (src/content/clanky, MDX): nezlomitelné mezery se doplní samy.
+  markdown: {
+    rehypePlugins: [rehypeCzechNbsp],
+  },
   integrations: [
+    mdx(),
     sitemap({
       filter: (page) => !SITEMAP_EXCLUDE.includes(new URL(page).pathname.replace(/\/$/, '')),
       // Adresy bez koncového lomítka (kromě domovské) — shodně s canonical

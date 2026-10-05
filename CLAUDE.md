@@ -1077,6 +1077,12 @@ na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
 - Všechny podstránky (`/sluzby` + 5 detailů, `/pristup`, `/recenze`,
   `/o-mne`, `/clanky`, právní stránky, 404) jsou hotové. `/clanky` je
   `noindex` a bez odkazu, dokud nebudou články.
+- **Články (od 5. 10. 2026):** `src/content/clanky/*.mdx` → `/clanky/<soubor>`
+  (`src/pages/clanky/[slug].astro`, data `src/data/articles.ts`, prvky
+  `src/components/article/`). Postup a pravidla: `docs/clanky-navod.md`.
+  Typografie v článcích se doplňuje sama (`src/lib/rehype-czech-nbsp.mjs`,
+  Astro 7 kvůli tomu potřebuje `@astrojs/markdown-remark`). `draft: true`
+  = jen dev a náhled (PUBLIC_PREVIEW), na Wedos se nesestaví.
 - **CookieConsent.astro a právní stránky** — vlastní znění, **uživatel je
   24. 9. 2026 přijal jako hotové bez další právní kontroly**. `loadAnalytics()`
   je inertní stub, dokud nebude GA4 ID. Marketingová kategorie je záměrně
