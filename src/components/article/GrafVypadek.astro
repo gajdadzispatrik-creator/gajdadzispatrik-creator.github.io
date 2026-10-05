@@ -44,9 +44,11 @@ const max = Math.max(...rows.map((r) => r.total));
         <li class="graf__row">
           <p class="graf__row-head" style={`--w:${(r.total / max) * 100}%`}>
             <span class="graf__row-label">{czechNbsp(r.label)}</span>
-            <span class="graf__row-total">
-              {czechNbsp(totalLabel)} {kc(r.total)}
-            </span>
+            {totalLabel && (
+              <span class="graf__row-total">
+                {czechNbsp(totalLabel)} {kc(r.total)}
+              </span>
+            )}
           </p>
           <div class="graf__track">
             <div class="graf__bar" style={`width:${(r.total / max) * 100}%`}>
