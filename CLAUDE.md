@@ -1100,9 +1100,10 @@ na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
   sitemap (od 4. 10. 2026 automaticky `@astrojs/sitemap` → `sitemap-index.xml`,
   vyřazené stránky v `SITEMAP_EXCLUDE` v `astro.config.mjs`), `robots.txt`, strukturovaná data (JSON-LD `FinancialService`; FAQPage na stránkách s častými otázkami přes `faqPage(faqs)` z `src/data/entity.ts` — z téhož pole, které se vykresluje, u nové stránky s FAQ přidat stejně).
 - Právní/regulatorní: registr ČNB, zásady zpracování OÚ, cookies — ověřit dle §8.
-- Nahradit `HeroPhotoPlaceholder` a placeholder fotku v AboutSection skutečnými
-  fotkami; nahradit zástupné texty v CasesSection a ArticlesSection skutečným
-  obsahem (viz `POZOR` komentáře v těch souborech).
+- Nahradit testovací fotky finálními (viz `docs/fotky-umisteni.md`).
+- **Příběhy v CasesSection („Výsledky místo slibů“) jsou SKUTEČNÉ** (uživatel
+  potvrdil opakovaně) — nenavrhovat jejich nahrazení. ArticlesSection čerpá
+  ze zveřejněných článků (od 5. 10. 2026).
 
 **Známé nesrovnalosti k opravě:**
 
