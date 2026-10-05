@@ -56,7 +56,7 @@ Z = základ máte · O = vyplatí se podívat · N = netýká se (oblast se neuk
 
 - **Rezerva:** Rezerva je základ všeho. Kolik má být, spočítáme podle vašich výdajů.
 - **Příjem:** Nemocenská pokryje jen část příjmu. Podnikatelé bez dobrovolného pojištění nedostanou nic.
-- **Rodina:** Bez vašeho příjmu by rodině chyběly peníze na život i splátky. Vyplatí se vědět, jak dlouho by vydržela.
+- **Rodina:** Bez vašeho příjmu by rodině chyběly peníze na život i splátky. Ukážu vám, jak to vyřešit.
 - **Majetek:** Ceny bydlení za poslední roky vyletěly. Stará pojistka nestačí a pojišťovna plnění krátí.
 - **Bydlení:** Nejdřív čísla, pak prohlídky. Spočítáme, na co dosáhnete a jaká splátka je rozumná.
 - **Auto:** Povinné ručení platí jen škody druhým. Jestli se vám vyplatí havarijní, záleží na hodnotě auta.
