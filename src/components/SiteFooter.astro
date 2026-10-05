@@ -269,6 +269,13 @@ const socialIcons: Record<string, string> = {
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
+    <defs>
+      <linearGradient id="footer-fade-desktop" class="footer__fade-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="var(--line-on-dark)" stop-opacity=".3"></stop>
+        <stop offset="1" stop-color="#FFFFFF" stop-opacity="1"></stop>
+      </linearGradient>
+    </defs>
+    <path class="footer__route-fade" d="M 0 0" fill="none" stroke="url(#footer-fade-desktop)" stroke-width="1" stroke-linecap="butt"></path>
     <line class="footer__divider footer__divider--1" x1="120" y1="330" x2="1320" y2="330"></line>
     <line class="footer__divider footer__divider--2" x1="120" y1="620" x2="1320" y2="620"></line>
     <circle class="footer__dot" cx="190" cy="184" r="3.5" fill="var(--emerald)"></circle>
@@ -295,6 +302,13 @@ const socialIcons: Record<string, string> = {
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
+    <defs>
+      <linearGradient id="footer-fade-laptop" class="footer__fade-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="var(--line-on-dark)" stop-opacity=".3"></stop>
+        <stop offset="1" stop-color="#FFFFFF" stop-opacity="1"></stop>
+      </linearGradient>
+    </defs>
+    <path class="footer__route-fade" d="M 0 0" fill="none" stroke="url(#footer-fade-laptop)" stroke-width="1" stroke-linecap="butt"></path>
     <line class="footer__divider footer__divider--1" x1="96" y1="312" x2="1270" y2="312"></line>
     <line class="footer__divider footer__divider--2" x1="96" y1="580" x2="1270" y2="580"></line>
     <circle class="footer__dot" cx="164" cy="174" r="3.5" fill="var(--emerald)"></circle>
@@ -321,6 +335,13 @@ const socialIcons: Record<string, string> = {
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
+    <defs>
+      <linearGradient id="footer-fade-tablet" class="footer__fade-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="var(--line-on-dark)" stop-opacity=".3"></stop>
+        <stop offset="1" stop-color="#FFFFFF" stop-opacity="1"></stop>
+      </linearGradient>
+    </defs>
+    <path class="footer__route-fade" d="M 0 0" fill="none" stroke="url(#footer-fade-tablet)" stroke-width="1" stroke-linecap="butt"></path>
     <line class="footer__divider footer__divider--1" x1="40" y1="270" x2="794" y2="270"></line>
     <line class="footer__divider footer__divider--2" x1="40" y1="560" x2="794" y2="560"></line>
     <circle class="footer__dot" cx="96" cy="122" r="3.2" fill="var(--emerald)"></circle>
@@ -353,6 +374,13 @@ const socialIcons: Record<string, string> = {
       stroke-linecap="round"
       stroke-linejoin="round"
     ></path>
+    <defs>
+      <linearGradient id="footer-fade-mobile" class="footer__fade-grad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="var(--line-on-dark)" stop-opacity=".3"></stop>
+        <stop offset="1" stop-color="#FFFFFF" stop-opacity="1"></stop>
+      </linearGradient>
+    </defs>
+    <path class="footer__route-fade" d="M 0 0" fill="none" stroke="url(#footer-fade-mobile)" stroke-width="1" stroke-linecap="butt"></path>
     <line class="footer__divider footer__divider--1" x1="24" y1="220" x2="366" y2="220"></line>
     <line class="footer__divider footer__divider--2" x1="24" y1="480" x2="366" y2="480"></line>
     <circle class="footer__dot" cx="76" cy="110" r="3.2" fill="var(--emerald)"></circle>
@@ -440,11 +468,32 @@ const socialIcons: Record<string, string> = {
       // Mobil: značka stojí na ose (zarovnaná s kontakty), trasa proto končí
       // tečkou 18 px NAD ní, ne ve výšce jejího středu (tečka by byla na „P").
       const straightEndY = (brandRect.top - gap - svgRect.top) / scaleY;
+      // Konec linky přechází do barvy loga (5. 10. 2026): posledních FADE_PX
+      // kreslí samostatná cesta s gradientem z barvy linky (--line-on-dark .3)
+      // do bílé loga — linka tak plynule vplyne do P. Cesty na sebe navazují
+      // bez překryvu (CLAUDE.md „zub“), délka přechodu nikdy nezasáhne oblouk.
+      const FADE_PX = 56;
+      const fade = svg.querySelector('.footer__route-fade') as SVGPathElement | null;
+      const fadeGrad = svg.querySelector('.footer__fade-grad') as SVGLinearGradientElement | null;
+      const setGrad = (x1: number, y1: number, x2: number, y2: number) => {
+        if (!fadeGrad) return;
+        fadeGrad.setAttribute('x1', String(x1));
+        fadeGrad.setAttribute('y1', String(y1));
+        fadeGrad.setAttribute('x2', String(x2));
+        fadeGrad.setAttribute('y2', String(y2));
+      };
       if (path) {
-        const d = straight
-          ? `M ${entryX} -20 V ${straightEndY}`
-          : `M ${entryX} -20 V ${bendY - r} A ${r} ${r} 0 0 0 ${entryX + r} ${bendY} H ${endX}`;
-        path.setAttribute('d', d);
+        if (straight) {
+          const fadeY = Math.max(-20, straightEndY - FADE_PX / scaleY);
+          path.setAttribute('d', `M ${entryX} -20 V ${fadeY}`);
+          fade?.setAttribute('d', `M ${entryX} ${fadeY} V ${straightEndY}`);
+          setGrad(entryX, fadeY, entryX, straightEndY);
+        } else {
+          const fadeX = Math.max(entryX + r, endX - FADE_PX / scaleX);
+          path.setAttribute('d', `M ${entryX} -20 V ${bendY - r} A ${r} ${r} 0 0 0 ${entryX + r} ${bendY} H ${fadeX}`);
+          fade?.setAttribute('d', `M ${fadeX} ${bendY} H ${endX}`);
+          setGrad(fadeX, bendY, endX, bendY);
+        }
       }
       if (dot) {
         dot.setAttribute('cx', String(straight ? entryX : endX));
