@@ -43,7 +43,10 @@
  * interakce). V `npm run dev` PHP neběží — lokálně skončí odeslání chybovou
  * hláškou, funkční test až na hostingu.
  */
+import { Image } from 'astro:assets';
 import { BOOKING_URL, WHATSAPP_URL } from '../data/entity';
+// Testovací fotka (kolečko jako na /pristup a v check-upu) — vymění se s finálními fotkami.
+import personPhoto from '../assets/photos/patrik-pristup-pece.png';
 
 const interestAreas = [
   'Finanční plán',
@@ -106,9 +109,19 @@ const bandDetails = [
           </div>
         </div>
 
+        <!-- Komu píšete (5. 10. 2026): fotka, jméno, kdy se ozvu a hodnocení — důvěra těsně před formulářem. -->
         <div class="kontakt__form-intro">
           <p class="kontakt__form-intro-label">Nebo napište</p>
-          <p class="kontakt__form-intro-text">Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</p>
+          <div class="kontakt__person">
+            <span class="kontakt__avatar">
+              <Image src={personPhoto} width={160} alt="" loading="lazy" />
+            </span>
+            <p class="kontakt__person-text">
+              <strong>Patrik Gajdadzis</strong>
+              <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
+              <span class="kontakt__person-proof"><span class="kontakt__nowrap"><span class="kontakt__person-star" aria-hidden="true">★</span> 5,0 na&nbsp;Google&nbsp;·</span> <span class="kontakt__nowrap">150+&nbsp;osobních klientů</span></span>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -769,12 +782,65 @@ const bandDetails = [
     color: var(--navy);
   }
 
-  .kontakt__form-intro-text {
+  .kontakt__person {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-top: 6px;
+  }
+
+  .kontakt__avatar {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--about-photo-1);
+  }
+
+  .kontakt__avatar :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0;
+  }
+
+  .kontakt__person-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     margin: 0;
-    font-weight: 400;
-    line-height: 1.6;
+  }
+
+  .kontakt__person-text strong {
+    font-weight: 600;
     font-size: 16px;
+    line-height: 1.4;
+    color: var(--navy);
+  }
+
+  .kontakt__person-text span {
+    font-size: 16px;
+    line-height: 1.5;
     color: var(--text-muted);
+  }
+
+  .kontakt__person-text .kontakt__person-proof {
+    margin-top: 2px;
+    font-size: 14px;
+    color: var(--text-quiet);
+  }
+
+  .kontakt__person-text .kontakt__nowrap {
+    font-size: inherit;
+    color: inherit;
+    white-space: nowrap;
+  }
+
+  .kontakt__person-text .kontakt__person-star {
+    font-size: inherit;
+    color: var(--emerald);
   }
 
   .kontakt__online-links {
