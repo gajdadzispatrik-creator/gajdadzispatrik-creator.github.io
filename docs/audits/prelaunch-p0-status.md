@@ -264,7 +264,7 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 1. **Fotky** místo zástupných obrázků: homepage hero („FOTO PATRIKA - PLACEHOLDER“), sekce O mně na homepage, `/o-mne`, `/pristup`.
 2. **Úpravy zobrazení pro mobil a desktop** (spolu s Claude — po každé úpravě `npm run check:layout` + `npm run check:typo`).
 3. ~~**Favicon + obrázek pro sdílení (OG, 1200×630)**~~ — **HOTOVO 4. 10. 2026:** logo PG (monogram z linky, `src/assets/brand/`), favicon SVG + ICO 16/32/48 + PNG 192/512 + ikona pro iPhone + `site.webmanifest`, `public/og-image.png` (og:image, twitter:card summary_large_image). Logo je i v hlavičce a patičce.
-4. ~~**Sekce Články na homepage**~~ — **SKRYTO 5. 10. 2026**, dokud nevyjde první článek: `showArticles = false` v `src/pages/index.astro`, linka jde z O mně rovnou do FAQ (`FaqSection entry="left"`). Po prvním článku přepnout `showArticles` i `HAS_ARTICLES` v `scripts/audit-layout.mjs` na `true` a doplnit článek do `ArticlesSection.astro` (viz bod 16).
+4. **Sekce Články na homepage** — dnes 3 zástupné řádky („Titulek - placeholder“), návštěvník je uvidí. Uživatel chce články dodat před spuštěním; **pokud nebudou hotové, sekci před spuštěním skrýt**.
 5. **/o-mne — doplnit nebo přepsat pasáž o začátku v oboru** (uživatel se k ní chce ještě vrátit, 4. 10. 2026). Jde o tyto tři odstavce:
    > Jeden můj známý tehdy pracoval jako ředitel v poradenské společnosti. Ozval jsem se mu a domluvili jsme se, že za ním budu po práci chodit a učit se, jak finance a finanční poradenství fungují v praxi.
    >

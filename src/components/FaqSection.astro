@@ -35,29 +35,6 @@
  * i zde kvůli konzistenci s existující sekcí, ne kvůli chybějícímu tokenu.
  */
 import { homeFaqs as faqs } from '../data/homeFaqs';
-
-/**
- * `entry="left"` — sekce Články je schovaná (index.astro `showArticles`),
- * trasa navazuje přímo na výstup AboutSection vlevo (120/96/40/24) a na
- * desktopu/notebooku se stejným oblým lomem stočí doprava k dělítku;
- * na tabletu je vstup = vlastní osa (40), jde rovně dolů jako na mobilu.
- */
-interface Props {
-  entry?: 'left' | 'right';
-}
-const { entry = 'right' } = Astro.props;
-const fromLeft = entry === 'left';
-const paths = fromLeft
-  ? {
-      desktop: 'M 120 -20 V 92 A 28 28 0 0 0 148 120 H 612 A 28 28 0 0 1 640 148 V 900',
-      laptop: 'M 96 -20 V 92 A 28 28 0 0 0 124 120 H 572 A 28 28 0 0 1 600 148 V 900',
-      tablet: 'M 40 -20 V 1000',
-    }
-  : {
-      desktop: 'M 1300 -20 V 92 A 28 28 0 0 1 1272 120 H 668 A 28 28 0 0 0 640 148 V 900',
-      laptop: 'M 1250 -20 V 92 A 28 28 0 0 1 1222 120 H 628 A 28 28 0 0 0 600 148 V 900',
-      tablet: 'M 794 -20 V 48 A 22 22 0 0 1 772 70 H 62 A 22 22 0 0 0 40 92 V 1000',
-    };
 ---
 
 <section class="faq" aria-labelledby="faq">
@@ -89,7 +66,7 @@ const paths = fromLeft
   >
     <path
       class="faq__route-path"
-      d={paths.desktop}
+      d="M 1300 -20 V 92 A 28 28 0 0 1 1272 120 H 668 A 28 28 0 0 0 640 148 V 900"
       fill="none"
       stroke="var(--line-on-dark)"
       stroke-opacity=".3"
@@ -110,7 +87,7 @@ const paths = fromLeft
   >
     <path
       class="faq__route-path"
-      d={paths.laptop}
+      d="M 1250 -20 V 92 A 28 28 0 0 1 1222 120 H 628 A 28 28 0 0 0 600 148 V 900"
       fill="none"
       stroke="var(--line-on-dark)"
       stroke-opacity=".3"
@@ -131,7 +108,7 @@ const paths = fromLeft
   >
     <path
       class="faq__route-path"
-      d={paths.tablet}
+      d="M 794 -20 V 48 A 22 22 0 0 1 772 70 H 62 A 22 22 0 0 0 40 92 V 1000"
       fill="none"
       stroke="var(--line-on-dark)"
       stroke-opacity=".3"

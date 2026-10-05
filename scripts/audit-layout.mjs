@@ -64,16 +64,12 @@ const SEAM_WIDTHS = [390, 768, 834, 1024, 1180, 1200, 1280, 1366, 1399, 1400, 14
 // se prostě přeskočí, nemusí být vyplněné všechny kategorie.
 // ---------------------------------------------------------------------------
 
-// Sekce Články na homepage je schovaná, dokud nevyjde první článek
-// (index.astro `showArticles`) — přepnout spolu s ním.
-const HAS_ARTICLES = false;
-
 const HOME_PAGE = {
   label: 'Homepage',
   path: '/',
   anchoredChecks: [
     { name: 'About — nadpis vs. tečka', routeSel: '.about__route', dotSel: '.about__dot', textSel: '.about__heading' },
-    ...(HAS_ARTICLES ? [{ name: 'Articles — nadpis vs. vstup trasy', routeSel: '.articles__route', pathEntrySel: '.articles__route-path', textSel: '.articles__heading' }] : []),
+    { name: 'Articles — nadpis vs. vstup trasy', routeSel: '.articles__route', pathEntrySel: '.articles__route-path', textSel: '.articles__heading' },
     { name: 'FAQ — otázky vs. tečka (dělítko)', routeSel: '.faq__route', dotSel: '.faq__dot', textSel: '.faq__question' },
     { name: 'Reviews — sloupec citací vs. tečka', routeSel: '.reviews__route', dotSel: '.reviews__dot', textSel: '.reviews__list' },
     {
@@ -155,12 +151,8 @@ const HOME_PAGE = {
   seamChain: [
     { from: '.benefits__route', to: '.cases__route', label: 'Benefity → Případové studie' },
     { from: '.cases__route', to: '.about__route', label: 'Případové studie → O mně' },
-    ...(HAS_ARTICLES
-      ? [
-          { from: '.about__route', to: '.articles__route', label: 'O mně → Články' },
-          { from: '.articles__route', to: '.faq__route', label: 'Články → Časté otázky' },
-        ]
-      : [{ from: '.about__route', to: '.faq__route', label: 'O mně → Časté otázky' }]),
+    { from: '.about__route', to: '.articles__route', label: 'O mně → Články' },
+    { from: '.articles__route', to: '.faq__route', label: 'Články → Časté otázky' },
     { from: '.faq__route', to: '.kontakt__route', label: 'Časté otázky → Kontakt' },
     { from: '.kontakt__route', to: '.footer__route', label: 'Kontakt → Footer' },
   ],
@@ -173,7 +165,7 @@ const HOME_PAGE = {
     // 36–37 px na 1280/1440 px). Obdélníkové porovnání by hlásilo falešný
     // překryv.
     { name: 'About', sel: '.about__heading, .about__text' },
-    ...(HAS_ARTICLES ? [{ name: 'Articles', sel: '.articles__heading, .articles__lead, .articles__topics, .articles__list, .articles__actions' }] : []),
+    { name: 'Articles', sel: '.articles__heading, .articles__lead, .articles__topics, .articles__list, .articles__actions' },
     { name: 'FAQ', sel: '.faq__heading, .faq__offer, .faq__question, .faq__answer' },
     { name: 'Cases', sel: '.cases__heading, .cases__lead, .cases__item, .cases__cta' },
     { name: 'Kontakt', sel: '.kontakt__heading, .kontakt__text, .kontakt__band, .kontakt__side, .kontakt__form' },
