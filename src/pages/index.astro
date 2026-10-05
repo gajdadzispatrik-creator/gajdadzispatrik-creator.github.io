@@ -18,6 +18,12 @@ import ContactSection from '../components/ContactSection.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { faqPage } from '../data/entity';
 import { homeFaqs } from '../data/homeFaqs';
+
+// Sekce Články je schovaná, dokud nevyjde první článek (5. 10. 2026) —
+// trasa pak jde z O mně rovnou do FAQ (FaqSection `entry="left"`).
+// Po prvním článku přepnout na true a vrátit záznamy Articles
+// v scripts/audit-layout.mjs (HAS_ARTICLES).
+const showArticles = false;
 ---
 
 <BaseLayout
@@ -39,8 +45,8 @@ import { homeFaqs } from '../data/homeFaqs';
     <BenefitsSection />
     <CasesSection />
     <AboutSection photoSrc={aboutPhoto.src} />
-    <ArticlesSection />
-    <FaqSection />
+    {showArticles && <ArticlesSection />}
+    <FaqSection entry={showArticles ? 'right' : 'left'} />
     <ContactSection />
   </main>
   <SiteFooter slot="footer" />
