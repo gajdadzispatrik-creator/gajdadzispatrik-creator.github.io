@@ -14,6 +14,8 @@ const SHORT = 'a|i|k|o|s|u|v|z|do|ke|na|od|po|pro|se|ve|za|ze';
 // („a <strong>penzi</strong>").
 const SHORT_RE = new RegExp(`(?<=^|[\\s\\u00A0(„"\\[/])(${SHORT})\\s+(?=\\S|$)`, 'gi');
 const NUMBER_RE = /(?<=\d)\s+(?=(?:\d{3}(?!\d))|[^\s\d])/g;
+// Řadová číslovka + malé písmeno („15. dne", „1. září") — ne konec věty.
+const ORDINAL_RE = /(?<=\d\.)\s+(?=\p{Ll})/gu;
 const DASH_RE = /\s+(?=[—–·]\s)/g;
 const PLACE_RE = /(Ostrav[a-zě]*)-(?=\p{Lu})/gu;
 
@@ -21,6 +23,7 @@ export function czechNbsp(text) {
   return text
     .replace(SHORT_RE, (_m, word) => word + NBSP)
     .replace(NUMBER_RE, NBSP)
+    .replace(ORDINAL_RE, NBSP)
     .replace(DASH_RE, NBSP)
     .replace(PLACE_RE, '$1-\u2060');
 }
