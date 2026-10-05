@@ -1,6 +1,6 @@
 # Finanční check-up v2 — návrh ke schválení
 
-Stav: **NÁVRH (5. 10. 2026), zostřená verze** — texty schválené Patrikem, čeká na stavbu.
+Stav: **SCHVÁLENO a postaveno 5. 10. 2026** — `src/pages/financni-check-up.astro` (data otázek, oblastí a hodnocení ve frontmatteru).
 Nahradí verzi 1 (`docs/financni-check-up-navrh.md`, dnes na webu).
 
 ## Cíle (zadání Patrika, 5. 10. 2026)

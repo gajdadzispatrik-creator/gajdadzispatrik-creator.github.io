@@ -1,3 +1,5 @@
+> **Nahrazeno verzí 2 (5. 10. 2026): docs/financni-check-up-v2.md.** Tento dokument popisuje původní verzi.
+
 # Finanční check-up — návrh textů k připomínkám
 
 Stav: **SCHVÁLENO a postaveno 4. 10. 2026** — `src/pages/financni-check-up.astro`.
