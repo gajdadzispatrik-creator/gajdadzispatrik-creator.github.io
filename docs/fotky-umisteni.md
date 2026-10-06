@@ -44,6 +44,9 @@ opencv; originály a mezivýstupy v `fotky-nove/`):
    `FINE=1.0 LOW=16 PROTECT=0 … 330 1.0 1240,1949,95,95 1225,1980,80,85
    950,1925,90,100`) a 1e. Archiv: `4-archiv.py 330:5:80` + rozdíly jasu
    `finalni/330-1d-dL.npy` a `330-1e-dL.npy`.
+   Stejně i hero na /pristup (`…_325`, 6. 10. 2026): `1c-brisko.py 325 50 0.8 5`,
+   pak `1e-rovne-tricko.py 325 1240 1340 1290 1790 0.85` (stejné SIDE/TOP/BOT/
+   KEEP/EDGE), archiv `4-archiv.py 325:5:80` + `finalni/325-1e-dL.npy`.
 2. `2-najit-vyrez.py vyrezy.json` — kde ve fotce leží schválený výřez.
 3. `3-export-web.py vyrezy.json <složka>` — WebP výřezy z `finalni/` do
    `src/assets/photos/`.
