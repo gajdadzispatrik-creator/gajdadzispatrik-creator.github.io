@@ -47,13 +47,21 @@ const placeholders: Article[] = [
   { category: 'Investice', title: null, excerpt: null, href: null, lineWidths: [100, 100, 48] },
 ];
 
-// Tři nejnovější zveřejněné články (src/content/clanky, 5. 10. 2026);
-// prázdná místa doplní zástupné řádky, dokud nejsou tři.
+// Připnuté články (přání uživatele 6. 10. 2026): na homepage trvale tři
+// články pro nového návštěvníka — poradce, hypotéka, životní pojištění.
+// Výměna = změna názvu souboru (bez .mdx) tady. Chybí-li některý (smazaný,
+// koncept), místo doplní nejnovější článek z tématu, které tam ještě není.
+const HOME_PINNED = [
+  'financni-poradce-bankar-nebo-pojistovak',
+  'nejdriv-hypoteka-potom-nemovitost',
+  'zivotni-pojisteni-za-co-platite-zbytecne',
+];
 const allPublished = await getPublishedArticles();
-// Nejdřív nejnovější článek z každého tématu (homepage ukáže víc oblastí,
-// ne tři články z jednoho tématu), zbylá místa doplní další nejnovější.
-const picked = allPublished.filter((a, i, list) => list.findIndex((b) => b.data.category === a.data.category) === i);
-const homeArticles = [...picked, ...allPublished.filter((a) => !picked.includes(a))].slice(0, 3);
+const pinned = HOME_PINNED.map((id) => allPublished.find((a) => a.id === id)).filter((a) => a !== undefined);
+const byTopic = allPublished.filter((a, i, list) => list.findIndex((b) => b.data.category === a.data.category) === i);
+const homeArticles = [...pinned, ...byTopic, ...allPublished]
+  .filter((a, i, list) => list.indexOf(a) === i)
+  .slice(0, 3);
 const published: Article[] = homeArticles.map((a) => ({
   category: czechNbsp(a.data.category),
   title: czechNbsp(a.data.title),
