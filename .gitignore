@@ -19,3 +19,6 @@ npm-debug.log*
 
 # osobní nastavení Claude Code (oprávnění) — ne pro sdílení
 .claude/settings.local.json
+
+# Originály fotek (velké, nejsou součástí webu)
+fotky-nove/

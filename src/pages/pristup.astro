@@ -86,15 +86,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
-import heroPhoto from '../assets/photos/patrik-pristup.png';
-import pecePhoto from '../assets/photos/patrik-pristup-pece.png';
+import { getImage } from 'astro:assets';
+import heroPhoto from '../assets/photos/patrik-pristup.webp';
+import pecePhoto from '../assets/photos/patrik-pristup-pece.webp';
 import { BOOKING_URL, faqPage } from '../data/entity';
 
 // Prázdné = placeholder. Jediné místo pro vložení skutečné fotografie —
 // stejný vzor jako `photoSrc` v `AboutSection.astro`.
 const photoSrc = '';
-// Hero má od 28. 9. 2026 vlastní fotku (výřez bez pozadí, zatím testovací).
-const heroPhotoSrc = heroPhoto.src;
+// Hero má od 28. 9. 2026 vlastní fotku (výřez bez pozadí, finální od 6. 10. 2026).
+// Více rozměrů (6. 10. 2026) — prohlížeč si vezme ten pro svůj displej.
+const heroImg = await getImage({ src: heroPhoto, widths: [400, 700, 950, 1136], format: 'webp', quality: 92 });
+const heroPhotoSrc = heroImg.src;
 // Kulatý portrét v kapitole Péče (od 28. 9. 2026).
 const pecePhotoSrc = pecePhoto.src;
 
@@ -210,7 +213,7 @@ const faqs: Faq[] = [
 
         <div class="pri-photo pri-hero__photo" data-reveal>
           {heroPhotoSrc ? (
-            <img src={heroPhotoSrc} alt="Patrik Gajdadzis" width="600" height="700" loading="lazy" decoding="async" />
+            <img src={heroPhotoSrc} srcset={heroImg.srcSet.attribute} sizes="(min-width: 1200px) 490px, (min-width: 768px) 370px, 100vw" alt="Patrik Gajdadzis" width="600" height="700" loading="lazy" decoding="async" />
           ) : (
             <div class="pri-photo__placeholder" aria-hidden="true">
               <div class="pri-photo__figure">

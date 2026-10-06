@@ -1070,10 +1070,10 @@ sekce 20 („ÚKOLY DO SPUŠTĚNÍ“)** — fotky, sekce Články
 na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
 `patrikgajdadzis.cz`), Search Console, GA4. Tam se udržuje, tady jen stručně:
 
-- **Fotky** jsou zatím testovací (vodoznak, nízké rozlišení). Schválené
-  usazení na desktopu je závazně zapsané v `docs/fotky-umisteni.md` (cílové
-  hodnoty + postup + `scripts/photo-metrics.mjs`) — finální fotky usadit
-  přesně podle něj. Mobil/tablet se ladí zvlášť.
+- **Fotky** jsou od 6. 10. 2026 finální (bez vodoznaku, WebP, stejné
+  rámování jako schválené testovací). Usazení je závazně zapsané
+  v `docs/fotky-umisteni.md` (cílové hodnoty + postup +
+  `scripts/photo-metrics.mjs`) — každou další výměnu usadit přesně podle něj.
 - Všechny podstránky (`/sluzby` + 5 detailů, `/pristup`, `/recenze`,
   `/o-mne`, `/clanky`, právní stránky, 404) jsou hotové. `/clanky` je od
   5. 10. 2026 zveřejněné (první tři články, odkaz v menu a patičce).
@@ -1100,7 +1100,6 @@ na homepage, nasazení na Wedos, Google profil (web `pafinga.cz` →
   sitemap (od 4. 10. 2026 automaticky `@astrojs/sitemap` → `sitemap-index.xml`,
   vyřazené stránky v `SITEMAP_EXCLUDE` v `astro.config.mjs`), `robots.txt`, strukturovaná data (JSON-LD `FinancialService`; FAQPage na stránkách s častými otázkami přes `faqPage(faqs)` z `src/data/entity.ts` — z téhož pole, které se vykresluje, u nové stránky s FAQ přidat stejně).
 - Právní/regulatorní: registr ČNB, zásady zpracování OÚ, cookies — ověřit dle §8.
-- Nahradit testovací fotky finálními (viz `docs/fotky-umisteni.md`).
 - **Příběhy v CasesSection („Výsledky místo slibů“) jsou SKUTEČNÉ** (uživatel
   potvrdil opakovaně) — nenavrhovat jejich nahrazení. ArticlesSection čerpá
   ze zveřejněných článků (od 5. 10. 2026).

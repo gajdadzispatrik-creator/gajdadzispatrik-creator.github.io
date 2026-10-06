@@ -34,7 +34,7 @@ import { Image } from 'astro:assets';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { render } from 'astro:content';
-import personPhoto from '../../assets/photos/patrik-pristup-pece.png';
+import personPhoto from '../../assets/photos/patrik-pristup-pece.webp';
 import { BOOKING_URL, PERSON_ID, SITE_URL, breadcrumbList, faqPage } from '../../data/entity';
 import {
   SERVICE_BY_TOPIC,
@@ -143,7 +143,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
         <h1>{czechNbsp(data.title)}</h1>
         <p class="art-hero__lead">{czechNbsp(data.description)}</p>
         <div class="art-meta">
-          <span class="art-meta__avatar"><Image src={personPhoto} width={120} alt="" /></span>
+          <span class="art-meta__avatar"><Image src={personPhoto} width={120} quality={92} alt="" /></span>
           <p class="art-meta__text">
             <a class="art-meta__name" href="/o-mne">Patrik Gajdadzis</a>
             <span class="art-meta__info">
@@ -239,7 +239,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
           </div>
 
           <div class="art-author">
-            <span class="art-author__avatar"><Image src={personPhoto} width={320} alt="" loading="lazy" /></span>
+            <span class="art-author__avatar"><Image src={personPhoto} width={320} quality={92} alt="" loading="lazy" /></span>
             <div class="art-author__text">
               <p class="art-author__name">Patrik Gajdadzis</p>
               <p class="art-author__role">Finanční poradce, Ostrava</p>

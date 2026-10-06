@@ -50,9 +50,10 @@
  */
 interface Props {
   photoSrc?: string;
+  photoSrcset?: string;
 }
 
-const { photoSrc = '' } = Astro.props;
+const { photoSrc = '', photoSrcset } = Astro.props;
 ---
 
 <section class="about" aria-labelledby="o-mne">
@@ -73,7 +74,7 @@ const { photoSrc = '' } = Astro.props;
 
       <div class="about__photo about__reveal-mask">
         {photoSrc ? (
-          <img src={photoSrc} alt="Patrik Gajdadzis" width="400" height="500" loading="lazy" decoding="async" />
+          <img src={photoSrc} srcset={photoSrcset} sizes="(min-width: 1440px) 580px, (min-width: 1200px) 500px, (min-width: 768px) 325px, 260px" alt="Patrik Gajdadzis" width="400" height="500" loading="lazy" decoding="async" />
         ) : (
           <div class="about__photo-placeholder" aria-hidden="true">
             <div class="about__photo-figure">

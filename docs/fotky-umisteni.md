@@ -3,11 +3,50 @@
 **Desktop schválen Patrikem 28. 9. 2026** — homepage, O mně a Přístup
 prohlédnuté a odsouhlasené na 1280, 1366, 1440, 1920 a 2560 px.
 
-Fotky na webu jsou zatím testovací (nízké rozlišení, vodoznak). Usazení níže
-schválil Patrik. **Až přijdou finální fotky (vyšší rozlišení, bez vodoznaku,
-případně jinak oříznuté), musí na webu vypadat PŘESNĚ takhle** — stejně velká
-hlava, stejné místo temene, hlavy a prstů v rámu, stejné rozpouštění.
-Rám (velikost a poloha bloku fotky) se NEMĚNÍ.
+**Finální fotky od 6. 10. 2026** (focení Vladislav Mach, originály 38 Mpx
+v `fotky-nove/` — mimo git). Výřezy mají STEJNÉ rámování jako dřívější
+testovací fotky (stejné snímky, poloha nalezená shodou bodů SIFT), jen ve
+vyšším rozlišení (hlava ~300 px zdroje), WebP kvalita 92. Poměr stran se
+nezměnil, takže CSS i hodnoty níže platí beze změny; ověřeno měřením na
+1300/1440 px (odchylka do ~2 px). Stránky posílají fotku ve více rozměrech
+(`getImage`/`Picture` + `srcset`), telefon stahuje menší verzi.
+
+**Postup z originálu** (`scripts/fotky/`, Python 3.12 + rembg + pymatting +
+opencv; originály a mezivýstupy v `fotky-nove/`):
+
+1. `1-vyriznout.py <id…>` — maska BiRefNet-portrait (celá postava + zvlášť
+   hlava a ramena), zpřesnění hran alpha mattingem, dekontaminace barev na
+   okraji (bez šedého lemu studiového pozadí), úklid drobných teček.
+   **Retuš trička:** úplet má rozteč ~3,5 px originálu a při zmenšení by
+   vytvořil moaré „pruhy“ — v plném rozlišení se proto vyhladí JEN tričko
+   (maska podle barvy), obličej, vlasy a ruce zůstávají nedotčené.
+   Výstup `bez-pozadi-v2/` (3600 px, pro web) a `bez-pozadi-plne/`
+   (plné rozlišení, archiv).
+1b. `1b-zjemnit-zahyby.py <id> 0.5` — záhyby na tričku a kalhotách zjemněné
+   o 50 % (frekvenční separace jasu; struktura látky, tvar těla a ostré
+   hrany — límec, knoflíky, logo, lemy — zůstávají).
+1c. `1c-brisko.py <id> 50 0.5 3` — břicho: stínování v oblasti pupku
+   zploštěné o 50 %, pas stažený o 3 % (u `…_312` jen stín, obrys 0 —
+   sepnuté ruce leží před břichem a posunuly by se). Schválená sada
+   (Patrik, 6. 10. 2026: „nechám si poradit“) → `fotky-nove/finalni/`.
+2. `2-najit-vyrez.py vyrezy.json` — kde ve fotce leží schválený výřez.
+3. `3-export-web.py vyrezy.json <složka>` — WebP výřezy z `finalni/` do
+   `src/assets/photos/`.
+4. `4-archiv.py 330:3 252:3 259:3 325:3 312:0` — stejná retuš v plném
+   rozlišení originálu → `fotky-nove/finalni-plne/` (pro sítě, tisk).
+
+Usazení níže schválil Patrik. **Každá další výměna fotky musí na webu
+vypadat PŘESNĚ takhle** — stejně velká hlava, stejné místo temene, hlavy
+a prstů v rámu, stejné rozpouštění. Rám (velikost a poloha bloku fotky)
+se NEMĚNÍ.
+
+| Místo | Snímek (originál) |
+|---|---|
+| Homepage — hero | `…_330` |
+| Homepage — „Za každým doporučením…" | `…_252` |
+| O mně — hero; Přístup — Péče, avatary | `…_312` |
+| O mně — Důvěra | `…_259` |
+| Přístup — hero | `…_325` |
 
 ## Postup při výměně fotky
 

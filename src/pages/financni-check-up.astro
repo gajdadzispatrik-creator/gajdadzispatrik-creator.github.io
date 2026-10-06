@@ -23,7 +23,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 import StandaloneRoute from '../components/StandaloneRoute.astro';
 import { Image } from 'astro:assets';
 import { BOOKING_URL } from '../data/entity';
-import pecePhoto from '../assets/photos/patrik-pristup-pece.png';
+import pecePhoto from '../assets/photos/patrik-pristup-pece.webp';
 
 // Nezlomitelná mezera za krátkými předložkami/spojkami a za číslem
 // (CLAUDE.md „Konvence: nezlomitelná mezera").
@@ -486,7 +486,7 @@ const config = {
             <div class="chk-offer__glow" aria-hidden="true"></div>
             <div class="chk-offer__person">
               <span class="chk-offer__avatar">
-                <Image src={pecePhoto} width={320} alt="" loading="lazy" />
+                <Image src={pecePhoto} width={320} quality={92} alt="" loading="lazy" />
               </span>
               <p>
                 <strong>Patrik Gajdadzis</strong>

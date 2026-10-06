@@ -5,16 +5,16 @@
  * kde se placeholder vyměňuje za <picture>). Pozici a rozměr bloku na
  * každém stupni dál řídí Hero.astro (`.hero :global(.hero-photo)`).
  *
- * Zdroj: výřez s průhledným pozadím (testovací 343×702 px, od 1. 10. 2026) — postava stojí přímo na
- * pozadí sekce, bez rámečku a stínu (§2.4, brief §24). Astro z něj generuje
- * AVIF/WebP ve více šířkách; obrázek je LCP, proto eager + fetchpriority.
+ * Zdroj: výřez s průhledným pozadím — postava stojí přímo na pozadí sekce,
+ * bez rámečku a stínu (§2.4, brief §24). Astro z něj generuje AVIF/WebP ve
+ * více šířkách; obrázek je LCP, proto eager + fetchpriority.
  *
- * POZOR (24. 9. 2026): dodaná fotka nese vodoznak „LAVMACH“ přes trup —
- * před spuštěním nahradit originálem bez vodoznaku (ideálně ve vyšším
- * rozlišení, ~1000 px na šířku kvůli retina displejům na desktopu).
+ * Finální fotka od 6. 10. 2026 (1029×2107, bez vodoznaku): stejný snímek
+ * a stejné rámování jako dřívější testovací 343×702, jen 3× větší — níže
+ * uvedené hodnoty v px testovací fotky proto platí dál (poměr stran shodný).
  */
 import { Picture } from 'astro:assets';
-import patrikHero from '../assets/photos/patrik-hero.png';
+import patrikHero from '../assets/photos/patrik-hero.webp';
 ---
 
 <div class="hero-photo" data-photo="photo">
@@ -22,8 +22,10 @@ import patrikHero from '../assets/photos/patrik-hero.png';
     src={patrikHero}
     alt="Patrik Gajdadzis, finanční poradce"
     formats={['avif', 'webp']}
-    widths={[343]}
-    sizes="(min-width: 1200px) 500px, (min-width: 768px) 40vw, 100vw"
+    widths={[400, 686, 1029]}
+    sizes="(min-width: 1200px) 500px, (min-width: 768px) 340px, 100vw"
+    quality={92}
+    fallbackFormat="webp"
     loading="eager"
     fetchpriority="high"
     class="hero-photo__img"

@@ -4,12 +4,12 @@
  * Malá fotka + popisek odliší osobní zkušenost od výkladu kolem.
  */
 import { Image } from 'astro:assets';
-import personPhoto from '../../assets/photos/patrik-pristup-pece.png';
+import personPhoto from '../../assets/photos/patrik-pristup-pece.webp';
 ---
 
 <aside class="praxe" aria-label="Z praxe">
   <p class="praxe__head">
-    <span class="praxe__avatar"><Image src={personPhoto} width={96} alt="" loading="lazy" /></span>
+    <span class="praxe__avatar"><Image src={personPhoto} width={96} quality={92} alt="" loading="lazy" /></span>
     <span class="praxe__label">Z&nbsp;praxe</span>
   </p>
   <div class="praxe__body"><slot /></div>

@@ -113,8 +113,9 @@ import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
 import { BOOKING_URL, SITE_URL, PERSON_ID, breadcrumbList } from '../data/entity';
+import { getImage } from 'astro:assets';
 import duveraPhoto from '../assets/photos/patrik-omne-hero.webp';
-import heroPhoto from '../assets/photos/patrik-omne-hero-top.png';
+import heroPhoto from '../assets/photos/patrik-omne-hero-top.webp';
 
 // ProfilePage (ne AboutPage) + BreadcrumbList — viz úkol „Předspouštěcí P0
 // technické dotažení“, §12. `mainEntity` odkazuje na JEDINOU Person entitu
@@ -137,9 +138,12 @@ const oMneJsonLd = [
 // stejný vzor jako `photoSrc` v `AboutSection.astro`/`pristup.astro`. Použité
 // na DVOU místech (hero, kapitola Důvěra) beze změny rozvržení při doplnění.
 // Hero má od 28. 9. 2026 vlastní fotku (výřez bez pozadí).
-const photoSrc = heroPhoto.src;
+// Více rozměrů (6. 10. 2026) — prohlížeč si vezme ten pro svůj displej.
+const heroImg = await getImage({ src: heroPhoto, widths: [400, 700, 950, 1154], format: 'webp', quality: 92 });
+const photoSrc = heroImg.src;
 // Kapitola Důvěra má od 28. 9. 2026 vlastní fotku (hero zatím placeholder).
-const duveraPhotoSrc = duveraPhoto.src;
+const duveraImg = await getImage({ src: duveraPhoto, widths: [400, 700, 1000, 1270], format: 'webp', quality: 92 });
+const duveraPhotoSrc = duveraImg.src;
 
 const MARKERS = ['zacatek', 'mint', 'klienti', 'souvislosti', 'duvera', 'projekt', 'role', 'recenze'] as const;
 
@@ -269,7 +273,7 @@ const facts: FactRow[] = [
 
         <div class="om-photo om-hero__photo" data-reveal>
           {photoSrc ? (
-            <img src={photoSrc} alt="Patrik Gajdadzis" width="373" height="714" loading="lazy" decoding="async" />
+            <img src={photoSrc} srcset={heroImg.srcSet.attribute} sizes="(min-width: 1200px) 475px, (min-width: 768px) 360px, 100vw" alt="Patrik Gajdadzis" width="373" height="714" loading="lazy" decoding="async" />
           ) : (
             <div class="om-photo__placeholder" aria-hidden="true">
               <div class="om-photo__bg"></div>
@@ -456,7 +460,7 @@ const facts: FactRow[] = [
 
             <div class="om-photo om-photo--dark om-duvera__photo" data-reveal>
               {duveraPhotoSrc ? (
-                <img src={duveraPhotoSrc} alt="Patrik Gajdadzis" width="656" height="1080" loading="lazy" decoding="async" />
+                <img src={duveraPhotoSrc} srcset={duveraImg.srcSet.attribute} sizes="(min-width: 1440px) 512px, (min-width: 1200px) 440px, (min-width: 768px) 360px, 100vw" alt="Patrik Gajdadzis" width="656" height="1080" loading="lazy" decoding="async" />
               ) : (
                 <div class="om-photo__placeholder" aria-hidden="true">
                   <div class="om-photo__bg"></div>

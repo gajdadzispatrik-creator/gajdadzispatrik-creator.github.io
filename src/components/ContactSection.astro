@@ -46,7 +46,7 @@
 import { Image } from 'astro:assets';
 import { BOOKING_URL, WHATSAPP_URL } from '../data/entity';
 // Testovací fotka (kolečko jako na /pristup a v check-upu) — vymění se s finálními fotkami.
-import personPhoto from '../assets/photos/patrik-pristup-pece.png';
+import personPhoto from '../assets/photos/patrik-pristup-pece.webp';
 
 const interestAreas = [
   'Finanční plán',
@@ -114,7 +114,7 @@ const bandDetails = [
           <p class="kontakt__form-intro-label">Nebo napište</p>
           <div class="kontakt__person">
             <span class="kontakt__avatar">
-              <Image src={personPhoto} width={320} alt="" loading="lazy" />
+              <Image src={personPhoto} width={320} quality={92} alt="" loading="lazy" />
             </span>
             <p class="kontakt__person-text">
               <strong>Patrik Gajdadzis</strong>
