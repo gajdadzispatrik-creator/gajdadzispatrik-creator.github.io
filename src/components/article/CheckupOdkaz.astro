@@ -1,20 +1,31 @@
 ---
 /**
- * Nenásilný odkaz na finanční check-up uprostřed článku.
- * V MDX: <CheckupOdkaz /> nebo <CheckupOdkaz text="Vlastní otázka?" />
+ * Nenásilný odkaz na další krok uprostřed článku. Výchozí cíl je finanční
+ * check-up; u témat, která check-up neřeší (např. porovnání hypoték), vždy
+ * vlastní `href` + `label`, aby další krok navazoval na téma článku.
+ * V MDX:
+ * <CheckupOdkaz />
+ * <CheckupOdkaz text="Nevíte, jestli máte pojištěné to důležité?" />
+ * <CheckupOdkaz text="Chcete porovnat nabídky bank?" href="/#kontakt" label="Nezávazná konzultace" />
  */
 import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
 
 interface Props {
   text?: string;
+  href?: string;
+  label?: string;
 }
-const { text = 'Nevíte, jak jste na tom vy?' } = Astro.props;
+const {
+  text = 'Nevíte, jak jste na tom vy?',
+  href = '/financni-check-up',
+  label = 'Zjistěte to za 2 minuty',
+} = Astro.props;
 ---
 
-<aside class="checkup-odkaz" aria-label="Finanční check-up">
+<aside class="checkup-odkaz" aria-label={czechNbsp(label)}>
   <p>
     <span class="checkup-odkaz__text">{czechNbsp(text)}</span>
-    <a href="/financni-check-up">Zjistěte to za&nbsp;2&nbsp;minuty</a>
+    <a href={href}>{czechNbsp(label)}</a>
   </p>
 </aside>
 
