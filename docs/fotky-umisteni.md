@@ -29,6 +29,11 @@ opencv; originály a mezivýstupy v `fotky-nove/`):
    zploštěné o 50 %, pas stažený o 3 % (u `…_312` jen stín, obrys 0 —
    sepnuté ruce leží před břichem a posunuly by se). Schválená sada
    (Patrik, 6. 10. 2026: „nechám si poradit“) → `fotky-nove/finalni/`.
+1d. `1d-vyhladit-oblast.py` — cílené vyhlazení v elipsách, u `…_330` (hero
+   homepage) rýhy od prstů v kapsách na kalhotách:
+   `FINE=1.0 LOW=22 PROTECT=0 … 330 1.0 1240,1949,95,95 1225,1980,80,85 950,1925,90,100`
+   (souřadnice při výšce 3600; poklopec a šev kapsy mimo elipsy).
+   Do archivu se přenese rozdíl jasu `finalni/330-1d-dL.npy`.
 2. `2-najit-vyrez.py vyrezy.json` — kde ve fotce leží schválený výřez.
 3. `3-export-web.py vyrezy.json <složka>` — WebP výřezy z `finalni/` do
    `src/assets/photos/`.

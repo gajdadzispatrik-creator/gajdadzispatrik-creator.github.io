@@ -2763,7 +2763,7 @@ stránce, smaragdový popisek a smaragdová kotva, žádná barevná plocha,
 
 **Text** (aktualizováno 14. 9. 2026, zadání uživatele „Upravit jednu větu na
 stránce /recenze")
-`Recenze pocházejí z mého Google profilu. Můžete si je přečíst tady na webu nebo si zobrazit můj profil a všechny recenze přímo na Googlu.`
+`Recenze pocházejí z mého Google profilu. Tady je výběr několika z nich, všechny si můžete přečíst přímo na Googlu.`
 
 *Tento text je pracovní copy a jeho veřejné použití předpokládá, že
 skutečně zprovozníme výpis odpovídajících Google recenzí.*

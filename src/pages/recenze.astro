@@ -30,7 +30,7 @@
  * metadatech recenzí NEPOUŽÍVAJÍ, zadání §7 to výslovně zakazuje).
  * „Zobrazit další recenze" (od 24. 9. 2026) NEodkrývá další položky na
  * stránce, ale otevírá Google profil v nové kartě — na webu jsou jen první
- * `REVIEWS_SHOWN` recenze, viz komentář u konstanty.
+ * vybrané recenze, viz komentář u `FEATURED_AUTHORS`.
  *
  * Souhrnné „X recenzí · 5,0 · Google hodnocení" pole (`.rec-summary`) bylo
  * na přání uživatele 14. 9. 2026 odstraněno bez náhrady — číslo recenzí se
@@ -48,6 +48,7 @@ import Header from '../components/Header.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
 import { BOOKING_URL, GOOGLE_REVIEWS_URL } from '../data/entity';
+import { czechNbsp } from '../lib/rehype-czech-nbsp.mjs';
 
 interface Review {
   author: string | null;
@@ -414,12 +415,18 @@ const reviews: Review[] = [
   },
 ];
 
-// Na webu se zobrazuje jen prvních pár recenzí, zbytek je na Google profilu
-// (rozhodnutí uživatele 24. 9. 2026 — nové recenze se na web nedoplňují,
-// „Zobrazit další recenze" otevírá profil). Počet recenzí se proto nikde na
-// webu neuvádí. Ostatní položky pole zůstávají jako zásoba, kdyby se počet
-// zobrazených měnil.
-const REVIEWS_SHOWN = 3;
+// Na webu je výběr 5 recenzí, zbytek je na Google profilu (rozhodnutí
+// uživatele 24. 9. 2026 — nové recenze se na web nedoplňují, „Zobrazit další
+// recenze" otevírá profil; 6. 10. 2026 rozšířeno ze 3 na vybraných 5). Výběr
+// tak, aby každá ukázala něco jiného: poradce ≠ prodavač produktů, dlouhodobá
+// spolupráce a úspora, hypotéka i v těžké situaci, jeden člověk na všechno,
+// zajištění rodiny. Počet recenzí se nikde na webu neuvádí.
+const FEATURED_AUTHORS = ['Karel Valenta', 'Stony Ka', 'Sandra Kleiner', 'Denis Ilyushkov', 'Jakub Rychtecký'];
+const shownReviews = FEATURED_AUTHORS.map((name) => {
+  const review = reviews.find((r) => r.author === name);
+  if (!review) throw new Error(`Recenze „${name}“ v poli reviews chybí.`);
+  return review;
+});
 ---
 
 <BaseLayout
@@ -516,8 +523,8 @@ const REVIEWS_SHOWN = 3;
           </div>
           <div class="rec-chapter__support-col" data-reveal>
             <p class="rec-support__text">
-              Recenze pocházejí z&nbsp;mého Google profilu. Můžete si je přečíst tady na&nbsp;webu nebo si zobrazit
-              můj profil a&nbsp;všechny recenze přímo na&nbsp;Googlu.
+              Recenze pocházejí z&nbsp;mého Google profilu. Tady je výběr několika z&nbsp;nich,
+              všechny si můžete přečíst přímo na&nbsp;Googlu.
             </p>
             <a class="rec-google-link" href={GOOGLE_PROFILE_URL} target="_blank" rel="noopener noreferrer">
               <span>Zobrazit na&nbsp;Google</span>
@@ -532,11 +539,11 @@ const REVIEWS_SHOWN = 3;
         <div class="rec-reviews" id="recenze-vypis">
           <ul class="rec-reviews__list">
             {
-              reviews.slice(0, REVIEWS_SHOWN).map((review) => (
+              shownReviews.map((review) => (
                 <li class="rec-review">
                   {review.text ? (
                     <blockquote class="rec-review__quote">
-                      <p>{review.text}</p>
+                      <p>{czechNbsp(review.text)}</p>
                       <footer class="rec-review__footer">
                         <cite>{review.author}</cite>
                         {review.rating != null && (

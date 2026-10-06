@@ -1730,8 +1730,13 @@ const faqs: Faq[] = [
       height: calc(100% * 1.064);
       object-fit: cover;
       object-position: 50% 0;
-      -webkit-mask-image: linear-gradient(180deg, #000 86%, rgba(0, 0, 0, .96) 87%, rgba(0, 0, 0, .85) 88%, rgba(0, 0, 0, .69) 89%, rgba(0, 0, 0, .50) 90%, rgba(0, 0, 0, .31) 91%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 93%, transparent 94%);
-              mask-image: linear-gradient(180deg, #000 86%, rgba(0, 0, 0, .96) 87%, rgba(0, 0, 0, .85) 88%, rgba(0, 0, 0, .69) 89%, rgba(0, 0, 0, .50) 90%, rgba(0, 0, 0, .31) 91%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 93%, transparent 94%);
+      /* Delší rozpuštění od 77 % (6. 10. 2026, jako homepage a /o-mne), ale volně
+         visící ruka (vlevo, prsty na 86,4 %) zůstává celá: vlevo platí
+         původní kratší rozpuštění. Maska = nové ∪ (původní ∩ levý pruh). */
+      -webkit-mask-image: linear-gradient(180deg, #000 77%, rgba(0, 0, 0, .96) 79.12%, rgba(0, 0, 0, .85) 81.25%, rgba(0, 0, 0, .69) 83.38%, rgba(0, 0, 0, .50) 85.50%, rgba(0, 0, 0, .31) 87.62%, rgba(0, 0, 0, .15) 89.75%, rgba(0, 0, 0, .04) 91.88%, transparent 94%), linear-gradient(180deg, #000 86%, rgba(0, 0, 0, .96) 87%, rgba(0, 0, 0, .85) 88%, rgba(0, 0, 0, .69) 89%, rgba(0, 0, 0, .50) 90%, rgba(0, 0, 0, .31) 91%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 93%, transparent 94%), linear-gradient(90deg, #000 15%, transparent 18%);
+      -webkit-mask-composite: source-over, source-in;
+              mask-image: linear-gradient(180deg, #000 77%, rgba(0, 0, 0, .96) 79.12%, rgba(0, 0, 0, .85) 81.25%, rgba(0, 0, 0, .69) 83.38%, rgba(0, 0, 0, .50) 85.50%, rgba(0, 0, 0, .31) 87.62%, rgba(0, 0, 0, .15) 89.75%, rgba(0, 0, 0, .04) 91.88%, transparent 94%), linear-gradient(180deg, #000 86%, rgba(0, 0, 0, .96) 87%, rgba(0, 0, 0, .85) 88%, rgba(0, 0, 0, .69) 89%, rgba(0, 0, 0, .50) 90%, rgba(0, 0, 0, .31) 91%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 93%, transparent 94%), linear-gradient(90deg, #000 15%, transparent 18%);
+              mask-composite: add, intersect;
     }
   }
 
@@ -1828,8 +1833,13 @@ const faqs: Faq[] = [
       height: calc(100% * 1.069);
       object-fit: contain;
       object-position: 50% 10px;
-      -webkit-mask-image: linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.3%, rgba(0, 0, 0, .85) 89%, rgba(0, 0, 0, .69) 89.8%, rgba(0, 0, 0, .50) 90.5%, rgba(0, 0, 0, .31) 91.3%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 92.8%, transparent 93.5%);
-              mask-image: linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.3%, rgba(0, 0, 0, .85) 89%, rgba(0, 0, 0, .69) 89.8%, rgba(0, 0, 0, .50) 90.5%, rgba(0, 0, 0, .31) 91.3%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 92.8%, transparent 93.5%);
+      /* Delší rozpuštění od 77 % (6. 10. 2026, jako homepage a /o-mne), ale volně
+         visící ruka (vlevo, prsty na 86,4 %) zůstává celá: vlevo platí
+         původní kratší rozpuštění. Maska = nové ∪ (původní ∩ levý pruh). */
+      -webkit-mask-image: linear-gradient(180deg, #000 77%, rgba(0, 0, 0, .96) 79.06%, rgba(0, 0, 0, .85) 81.12%, rgba(0, 0, 0, .69) 83.19%, rgba(0, 0, 0, .50) 85.25%, rgba(0, 0, 0, .31) 87.31%, rgba(0, 0, 0, .15) 89.38%, rgba(0, 0, 0, .04) 91.44%, transparent 93.50%), linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.3%, rgba(0, 0, 0, .85) 89%, rgba(0, 0, 0, .69) 89.8%, rgba(0, 0, 0, .50) 90.5%, rgba(0, 0, 0, .31) 91.3%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 92.8%, transparent 93.5%), linear-gradient(90deg, #000 15%, transparent 18%);
+      -webkit-mask-composite: source-over, source-in;
+              mask-image: linear-gradient(180deg, #000 77%, rgba(0, 0, 0, .96) 79.06%, rgba(0, 0, 0, .85) 81.12%, rgba(0, 0, 0, .69) 83.19%, rgba(0, 0, 0, .50) 85.25%, rgba(0, 0, 0, .31) 87.31%, rgba(0, 0, 0, .15) 89.38%, rgba(0, 0, 0, .04) 91.44%, transparent 93.50%), linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.3%, rgba(0, 0, 0, .85) 89%, rgba(0, 0, 0, .69) 89.8%, rgba(0, 0, 0, .50) 90.5%, rgba(0, 0, 0, .31) 91.3%, rgba(0, 0, 0, .15) 92%, rgba(0, 0, 0, .04) 92.8%, transparent 93.5%), linear-gradient(90deg, #000 15%, transparent 18%);
+              mask-composite: add, intersect;
     }
 
     /* 160 (dřív 100) — rozpuštěné nohy hero fotky jinak končily 2 px nad
@@ -2034,8 +2044,13 @@ const faqs: Faq[] = [
     .pri-hero__photo img {
       height: calc(100% * 1.0406);
       object-position: 50% 11px;
-      -webkit-mask-image: linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.6%, rgba(0, 0, 0, .85) 89.6%, rgba(0, 0, 0, .69) 90.7%, rgba(0, 0, 0, .50) 91.8%, rgba(0, 0, 0, .31) 92.8%, rgba(0, 0, 0, .15) 93.9%, rgba(0, 0, 0, .04) 94.9%, transparent 96%);
-              mask-image: linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.6%, rgba(0, 0, 0, .85) 89.6%, rgba(0, 0, 0, .69) 90.7%, rgba(0, 0, 0, .50) 91.8%, rgba(0, 0, 0, .31) 92.8%, rgba(0, 0, 0, .15) 93.9%, rgba(0, 0, 0, .04) 94.9%, transparent 96%);
+      /* Delší rozpuštění od 77 % (6. 10. 2026, jako homepage a /o-mne), ale volně
+         visící ruka (vlevo, prsty na 86,4 %) zůstává celá: vlevo platí
+         původní kratší rozpuštění. Maska = nové ∪ (původní ∩ levý pruh). */
+      -webkit-mask-image: linear-gradient(180deg, #000 77%, rgba(0, 0, 0, .96) 79.38%, rgba(0, 0, 0, .85) 81.75%, rgba(0, 0, 0, .69) 84.12%, rgba(0, 0, 0, .50) 86.50%, rgba(0, 0, 0, .31) 88.88%, rgba(0, 0, 0, .15) 91.25%, rgba(0, 0, 0, .04) 93.62%, transparent 96%), linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.6%, rgba(0, 0, 0, .85) 89.6%, rgba(0, 0, 0, .69) 90.7%, rgba(0, 0, 0, .50) 91.8%, rgba(0, 0, 0, .31) 92.8%, rgba(0, 0, 0, .15) 93.9%, rgba(0, 0, 0, .04) 94.9%, transparent 96%), linear-gradient(90deg, #000 15%, transparent 18%);
+      -webkit-mask-composite: source-over, source-in;
+              mask-image: linear-gradient(180deg, #000 77%, rgba(0, 0, 0, .96) 79.38%, rgba(0, 0, 0, .85) 81.75%, rgba(0, 0, 0, .69) 84.12%, rgba(0, 0, 0, .50) 86.50%, rgba(0, 0, 0, .31) 88.88%, rgba(0, 0, 0, .15) 91.25%, rgba(0, 0, 0, .04) 93.62%, transparent 96%), linear-gradient(180deg, #000 87.5%, rgba(0, 0, 0, .96) 88.6%, rgba(0, 0, 0, .85) 89.6%, rgba(0, 0, 0, .69) 90.7%, rgba(0, 0, 0, .50) 91.8%, rgba(0, 0, 0, .31) 92.8%, rgba(0, 0, 0, .15) 93.9%, rgba(0, 0, 0, .04) 94.9%, transparent 96%), linear-gradient(90deg, #000 15%, transparent 18%);
+              mask-composite: add, intersect;
     }
 
     /* 180 (dřív 120) — stejný důvod jako notebook výše. */
