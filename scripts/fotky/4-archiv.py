@@ -4,7 +4,7 @@ v plném rozlišení originálu (fotky-nove/bez-pozadi-plne → fotky-nove/final
 Tónová retuš je plynulá (žádný jemný detail), takže se rozdíl jasu
 spočítá na 3600 px a zvětší na originál; jemná kresba originálu zůstane.
 Posun obrysu (liquify) se přepočítá ve stejném vzorci v plném rozlišení.
-Použití: python 4-archiv.py <id>:<obrys %> [...]   např. 330:3 312:0"""
+Použití: python 4-archiv.py <id>:<obrys %>[:<stín %>] [...]   např. 330:5:80 312:0"""
 import sys
 import numpy as np, cv2
 from PIL import Image
@@ -18,10 +18,11 @@ def L_of(rgb8):
 
 
 for arg in sys.argv[1:]:
-    src, obrys = arg.split(":")
-    obrys = float(obrys)
+    parts = arg.split(":")
+    src, obrys = parts[0], float(parts[1])
+    stin = parts[2] if len(parts) > 2 else "50"
     before = np.asarray(Image.open(f"{ROOT}/bez-pozadi-v2/{src}.png").convert("RGBA"))
-    after = np.asarray(Image.open(f"{ROOT}/bez-pozadi-v3/{src}-50-b50-o0.png").convert("RGBA"))
+    after = np.asarray(Image.open(f"{ROOT}/bez-pozadi-v3/{src}-50-b{stin}-o0.png").convert("RGBA"))
     dL = L_of(after[..., :3]) - L_of(before[..., :3])          # jen tónová změna, bez posunu
 
     full = np.asarray(Image.open(f"{ROOT}/bez-pozadi-plne/{src}.png").convert("RGBA"))

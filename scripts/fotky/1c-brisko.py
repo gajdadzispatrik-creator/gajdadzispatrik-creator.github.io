@@ -9,7 +9,7 @@
 Vstup:  fotky-nove/bez-pozadi-v3/<id>-<zahyby>.png
 Výstup: fotky-nove/bez-pozadi-v3/<id>-<zahyby>-b<stin>-o<obrys>.png
 Použití: python 1c-brisko.py <id> <zahyby%> <stin 0–1> <obrys %>"""
-import sys
+import sys, os
 import numpy as np, cv2
 from PIL import Image
 
@@ -33,7 +33,9 @@ cy = top + 0.74 * (bot - top)
 row = torso[int(cy)]
 lx, rx = np.where(row)[0][[0, -1]]
 cx = (lx + rx) / 2
-ex, ey = (rx - lx) * 0.42, (bot - top) * 0.16
+EX = float(os.environ.get('EX', 0.42))   # šířka oblasti břicha (podíl šířky trupu)
+EY = float(os.environ.get('EY', 0.16))   # výška oblasti (podíl výšky trička)
+ex, ey = (rx - lx) * EX, (bot - top) * EY
 Y, X = np.mgrid[0:H, 0:W].astype(np.float32)
 
 # 1) stínování
@@ -65,6 +67,6 @@ if obrys > 0:
     im = cv2.remap(im, mapx, Y, interpolation=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT)
 
 out = np.clip(im + 0.5, 0, 255).astype(np.uint8)
-name = f"{src}-{zah}-b{int(stin * 100)}-o{obrys:g}"
+name = f"{src}-{zah}-b{int(stin * 100)}-o{obrys:g}" + os.environ.get("SUFFIX", "")
 Image.fromarray(out, "RGBA").save(f"{ROOT}/bez-pozadi-v3/{name}.png")
 print(name, "pupek y=%d x=%d" % (cy, cx))

@@ -2,7 +2,7 @@
 kalhotami u kapes). Stejný princip jako 1b (frekvenční separace jasu), ale
 silněji a jen v elipsách; kůže a ostré hrany (šev kapsy, poklopec) se chrání.
 Upravuje fotky-nove/finalni/<id>.png na místě (záloha <id>-pred-1d.png).
-Použití: python 1d-vyhladit-oblast.py <id> <sila> cx,cy,rx,ry [cx,cy,rx,ry …]
+Použití: python 1d-vyhladit-oblast.py <id> <sila> cx,cy,rx,ry[,k] [… ]  (k = síla elipsy 0–1)
 (souřadnice v px pracovního rozlišení 3600)"""
 import sys, os, shutil
 import numpy as np, cv2
@@ -20,15 +20,20 @@ rgb = im[..., :3]
 H, W = rgb.shape[:2]
 hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV_FULL).astype(np.float32)
 h, s = hsv[..., 0] * 360 / 255, hsv[..., 1] / 255
-cloth = ((s < 0.22) & ~((h > 5) & (h < 45) & (s > 0.18)) & (im[..., 3] > 250)).astype(np.uint8)
+v = hsv[..., 2] / 255
+pants = (s < 0.22) & ~((h > 5) & (h < 45) & (s > 0.18))
+shirt = (h > 185) & (h < 230) & (s > 0.07) & (s < 0.65) & (v > 0.40)
+cloth = ((pants | shirt) & (im[..., 3] > 250)).astype(np.uint8)
 cloth = cv2.erode(cloth, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
 m = cv2.GaussianBlur(cloth.astype(np.float32), (0, 0), 3)
 
 Y, X = np.mgrid[0:H, 0:W].astype(np.float32)
 area = np.zeros((H, W), np.float32)
-for cx, cy, rx, ry in ells:
+for e in ells:                     # cx,cy,rx,ry[,síla elipsy]
+    cx, cy, rx, ry = e[:4]
+    k = e[4] if len(e) > 4 else 1.0
     d = ((X - cx) / rx) ** 2 + ((Y - cy) / ry) ** 2
-    area = np.maximum(area, np.clip(1.5 - d, 0, 1) ** 1.5)
+    area = np.maximum(area, k * np.clip(1.5 - d, 0, 1) ** 1.5)
 
 lab = cv2.cvtColor(rgb.astype(np.float32) / 255, cv2.COLOR_RGB2LAB)
 L = lab[..., 0]
