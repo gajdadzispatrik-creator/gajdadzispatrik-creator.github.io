@@ -50,7 +50,11 @@ const placeholders: Article[] = [
 // Tři nejnovější zveřejněné články (src/content/clanky, 5. 10. 2026);
 // prázdná místa doplní zástupné řádky, dokud nejsou tři.
 const allPublished = await getPublishedArticles();
-const published: Article[] = allPublished.slice(0, 3).map((a) => ({
+// Nejdřív nejnovější článek z každého tématu (homepage ukáže víc oblastí,
+// ne tři články z jednoho tématu), zbylá místa doplní další nejnovější.
+const picked = allPublished.filter((a, i, list) => list.findIndex((b) => b.data.category === a.data.category) === i);
+const homeArticles = [...picked, ...allPublished.filter((a) => !picked.includes(a))].slice(0, 3);
+const published: Article[] = homeArticles.map((a) => ({
   category: czechNbsp(a.data.category),
   title: czechNbsp(a.data.title),
   excerpt: czechNbsp(a.data.description),
