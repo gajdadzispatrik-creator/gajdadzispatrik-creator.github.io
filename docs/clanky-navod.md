@@ -21,6 +21,7 @@ Bez diakritiky, slova oddělená pomlčkou.
 ```yaml
 ---
 title: 'Nadpis článku'              # v uvozovkách, když obsahuje dvojtečku
+homeTitle: Kratší nadpis            # nepovinné: jen pro kartu na homepage, když se plný nevejde na 2 řádky
 description: Perex pod nadpisem, zároveň popis pro Google (do ~160 znaků).
 category: Pojištění                  # Hypotéky a bydlení | Finanční plánování | Investice | Pojištění | Penze
 publishedAt: 2026-10-05

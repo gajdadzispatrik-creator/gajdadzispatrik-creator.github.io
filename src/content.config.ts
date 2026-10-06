@@ -16,6 +16,8 @@ const clanky = defineCollection({
   schema: () =>
     z.object({
       title: z.string(),
+      /** Kratší nadpis jen pro kartu na homepage, když se plný nevejde na 2 řádky. */
+      homeTitle: z.string().optional(),
       /** Perex pod nadpisem a zároveň popis pro Google a sdílení (do ~160 znaků). */
       description: z.string().max(200),
       category: z.enum(ARTICLE_TOPICS),

@@ -64,7 +64,7 @@ const homeArticles = [...pinned, ...byTopic, ...allPublished]
   .slice(0, 3);
 const published: Article[] = homeArticles.map((a) => ({
   category: czechNbsp(a.data.category),
-  title: czechNbsp(a.data.title),
+  title: czechNbsp(a.data.homeTitle ?? a.data.title),
   excerpt: czechNbsp(a.data.description),
   href: articleHref(a),
   minutes: readingMinutes(a),

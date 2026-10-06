@@ -67,6 +67,11 @@ const SEAM_WIDTHS = [390, 768, 834, 1024, 1180, 1200, 1280, 1366, 1399, 1400, 14
 const HOME_PAGE = {
   label: 'Homepage',
   path: '/',
+  // Články na polici stojí dole — delší nadpis by článek vytáhl nad ostatní.
+  // Nadpis nad 2 řádky → doplnit článku `homeTitle` (docs/clanky-navod.md).
+  lineLimitChecks: [
+    { name: 'Články — nadpis na homepage max. 2 řádky', selector: '.articles__title', maxLines: 2, widths: [1200, 1280, 1366, 1399, 1400, 1440, 1920] },
+  ],
   anchoredChecks: [
     { name: 'About — nadpis vs. tečka', routeSel: '.about__route', dotSel: '.about__dot', textSel: '.about__heading' },
     { name: 'Articles — nadpis vs. vstup trasy', routeSel: '.articles__route', pathEntrySel: '.articles__route-path', textSel: '.articles__heading' },
@@ -592,6 +597,21 @@ async function auditPage(page, cfg) {
       `${prefix}: ${check.name}`,
       `odstup mezi prvky ${lefts.map((l) => `${l.diff.toFixed(1)}@${l.w}px`).join(' / ')} (rozdíl ${drift.toFixed(1)} px)`
     );
+  }
+
+  // --- Počet řádků textu (např. nadpisy článků na homepage) ---
+  for (const check of cfg.lineLimitChecks || []) {
+    const over = [];
+    for (const w of check.widths) {
+      await setWidth(page, w);
+      const lines = await page.evaluate((sel) =>
+        Array.from(document.querySelectorAll(sel)).map((el) => ({
+          text: el.textContent.trim(),
+          lines: Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight)),
+        })), check.selector);
+      for (const l of lines) if (l.lines > check.maxLines) over.push(`„${l.text}“ ${l.lines} řádky@${w}px`);
+    }
+    report(over.length === 0, `${prefix}: ${check.name}`, over.length ? over.join(' / ') : `${check.widths.length} šířek`);
   }
 }
 
