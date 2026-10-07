@@ -18,6 +18,9 @@ const clanky = defineCollection({
       title: z.string(),
       /** Kratší nadpis jen pro kartu na homepage, když se plný nevejde na 2 řádky. */
       homeTitle: z.string().optional(),
+      /** Krátký nadpis na obrázek pro sdílení (2–3 řádky velkým písmem); plný nadpis
+       *  sociální sítě vypíšou pod obrázek samy. Chybí-li, použije se `title`. */
+      shareTitle: z.string().max(60).optional(),
       /** Perex pod nadpisem a zároveň popis pro Google a sdílení (do ~160 znaků). */
       description: z.string().max(200),
       category: z.enum(ARTICLE_TOPICS),

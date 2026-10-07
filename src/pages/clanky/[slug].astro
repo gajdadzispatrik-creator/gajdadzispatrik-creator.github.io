@@ -240,10 +240,10 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
 
           <div class="art-author">
             <span class="art-author__avatar"><Image src={personPhoto} width={320} quality={92} alt="" loading="lazy" /></span>
-            <div class="art-author__text">
-              <p class="art-author__name">Patrik Gajdadzis</p>
-              <p class="art-author__role">Finanční poradce, Ostrava</p>
-            </div>
+            <p class="art-author__text">
+              <strong>Patrik Gajdadzis</strong>
+              <span>Finanční poradce, Ostrava</span>
+            </p>
             <p class="art-author__proof">
               <span class="art-nowrap"><span class="art-author__star" aria-hidden="true">★</span> 5,0 na&nbsp;Google&nbsp;·</span>{' '}
               <span class="art-nowrap">150+ osobních klientů</span>
@@ -878,6 +878,13 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     margin-top: 32px;
   }
 
+  /* Panel hned pod nadpisem (typicky seznam k odškrtání): platí mezera
+     nadpis → obsah 14 px, ne oddělení panelu od textu (check:spacing). */
+  .art-prose > :global(h2 + :is(aside, figure, section, .table-scroll)),
+  .art-prose > :global(h3 + :is(aside, figure, section, .table-scroll)) {
+    margin-top: 14px;
+  }
+
   .art-prose :global(strong) {
     font-weight: 700;
     color: var(--navy);
@@ -1203,26 +1210,25 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     height: 64px;
   }
 
+  /* Jméno + popisek = jeden řádek „podpisu“ (stejný zápis i mezera 2 px
+     jako kontaktní osoba v ContactSection.astro), ne nadpis → text. */
   .art-author__text {
     grid-column: 2;
     grid-row: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
-  }
-
-  .art-author__text p {
     margin: 0;
   }
 
-  .art-author__name {
+  .art-author__text strong {
     font-weight: 600;
     font-size: 16px;
     line-height: 1.4;
     color: var(--navy);
   }
 
-  .art-author__role {
+  .art-author__text span {
     font-size: 16px;
     line-height: 1.5;
     color: var(--text-muted);
@@ -1488,7 +1494,8 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
       margin-top: 40px;
     }
 
-    .art-prose > :global(h2 + *) {
+    .art-prose > :global(h2 + *),
+    .art-prose > :global(h2 + :is(aside, figure, section, .table-scroll)) {
       margin-top: 18px;
     }
 
@@ -1597,7 +1604,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
       height: 88px;
     }
 
-    .art-author__name {
+    .art-author__text strong {
       font-size: 17px;
     }
 

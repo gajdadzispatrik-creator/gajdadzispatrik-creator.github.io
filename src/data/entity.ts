@@ -13,6 +13,7 @@
  */
 export const SITE_URL = 'https://patrikgajdadzis.cz';
 export const PERSON_ID = `${SITE_URL}/#person`;
+export const PERSON_IMAGE = `${SITE_URL}/patrik-gajdadzis.jpg`;
 export const WEBSITE_ID = `${SITE_URL}/#website`;
 export const BUSINESS_ID = `${SITE_URL}/#business`;
 
@@ -68,6 +69,9 @@ export const personEntity = {
   '@id': PERSON_ID,
   name: 'Patrik Gajdadzis',
   url: `${SITE_URL}/`,
+  // Portrét na stálé adrese (public/, ne hashovaný asset) — Google ho může
+  // ukázat u jména. Výřez z finální hero fotky (6. 10. 2026).
+  image: PERSON_IMAGE,
   telephone: '+420775217721',
   email: 'patrik@mintfinance.cz',
   jobTitle: 'Finanční poradce',
@@ -97,6 +101,7 @@ export const businessEntity = {
   '@type': 'FinancialService',
   '@id': BUSINESS_ID,
   name: 'Patrik Gajdadzis | Hypotéky a finance',
+  image: PERSON_IMAGE,
   url: `${SITE_URL}/`,
   telephone: '+420775217721',
   email: 'patrik@mintfinance.cz',

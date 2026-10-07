@@ -22,6 +22,7 @@ Bez diakritiky, slova oddělená pomlčkou.
 ---
 title: 'Nadpis článku'              # v uvozovkách, když obsahuje dvojtečku
 homeTitle: Kratší nadpis            # nepovinné: jen pro kartu na homepage, když se plný nevejde na 2 řádky
+shareTitle: Krátký hook na obrázek  # VŽDY u nového článku (max. 60 znaků, ideálně do ~45): na obrázek pro sdílení
 description: Perex pod nadpisem, zároveň popis pro Google (do ~160 znaků).
 category: Pojištění                  # Hypotéky a bydlení | Finanční plánování | Investice | Pojištění | Penze
 publishedAt: 2026-10-05
@@ -121,7 +122,19 @@ Komponentu vždy na samostatný řádek s prázdným řádkem před i za
 Každý článek má vlastní obrázek s nadpisem (`public/og/<soubor>.png`).
 Po přidání článku nebo změně nadpisu: běžící `npm run dev` + `npm run og`
 (jen jeden: `ONLY=<soubor> npm run og`). Předloha: `src/pages/og/[slug].astro`
-(jen při vývoji). Bez obrázku se použije výchozí `og-image.png`.
+(jen při vývoji). Bez obrázku se použije výchozí `og-image.png`
+(`npm run og:web`, předloha `src/pages/og-web/[variant].astro`).
+
+**Krátký nadpis pro sdílení (`shareTitle`) — povinný krok u každého nového
+článku** (Patrik, 6. 10. 2026): sítě vypíšou plný nadpis pod obrázek samy,
+na obrázek patří krátká, úderná verze na 2–3 řádky velkým písmem (např.
+„Nejdřív hypotéka, potom nemovitost“). Navrhnout ji spolu s článkem.
+
+Od 6. 10. 2026 je na obrázcích vpravo Patrikova fotka. **Pravidlo
+(`scripts/lib/og-fit.mjs`):** text musí být aspoň 96 px od skutečného obrysu
+postavy (měří se z průhlednosti fotky v každém řádku textu) a nadpis aspoň
+32 px nad patičkou. Když to nesedí, skript nadpis zmenšuje po 2 px; když
+nesedí ani při 36 px, generování skončí chybou — pak nadpis zkrátit.
 
 ## Kontrola před zveřejněním
 

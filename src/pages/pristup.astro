@@ -1714,14 +1714,23 @@ const faqs: Faq[] = [
     .pri-hero__photo {
       position: absolute;
       top: clamp(72px, calc(72px + 0.060150 * (100vw - 834px)), 104px);
+      /* Šířka postavy: min. 334 px (užší blok pod ~900 px ořezával cover-em
+         boky fotky a uřízl loket, 28. 9. 2026). Od ~1060 px roste pomaleji
+         (druhý člen min()): výška bloku roste se šířkou okna jen o ~0,19 px
+         na px, takže při plném tempu by visící ruka přerostla spodní hranu
+         bloku (iPad Air na šířku 1180 px — prsty uříznuté, 6. 10. 2026).
+         Druhý člen = (výška bloku − 24 px) × 0,624: prsty končí na 86,4 %
+         výšky fotky (poměr stran 0,539), tj. vždy ≥ 24 px nad spodní hranou. */
+      --pri-photo-w: min(
+        clamp(334px, calc(312px + 0.289474 * (100vw - 834px)), 466px),
+        calc(349.6px + 0.1214 * (100vw - 834px))
+      );
       left: min(
         clamp(560px, calc(560px + 0.639098 * (100vw - 834px)), 900px),
-        calc(100% - clamp(334px, calc(312px + 0.289474 * (100vw - 834px)), 466px) - 8px)
+        calc(100% - var(--pri-photo-w) - 8px)
       );
       bottom: 0;
-      /* Min. 334 px (ne 312): užší blok pod ~900 px ořezával cover-em boky
-         fotky a uřízl loket vpravo (28. 9. 2026). */
-      width: clamp(334px, calc(312px + 0.289474 * (100vw - 834px)), 466px);
+      width: var(--pri-photo-w);
       height: auto;
       margin: 0;
     }

@@ -682,30 +682,48 @@ const ARTICLES_PAGE_SIZE = 6;
   const topicsNav = document.querySelector('.cla-topics');
   const articlesList = document.querySelector('[data-articles-list]');
   const emptyFiltered = document.querySelector('[data-empty-filtered]');
-  if (topicsNav && articlesList) {
-    const buttons = Array.from(topicsNav.querySelectorAll('.cla-topics__btn')) as HTMLButtonElement[];
+  // Filtr témat a „Zobrazit další články" sdílí jeden stav (oprava 6. 10. 2026,
+  // test check:funkce): dřív filtr ignoroval stránkování — „Všechna témata"
+  // ukázalo všechno a tlačítko zůstalo, při tématu by „další" odkrylo i články
+  // z jiných témat. Teď: z článků daného tématu je vidět prvních `limit`,
+  // tlačítko jen když jich je víc; změna tématu vrátí limit na začátek.
+  // Stejná hodnota jako `ARTICLES_PAGE_SIZE` ve frontmatteru (samostatný kontext).
+  const ARTICLES_INCREMENT = 6;
+  const moreBtn = document.querySelector('[data-articles-more]') as HTMLButtonElement | null;
+  if (articlesList) {
+    const buttons = topicsNav ? (Array.from(topicsNav.querySelectorAll('.cla-topics__btn')) as HTMLButtonElement[]) : [];
     const items = Array.from(articlesList.querySelectorAll('.cla-article')) as HTMLElement[];
+    let topic = '';
+    let limit = ARTICLES_INCREMENT;
+
+    const render = () => {
+      const matching = items.filter((item) => !topic || item.dataset.category === topic);
+      items.forEach((item) => {
+        const idx = matching.indexOf(item);
+        item.hidden = idx < 0 || idx >= limit;
+        item.classList.toggle('is-first', idx === 0);
+      });
+      if (moreBtn) moreBtn.hidden = matching.length <= limit;
+      if (emptyFiltered) (emptyFiltered as HTMLElement).hidden = matching.length > 0;
+    };
 
     buttons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const topic = btn.dataset.topic ?? '';
+        topic = btn.dataset.topic ?? '';
+        limit = ARTICLES_INCREMENT;
         buttons.forEach((b) => {
           const isActive = b === btn;
           b.classList.toggle('is-active', isActive);
           if (isActive) b.setAttribute('aria-current', 'true');
           else b.removeAttribute('aria-current');
         });
-
-        let visibleCount = 0;
-        items.forEach((item) => {
-          const matches = !topic || item.dataset.category === topic;
-          item.hidden = !matches;
-          item.classList.toggle('is-first', matches && visibleCount === 0);
-          if (matches) visibleCount += 1;
-        });
-
-        if (emptyFiltered) (emptyFiltered as HTMLElement).hidden = visibleCount > 0;
+        render();
       });
+    });
+
+    moreBtn?.addEventListener('click', () => {
+      limit += ARTICLES_INCREMENT;
+      render();
     });
 
     // Odkaz s předvybraným tématem (témata v sekci Články na homepage):
@@ -719,22 +737,6 @@ const ARTICLES_PAGE_SIZE = 6;
     resetFilterBtn.addEventListener('click', () => {
       const allBtn = document.querySelector('.cla-topics__btn[data-topic=""]') as HTMLButtonElement | null;
       if (allBtn) allBtn.click();
-    });
-  }
-
-  // „Zobrazit další články" — postupné odkrývání dalších (skutečných)
-  // položek stejného pole; se strukturou připravenou na budoucí obsah.
-  // Stejná hodnota jako `ARTICLES_PAGE_SIZE` ve frontmatteru — tenhle
-  // `<script>` běží v samostatném kontextu bez přístupu k frontmatter
-  // konstantám, proto zapsáno znovu, ne importováno.
-  const ARTICLES_INCREMENT = 6;
-  const moreBtn = document.querySelector('[data-articles-more]') as HTMLButtonElement | null;
-  if (moreBtn && articlesList) {
-    moreBtn.addEventListener('click', () => {
-      const hiddenItems = Array.from(articlesList.querySelectorAll('.cla-article[hidden]'));
-      hiddenItems.slice(0, ARTICLES_INCREMENT).forEach((el) => el.removeAttribute('hidden'));
-      const remaining = articlesList.querySelectorAll('.cla-article[hidden]').length;
-      if (remaining === 0) moreBtn.hidden = true;
     });
   }
 </script>
@@ -1183,10 +1185,11 @@ const ARTICLES_PAGE_SIZE = 6;
     color: var(--text-muted);
   }
 
+  /* Nadpis článku → perex 14 px (CLAUDE.md: i u opakovaných položek). */
   .cla-article__body {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 14px;
   }
 
   .cla-article__title {

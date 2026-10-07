@@ -12,6 +12,8 @@ import '../../styles/fonts.css';
 import { getCollection } from 'astro:content';
 import { czechNbsp } from '../../lib/rehype-czech-nbsp.mjs';
 import type { CollectionEntry } from 'astro:content';
+import { getImage } from 'astro:assets';
+import heroPhoto from '../../assets/photos/patrik-hero.webp';
 
 export async function getStaticPaths() {
   if (!import.meta.env.DEV) return [];
@@ -23,8 +25,11 @@ interface Props {
   article: CollectionEntry<'clanky'>;
 }
 const { article } = Astro.props;
-const { title, category } = article.data;
-const titleSize = title.length > 58 ? 60 : title.length > 44 ? 66 : 74;
+const { category } = article.data;
+const title = article.data.shareTitle ?? article.data.title;
+// Vpravo fotka (od 6. 10. 2026 — „ať vidí můj obličej“), nadpis má proto užší sloupec.
+const titleSize = title.length > 80 ? 46 : title.length > 58 ? 50 : title.length > 46 ? 56 : title.length > 34 ? 62 : 68;
+const photo = await getImage({ src: heroPhoto, width: 1029, format: 'png' });
 ---
 
 <!doctype html>
@@ -42,6 +47,10 @@ const titleSize = title.length > 58 ? 60 : title.length > 44 ? 66 : 74;
         <circle cx="92" cy="204" r="7" fill="var(--emerald)" />
       </svg>
 
+      <div class="og__photo" data-og-photo>
+        <img src={photo.src} alt="" />
+      </div>
+
       <header class="og__brand">
         <svg class="og__logo" viewBox="133 122 1729 1537" aria-hidden="true">
           <g fill="none" stroke="#FFFFFF" stroke-width="112" stroke-linejoin="round">
@@ -55,7 +64,7 @@ const titleSize = title.length > 58 ? 60 : title.length > 44 ? 66 : 74;
 
       <main class="og__main">
         <p class="og__category">{czechNbsp(category)}</p>
-        <h1 class="og__title" style={`font-size:${titleSize}px`}>{czechNbsp(title)}</h1>
+        <h1 class="og__title" data-og-title style={`font-size:${titleSize}px`}>{czechNbsp(title)}</h1>
       </main>
 
       <footer class="og__footer">
@@ -138,17 +147,37 @@ const titleSize = title.length > 58 ? 60 : title.length > 44 ? 66 : 74;
 
   .og__title {
     margin: 0;
-    max-width: 960px;
+    max-width: 540px;
     font-weight: 700;
     line-height: 1.06;
     letter-spacing: -.04em;
     text-wrap: balance;
   }
 
+  /* Postava vpravo od hlavy po pas, spodek se rozpouští do pozadí. */
+  .og__photo {
+    position: absolute;
+    right: 24px;
+    top: 44px;
+    width: 470px;
+    height: 586px;
+    -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+  }
+
+  .og__photo img {
+    display: block;
+    width: 470px;
+    height: auto;
+  }
+
   .og__footer {
     position: relative;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 540px;
+    justify-content: flex-start;
     align-items: baseline;
     margin-top: auto;
     font-weight: 500;

@@ -19,7 +19,9 @@
 // Spuštění: dev server musí běžet (npm run dev), pak `npm run check:spacing`.
 // Exit kód 0 = vše v pořádku, 1 = nalezen problém (detaily ve výpisu).
 
-import { chromium } from '@playwright/test';
+import { chromium, webkit, firefox } from '@playwright/test';
+// BROWSER=webkit|firefox npm run check:… — stejná pravidla v jádru Safari / Firefoxu.
+const engine = { chromium, webkit, firefox }[process.env.BROWSER || 'chromium'];
 
 const ORIGIN = (process.env.AUDIT_URL || 'http://localhost:4321').replace(/\/$/, '');
 const EXTRA_PATHS = ['/clanky', '/neexistujici-stranka-404'];
@@ -149,7 +151,7 @@ const mode = (vals) => {
   return [...counts].sort((a, z) => z[1] - a[1] || a[0] - z[0])[0][0];
 };
 
-const browser = await chromium.launch();
+const browser = await engine.launch();
 const fails = [];
 let headCount = 0, endCount = 0;
 // ONLY=/o-mne,/pristup — zkontrolovat jen vybrané stránky (po úpravě jedné stránky).

@@ -18,7 +18,9 @@
 // Spuštění: dev server musí běžet (npm run dev), pak `npm run check:typo`.
 // Exit kód 0 = vše v pořádku, 1 = nalezen problém (detaily ve výpisu).
 
-import { chromium } from '@playwright/test';
+import { chromium, webkit, firefox } from '@playwright/test';
+// BROWSER=webkit|firefox npm run check:… — stejná pravidla v jádru Safari / Firefoxu.
+const engine = { chromium, webkit, firefox }[process.env.BROWSER || 'chromium'];
 
 const ORIGIN = (process.env.AUDIT_URL || 'http://localhost:4321').replace(/\/$/, '');
 
@@ -115,7 +117,7 @@ function collectLinks(origin) {
     .map((u) => u.pathname.replace(/\/$/, '') || '/');
 }
 
-const browser = await chromium.launch();
+const browser = await engine.launch();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
 const queue = ['/', ...EXTRA_PATHS];

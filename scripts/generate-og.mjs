@@ -11,6 +11,7 @@
 import { chromium } from '@playwright/test';
 import { readdirSync, readFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { fitTextToPhoto, MIN_GAP } from './lib/og-fit.mjs';
 
 const ORIGIN = (process.env.AUDIT_URL || 'http://localhost:4321').replace(/\/$/, '');
 const CONTENT = 'src/content/clanky';
@@ -32,8 +33,10 @@ for (const slug of slugs) {
   // Lišta vývojového serveru Astra se jinak vyfotí dole uprostřed.
   await page.addStyleTag({ content: 'astro-dev-toolbar { display: none !important; }' });
   await page.evaluate(() => document.fonts.ready);
+  const fit = await fitTextToPhoto(page);
+  if (!fit.ok) throw new Error(`${slug}: „${fit.what}“ — od postavy ${fit.gap} px (min. ${MIN_GAP}), nad patičkou ${fit.footerGap} px`);
   await page.locator('[data-og]').screenshot({ path: join(OUT, `${slug}.png`) });
-  console.log(`OK  ${OUT}/${slug}.png`);
+  console.log(`OK  ${OUT}/${slug}.png  (od postavy ${fit.gap} px, nad patičkou ${fit.footerGap} px, nadpis ${fit.size} px)`);
 }
 
 await browser.close();
