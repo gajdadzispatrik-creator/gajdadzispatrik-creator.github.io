@@ -3660,7 +3660,7 @@ Hero záměrně neobsahuje: rok začátku praxe, délku zkušeností, provozní
 
 `Po pár týdnech se mě zeptal, jestli bych se tím nechtěl začít živit. Rozhodl jsem se začít ve finančním poradenství podnikat. Začátky nebyly jednoduché. Je to podnikání a práce s lidmi a důvěru si musíte zasloužit.`
 
-`Brzy jsem ale viděl, jak to v oboru často vypadá. Pod ruku mi chodí spousta smluv, které lidem sjednal bankéř, pojišťovák nebo jiný poradce, a většina z nich je nastavená špatně. Lidé za ně platí a v nejhorší chvíli by jim nepomohly. Právě proto dělám věci jinak.`
+`Brzy jsem ale viděl, jak to v oboru často vypadá. Pod ruku mi chodí spousta smluv, které lidem sjednal bankéř, pojišťovák nebo jiný poradce, a většina z nich je nastavená špatně nebo jde o nevhodný produkt. Lidé za ně platí, a přitom jim nepřinášejí to, kvůli čemu je uzavřeli. Právě proto dělám věci jinak.`
 
 `A učím se dál. Pravidelně chodíme na školení bank, pojišťoven a dalších institucí, abychom věděli o novinkách a o tom, kam se finanční trh vyvíjí. Díky spolupráci s nimi můžu klientům nabídnout slevy a výhody, ke kterým by se sami nedostali.`
 
