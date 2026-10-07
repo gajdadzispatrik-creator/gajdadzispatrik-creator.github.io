@@ -3682,7 +3682,7 @@ Bez roku zahájení praxe.
 
 `Dostal jsem příležitost vybudovat v Mint reality vedle realitní kanceláře i finanční poradenství. Když jsem svému tehdejšímu týmu oznámil, že odcházím, několik kolegů to vidělo stejně a chtěli se ke mně přidat.`
 
-`Tak vznikla finanční část Mint reality & finance, kterou dnes vedu. Vedle vedení poradců ale dál osobně pracuji se svými klienty.`
+`Tak vznikla finanční část Mint reality & finance, kterou dnes vedu. Vedle vedení týmu ale dál osobně pracuji se svými klienty.`
 
 Bez jmenování/kritiky původní společnosti a bez interních konfliktů.
 
