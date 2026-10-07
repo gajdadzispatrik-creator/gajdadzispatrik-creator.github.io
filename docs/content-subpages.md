@@ -516,7 +516,7 @@ Zvýrazněná závěrečná věta: `Co budete chtít řešit dál, je na vás.`
 **Řešíte také refinancování?**
 `Ano. Stejně tak změny nebo navýšení stávající hypotéky.`
 
-**Musím kvůli hypotéce řešit i ostatní finance?**
+**Musím kvůli hypotéce řešit i něco dalšího?**
 `Ne. Pokud přijdete kvůli hypotéce, prioritou je hypotéka. Další témata mají smysl otevírat pouze tehdy, pokud jsou pro vaši situaci relevantní.`
 
 **Jak probíhá první konzultace?**
@@ -1443,7 +1443,7 @@ Stránka nemá působit jako:
 `Investice mají vycházet z toho, na co a kdy peníze potřebujete.`
 
 **Hero text**
-`Nejdřív si ujasníme, co chcete investováním získat, kdy budete peníze potřebovat a jaké riziko dává smysl podstoupit. Potom nastavíme způsob investování, který odpovídá vašim cílům i ostatním financím.`
+`Nejdřív si ujasníme, co chcete investováním získat, kdy budete peníze potřebovat a jaké riziko dává smysl podstoupit. Potom nastavíme způsob investování, který odpovídá vašim cílům i možnostem.`
 
 **Primární CTA**
 `Nezávazná konzultace`
@@ -1807,7 +1807,7 @@ Závěr: `Až potom vybíráme způsob investování.`
 | Search intent | viz „Search intent" výše |
 | Obchodní cíl | viz „Obchodní cíl" výše |
 | H1 | `Investice mají vycházet z toho, na co a kdy peníze potřebujete.` (návrh) |
-| Hero text | `Nejdřív si ujasníme, co chcete investováním získat, kdy budete peníze potřebovat a jaké riziko dává smysl podstoupit. Potom nastavíme způsob investování, který odpovídá vašim cílům i ostatním financím.` (návrh) |
+| Hero text | `Nejdřív si ujasníme, co chcete investováním získat, kdy budete peníze potřebovat a jaké riziko dává smysl podstoupit. Potom nastavíme způsob investování, který odpovídá vašim cílům i možnostem.` (návrh) |
 | Sekční struktura | devět sekcí — viz „Sekční osnova — návrh copy" výše (Hero, Různý cíl = jiný přístup, Rozpočet a rezerva, Riziko náklady a podmínky, Co když už investujete, Jak investiční plán vzniká, Investice a ostatní finance, FAQ, Finální CTA) |
 | Finální copy | NÁVRH K UŽIVATELSKÉMU SCHVÁLENÍ — kompletní první verze, viz „Sekční osnova — návrh copy" výše (sekce 1–9); původní přesunutý text z `/sluzby` zachován beze změny v sekci 3 a v „Archivní poznámce" |
 | Primární CTA | `Nezávazná konzultace` (návrh) |
@@ -3660,9 +3660,9 @@ Hero záměrně neobsahuje: rok začátku praxe, délku zkušeností, provozní
 
 `Po pár týdnech se mě zeptal, jestli bych se tím nechtěl začít živit. Rozhodl jsem se začít ve finančním poradenství podnikat. Začátky nebyly jednoduché. Je to podnikání a práce s lidmi a důvěru si musíte zasloužit.`
 
-`Brzy jsem ale viděl, jak to v oboru často vypadá. Pod ruku mi chodí spousta smluv, které lidem sjednal bankéř, pojišťovák nebo jiný poradce, a většina z nich je nastavená špatně nebo jde o nevhodný produkt. Lidé za ně platí, a přitom jim nepřinášejí to, kvůli čemu je uzavřeli. Právě proto dělám věci jinak.`
+`Brzy jsem si ale všiml jedné věci. Lidé za mnou chodí se smlouvami, které neodpovídají jejich situaci. Často nejsou špatné samy o sobě, jen je někdo sjednal, aniž by se zeptal na víc. Lidé za ně platí, a přitom jim nepřinášejí to, kvůli čemu je uzavřeli. Proto to dělám obráceně: nejdřív zjistím, co člověk opravdu potřebuje, a teprve potom hledám řešení. A vždycky vysvětlím, proč zrovna tohle.`
 
-`A učím se dál. Pravidelně chodíme na školení bank, pojišťoven a dalších institucí, abychom věděli o novinkách a o tom, kam se finanční trh vyvíjí. Díky spolupráci s nimi můžu klientům nabídnout slevy a výhody, ke kterým by se sami nedostali.`
+`Pro mě to vlastně ani není práce, každý den se na ni těším. Nejvíc mě baví vidět, jak jsou lidé rádi, že se jejich situace vyřešila. Často přijdou s něčím, co už považovali za neřešitelné. Najít cestu tam, kde ji nikdo nečekal, a poskládat řešení, které dává smysl, je pro mě to nejlepší.`
 
 *(Přepsáno 5. 10. 2026 podle uživatele, úkol A5.)*
 

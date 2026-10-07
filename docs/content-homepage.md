@@ -249,7 +249,7 @@ Klient podnikal a chtěl hypotéku. V bankách mu ale z daňového přiznání v
 
 Případová studie 3 (řádková, krátký sloučený popis)
 Přišli kvůli hypotéce. Nezůstalo jen u ní.
-Klienti za mnou přišli kvůli hypotéce a stejně jako většina lidí se na začátku soustředili hlavně na úrokovou sazbu. Během řešení ale postupně viděli, že hypotéka je jen jedna část jejich financí. Vyřešili jsme nejen samotné financování, ale také ochranu příjmu, životní pojištění, pojištění nemovitosti a celý proces kolem smluv, úschovy a čerpání. U každého kroku jsem jim vysvětlil, proč ho řešíme a jak zapadá do ostatních financí. Po dokončení hypotéky už nechtěli skončit jen u bydlení. Sami chtějí pokračovat a podívat se také na investice a další finanční cíle. Z jednorázového řešení hypotéky tak vzniká dlouhodobější spolupráce nad jejich financemi jako celkem.
+Klienti za mnou přišli kvůli hypotéce a stejně jako většina lidí se na začátku soustředili hlavně na úrokovou sazbu. Během řešení ale postupně viděli, že hypotéka je jen jedna část jejich financí. Vyřešili jsme nejen samotné financování, ale také ochranu příjmu, životní pojištění, pojištění nemovitosti a celý proces kolem smluv, úschovy a čerpání. U každého kroku jsem jim vysvětlil, proč ho řešíme a na co bude mít vliv. Po dokončení hypotéky už nechtěli skončit jen u bydlení. Sami chtějí pokračovat a podívat se také na investice a další finanční cíle. Z jednorázového řešení hypotéky tak vzniká dlouhodobější spolupráce nad jejich financemi jako celkem.
 
 (Podporuje positioning „Finance se nemají řešit po částech." — bez doslovného opakování té věty.)
 
