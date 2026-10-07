@@ -3662,7 +3662,7 @@ Hero záměrně neobsahuje: rok začátku praxe, délku zkušeností, provozní
 
 `Brzy jsem si ale všiml jedné věci. Lidé za mnou chodí se smlouvami, které neodpovídají jejich situaci. Často nejsou špatné samy o sobě, jen je někdo sjednal, aniž by se zeptal na víc. Lidé za ně platí, a přitom jim nepřinášejí to, kvůli čemu je uzavřeli. Proto to dělám obráceně: nejdřív zjistím, co člověk opravdu potřebuje, a teprve potom hledám řešení. A vždycky vysvětlím, proč zrovna tohle.`
 
-`Pro mě to vlastně ani není práce, každý den se na ni těším. Nejvíc mě baví vidět, jak jsou lidé rádi, že se jejich situace vyřešila. Často přijdou s něčím, co už považovali za neřešitelné. Najít cestu tam, kde ji nikdo nečekal, a poskládat řešení, které dává smysl, je pro mě to nejlepší.`
+`Pro mě to vlastně ani není práce, každý den se těším. Nejvíc mě baví vidět, jak jsou lidé rádi, že se jejich situace vyřešila. Často přijdou s něčím, co už považovali za neřešitelné. Najít cestu tam, kde ji nikdo nečekal, a poskládat řešení, které dává smysl, je pro mě to nejlepší.`
 
 *(Přepsáno 5. 10. 2026 podle uživatele, úkol A5.)*
 
@@ -3680,7 +3680,7 @@ Bez roku zahájení praxe.
 **Copy**
 `Po čase mi přestaly vyhovovat prostředí a způsob fungování společnosti, ve které jsem tehdy pracoval. Rozhodl jsem se proto pokračovat jinak.`
 
-`Dlouholetý kamarád, který stojí za Mint reality, mi nabídl možnost vybudovat v rámci firmy finanční část. Když jsem svému tehdejšímu týmu oznámil, že odcházím, několik kolegů to vidělo stejně a chtěli se ke mně přidat.`
+`Dostal jsem příležitost vybudovat v Mint reality vedle realitní kanceláře i finanční poradenství. Když jsem svému tehdejšímu týmu oznámil, že odcházím, několik kolegů to vidělo stejně a chtěli se ke mně přidat.`
 
 `Tak vznikla finanční část Mint reality & finance, kterou dnes vedu. Vedle vedení poradců ale dál osobně pracuji se svými klienty.`
 
