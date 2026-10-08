@@ -1,19 +1,21 @@
 ---
 /**
- * „Na kolik dosáhnete?" — krátký dotazník k hypotéce (8. 10. 2026).
- * Zadání: ../Osobní značka/strategie/zadani-web-google-ads.md, část B.
- * Texty schválil Patrik 8. 10. 2026 (s úpravami).
+ * „Na kolik dosáhnete?" — dotazník k hypotéce, v3 (8. 10. 2026).
+ * Zadání: ../Osobní značka/strategie/zadani-web-google-ads.md, část B;
+ * otázky v3 podle Patrikova zadání 8. 10. 2026 (to, co potřebuje ke
+ * skutečnému výpočtu bonity).
  *
  * Princip i vzhled jako Finanční check-up (/financni-check-up): jedna
- * otázka na obrazovce, klikání, postup jako linka s tečkami. Rozdíl: na
- * konci NENÍ žádné číslo (částka, sazba ani splátka) — nejde o kalkulačku
- * úvěru (lovci sazeb, pravidla reklamy na spotřebitelský úvěr). Výsledek
- * vede k poptávce: odpovědi se odešlou s kontaktem na /api/poptavka.php
- * (zdroj „na-kolik-dosahnete“, e-mail nepovinný).
+ * otázka na obrazovce, postup jako linka s tečkami. Navíc: částky a věk
+ * jako číselná pole, příjem a věk zvlášť za každého žadatele, otázky se
+ * větví podle odpovědí (OSVČ → paušální výdaje, úvěr → kolik…).
+ * Na konci NENÍ žádné číslo (částka, sazba ani splátka) — výpočet pošle
+ * Patrik. Odpovědi se odešlou s kontaktem na /api/poptavka.php (zdroj
+ * „na-kolik-dosahnete“, e-mail nepovinný), přehledně po žadatelích.
  *
- * Bez kapitol s trasou (nástroj, stejně jako check-up), linku do patičky
- * kreslí StandaloneRoute.astro. Všechny texty jsou ve statickém HTML,
- * JS jen přepíná, co je vidět (check:typo tak vidí celý text).
+ * Všechny obrazovky jsou ve statickém HTML (check:typo vidí celý text),
+ * JS jen počítá cestu podle odpovědí a přepíná, co je vidět.
+ * Bez kapitol s trasou (nástroj), linku do patičky kreslí StandaloneRoute.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Header from '../../../components/Header.astro';
@@ -32,92 +34,99 @@ const nb = (text: string) =>
     .replace(/(\d) /g, `$1${NBSP}`)
     .replace(/ (–|—) /g, `${NBSP}$1 `);
 
-interface Question {
+type Kind = 'choice' | 'money' | 'age';
+interface Screen {
   id: string;
-  /** Krátký název do e-mailu s odpověďmi. */
-  title: string;
+  kind: Kind;
   q: string;
-  options: string[];
+  /** Štítek nad otázkou (který žadatel). */
+  who?: 1 | 2;
+  options?: string[];
+  /** Popisek číselného pole. */
+  label?: string;
 }
 
-// Pořadí odpovědí je důležité — pravidla tipů níž pracují s indexem.
-const questions: Question[] = [
+const INCOME_TYPES = ['Zaměstnanec', 'OSVČ', 'Invalidní důchod', 'Rodičovská nebo mateřská', 'Jiný'];
+
+const applicantScreens = (n: 1 | 2): Screen[] => {
+  const two = n === 2;
+  return [
+    {
+      id: `typ-${n}`,
+      kind: 'choice',
+      who: n,
+      q: two ? 'Jaký příjem má druhý žadatel?' : 'Jaký máte příjem?',
+      options: INCOME_TYPES,
+    },
+    {
+      id: `zam-${n}`,
+      kind: 'money',
+      who: n,
+      q: two ? 'Jaký je čistý měsíční příjem druhého žadatele?' : 'Jaký je váš čistý měsíční příjem?',
+      label: 'Čistý měsíční příjem',
+    },
+    {
+      id: `osvc-${n}`,
+      kind: 'money',
+      who: n,
+      q: two
+        ? 'Jaké má druhý žadatel příjmy za rok podle posledního daňového přiznání?'
+        : 'Jaké máte příjmy za rok podle posledního daňového přiznání?',
+      label: 'Příjmy za rok',
+    },
+    {
+      id: `pausal-${n}`,
+      kind: 'choice',
+      who: n,
+      q: two ? 'Uplatňuje druhý žadatel paušální výdaje?' : 'Uplatňujete paušální výdaje?',
+      options: ['Ano', 'Ne', 'Nevím'],
+    },
+    {
+      id: `jiny-${n}`,
+      kind: 'money',
+      who: n,
+      q: two ? 'Kolik měsíčně dostává druhý žadatel?' : 'Kolik měsíčně dostáváte?',
+      label: 'Měsíčně',
+    },
+  ];
+};
+
+const screens: Screen[] = [
   {
     id: 'ucel',
-    title: 'Na co',
+    kind: 'choice',
     q: 'Na co hypotéku potřebujete?',
-    options: ['Koupě bytu', 'Koupě domu', 'Výstavba', 'Rekonstrukce', 'Ještě nevím, chci zjistit, na co mám'],
+    options: ['Koupě bytu', 'Koupě domu', 'Výstavba', 'Rekonstrukce', 'Ještě nevím'],
   },
-  {
-    id: 'prijem',
-    title: 'Druh příjmu',
-    q: 'Jaký máte příjem?',
-    options: ['Zaměstnanec', 'OSVČ nebo s.r.o.', 'Kombinace', 'Jiný (rodičovská, důchod…)'],
-  },
-  {
-    id: 'vyse',
-    title: 'Čistý příjem domácnosti',
-    q: 'Jaký je čistý měsíční příjem domácnosti?',
-    options: ['Do 40 000 Kč', '40–60 000 Kč', '60–80 000 Kč', '80–100 000 Kč', 'Nad 100 000 Kč'],
-  },
-  {
-    id: 'uvery',
-    title: 'Jiné úvěry',
-    q: 'Splácíte jiné úvěry nebo leasing?',
-    options: ['Ne', 'Ano, do 5 000 Kč měsíčně', '5–15 000 Kč měsíčně', 'Víc'],
-  },
-  {
-    id: 'vlastni',
-    title: 'Vlastní peníze',
-    q: 'Kolik máte vlastních peněz?',
-    options: ['Zatím nic', 'Méně než 10 % ceny', '10–20 % ceny', 'Víc než 20 % ceny', 'Ještě nevím cenu'],
-  },
-  {
-    id: 'kdy',
-    title: 'Kdy kupovat',
-    q: 'Kdy chcete kupovat?',
-    options: ['Do 3 měsíců', 'Do roka', 'Zatím jen zjišťuji'],
-  },
+  { id: 'pocet', kind: 'choice', q: 'Kolik vás bude o hypotéku žádat?', options: ['Jen já', 'Dva'] },
+  ...applicantScreens(1),
+  ...applicantScreens(2),
+  { id: 'uvery', kind: 'choice', q: 'Splácíte nějaké úvěry nebo leasing?', options: ['Ne', 'Ano'] },
+  { id: 'uvery-castka', kind: 'money', q: 'Kolik měsíčně celkem?', label: 'Splátky měsíčně' },
+  { id: 'karta', kind: 'choice', q: 'Máte kreditní kartu nebo kontokorent?', options: ['Ne', 'Ano'] },
+  { id: 'karta-limit', kind: 'money', q: 'Jaký je limit?', label: 'Limit' },
+  { id: 'deti', kind: 'choice', q: 'Kolik dětí vyživujete?', options: ['0', '1', '2', '3', '4 a víc'] },
+  { id: 'vek', kind: 'age', q: 'Kolik je vám let?' },
+  { id: 'uspory', kind: 'choice', q: 'Máte na hypotéku něco naspořeno?', options: ['Ano', 'Ne'] },
+  { id: 'nemovitost', kind: 'choice', q: 'Máte jinou nemovitost, kterou můžete dát do zástavy?', options: ['Ano', 'Ne'] },
+  { id: 'kdy', kind: 'choice', q: 'Kdy chcete kupovat?', options: ['Do 3 měsíců', 'Do roka', 'Zatím zjišťuji'] },
 ];
 
-// Tipy podle odpovědí (pravidla v <script>). Ukazují se jen schválené —
-// `confirmed: false` čeká na Patrikovo potvrzení odborného tvrzení.
+// Tipy podle odpovědí (pravidla v <script>), všechny potvrdil Patrik 8. 10. 2026.
 const tips = [
-  {
-    id: 'osvc',
-    confirmed: true,
-    text: 'U podnikatelů každá banka počítá příjem z daňového přiznání jinak. Ze stejného přiznání může v jiné bance vyjít vyšší částka.',
-  },
-  {
-    id: 'vlastni',
-    confirmed: true, // potvrdil Patrik 8. 10. 2026
-    text: 'Banka obvykle půjčí až 80 % ceny nemovitosti, lidem do 36 let až 90 %. Zbytek je potřeba mít z vlastních zdrojů.',
-  },
-  {
-    id: 'uvery',
-    confirmed: true, // potvrdil Patrik 8. 10. 2026
-    text: 'Každá splátka jiného úvěru snižuje, na kolik dosáhnete. Někdy pomůže úvěr před žádostí doplatit nebo sloučit.',
-  },
-  {
-    id: 'jiny',
-    confirmed: true, // potvrdil a přepsal Patrik 8. 10. 2026
-    text: 'Banky tyto příjmy posuzují každá jinak. Proto nejdřív vyřešte hypotéku a nemovitost hledejte až podle toho, na kolik dosáhnete.',
-  },
-  {
-    id: 'cena',
-    confirmed: true,
-    text: 'Děláte to správně: nejdřív zjistit, na kolik dosáhnete, a až potom hledat nemovitost.',
-  },
-].filter((t) => t.confirmed);
+  { id: 'osvc', text: 'U podnikatelů každá banka počítá příjem z daňového přiznání jinak. Ze stejného přiznání může v jiné bance vyjít vyšší částka.' },
+  { id: 'vlastni', text: 'Banka obvykle půjčí až 80 % ceny nemovitosti, lidem do 36 let až 90 %. Zbytek je potřeba mít z vlastních zdrojů.' },
+  { id: 'uvery', text: 'Každá splátka jiného úvěru snižuje, na kolik dosáhnete. Někdy pomůže úvěr před žádostí doplatit nebo sloučit.' },
+  { id: 'jiny', text: 'Banky tyto příjmy posuzují každá jinak. Proto nejdřív vyřešte hypotéku a nemovitost hledejte až podle toho, na kolik dosáhnete.' },
+  { id: 'cena', text: 'Děláte to správně: nejdřív zjistit, na kolik dosáhnete, a až potom hledat nemovitost.' },
+];
 
-const config = {
-  questions: questions.map((q) => ({ id: q.id, title: q.title, options: q.options })),
-};
+const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, options })) };
 ---
 
 <BaseLayout
   title="Na jakou hypotéku dosáhnete? | Patrik Gajdadzis"
-  description="Šest krátkých otázek, zhruba minuta. Podle odpovědí spočítám, kolik vám půjčí konkrétní banky, a ozvu se do jednoho pracovního dne. Zdarma, 5★ hodnocení na Googlu."
+  description="Pár otázek, asi 2 minuty. Podle odpovědí spočítám, kolik vám půjčí konkrétní banky, a ozvu se do jednoho pracovního dne. Zdarma, 5★ hodnocení na Googlu."
 >
   <Header />
   <main id="hero" class="nkd">
@@ -127,11 +136,11 @@ const config = {
       <div class="nkd-hero__text" data-route-content data-nkd data-config={JSON.stringify(config)}>
         <h1 id="nkd-heading">Spočítám, na&nbsp;kolik dosáhnete.</h1>
 
-        <!-- Úvod (8. 10. 2026, v2: hned od začátku je jasné, že výpočet pošle Patrik) -->
+        <!-- Úvod -->
         <div class="nkd-step" data-step="intro">
           <p class="nkd-hero__lead">
-            Odpovězte na&nbsp;šest krátkých otázek. Podle nich spočítám, kolik vám půjčí konkrétní banky, a&nbsp;ozvu se&nbsp;do&nbsp;jednoho
-            pracovního dne. Zdarma.
+            Odpovězte na&nbsp;pár otázek, zabere to asi 2&nbsp;minuty. Podle odpovědí spočítám, kolik vám půjčí konkrétní banky,
+            a&nbsp;ozvu se&nbsp;do&nbsp;jednoho pracovního dne. Zdarma.
           </p>
           <div class="nkd-intro__actions">
             <button class="nkd-cta" type="button" data-start>Začít</button>
@@ -143,29 +152,69 @@ const config = {
           </noscript>
         </div>
 
-        <!-- Otázky -->
+        <!-- Otázky: počet i pořadí podle odpovědí, viz flow() ve <script> -->
         <div class="nkd-step nkd-quiz" data-step="quiz" hidden>
           <svg class="nkd-progress" width="260" height="10" viewBox="0 0 260 10" aria-hidden="true" focusable="false">
             <path d="M5 5H255" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" fill="none" />
-            {questions.map((_, i) => (
-              <circle class="nkd-progress__dot" cx={5 + (i * 250) / (questions.length - 1)} cy="5" r="2.4" />
-            ))}
+            <g data-dots></g>
           </svg>
-          <p class="nkd-quiz__count" aria-live="polite">Otázka <span data-count>1</span> z&nbsp;{questions.length}</p>
+          {/* Bez „z N“: počet otázek se mění podle odpovědí (druhý žadatel,
+              OSVČ, úvěr…) a rostoucí číslo by mátlo. Postup ukazují tečky. */}
+          <p class="nkd-quiz__count" aria-live="polite">Otázka <span data-count>1</span></p>
 
           <div class="nkd-questions">
             {
-              questions.map((q, qi) => (
-                <fieldset class="nkd-question" data-question={qi} hidden>
-                  <legend class="nkd-question__title" tabindex="-1">{nb(q.q)}</legend>
-                  <div class="nkd-options">
-                    {q.options.map((label, oi) => (
-                      <button class="nkd-option" type="button" data-option={oi}>
-                        <span class="nkd-option__mark" aria-hidden="true" />
-                        <span>{nb(label)}</span>
-                      </button>
-                    ))}
-                  </div>
+              screens.map((s) => (
+                <fieldset class="nkd-question" data-screen={s.id} data-kind={s.kind} hidden>
+                  {s.who && (
+                    <p class="nkd-question__who" data-who={s.who}>
+                      {s.who === 2 ? 'Druhý žadatel' : 'Vy'}
+                    </p>
+                  )}
+                  <legend class="nkd-question__title" tabindex="-1">{nb(s.q)}</legend>
+                  {s.kind === 'choice' && (
+                    <div class="nkd-options">
+                      {s.options!.map((label, oi) => (
+                        <button class="nkd-option" type="button" data-option={oi}>
+                          <span class="nkd-option__mark" aria-hidden="true" />
+                          <span>{nb(label)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {s.kind === 'money' && (
+                    <div class="nkd-number">
+                      <label class="nkd-number__label" for={`nkd-in-${s.id}`}>{nb(s.label ?? '')}</label>
+                      <div class="nkd-number__field">
+                        <input id={`nkd-in-${s.id}`} type="text" inputmode="numeric" autocomplete="off" data-input aria-describedby={`nkd-err-${s.id}`} />
+                        <span class="nkd-number__unit" aria-hidden="true">Kč</span>
+                      </div>
+                      <p class="nkd-number__error" id={`nkd-err-${s.id}`} hidden>Zadejte prosím částku.</p>
+                      <button class="nkd-cta nkd-number__next" type="button" data-next>Pokračovat</button>
+                    </div>
+                  )}
+                  {s.kind === 'age' && (
+                    <div class="nkd-number">
+                      <div class="nkd-number__pair">
+                        <div class="nkd-number__item">
+                          <label class="nkd-number__label" for="nkd-in-vek-1" data-age-label>Váš věk</label>
+                          <div class="nkd-number__field nkd-number__field--short">
+                            <input id="nkd-in-vek-1" type="text" inputmode="numeric" autocomplete="off" maxlength="2" data-input data-age="1" aria-describedby="nkd-err-vek" />
+                            <span class="nkd-number__unit" aria-hidden="true">let</span>
+                          </div>
+                        </div>
+                        <div class="nkd-number__item" data-age-second hidden>
+                          <label class="nkd-number__label" for="nkd-in-vek-2">Věk druhého žadatele</label>
+                          <div class="nkd-number__field nkd-number__field--short">
+                            <input id="nkd-in-vek-2" type="text" inputmode="numeric" autocomplete="off" maxlength="2" data-input data-age="2" aria-describedby="nkd-err-vek" />
+                            <span class="nkd-number__unit" aria-hidden="true">let</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p class="nkd-number__error" id="nkd-err-vek" hidden>Zadejte prosím věk.</p>
+                      <button class="nkd-cta nkd-number__next" type="button" data-next>Pokračovat</button>
+                    </div>
+                  )}
                 </fieldset>
               ))
             }
@@ -174,7 +223,7 @@ const config = {
           <button class="nkd-back" type="button" data-back>Zpět</button>
         </div>
 
-        <!-- Výsledek: bez čísla → tipy → formulář → termín / telefon -->
+        <!-- Poslední krok: kam poslat výpočet → tipy → formulář → termín / telefon -->
         <div class="nkd-step nkd-result" data-step="result" hidden>
           <div class="nkd-verdict">
             <h2 class="nkd-verdict__title" tabindex="-1">Kam vám výpočet pošlu?</h2>
@@ -201,6 +250,16 @@ const config = {
             <input type="hidden" name="zdroj" value="na-kolik-dosahnete" />
             <input type="hidden" name="oblast" value="Hypotéka a bydlení" />
             <input type="hidden" name="situace" value="" />
+
+            <!-- Komu výpočet posíláte: fotka, jméno, kdy se ozve (jako u kontaktního formuláře). -->
+            <div class="nkd-person">
+              <img class="nkd-person__photo" src="/email/patrik-gajdadzis.jpg" width="64" height="64" alt="" loading="lazy" />
+              <p class="nkd-person__text">
+                <strong>Patrik Gajdadzis</strong>
+                <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
+              </p>
+              <p class="nkd-person__proof">5<span class="nkd-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;· zdarma</p>
+            </div>
 
             <div class="nkd-form__grid">
               <div class="nkd-field">
@@ -252,56 +311,160 @@ const config = {
 </BaseLayout>
 
 <script>
-  interface Config {
-    questions: { id: string; title: string; options: string[] }[];
+  interface ScreenCfg {
+    id: string;
+    kind: 'choice' | 'money' | 'age';
+    options?: string[];
   }
 
   const root = document.querySelector<HTMLElement>('[data-nkd]');
   if (root) {
-    const config = JSON.parse(root.dataset.config ?? '{}') as Config;
-    const total = config.questions.length;
-    const answers: number[] = [];
-    let current = 0;
+    const { screens } = JSON.parse(root.dataset.config ?? '{}') as { screens: ScreenCfg[] };
+    const byId = new Map(screens.map((s) => [s.id, s]));
+    const els = new Map(
+      Array.from(root.querySelectorAll<HTMLElement>('[data-screen]')).map((el) => [el.dataset.screen ?? '', el]),
+    );
+    // Odpovědi: u výběru index možnosti, u částky/věku číslo.
+    const answers: Record<string, number> = {};
+    let index = 0;
     let startedAt: number | null = null;
 
     const steps = root.querySelectorAll<HTMLElement>('[data-step]');
-    const questionEls = root.querySelectorAll<HTMLElement>('[data-question]');
-    const dots = root.querySelectorAll<SVGCircleElement>('.nkd-progress__dot');
     const countEl = root.querySelector<HTMLElement>('[data-count]');
+    const totalEl = root.querySelector<HTMLElement>('[data-total]');
+    const dotsG = root.querySelector<SVGGElement>('[data-dots]');
     const form = root.querySelector<HTMLFormElement>('.nkd-form');
     const success = root.querySelector<HTMLElement>('.nkd-status--success');
 
+    const two = () => answers.pocet === 1;
+    // Obrazovka s částkou podle druhu příjmu (0 zaměstnanec, 1 OSVČ, jinak „kolik měsíčně“).
+    const incomeScreens = (n: number) => {
+      const typ = answers[`typ-${n}`];
+      if (typ === 1) return [`osvc-${n}`, `pausal-${n}`];
+      if (typ === undefined || typ === 0) return [`zam-${n}`];
+      return [`jiny-${n}`];
+    };
+    // Cesta dotazníkem podle dosavadních odpovědí (nezodpovězené větve = nejkratší).
+    const flow = () => [
+      'ucel',
+      'pocet',
+      `typ-1`,
+      ...incomeScreens(1),
+      ...(two() ? ['typ-2', ...incomeScreens(2)] : []),
+      'uvery',
+      ...(answers.uvery === 1 ? ['uvery-castka'] : []),
+      'karta',
+      ...(answers.karta === 1 ? ['karta-limit'] : []),
+      'deti',
+      'vek',
+      'uspory',
+      'nemovitost',
+      'kdy',
+    ];
+
     const showStep = (name: string) => steps.forEach((s) => (s.hidden = s.dataset.step !== name));
 
-    const showQuestion = (index: number, focus = true) => {
-      current = index;
-      questionEls.forEach((q, i) => (q.hidden = i !== index));
-      dots.forEach((d, i) => {
-        d.classList.toggle('is-done', i < index);
-        d.classList.toggle('is-current', i === index);
-      });
-      if (countEl) countEl.textContent = String(index + 1);
-      questionEls[index].querySelectorAll<HTMLElement>('[data-option]').forEach((o) => {
-        o.classList.toggle('is-selected', Number(o.dataset.option) === answers[index]);
-      });
-      if (focus) questionEls[index].querySelector<HTMLElement>('legend')?.focus({ preventScroll: true });
-      if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start' });
+    const renderDots = (total: number, current: number) => {
+      if (!dotsG) return;
+      const ns = 'http://www.w3.org/2000/svg';
+      dotsG.replaceChildren(
+        ...Array.from({ length: total }, (_, i) => {
+          const c = document.createElementNS(ns, 'circle');
+          c.setAttribute('cx', String(5 + (total > 1 ? (i * 250) / (total - 1) : 0)));
+          c.setAttribute('cy', '5');
+          c.setAttribute('r', '2.4');
+          c.setAttribute('class', `nkd-progress__dot${i < current ? ' is-done' : ''}${i === current ? ' is-current' : ''}`);
+          return c;
+        }),
+      );
     };
 
-    const ans = (id: string) => answers[config.questions.findIndex((q) => q.id === id)];
+    const formatKc = (n: number) => n.toLocaleString('cs-CZ');
+    const parseNum = (v: string) => {
+      const digits = v.replace(/[^\d]/g, '');
+      return digits ? Number(digits) : NaN;
+    };
+
+    const show = (i: number) => {
+      const path = flow();
+      index = Math.max(0, Math.min(i, path.length - 1));
+      const id = path[index];
+      els.forEach((el, key) => (el.hidden = key !== id));
+      const el = els.get(id)!;
+      el.querySelectorAll<HTMLElement>('[data-who="1"]').forEach((w) => (w.hidden = !two()));
+      if (id === 'vek') {
+        const second = el.querySelector<HTMLElement>('[data-age-second]');
+        if (second) second.hidden = !two();
+        const label = el.querySelector<HTMLElement>('[data-age-label]');
+        if (label) label.hidden = !two();
+      }
+      // Předvyplnit dřívější odpověď (při návratu „Zpět“).
+      el.querySelectorAll<HTMLElement>('[data-option]').forEach((o) =>
+        o.classList.toggle('is-selected', Number(o.dataset.option) === answers[id]),
+      );
+      el.querySelectorAll<HTMLInputElement>('[data-input]').forEach((input) => {
+        const key = input.dataset.age ? `vek-${input.dataset.age}` : id;
+        input.value = answers[key] !== undefined ? (input.dataset.age ? String(answers[key]) : formatKc(answers[key])) : '';
+      });
+      el.querySelector<HTMLElement>('.nkd-number__error')?.setAttribute('hidden', '');
+      if (countEl) countEl.textContent = String(index + 1);
+      if (totalEl) totalEl.textContent = String(path.length);
+      renderDots(path.length, index);
+      if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start' });
+      const firstInput = el.querySelector<HTMLInputElement>('[data-input]');
+      if (firstInput) firstInput.focus({ preventScroll: true });
+      else el.querySelector<HTMLElement>('legend')?.focus({ preventScroll: true });
+    };
+
+    const next = () => {
+      const path = flow();
+      if (index + 1 < path.length) show(index + 1);
+      else showResult();
+    };
+
+    // --- Shrnutí do e-mailu, přehledně po žadatelích ---
+    const label = (id: string) => {
+      const s = byId.get(id);
+      const v = answers[id];
+      return s?.options && v !== undefined ? s.options[v] : '—';
+    };
+    const applicantLine = (n: number) => {
+      const typ = answers[`typ-${n}`];
+      const parts = [`příjem: ${label(`typ-${n}`)}`];
+      if (typ === 0) parts.push(`čistě ${formatKc(answers[`zam-${n}`])} Kč měsíčně`);
+      else if (typ === 1) parts.push(`příjmy za rok podle DP ${formatKc(answers[`osvc-${n}`])} Kč`, `paušální výdaje: ${label(`pausal-${n}`)}`);
+      else parts.push(`${formatKc(answers[`jiny-${n}`])} Kč měsíčně`);
+      parts.push(`věk ${answers[`vek-${n}`]}`);
+      return `${n === 1 ? 'Žadatel 1' : 'Žadatel 2'}: ${parts.join(', ')}`;
+    };
+    const summary = () =>
+      [
+        'Odpovědi z nástroje „Na kolik dosáhnete?“ na webu:',
+        `Na co: ${label('ucel')}`,
+        `Počet žadatelů: ${two() ? '2' : '1'}`,
+        '',
+        applicantLine(1),
+        ...(two() ? [applicantLine(2)] : []),
+        '',
+        `Úvěry a leasing: ${answers.uvery === 1 ? `ano, ${formatKc(answers['uvery-castka'])} Kč měsíčně` : 'ne'}`,
+        `Kreditní karta / kontokorent: ${answers.karta === 1 ? `ano, limit ${formatKc(answers['karta-limit'])} Kč` : 'ne'}`,
+        `Děti: ${label('deti')}`,
+        `Naspořeno na hypotéku: ${label('uspory')}`,
+        `Jiná nemovitost do zástavy: ${label('nemovitost')}`,
+        `Kdy kupovat: ${label('kdy')}`,
+      ].join('\n');
 
     const showResult = () => {
-      // Tipy podle odpovědí (indexy odpovídají pořadí v `questions`).
+      const types = [answers['typ-1'], ...(two() ? [answers['typ-2']] : [])];
       const rules: Record<string, () => boolean> = {
-        osvc: () => ans('prijem') === 1 || ans('prijem') === 2,
-        vlastni: () => ans('vlastni') <= 2,
-        uvery: () => ans('uvery') >= 1,
-        jiny: () => ans('prijem') === 3,
-        cena: () => ans('vlastni') === 4 || ans('kdy') === 2 || ans('ucel') === 4,
+        osvc: () => types.includes(1),
+        vlastni: () => answers.uspory === 1,
+        uvery: () => answers.uvery === 1,
+        jiny: () => types.some((t) => t >= 2),
+        cena: () => answers.ucel === 4 || answers.kdy === 2,
       };
       const items = Array.from(root.querySelectorAll<HTMLElement>('[data-tip]'));
-      // „Jiný příjem“ a „Děláte to správně“ říkají totéž (nejdřív hypotéka,
-      // pak nemovitost) — když platí oba, zůstane jen „jiný příjem“.
+      // „Jiný příjem“ a „Děláte to správně“ říkají totéž — když platí oba, zůstane „jiný příjem“.
       const hits = items.filter((li) => rules[li.dataset.tip ?? '']?.());
       const hasJiny = hits.some((li) => li.dataset.tip === 'jiny');
       const shown = hits.filter((li) => !(hasJiny && li.dataset.tip === 'cena')).slice(0, 2);
@@ -309,14 +472,8 @@ const config = {
       const box = root.querySelector<HTMLElement>('[data-tips]');
       if (box) box.hidden = shown.length === 0;
 
-      // Odpovědi do e-mailu (pole „situace“).
       const situation = form?.elements.namedItem('situace') as HTMLInputElement | null;
-      if (situation) {
-        situation.value = [
-          'Odpovědi z nástroje „Na kolik dosáhnete?“ na webu:',
-          ...config.questions.map((q, i) => `${q.title}: ${q.options[answers[i]] ?? '—'}`),
-        ].join('\n');
-      }
+      if (situation) situation.value = summary();
 
       showStep('result');
       root.querySelector<HTMLElement>('.nkd-verdict__title')?.focus({ preventScroll: true });
@@ -326,33 +483,74 @@ const config = {
     root.querySelector('[data-start]')?.addEventListener('click', () => {
       startedAt = performance.now();
       showStep('quiz');
-      showQuestion(0);
+      show(0);
     });
 
-    questionEls.forEach((q, qi) => {
-      q.querySelectorAll<HTMLElement>('[data-option]').forEach((option) => {
+    // Výběr z možností.
+    els.forEach((el, id) => {
+      el.querySelectorAll<HTMLElement>('[data-option]').forEach((option) => {
         option.addEventListener('click', () => {
-          answers[qi] = Number(option.dataset.option);
-          if (qi + 1 < total) showQuestion(qi + 1);
-          else showResult();
+          answers[id] = Number(option.dataset.option);
+          next();
         });
       });
     });
 
+    // Číselná pole: částka (Kč) nebo věk.
+    els.forEach((el, id) => {
+      const inputs = Array.from(el.querySelectorAll<HTMLInputElement>('[data-input]'));
+      if (!inputs.length) return;
+      const error = el.querySelector<HTMLElement>('.nkd-number__error');
+      const isAge = id === 'vek';
+      const submit = () => {
+        const visible = inputs.filter((i) => !i.closest('[hidden]'));
+        const values = visible.map((i) => parseNum(i.value));
+        const ok = values.every((v) => (isAge ? v >= 18 && v <= 99 : v > 0));
+        visible.forEach((i, k) => {
+          const bad = isAge ? !(values[k] >= 18 && values[k] <= 99) : !(values[k] > 0);
+          if (bad) i.setAttribute('aria-invalid', 'true');
+          else i.removeAttribute('aria-invalid');
+        });
+        if (error) error.hidden = ok;
+        if (!ok) return;
+        visible.forEach((i, k) => {
+          answers[isAge ? `vek-${i.dataset.age}` : id] = values[k];
+        });
+        next();
+      };
+      inputs.forEach((input) => {
+        if (!isAge) {
+          input.addEventListener('input', () => {
+            const n = parseNum(input.value);
+            input.value = Number.isNaN(n) ? '' : formatKc(n);
+          });
+        } else {
+          input.addEventListener('input', () => (input.value = input.value.replace(/[^\d]/g, '')));
+        }
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            submit();
+          }
+        });
+      });
+      el.querySelector('[data-next]')?.addEventListener('click', submit);
+    });
+
     root.querySelector('[data-back]')?.addEventListener('click', () => {
-      if (current > 0) showQuestion(current - 1);
+      if (index > 0) show(index - 1);
       else showStep('intro');
     });
 
     root.querySelector('[data-restart]')?.addEventListener('click', () => {
-      answers.length = 0;
+      Object.keys(answers).forEach((k) => delete answers[k]);
       if (form) {
         form.hidden = false;
         form.reset();
       }
       if (success) success.hidden = true;
       showStep('quiz');
-      showQuestion(0);
+      show(0);
     });
 
     // --- Formulář: stejná pravidla a cesta jako kontaktní formulář ---
@@ -375,7 +573,7 @@ const config = {
         return ok;
       };
       fields.forEach((f) => f.addEventListener('blur', () => validate(f)));
-      const summary = form.querySelector<HTMLElement>('.nkd-form__errors');
+      const summaryEl = form.querySelector<HTMLElement>('.nkd-form__errors');
       const errorStatus = form.querySelector<HTMLElement>('.nkd-status--error');
       const submit = form.querySelector<HTMLButtonElement>('.nkd-form__submit');
 
@@ -384,9 +582,9 @@ const config = {
         if (submit?.disabled) return;
         if (errorStatus) errorStatus.hidden = true;
         const allOk = fields.map(validate).every(Boolean);
-        if (summary) {
-          summary.hidden = allOk;
-          summary.textContent = allOk ? '' : 'Zkontrolujte prosím zvýrazněná pole.';
+        if (summaryEl) {
+          summaryEl.hidden = allOk;
+          summaryEl.textContent = allOk ? '' : 'Zkontrolujte prosím zvýrazněná pole.';
         }
         if (!allOk) return;
 
@@ -532,29 +730,30 @@ const config = {
     overflow: visible;
   }
 
-  .nkd-progress__dot {
+  /* Tečky vytváří skript (počet podle odpovědí) — proto :global(). */
+  .nkd-progress :global(.nkd-progress__dot) {
     r: 2.4px;
     fill: var(--line);
     fill-opacity: .5;
   }
 
-  .nkd-progress__dot.is-done {
+  .nkd-progress :global(.nkd-progress__dot.is-done) {
     fill: var(--emerald);
     fill-opacity: 1;
   }
 
-  .nkd-progress__dot.is-current {
+  .nkd-progress :global(.nkd-progress__dot.is-current) {
     r: 3.2px;
     fill: var(--emerald);
     fill-opacity: 1;
   }
 
   @media (min-width: 1200px) {
-    .nkd-progress__dot {
+    .nkd-progress :global(.nkd-progress__dot) {
       r: 2.6px;
     }
 
-    .nkd-progress__dot.is-current {
+    .nkd-progress :global(.nkd-progress__dot.is-current) {
       r: 3.5px;
     }
   }
@@ -586,10 +785,10 @@ const config = {
     min-width: 0;
   }
 
-  /* Skrytá otázka drží výšku, aby „Zpět“ neposkakovalo. */
+  /* Skrytá otázka se nevykresluje: otázky mají různou výšku (výběr vs.
+     číselné pole) a držet výšku nejvyšší by pod polem nechalo prázdno. */
   .nkd-question[hidden] {
-    display: block;
-    visibility: hidden;
+    display: none;
   }
 
   .nkd-question__title {
@@ -1012,6 +1211,190 @@ const config = {
 
     .nkd-hero__text h1 {
       font-size: 72px;
+    }
+  }
+
+  /* --- v3: štítek žadatele, číselná pole, osoba nad formulářem --- */
+  .nkd-question__who {
+    margin: 0 0 8px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: var(--emerald);
+  }
+
+  .nkd-question__who[hidden] {
+    display: none;
+  }
+
+  .nkd-number {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 420px;
+  }
+
+  .nkd-number__pair {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 28px;
+  }
+
+  .nkd-number__item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nkd-number__item[hidden],
+  .nkd-number__label[hidden] {
+    display: none;
+  }
+
+  .nkd-number__label {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--navy);
+  }
+
+  .nkd-number__field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 56px;
+    padding: 0 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    background: var(--white);
+    transition: border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .nkd-number__field:focus-within {
+    border-color: var(--emerald);
+  }
+
+  .nkd-number__field--short {
+    width: 140px;
+  }
+
+  .nkd-number__field input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--navy);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nkd-number__field input:focus,
+  .nkd-number__field input:focus-visible {
+    outline: none;
+  }
+
+  .nkd-number__field:has(input[aria-invalid='true']) {
+    border-color: #B3261E;
+  }
+
+  .nkd-number__unit {
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+
+  .nkd-number__error {
+    margin: 0;
+    font-weight: 500;
+    font-size: 13px;
+    color: #B3261E;
+  }
+
+  .nkd-number__error[hidden] {
+    display: none;
+  }
+
+  .nkd-number__next {
+    margin-top: 8px;
+  }
+
+  /* Jako .kontakt__person: fotka | jméno, hodnocení na mobilu jako řádek
+     pod nimi přes celou šířku (vejde se na jeden řádek), od tabletu pod jménem. */
+  .nkd-person {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 12px;
+    align-items: center;
+  }
+
+  .nkd-person__proof {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: nowrap;
+    color: var(--text-quiet);
+  }
+
+  .nkd-person__photo {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .nkd-person__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+  }
+
+  .nkd-person__text strong {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.4;
+    color: var(--navy);
+  }
+
+  .nkd-person__text span {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .nkd-person__star {
+    color: var(--emerald);
+  }
+
+  @media (min-width: 768px) {
+    .nkd-number__next {
+      align-self: flex-start;
+    }
+
+    .nkd-person {
+      grid-template-columns: 72px minmax(0, 1fr);
+      row-gap: 2px;
+    }
+
+    .nkd-person__photo {
+      grid-row: 1 / span 2;
+      width: 72px;
+      height: 72px;
+    }
+
+    .nkd-person__text {
+      align-self: end;
+    }
+
+    .nkd-person__proof {
+      grid-column: 2;
+      align-self: start;
     }
   }
 </style>
