@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Děkuji za zprávu</title>
+<style>
+  /* Telefon: menší okraje, aby se vešel podpis (je široký ~330 px). Gmail i Apple Mail to podporují. */
+  @media (max-width: 480px) {
+    .obal { padding: 16px 6px !important; }
+    .karta { padding: 28px 16px 24px !important; }
+  }
+</style>
+</head>
+<!--
+  Potvrzovací e-mail klientovi po odeslání formuláře (8. 10. 2026).
+  Odesílá ho poptavka.php, které doplní téma, odkaz na rezervaci a podpis
+  (podpis = soubor podpis-email.html, vyměnit ho stačí tam). Textová verze
+  téhož je přímo v poptavka.php — při změně textu upravit obě.
+  Styl: osobní e-mail, ne newsletter. Jediný grafický prvek je tlačítko.
+  Inline styly a tabulky kvůli e-mailovým programům (Outlook, Gmail).
+-->
+<body style="margin:0;padding:0;background-color:#F8FAFC;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#F8FAFC;font-size:1px;line-height:1px;">Zprávu jsem dostal, ozvu se vám do&nbsp;jednoho pracovního dne.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F8FAFC;">
+  <tr>
+    <td class="obal" align="center" style="padding:32px 12px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background-color:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;">
+        <tr>
+          <td class="karta" style="padding:36px 32px 32px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:26px;color:#31445B;">
+            <p style="margin:0 0 18px;font-size:20px;line-height:28px;font-weight:bold;color:#0F2747;">Děkuji za&nbsp;zprávu</p>
+            <p style="margin:0 0 16px;">Dobrý den,</p>
+            <p style="margin:0 0 20px;">zpráva mi dorazila v&nbsp;pořádku. Do&nbsp;jednoho pracovního dne se&nbsp;vám osobně ozvu, abychom domluvili termín.</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
+              <tr>
+                <td style="border-left:3px solid #1E7A5C;padding:4px 0 4px 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;color:#52657D;">Téma: <strong style="color:#0F2747;">{{TEMA}}</strong></td>
+              </tr>
+            </table>
+            <p style="margin:0 0 24px;">Konzultace je nezávazná a&nbsp;zdarma, trvá zhruba 30&nbsp;minut. Můžeme se&nbsp;potkat v&nbsp;kanceláři v&nbsp;Ostravě-&#8288;Porubě, nebo online.</p>
+            <p style="margin:0 0 14px;">Pokud nechcete čekat, vyberte si termín rovnou:</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
+              <tr>
+                <td align="center" bgcolor="#1E7A5C" style="border-radius:8px;">
+                  <a href="{{REZERVACE}}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:20px;font-weight:bold;color:#FFFFFF;text-decoration:none;border-radius:8px;">Vybrat termín</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 32px;">Nebo mi zavolejte na&nbsp;<a href="tel:+420775217721" style="color:#0F2747;font-weight:bold;text-decoration:none;white-space:nowrap;">+420&nbsp;775&nbsp;217&nbsp;721</a>.</p>
+            {{PODPIS}}
+          </td>
+        </tr>
+      </table>
+      <p style="margin:16px 0 0;max-width:560px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#7A8BA0;">Tento e-mail jste dostali, protože jste vyplnili formulář na&nbsp;<a href="https://patrikgajdadzis.cz/" style="color:#7A8BA0;">patrikgajdadzis.cz</a>.</p>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

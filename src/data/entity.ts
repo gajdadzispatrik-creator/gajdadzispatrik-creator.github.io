@@ -60,7 +60,8 @@ export function faqPage(items: { q: string; a: string }[]) {
 
 // Online rezervace úvodní konzultace (Google Kalendář, plán schůzek — hlídá
 // obsazené časy) a WhatsApp s předvyplněnou první zprávou. Kontakt + závěrečné
-// pásy podstránek.
+// pásy podstránek. Kopie BOOKING_URL je i v public/api/poptavka.php
+// (potvrzovací e-mail klientovi) — při změně upravit obě.
 export const BOOKING_URL = 'https://calendar.app.google/995121nUYKycJ5aNA';
 export const WHATSAPP_URL = `https://wa.me/420775217721?text=${encodeURIComponent('Dobrý den, mám zájem o nezávaznou konzultaci.')}`;
 

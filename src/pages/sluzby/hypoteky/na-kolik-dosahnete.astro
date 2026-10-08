@@ -1,0 +1,1024 @@
+---
+/**
+ * „Na kolik dosáhnete?" — krátký dotazník k hypotéce (8. 10. 2026).
+ * Zadání: ../Osobní značka/strategie/zadani-web-google-ads.md, část B.
+ * Texty schválil Patrik 8. 10. 2026 (s úpravami).
+ *
+ * Princip i vzhled jako Finanční check-up (/financni-check-up): jedna
+ * otázka na obrazovce, klikání, postup jako linka s tečkami. Rozdíl: na
+ * konci NENÍ žádné číslo (částka, sazba ani splátka) — nejde o kalkulačku
+ * úvěru (lovci sazeb, pravidla reklamy na spotřebitelský úvěr). Výsledek
+ * vede k poptávce: odpovědi se odešlou s kontaktem na /api/poptavka.php
+ * (zdroj „na-kolik-dosahnete“, e-mail nepovinný).
+ *
+ * Bez kapitol s trasou (nástroj, stejně jako check-up), linku do patičky
+ * kreslí StandaloneRoute.astro. Všechny texty jsou ve statickém HTML,
+ * JS jen přepíná, co je vidět (check:typo tak vidí celý text).
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import SiteFooter from '../../../components/SiteFooter.astro';
+import StandaloneRoute from '../../../components/StandaloneRoute.astro';
+import { BOOKING_URL } from '../../../data/entity';
+
+// Nezlomitelná mezera (U+00A0) za krátkými předložkami/spojkami, za číslem
+// a mezi skupinami číslic (CLAUDE.md „Konvence: nezlomitelná mezera").
+const NBSP = ' ';
+const PREP = /(^|[\s (])([aikosuvzAIKOSUVZ]|do|ke|na|od|po|pro|se|ve|za|ze|Do|Ke|Na|Od|Po|Pro|Se|Ve|Za|Ze) /g;
+const nb = (text: string) =>
+  text
+    .replace(PREP, `$1$2${NBSP}`)
+    .replace(PREP, `$1$2${NBSP}`)
+    .replace(/(\d) /g, `$1${NBSP}`)
+    .replace(/ (–|—) /g, `${NBSP}$1 `);
+
+interface Question {
+  id: string;
+  /** Krátký název do e-mailu s odpověďmi. */
+  title: string;
+  q: string;
+  options: string[];
+}
+
+// Pořadí odpovědí je důležité — pravidla tipů níž pracují s indexem.
+const questions: Question[] = [
+  {
+    id: 'ucel',
+    title: 'Na co',
+    q: 'Na co hypotéku potřebujete?',
+    options: ['Koupě bytu', 'Koupě domu', 'Výstavba', 'Rekonstrukce', 'Ještě nevím, chci zjistit, na co mám'],
+  },
+  {
+    id: 'zadatele',
+    title: 'Žadatelé',
+    q: 'Kdo bude o hypotéku žádat?',
+    options: ['Jen já', 'Dva (s partnerem nebo partnerkou)'],
+  },
+  {
+    id: 'prijem',
+    title: 'Druh příjmu',
+    q: 'Jak máte příjem?',
+    options: ['Zaměstnanec', 'OSVČ nebo s.r.o.', 'Kombinace', 'Jiný (rodičovská, důchod…)'],
+  },
+  {
+    id: 'vyse',
+    title: 'Čistý příjem domácnosti',
+    q: 'Jaký je čistý měsíční příjem domácnosti?',
+    options: ['Do 40 000 Kč', '40–60 000 Kč', '60–80 000 Kč', '80–100 000 Kč', 'Nad 100 000 Kč'],
+  },
+  {
+    id: 'uvery',
+    title: 'Jiné úvěry',
+    q: 'Splácíte jiné úvěry nebo leasing?',
+    options: ['Ne', 'Ano, do 5 000 Kč měsíčně', '5–15 000 Kč měsíčně', 'Víc'],
+  },
+  {
+    id: 'vlastni',
+    title: 'Vlastní peníze',
+    q: 'Kolik máte vlastních peněz?',
+    options: ['Zatím nic', 'Méně než 10 % ceny', '10–20 % ceny', 'Víc než 20 % ceny', 'Ještě nevím cenu'],
+  },
+  {
+    id: 'kdy',
+    title: 'Kdy kupovat',
+    q: 'Kdy chcete kupovat?',
+    options: ['Do 3 měsíců', 'Do roka', 'Zatím jen zjišťuji'],
+  },
+];
+
+// Tipy podle odpovědí (pravidla v <script>). Ukazují se jen schválené —
+// `confirmed: false` čeká na Patrikovo potvrzení odborného tvrzení.
+const tips = [
+  {
+    id: 'osvc',
+    confirmed: true,
+    text: 'U podnikatelů každá banka počítá příjem z daňového přiznání jinak. Ze stejného přiznání může v jiné bance vyjít vyšší částka.',
+  },
+  {
+    id: 'vlastni',
+    confirmed: true, // potvrdil Patrik 8. 10. 2026
+    text: 'Banka obvykle půjčí až 80 % ceny nemovitosti, lidem do 36 let až 90 %. Zbytek je potřeba mít z vlastních zdrojů.',
+  },
+  {
+    id: 'uvery',
+    confirmed: true, // potvrdil Patrik 8. 10. 2026
+    text: 'Každá splátka jiného úvěru snižuje, na kolik dosáhnete. Někdy pomůže úvěr před žádostí doplatit nebo sloučit.',
+  },
+  {
+    id: 'jiny',
+    confirmed: true, // potvrdil a přepsal Patrik 8. 10. 2026
+    text: 'Banky tyto příjmy posuzují každá jinak. Proto nejdřív vyřešte hypotéku a nemovitost hledejte až podle toho, na kolik dosáhnete.',
+  },
+  {
+    id: 'cena',
+    confirmed: true,
+    text: 'Děláte to správně: nejdřív zjistit, na kolik dosáhnete, a až potom hledat nemovitost.',
+  },
+].filter((t) => t.confirmed);
+
+const config = {
+  questions: questions.map((q) => ({ id: q.id, title: q.title, options: q.options })),
+};
+---
+
+<BaseLayout
+  title="Na jakou hypotéku dosáhnete? | Patrik Gajdadzis"
+  description="Sedm krátkých otázek, zhruba minuta. Podle odpovědí spočítám, na jakou hypotéku dosáhnete, a to podle podmínek konkrétních bank. Zdarma, 5★ hodnocení na Googlu."
+>
+  <Header />
+  <main id="hero" class="nkd">
+    <StandaloneRoute />
+
+    <section class="nkd-hero" aria-labelledby="nkd-heading">
+      <div class="nkd-hero__text" data-route-content data-nkd data-config={JSON.stringify(config)}>
+        <h1 id="nkd-heading">Na&nbsp;kolik dosáhnete?</h1>
+
+        <!-- Úvod -->
+        <div class="nkd-step" data-step="intro">
+          <p class="nkd-hero__lead">
+            Sedm krátkých otázek, zhruba minuta. Podle odpovědí vám spočítám, na&nbsp;jakou hypotéku dosáhnete, a&nbsp;to podle
+            podmínek konkrétních bank.
+          </p>
+          <p class="nkd-meta">Odpovědi zůstávají ve&nbsp;vašem prohlížeči. Pošlete mi je, až když budete chtít.</p>
+          <div class="nkd-intro__actions">
+            <button class="nkd-cta" type="button" data-start>Začít</button>
+          </div>
+          <noscript>
+            <p class="nkd-meta">
+              Dotazník potřebuje zapnutý JavaScript. Zavolejte mi na&nbsp;<a href="tel:+420775217721">+420&nbsp;775&nbsp;217&nbsp;721</a>.
+            </p>
+          </noscript>
+        </div>
+
+        <!-- Otázky -->
+        <div class="nkd-step nkd-quiz" data-step="quiz" hidden>
+          <svg class="nkd-progress" width="260" height="10" viewBox="0 0 260 10" aria-hidden="true" focusable="false">
+            <path d="M5 5H255" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" fill="none" />
+            {questions.map((_, i) => (
+              <circle class="nkd-progress__dot" cx={5 + (i * 250) / (questions.length - 1)} cy="5" r="2.4" />
+            ))}
+          </svg>
+          <p class="nkd-quiz__count" aria-live="polite">Otázka <span data-count>1</span> z&nbsp;{questions.length}</p>
+
+          <div class="nkd-questions">
+            {
+              questions.map((q, qi) => (
+                <fieldset class="nkd-question" data-question={qi} hidden>
+                  <legend class="nkd-question__title" tabindex="-1">{nb(q.q)}</legend>
+                  <div class="nkd-options">
+                    {q.options.map((label, oi) => (
+                      <button class="nkd-option" type="button" data-option={oi}>
+                        <span class="nkd-option__mark" aria-hidden="true" />
+                        <span>{nb(label)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              ))
+            }
+          </div>
+
+          <button class="nkd-back" type="button" data-back>Zpět</button>
+        </div>
+
+        <!-- Výsledek: bez čísla → tipy → formulář → termín / telefon -->
+        <div class="nkd-step nkd-result" data-step="result" hidden>
+          <div class="nkd-verdict">
+            <h2 class="nkd-verdict__title" tabindex="-1">Děkuji, mám vše, co potřebuji.</h2>
+            <p class="nkd-verdict__text">
+              Přesnou částku spočítám podle podmínek konkrétních bank, protože každá počítá příjem a&nbsp;výdaje jinak. Pošlete
+              mi odpovědi. Obvykle se&nbsp;vám ozvu ještě ten den.
+            </p>
+          </div>
+
+          <div class="nkd-tips" data-tips hidden>
+            <p class="nkd-tips__label">Čeho jsem si všiml</p>
+            <ul class="nkd-tips__list">
+              {tips.map((t) => <li data-tip={t.id} hidden>{nb(t.text)}</li>)}
+            </ul>
+          </div>
+
+          <form class="nkd-form" method="post" action="/api/poptavka.php" novalidate>
+            <p class="nkd-form__errors" role="alert" hidden></p>
+            <div class="nkd-hp" aria-hidden="true">
+              <label for="nkd-website">Nevyplňujte</label>
+              <input id="nkd-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+            </div>
+            <input type="hidden" name="vyplneno-ms" value="" />
+            <input type="hidden" name="zdroj" value="na-kolik-dosahnete" />
+            <input type="hidden" name="oblast" value="Hypotéka a bydlení" />
+            <input type="hidden" name="situace" value="" />
+
+            <div class="nkd-form__grid">
+              <div class="nkd-field">
+                <label for="nkd-jmeno">Jméno a&nbsp;příjmení <span class="nkd-required" aria-hidden="true">*</span></label>
+                <input id="nkd-jmeno" name="jmeno" type="text" autocomplete="name" required aria-describedby="nkd-jmeno-chyba" />
+                <p class="nkd-field__error" id="nkd-jmeno-chyba" hidden></p>
+              </div>
+              <div class="nkd-field">
+                <label for="nkd-telefon">Telefon <span class="nkd-required" aria-hidden="true">*</span></label>
+                <input id="nkd-telefon" name="telefon" type="tel" autocomplete="tel" required aria-describedby="nkd-telefon-chyba" />
+                <p class="nkd-field__error" id="nkd-telefon-chyba" hidden></p>
+              </div>
+              <div class="nkd-field nkd-field--wide">
+                <label for="nkd-email">E-mail <span class="nkd-optional">(nepovinný)</span></label>
+                <input id="nkd-email" name="email" type="email" autocomplete="email" aria-describedby="nkd-email-chyba" />
+                <p class="nkd-field__error" id="nkd-email-chyba" hidden></p>
+              </div>
+            </div>
+
+            <button class="nkd-cta nkd-form__submit" type="submit">Poslat odpovědi</button>
+
+            <p class="nkd-status nkd-status--error" role="alert" hidden>
+              Odpovědi se&nbsp;nepodařilo odeslat. Zkuste to znovu nebo mi zavolejte na&nbsp;<a href="tel:+420775217721">+420&nbsp;775&nbsp;217&nbsp;721</a>.
+            </p>
+
+            <p class="nkd-privacy">
+              Údaje použiji pouze pro&nbsp;vyřízení vaší poptávky a&nbsp;navazující komunikaci. <a href="/zpracovani-osobnich-udaju">Zásady zpracování osobních údajů</a>
+            </p>
+          </form>
+
+          <p class="nkd-status nkd-status--success" role="status" tabindex="-1" hidden>
+            Děkuji, odpovědi mi dorazily. Obvykle se&nbsp;vám ozvu ještě ten den.
+          </p>
+
+          <div class="nkd-alt">
+            <p class="nkd-alt__label">Raději hned?</p>
+            <div class="nkd-alt__actions">
+              <a class="nkd-alt__btn" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat termín</a>
+              <a class="nkd-alt__btn" href="tel:+420775217721">Zavolat</a>
+            </div>
+          </div>
+
+          <button class="nkd-back" type="button" data-restart>Projít znovu</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  interface Config {
+    questions: { id: string; title: string; options: string[] }[];
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-nkd]');
+  if (root) {
+    const config = JSON.parse(root.dataset.config ?? '{}') as Config;
+    const total = config.questions.length;
+    const answers: number[] = [];
+    let current = 0;
+    let startedAt: number | null = null;
+
+    const steps = root.querySelectorAll<HTMLElement>('[data-step]');
+    const questionEls = root.querySelectorAll<HTMLElement>('[data-question]');
+    const dots = root.querySelectorAll<SVGCircleElement>('.nkd-progress__dot');
+    const countEl = root.querySelector<HTMLElement>('[data-count]');
+    const form = root.querySelector<HTMLFormElement>('.nkd-form');
+    const success = root.querySelector<HTMLElement>('.nkd-status--success');
+
+    const showStep = (name: string) => steps.forEach((s) => (s.hidden = s.dataset.step !== name));
+
+    const showQuestion = (index: number, focus = true) => {
+      current = index;
+      questionEls.forEach((q, i) => (q.hidden = i !== index));
+      dots.forEach((d, i) => {
+        d.classList.toggle('is-done', i < index);
+        d.classList.toggle('is-current', i === index);
+      });
+      if (countEl) countEl.textContent = String(index + 1);
+      questionEls[index].querySelectorAll<HTMLElement>('[data-option]').forEach((o) => {
+        o.classList.toggle('is-selected', Number(o.dataset.option) === answers[index]);
+      });
+      if (focus) questionEls[index].querySelector<HTMLElement>('legend')?.focus({ preventScroll: true });
+      if (root.getBoundingClientRect().top < 0) root.scrollIntoView({ block: 'start' });
+    };
+
+    const ans = (id: string) => answers[config.questions.findIndex((q) => q.id === id)];
+
+    const showResult = () => {
+      // Tipy podle odpovědí (indexy odpovídají pořadí v `questions`).
+      const rules: Record<string, () => boolean> = {
+        osvc: () => ans('prijem') === 1 || ans('prijem') === 2,
+        vlastni: () => ans('vlastni') <= 2,
+        uvery: () => ans('uvery') >= 1,
+        jiny: () => ans('prijem') === 3,
+        cena: () => ans('vlastni') === 4 || ans('kdy') === 2 || ans('ucel') === 4,
+      };
+      const items = Array.from(root.querySelectorAll<HTMLElement>('[data-tip]'));
+      // „Jiný příjem“ a „Děláte to správně“ říkají totéž (nejdřív hypotéka,
+      // pak nemovitost) — když platí oba, zůstane jen „jiný příjem“.
+      const hits = items.filter((li) => rules[li.dataset.tip ?? '']?.());
+      const hasJiny = hits.some((li) => li.dataset.tip === 'jiny');
+      const shown = hits.filter((li) => !(hasJiny && li.dataset.tip === 'cena')).slice(0, 2);
+      items.forEach((li) => (li.hidden = !shown.includes(li)));
+      const box = root.querySelector<HTMLElement>('[data-tips]');
+      if (box) box.hidden = shown.length === 0;
+
+      // Odpovědi do e-mailu (pole „situace“).
+      const situation = form?.elements.namedItem('situace') as HTMLInputElement | null;
+      if (situation) {
+        situation.value = [
+          'Odpovědi z nástroje „Na kolik dosáhnete?“ na webu:',
+          ...config.questions.map((q, i) => `${q.title}: ${q.options[answers[i]] ?? '—'}`),
+        ].join('\n');
+      }
+
+      showStep('result');
+      root.querySelector<HTMLElement>('.nkd-verdict__title')?.focus({ preventScroll: true });
+      root.scrollIntoView({ block: 'start' });
+    };
+
+    root.querySelector('[data-start]')?.addEventListener('click', () => {
+      startedAt = performance.now();
+      showStep('quiz');
+      showQuestion(0);
+    });
+
+    questionEls.forEach((q, qi) => {
+      q.querySelectorAll<HTMLElement>('[data-option]').forEach((option) => {
+        option.addEventListener('click', () => {
+          answers[qi] = Number(option.dataset.option);
+          if (qi + 1 < total) showQuestion(qi + 1);
+          else showResult();
+        });
+      });
+    });
+
+    root.querySelector('[data-back]')?.addEventListener('click', () => {
+      if (current > 0) showQuestion(current - 1);
+      else showStep('intro');
+    });
+
+    root.querySelector('[data-restart]')?.addEventListener('click', () => {
+      answers.length = 0;
+      if (form) {
+        form.hidden = false;
+        form.reset();
+      }
+      if (success) success.hidden = true;
+      showStep('quiz');
+      showQuestion(0);
+    });
+
+    // --- Formulář: stejná pravidla a cesta jako kontaktní formulář ---
+    if (form) {
+      const messages: Record<string, string> = {
+        jmeno: 'Vyplňte prosím jméno a příjmení.',
+        telefon: 'Vyplňte prosím telefonní číslo.',
+        email: 'Zkontrolujte prosím e-mailovou adresu.',
+      };
+      const fields = ['jmeno', 'telefon', 'email'].map((n) => form.elements.namedItem(n) as HTMLInputElement);
+      const validate = (input: HTMLInputElement) => {
+        const ok = input.checkValidity();
+        const err = document.getElementById(`${input.id}-chyba`);
+        if (err) {
+          err.textContent = ok ? '' : messages[input.name];
+          err.hidden = ok;
+        }
+        if (ok) input.removeAttribute('aria-invalid');
+        else input.setAttribute('aria-invalid', 'true');
+        return ok;
+      };
+      fields.forEach((f) => f.addEventListener('blur', () => validate(f)));
+      const summary = form.querySelector<HTMLElement>('.nkd-form__errors');
+      const errorStatus = form.querySelector<HTMLElement>('.nkd-status--error');
+      const submit = form.querySelector<HTMLButtonElement>('.nkd-form__submit');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (submit?.disabled) return;
+        if (errorStatus) errorStatus.hidden = true;
+        const allOk = fields.map(validate).every(Boolean);
+        if (summary) {
+          summary.hidden = allOk;
+          summary.textContent = allOk ? '' : 'Zkontrolujte prosím zvýrazněná pole.';
+        }
+        if (!allOk) return;
+
+        const elapsed = form.elements.namedItem('vyplneno-ms') as HTMLInputElement;
+        elapsed.value = String(Math.round(performance.now() - (startedAt ?? 0)));
+
+        if (submit) submit.disabled = true;
+        form.setAttribute('aria-busy', 'true');
+        let sent = false;
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: new URLSearchParams(new FormData(form) as unknown as Record<string, string>),
+          });
+          const result = (await response.json().catch(() => null)) as { ok?: boolean } | null;
+          sent = response.ok && result?.ok === true;
+        } catch {
+          sent = false;
+        } finally {
+          if (submit) submit.disabled = false;
+          form.removeAttribute('aria-busy');
+        }
+
+        if (sent) {
+          form.hidden = true;
+          if (success) {
+            success.hidden = false;
+            success.focus({ preventScroll: true });
+          }
+        } else if (errorStatus) {
+          errorStatus.hidden = false;
+        }
+      });
+    }
+  }
+</script>
+
+<style>
+  .nkd {
+    position: relative;
+    background: var(--bg);
+  }
+
+  .nkd :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .nkd .nkd-question__title:focus,
+  .nkd .nkd-verdict__title:focus,
+  .nkd .nkd-status:focus {
+    outline: none;
+  }
+
+  /* Hero 1:1 jako /financni-check-up (symetrický padding, stejné stupně). */
+  .nkd-hero {
+    position: relative;
+    padding: 64px 24px;
+  }
+
+  .nkd-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 640px;
+  }
+
+  .nkd-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .nkd-step {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .nkd-step[hidden],
+  .nkd-result [hidden] {
+    display: none;
+  }
+
+  .nkd-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .nkd-meta {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .nkd-intro__actions {
+    margin-top: 6px;
+  }
+
+  .nkd-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 56px;
+    padding-inline: 30px;
+    border: none;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .nkd-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .nkd-cta:active {
+    transform: translateY(1px);
+  }
+
+  .nkd-cta:disabled {
+    opacity: .6;
+    cursor: wait;
+  }
+
+  /* Postup: linka s tečkami jako trasa webu (CLAUDE.md „Konvence: velikost teček"). */
+  .nkd-progress {
+    display: block;
+    overflow: visible;
+  }
+
+  .nkd-progress__dot {
+    r: 2.4px;
+    fill: var(--line);
+    fill-opacity: .5;
+  }
+
+  .nkd-progress__dot.is-done {
+    fill: var(--emerald);
+    fill-opacity: 1;
+  }
+
+  .nkd-progress__dot.is-current {
+    r: 3.2px;
+    fill: var(--emerald);
+    fill-opacity: 1;
+  }
+
+  @media (min-width: 1200px) {
+    .nkd-progress__dot {
+      r: 2.6px;
+    }
+
+    .nkd-progress__dot.is-current {
+      r: 3.5px;
+    }
+  }
+
+  .nkd-quiz__count,
+  .nkd-tips__label,
+  .nkd-alt__label {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: var(--navy);
+  }
+
+  .nkd-questions {
+    display: grid;
+  }
+
+  .nkd-questions > .nkd-question {
+    grid-area: 1 / 1;
+  }
+
+  .nkd-question {
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+  }
+
+  /* Skrytá otázka drží výšku, aby „Zpět“ neposkakovalo. */
+  .nkd-question[hidden] {
+    display: block;
+    visibility: hidden;
+  }
+
+  .nkd-question__title {
+    padding: 0;
+    margin: 0 0 20px;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .nkd-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 560px;
+  }
+
+  .nkd-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 56px;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    background: var(--white);
+    color: var(--navy);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .nkd-option:hover,
+  .nkd-option.is-selected {
+    border-color: var(--emerald);
+  }
+
+  .nkd-option__mark {
+    flex: none;
+    position: relative;
+    width: 14px;
+    height: 14px;
+    box-sizing: border-box;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+  }
+
+  .nkd-option.is-selected .nkd-option__mark {
+    border-color: var(--emerald);
+  }
+
+  .nkd-option.is-selected .nkd-option__mark::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--emerald);
+  }
+
+  .nkd-back {
+    align-self: flex-start;
+    padding: 12px 0;
+    border: none;
+    background: none;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .nkd-back:hover {
+    color: var(--emerald);
+  }
+
+  /* --- Výsledek --- */
+  .nkd-result {
+    gap: 40px;
+  }
+
+  .nkd-verdict {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .nkd-verdict__title {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -.04em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .nkd-verdict__text {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  /* Tipy jako postřehy v check-upu: krátký zářez trasy u každého. */
+  .nkd-tips {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 600px;
+  }
+
+  .nkd-tips__label {
+    color: var(--emerald);
+  }
+
+  .nkd-tips__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nkd-tips__list li {
+    position: relative;
+    padding-left: 34px;
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .nkd-tips__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: .75em;
+    width: 22px;
+    height: 1px;
+    background: var(--emerald);
+  }
+
+  /* Formulář: bílá karta, pole jako kontaktní formulář (ContactSection.astro). */
+  .nkd-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-width: 640px;
+    padding: 28px 22px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-panel);
+    background: var(--white);
+  }
+
+  .nkd-form[hidden] {
+    display: none;
+  }
+
+  .nkd-hp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .nkd-form__errors,
+  .nkd-status {
+    margin: 0;
+    padding: 12px 16px;
+    border-radius: var(--radius-field);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .nkd-form__errors,
+  .nkd-status--error {
+    background: rgba(197, 48, 48, .08);
+    color: #B3261E;
+  }
+
+  .nkd-status--error a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .nkd-status--success {
+    max-width: 640px;
+    padding: 18px 20px;
+    background: rgba(30, 122, 92, .1);
+    font-size: 16px;
+    color: var(--emerald);
+  }
+
+  .nkd-form__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .nkd-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nkd-field label {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--navy);
+  }
+
+  .nkd-required {
+    color: var(--emerald);
+  }
+
+  .nkd-optional {
+    font-weight: 400;
+    color: var(--text-quiet);
+  }
+
+  .nkd-field input {
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 10px 2px;
+    border: none;
+    border-bottom: 1px solid rgba(15, 39, 71, .28);
+    border-radius: 0;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    color: var(--navy);
+  }
+
+  .nkd-field input[aria-invalid='true'] {
+    border-bottom-color: #B3261E;
+  }
+
+  .nkd-field__error {
+    margin: 0;
+    font-weight: 500;
+    font-size: 13px;
+    color: #B3261E;
+  }
+
+  .nkd-form__submit {
+    margin-top: 4px;
+  }
+
+  .nkd-privacy {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .nkd-privacy a {
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  /* Termín / telefon: dvě vedlejší tlačítka s obrysem. */
+  .nkd-alt {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .nkd-alt__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .nkd-alt__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 160px;
+    height: 52px;
+    padding-inline: 24px;
+    border: 1px solid var(--navy);
+    border-radius: var(--radius-btn);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--navy);
+    text-decoration: none;
+    transition: border-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+  }
+
+  .nkd-alt__btn:hover {
+    border-color: var(--emerald);
+    color: var(--emerald);
+  }
+
+  .nkd-result > .nkd-back {
+    margin-top: -24px;
+  }
+
+  /* ============ Tablet: 768–1199 ============ */
+  @media (min-width: 768px) {
+    .nkd-hero {
+      padding: 88px 40px;
+    }
+
+    .nkd-hero__text {
+      gap: 20px;
+    }
+
+    .nkd-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .nkd-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .nkd-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .nkd-question__title {
+      font-size: 28px;
+    }
+
+    .nkd-verdict__title {
+      font-size: 34px;
+    }
+
+    .nkd-verdict__text {
+      font-size: 17.5px;
+    }
+
+    .nkd-form {
+      padding: 36px 40px;
+    }
+
+    .nkd-form__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 22px 32px;
+    }
+
+    .nkd-field--wide {
+      grid-column: 1 / -1;
+    }
+
+    .nkd-form__submit {
+      align-self: flex-start;
+    }
+
+    .nkd-alt__btn {
+      flex: 0 0 auto;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .nkd-hero {
+      padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834);
+    }
+
+    .nkd-hero__text h1 {
+      max-width: 11em;
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      line-height: .99;
+    }
+
+    .nkd-hero__text {
+      gap: 40px;
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 ============ */
+  @media (min-width: 1200px) {
+    .nkd-hero {
+      padding: 112px 96px;
+    }
+
+    .nkd-hero__text {
+      gap: 32px;
+    }
+
+    .nkd-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .nkd-hero__lead {
+      font-size: 19px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ ============ */
+  @media (min-width: 1400px) {
+    .nkd-hero {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+      padding: 120px 100px;
+    }
+
+    .nkd-hero__text h1 {
+      font-size: 72px;
+    }
+  }
+</style>

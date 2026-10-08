@@ -6,7 +6,8 @@
  * Obsah poptávky se neukládá na server — odchází jen e-mailem na RECIPIENT
  * a zálohou na BACKUP_RECIPIENT (schránka na Wedosu, jiný poskytovatel než
  * Google Workspace u RECIPIENT — když jeden e-mail spadne do spamu nebo se
- * nedoručí, poptávka se neztratí).
+ * nedoručí, poptávka se neztratí). Klient dostane krátké potvrzení
+ * (od 7. 10. 2026), odpovědí na něj píše na REPLY_TO.
  *
  * Ochrana proti spamu bez CAPTCHA: skryté pole (honeypot) + minimální doba
  * vyplnění. Obojí při zásahu vrací „úspěch“, aby robot nepoznal, že neprošel.
@@ -23,6 +24,10 @@ const RECIPIENT = 'patrik@mintfinance.cz';
 const SENDER = 'poptavka@patrikgajdadzis.cz';
 const SENDER_NAME = 'Web patrikgajdadzis.cz';
 const BACKUP_RECIPIENT = 'poptavka@patrikgajdadzis.cz';
+// Kam odpoví klient na potvrzovací e-mail (veřejný e-mail z brand manualu).
+const REPLY_TO = 'patrik@mintfinance.cz';
+// Online rezervace — musí sedět s BOOKING_URL v src/data/entity.ts.
+const BOOKING_URL = 'https://calendar.app.google/995121nUYKycJ5aNA';
 const MIN_FILL_MS = 3000;
 // Záměrně velkorysé: kdyby Wedos schovával návštěvníky za společnou IP
 // proxy, přísnější limit by blokoval skutečné klienty.
@@ -156,12 +161,18 @@ $phone = oneLine(field('telefon', 60));
 $email = oneLine(field('email', 254));
 $area = oneLine(field('oblast', 60));
 $situation = field('situace', 3000);
+// Odkud poptávka je: kontaktní formulář (prázdné) nebo nástroj
+// „Na kolik dosáhnete?“ (/sluzby/hypoteky/na-kolik-dosahnete) — tam je
+// e-mail nepovinný, ozývá se po telefonu.
+$source = oneLine(field('zdroj', 40));
+$isTool = $source === 'na-kolik-dosahnete';
+$hasEmail = filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 
 // Kontroly jsou záměrně stejně volné jako v prohlížeči (pole jen povinná) —
 // přísnější server by odmítl poptávku, kterou formulář pustil, a ta by se ztratila.
 $valid = $name !== ''
     && preg_match_all('/\d/', $phone) >= 6
-    && filter_var($email, FILTER_VALIDATE_EMAIL) !== false
+    && ($hasEmail || ($isTool && $email === ''))
     && in_array($area, INTEREST_AREAS, true);
 
 if (!$valid) {
@@ -170,14 +181,16 @@ if (!$valid) {
 
 $encode = static fn (string $text): string => '=?UTF-8?B?' . base64_encode($text) . '?=';
 
-$subject = $encode("Nová poptávka z webu: {$area} — {$name}");
+$subject = $encode($isTool
+    ? "Na kolik dosáhnu (web): {$name}"
+    : "Nová poptávka z webu: {$area} — {$name}");
 
 $body = implode("\n", [
-    'Nová poptávka z formuláře na patrikgajdadzis.cz',
+    $isTool ? 'Nová poptávka z nástroje „Na kolik dosáhnete?“ na patrikgajdadzis.cz' : 'Nová poptávka z formuláře na patrikgajdadzis.cz',
     '',
     "Jméno a příjmení: {$name}",
     "Telefon: {$phone}",
-    "E-mail: {$email}",
+    'E-mail: ' . ($hasEmail ? $email : '(nevyplněno)'),
     "Oblast zájmu: {$area}",
     '',
     'Situace:',
@@ -185,21 +198,101 @@ $body = implode("\n", [
     '',
     '—',
     'Odesláno ' . (new DateTimeImmutable('now', new DateTimeZone('Europe/Prague')))->format('j. n. Y H:i'),
-    'Odpovědí na tento e-mail napíšete přímo klientovi.',
+    $hasEmail ? 'Odpovědí na tento e-mail napíšete přímo klientovi.' : 'Klient e-mail nevyplnil — ozvěte se mu telefonicky.',
 ]);
 
-$headers = implode("\r\n", [
+$headers = implode("\r\n", array_filter([
     'From: ' . $encode(SENDER_NAME) . ' <' . SENDER . '>',
-    'Reply-To: ' . $encode($name) . ' <' . $email . '>',
+    $hasEmail ? 'Reply-To: ' . $encode($name) . ' <' . $email . '>' : '',
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=UTF-8',
     'Content-Transfer-Encoding: 8bit',
-]);
+]));
 
 // Dvě samostatná odeslání: selhání jednoho nesmí shodit druhé. Pro klienta
 // je poptávka odeslaná, pokud dorazila aspoň jedna kopie.
 $sentMain = mail(RECIPIENT, $subject, $body, $headers, '-f' . SENDER);
 $sentBackup = mail(BACKUP_RECIPIENT, $subject, $body, $headers, '-f' . SENDER);
 $sent = $sentMain || $sentBackup;
+
+// Potvrzení klientovi (7.–8. 10. 2026, text i vzhled schválil uživatel).
+// Záměrně bez jména z formuláře a bez textu situace: kdyby robot zadal cizí
+// e-mail a do polí reklamu, web by ji jinak rozeslal pod Patrikovým jménem.
+// Oblast je ze seznamu (whitelist výš), takže je bezpečná. Odpověď klienta
+// jde přímo na REPLY_TO. Selhání potvrzení neovlivní výsledek poptávky.
+// HTML verze: potvrzeni-email.html + podpis-email.html (obojí v api/,
+// zvenku nedostupné). Textová verze níž je pro programy bez HTML —
+// při změně textu upravit obě.
+if ($sent && $hasEmail) {
+    $clientText = implode("\n", [
+        'Dobrý den,',
+        '',
+        'zpráva mi dorazila v pořádku. Do jednoho pracovního dne se vám osobně ozvu, abychom domluvili termín.',
+        '',
+        "Téma: {$area}",
+        '',
+        'Konzultace je nezávazná a zdarma, trvá zhruba 30 minut. Můžeme se potkat v kanceláři v Ostravě-Porubě, nebo online.',
+        '',
+        'Pokud nechcete čekat, vyberte si termín rovnou tady: ' . BOOKING_URL,
+        'nebo mi zavolejte na +420 775 217 721.',
+        '',
+        'Patrik Gajdadzis',
+        '+420 775 217 721 · ' . REPLY_TO,
+        'patrikgajdadzis.cz',
+        '17. listopadu 599/30, 708 00 Ostrava-Poruba',
+        '',
+        '—',
+        'Tento e-mail jste dostali, protože jste vyplnili formulář na patrikgajdadzis.cz.',
+    ]);
+
+    $template = @file_get_contents(__DIR__ . '/potvrzeni-email.html');
+    $signature = @file_get_contents(__DIR__ . '/podpis-email.html');
+    $clientHtml = null;
+    if ($template !== false) {
+        if ($signature === false) {
+            $signature = '<p style="margin:0;font-weight:bold;color:#0F2747;">Patrik Gajdadzis</p>';
+        }
+        $clientHtml = str_replace(
+            ['{{TEMA}}', '{{REZERVACE}}', '{{PODPIS}}'],
+            [htmlspecialchars($area, ENT_QUOTES, 'UTF-8'), htmlspecialchars(BOOKING_URL, ENT_QUOTES, 'UTF-8'), $signature],
+            $template
+        );
+    }
+
+    $clientHeaders = [
+        'From: ' . $encode('Patrik Gajdadzis') . ' <' . SENDER . '>',
+        'Reply-To: ' . $encode('Patrik Gajdadzis') . ' <' . REPLY_TO . '>',
+        'MIME-Version: 1.0',
+    ];
+    if ($clientHtml !== null) {
+        $boundary = 'pg-' . bin2hex(random_bytes(12));
+        $clientHeaders[] = 'Content-Type: multipart/alternative; boundary="' . $boundary . '"';
+        $clientBody = implode("\r\n", [
+            '--' . $boundary,
+            'Content-Type: text/plain; charset=UTF-8',
+            'Content-Transfer-Encoding: base64',
+            '',
+            chunk_split(base64_encode($clientText)),
+            '--' . $boundary,
+            'Content-Type: text/html; charset=UTF-8',
+            'Content-Transfer-Encoding: base64',
+            '',
+            chunk_split(base64_encode($clientHtml)),
+            '--' . $boundary . '--',
+            '',
+        ]);
+    } else {
+        $clientHeaders[] = 'Content-Type: text/plain; charset=UTF-8';
+        $clientHeaders[] = 'Content-Transfer-Encoding: 8bit';
+        $clientBody = $clientText;
+    }
+    @mail(
+        $email,
+        $encode('Děkuji za zprávu, ozvu se do jednoho pracovního dne'),
+        $clientBody,
+        implode("\r\n", $clientHeaders),
+        '-f' . SENDER
+    );
+}
 
 respond($sent, $sent ? 200 : 500, $wantsJson);
