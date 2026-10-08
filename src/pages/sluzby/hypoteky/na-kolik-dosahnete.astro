@@ -49,15 +49,9 @@ const questions: Question[] = [
     options: ['Koupě bytu', 'Koupě domu', 'Výstavba', 'Rekonstrukce', 'Ještě nevím, chci zjistit, na co mám'],
   },
   {
-    id: 'zadatele',
-    title: 'Žadatelé',
-    q: 'Kdo bude o hypotéku žádat?',
-    options: ['Jen já', 'Dva (s partnerem nebo partnerkou)'],
-  },
-  {
     id: 'prijem',
     title: 'Druh příjmu',
-    q: 'Jak máte příjem?',
+    q: 'Jaký máte příjem?',
     options: ['Zaměstnanec', 'OSVČ nebo s.r.o.', 'Kombinace', 'Jiný (rodičovská, důchod…)'],
   },
   {
@@ -123,7 +117,7 @@ const config = {
 
 <BaseLayout
   title="Na jakou hypotéku dosáhnete? | Patrik Gajdadzis"
-  description="Sedm krátkých otázek, zhruba minuta. Podle odpovědí spočítám, na jakou hypotéku dosáhnete, a to podle podmínek konkrétních bank. Zdarma, 5★ hodnocení na Googlu."
+  description="Šest krátkých otázek, zhruba minuta. Podle odpovědí spočítám, kolik vám půjčí konkrétní banky, a ozvu se do jednoho pracovního dne. Zdarma, 5★ hodnocení na Googlu."
 >
   <Header />
   <main id="hero" class="nkd">
@@ -131,15 +125,14 @@ const config = {
 
     <section class="nkd-hero" aria-labelledby="nkd-heading">
       <div class="nkd-hero__text" data-route-content data-nkd data-config={JSON.stringify(config)}>
-        <h1 id="nkd-heading">Na&nbsp;kolik dosáhnete?</h1>
+        <h1 id="nkd-heading">Spočítám, na&nbsp;kolik dosáhnete.</h1>
 
-        <!-- Úvod -->
+        <!-- Úvod (8. 10. 2026, v2: hned od začátku je jasné, že výpočet pošle Patrik) -->
         <div class="nkd-step" data-step="intro">
           <p class="nkd-hero__lead">
-            Sedm krátkých otázek, zhruba minuta. Podle odpovědí vám spočítám, na&nbsp;jakou hypotéku dosáhnete, a&nbsp;to podle
-            podmínek konkrétních bank.
+            Odpovězte na&nbsp;šest krátkých otázek. Podle nich spočítám, kolik vám půjčí konkrétní banky, a&nbsp;ozvu se&nbsp;do&nbsp;jednoho
+            pracovního dne. Zdarma.
           </p>
-          <p class="nkd-meta">Odpovědi zůstávají ve&nbsp;vašem prohlížeči. Pošlete mi je, až když budete chtít.</p>
           <div class="nkd-intro__actions">
             <button class="nkd-cta" type="button" data-start>Začít</button>
           </div>
@@ -184,10 +177,10 @@ const config = {
         <!-- Výsledek: bez čísla → tipy → formulář → termín / telefon -->
         <div class="nkd-step nkd-result" data-step="result" hidden>
           <div class="nkd-verdict">
-            <h2 class="nkd-verdict__title" tabindex="-1">Děkuji, mám vše, co potřebuji.</h2>
+            <h2 class="nkd-verdict__title" tabindex="-1">Kam vám výpočet pošlu?</h2>
             <p class="nkd-verdict__text">
-              Přesnou částku spočítám podle podmínek konkrétních bank, protože každá počítá příjem a&nbsp;výdaje jinak. Pošlete
-              mi odpovědi. Obvykle se&nbsp;vám ozvu ještě ten den.
+              Spočítám to podle podmínek konkrétních bank. Každá počítá příjem jinak, proto to dělám ručně. Ozvu se&nbsp;do&nbsp;jednoho
+              pracovního dne.
             </p>
           </div>
 
@@ -227,7 +220,7 @@ const config = {
               </div>
             </div>
 
-            <button class="nkd-cta nkd-form__submit" type="submit">Poslat odpovědi</button>
+            <button class="nkd-cta nkd-form__submit" type="submit">Chci výpočet</button>
 
             <p class="nkd-status nkd-status--error" role="alert" hidden>
               Odpovědi se&nbsp;nepodařilo odeslat. Zkuste to znovu nebo mi zavolejte na&nbsp;<a href="tel:+420775217721">+420&nbsp;775&nbsp;217&nbsp;721</a>.
@@ -239,7 +232,7 @@ const config = {
           </form>
 
           <p class="nkd-status nkd-status--success" role="status" tabindex="-1" hidden>
-            Děkuji, odpovědi mi dorazily. Obvykle se&nbsp;vám ozvu ještě ten den.
+            Díky, odpovědi mi dorazily. Spočítám to a&nbsp;ozvu se&nbsp;do&nbsp;jednoho pracovního dne.
           </p>
 
           <div class="nkd-alt">
