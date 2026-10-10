@@ -1,0 +1,58 @@
+# Nasazení OSTRÉHO webu na Wedos (patrikgajdadzis.cz). Spouští se jen ručně
+# (Actions → „Nasazení na Wedos“ → Run workflow), nikdy samo po pushi —
+# náhled na GitHub Pages běží dál zvlášť (preview.yml).
+#
+# Přístup k FTP je v tajných údajích repozitáře (Settings → Secrets and
+# variables → Actions), zadává je Patrik, v kódu ani v logu nejsou:
+#   WEDOS_FTP_HOST      např. 405333.w33.wedos.net
+#   WEDOS_FTP_USER      např. w405333
+#   WEDOS_FTP_PASSWORD  heslo FTP účtu
+#
+# lftp nahraje celý dist/ včetně skrytých .htaccess a api/.htaccess
+# (docs/deploy-wedos.md). Složku api/limity/ na serveru nemaže (drží limit
+# odeslání formuláře) a nic jiného na serveru také nemaže.
+name: Nasazení na Wedos
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wedos
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Kontrola, že build obsahuje skryté soubory a PHP
+        run: |
+          test -f dist/.htaccess
+          test -f dist/api/.htaccess
+          test -f dist/api/poptavka.php
+          ! grep -q 'noindex, nofollow' dist/index.html
+      - name: Instalace lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Nahrání na Wedos (FTP s TLS)
+        env:
+          FTP_HOST: ${{ secrets.WEDOS_FTP_HOST }}
+          FTP_USER: ${{ secrets.WEDOS_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.WEDOS_FTP_PASSWORD }}
+        run: |
+          lftp -e "
+            set ftp:ssl-allow yes;
+            set ftp:ssl-force yes;
+            set ssl:verify-certificate no;
+            set net:max-retries 3;
+            mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ dist/ /www/domains/patrikgajdadzis.cz/;
+            quit
+          " -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST"
