@@ -265,10 +265,7 @@ const faqs: Faq[] = [
             </svg>
             <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
           </a>
-        </div>
-        <!-- Nástroj „Na kolik dosáhnete?“ (8. 10. 2026, schválil Patrik) — cíl reklam na hypotéky. -->
-        <a class="hyp-hero__tool" href="/sluzby/hypoteky/na-kolik-dosahnete" data-reveal>Spočítám, na&nbsp;kolik dosáhnete. Pár otázek, asi 2&nbsp;minuty.</a>
-      </div>
+        </div>      </div>
     </section>
 
     <section class="hyp-chapter hyp-chapter--faze" aria-labelledby="faze-heading">
@@ -459,9 +456,7 @@ const faqs: Faq[] = [
             </a>
           </div>
 
-          <a class="closing-booking" href={BOOKING_URL} target="_blank" rel="noopener">Nebo si rovnou vyberte termín online</a>
-          <a class="closing-booking" href="/sluzby/hypoteky/na-kolik-dosahnete">Spočítám, na&nbsp;kolik dosáhnete. Pár otázek, asi 2&nbsp;minuty.</a>
-        </div>
+          <a class="closing-booking" href={BOOKING_URL} target="_blank" rel="noopener">Nebo si rovnou vyberte termín online</a>        </div>
       </div>
     </section>
   </main>
@@ -995,38 +990,6 @@ const faqs: Faq[] = [
     height: 48px;
     justify-content: center;
     font-size: 16px;
-  }
-
-  /* Odkaz na nástroj „Na kolik dosáhnete?“ — textový odkaz jako
-     `.closing-booking` (global.css), jen ve světlé variantě pro hero. */
-  .hyp-hero__tool {
-    position: relative;
-    align-self: center;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--navy);
-    text-decoration: underline;
-    text-decoration-color: var(--emerald);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 6px;
-    transition: color var(--duration-hover) var(--ease-out);
-  }
-
-  .hyp-hero__tool::after {
-    content: '';
-    position: absolute;
-    inset: -13px 0;
-  }
-
-  .hyp-hero__tool:hover {
-    color: var(--emerald-hover);
-  }
-
-  @media (min-width: 768px) {
-    .hyp-hero__tool {
-      align-self: flex-start;
-    }
   }
 
   /* ---------- Kapitoly — sdílené ---------- */
@@ -1800,12 +1763,6 @@ const faqs: Faq[] = [
     .hyp-hero__actions {
       margin-top: 46px;
       gap: clamp(32px, calc(32px + 0.007519 * (100vw - 834px)), 36px);
-    }
-
-    /* Hero text tu má gap 0 (mezery dávají marginy) — odkaz na nástroj
-       stejně daleko od tlačítek jako na notebooku a desktopu. */
-    .hyp-hero__tool {
-      margin-top: 22px;
     }
   }
 
