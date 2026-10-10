@@ -51,11 +51,16 @@ jobs:
           FTP_USER: ${{ secrets.WEDOS_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.WEDOS_FTP_PASSWORD }}
         run: |
-          lftp -e "
+          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASSWORD" || { echo "Chybí tajné údaje WEDOS_FTP_*"; exit 1; }
+          lftp -c "
             set ftp:ssl-allow yes;
             set ftp:ssl-force yes;
             set ssl:verify-certificate no;
-            set net:max-retries 3;
-            mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ dist/ /www/domains/patrikgajdadzis.cz/;
-            quit
-          " -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST"
+            set ftp:passive-mode yes;
+            set net:max-retries 2;
+            set net:timeout 30;
+            debug 2;
+            open -u \"$FTP_USER\",\"$FTP_PASSWORD\" ftp://$FTP_HOST;
+            cls -1 /;
+            mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ dist/ /www/domains/patrikgajdadzis.cz/
+          "
