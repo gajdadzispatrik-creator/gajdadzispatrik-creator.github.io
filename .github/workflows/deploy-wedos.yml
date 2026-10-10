@@ -62,5 +62,7 @@ jobs:
             debug 2;
             open -u \"$FTP_USER\",\"$FTP_PASSWORD\" ftp://$FTP_HOST;
             cls -1 /;
+            cls -1 /www;
+            cat /www/.htaccess;
             mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ dist/ /www/domains/patrikgajdadzis.cz/
           "
