@@ -11,7 +11,10 @@
 #
 # lftp nahraje celý dist/ včetně skrytých .htaccess a api/.htaccess
 # (docs/deploy-wedos.md). Složku api/limity/ na serveru nemaže (drží limit
-# odeslání formuláře) a nic jiného na serveru také nemaže.
+# odeslání formuláře) a nic jiného na serveru také nemaže. Navíc nahraje
+# upravený hostingový /www/.htaccess (deploy/www.htaccess — bez pravidla
+# Wedosu, které přidává koncové lomítko a se stránkami bez lomítka dělalo
+# nekonečnou smyčku přesměrování).
 name: Nasazení na Wedos
 
 on:
@@ -61,8 +64,6 @@ jobs:
             set net:timeout 30;
             debug 2;
             open -u \"$FTP_USER\",\"$FTP_PASSWORD\" ftp://$FTP_HOST;
-            cls -1 /;
-            cls -1 /www;
-            cat /www/.htaccess;
-            mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ dist/ /www/domains/patrikgajdadzis.cz/
+            mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ dist/ /www/domains/patrikgajdadzis.cz/;
+            put deploy/www.htaccess -o /www/.htaccess
           "
