@@ -306,3 +306,18 @@ Nic z tohoto jsem sám neměnil (mimo rozsah, zadání to výslovně zakazuje):
 19. Vzdálená záloha gitu (soukromý GitHub/GitLab) — dnes je repozitář jen na OneDrivu.
 20. Přesunout projekt mimo OneDrive — synchronizace `node_modules` způsobuje hromadné dotazy na mazání a hrozí promíchání knihoven.
 21. Drobnosti bez dopadu na návštěvníka: hláška Vite „Failed to scan for dependencies“ v dev režimu, blokující CSS ~0,5 s při simulaci pomalého mobilu (rychlost i tak 98–100).
+
+## 21) Spuštění a měření — 10. 10. 2026
+
+**Hotovo (ověřeno):**
+- Web běží na `https://patrikgajdadzis.cz` (Wedos, nasazení štítkem `ostry-*`, viz `docs/deploy-wedos.md`). Kontrola ostrého webu: `check:funkce` 709 kontrol v 5 prohlížečích, 0 problémů; čisté adresy bez `#kotvy`.
+- Zkušební poptávka z formuláře i z nástroje „Na kolik dosáhnete?“ dorazila do `patrik@mintfinance.cz` (Doručená pošta, ne spam). Potvrzení klientovi šlo na Gmail uživatele — zkontroluje sám.
+- Google profil: web změněn z `pafinga.cz` na `patrikgajdadzis.cz` (Google změnu schvaluje, obvykle do 10 min).
+- Bod 14 + 14a: **GA4 `G-8DFSTT56X1`** (původní služba „www.pafinga.cz“ přejmenovaná na patrikgajdadzis.cz, stream na nový web, měna Kč, uchovávání dat 14 měsíců) a **Google Ads `AW-18127073321`** s Consent Mode v2 (základní režim: bez souhlasu se od Googlu nenačte nic) — `CookieConsent.astro`. Marketingová kategorie zapnutá (výchozí vypnutá), verze souhlasu 2 (lišta se ukáže znovu). Konverze v Ads: formulář (`2A4BCJLuj5gdEKng1MND`), klik na telefon (`Um5yCP7liJgdEKng1MND`), rezervace (`X2XGCITmiJgdEKng1MND`), WhatsApp (`LupDCIHmiJgdEKng1MND`), hovory z reklam; hodnota hypotéky 4 / pojištění 3 / ostatní 2 Kč. Ověřeno na ostrém webu (požadavky na googleadservices se správnými štítky). Stránky Cookies a Zpracování osobních údajů doplněné o Google Ads (účinnost 10. 10. 2026).
+- Bod 13: Search Console — doména ověřená (TXT záznam na Wedosu), odeslaná `sitemap-index.xml`, zažádáno o indexování homepage.
+
+**Zbývá (potřebuje uživatele):**
+- **Google Ads kampaně:** kampaň Hypotéky je rozpracovaná jako koncept (nastavení, klíčová slova, reklama 15 nadpisů + 4 popisy, 6 odkazů na podstránky, 6 popisků, volání po–pá 7–19 h). Google před uložením chtěl potvrdit totožnost heslem — to zadává jen uživatel. Ostatních 5 kampaní (Značka, Finanční poradce, Refixace, Životní pojištění, Finanční plán a investice) dokončit po potvrzení. Symbol ★ Google v reklamách nepovoluje → v reklamách „Hodnocení 5,0 na Googlu“.
+- **WhatsApp konverzi** v Ads přepnout na sekundární (strategie § 8).
+- **pafinga.cz:** doména u Wedosu, DNS u Wixu (web na Wixu běží dál). Hosting LowCost nepovoluje alias; bezplatné přesměrování Wedosu neumí HTTPS (starý web je ve vyhledávání jako `https://www.pafinga.cz`). Rozhodnout: levný hosting / vyšší tarif s aliasem, nebo nechat Wix a zrušit ho později.
+- Bing Webmaster Tools (import ze Search Console), Facebook a Instagram — odkaz na nový web.
