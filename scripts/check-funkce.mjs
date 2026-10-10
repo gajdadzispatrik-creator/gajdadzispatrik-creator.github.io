@@ -92,6 +92,8 @@ async function functional(ctx, name, isMobile) {
   // cookies: lišta → nastavení → uložit → po načtení už není
   await p.goto(ORIGIN + '/', { waitUntil: 'networkidle' });
   const bar = p.locator('#cookie-bar');
+  // Lišta vyjíždí s animací — na rychlém ostrém webu ji jinak test chytí dřív.
+  await bar.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {});
   ok(await bar.isVisible(), `${name}: cookie lišta se nezobrazila`);
   await p.locator('#cookie-bar [data-action="open-settings"]').click();
   ok(await p.locator('#cookie-settings').isVisible(), `${name}: nastavení cookies se neotevřelo`);

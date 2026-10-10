@@ -22,17 +22,34 @@ jen obsah složky `dist/` vzniklé příkazem `npm run build`.
    - **DMARC** — TXT `_dmarc.patrikgajdadzis.cz`, na začátek
      `v=DMARC1; p=none; rua=mailto:poptavka@patrikgajdadzis.cz`.
 
-## 2) Každé nasazení
+## 2) Každé nasazení (od 10. 10. 2026 automaticky přes GitHub)
 
-1. `npm run build` → musí skončit `0 errors`.
-2. Zálohovat to, co je na serveru teď (stáhnout obsah složky domény) — pro
-   rychlý návrat, kdyby se něco rozbilo.
-3. Nahrát **celý obsah** `dist/` do `/www/domains/patrikgajdadzis.cz/`
-   (FTP/SFTP). **Pozor na skryté soubory:** `.htaccess` a `api/.htaccess`
-   začínají tečkou a řada FTP klientů je ve výchozím stavu nezobrazuje ani
-   nenahrává — zapnout zobrazení skrytých souborů a ověřit, že na serveru jsou.
-4. Nemazat na serveru složku `api/limity/` (vzniká sama, drží limit
-   odeslání formuláře).
+Web se nahrává automatem `.github/workflows/deploy-wedos.yml` — **jen záměrně**,
+nikdy sám po pushi (push do `main` jde jen na náhled na GitHub Pages):
+
+```bash
+git tag ostry-RRRR-MM-DDx && git push origin ostry-RRRR-MM-DDx
+```
+
+nebo v GitHubu Actions → „Nasazení na Wedos“ → Run workflow. Automat udělá
+`npm run build`, ověří, že build obsahuje `.htaccess`, `api/.htaccess`
+a `api/poptavka.php` a nemá `noindex`, a přes FTP s TLS nahraje celý `dist/`
+do `/www/domains/patrikgajdadzis.cz/` (včetně skrytých souborů, složku
+`api/limity/` nemaže). Přístup k FTP je v tajných údajích repozitáře
+(`WEDOS_FTP_HOST` = 405333.w33.wedos.net, `WEDOS_FTP_USER` = w405333,
+`WEDOS_FTP_PASSWORD` — zadal Patrik, nikde jinde není).
+
+**Hostingový `/www/.htaccess` se nahrává taky** — z `deploy/www.htaccess`.
+Výchozí soubor Wedosu obsahuje pravidlo „aliasy – správné přesměrování při
+chybějícím /“, které přidává koncové lomítko (302 `/sluzby` → `/sluzby/`);
+náš `.htaccess` ho odebírá (kanonické adresy jsou bez lomítka) → nekonečná
+smyčka, podstránky se neotevřely (zjištěno při spuštění 10. 10. 2026).
+V `deploy/www.htaccess` je to pravidlo vypnuté, zbytek odpovídá výchozímu.
+
+Ruční nasazení (záloha postupu): `npm run build` → nahrát celý obsah `dist/`
+do `/www/domains/patrikgajdadzis.cz/` (pozor na skryté `.htaccess`
+a `api/.htaccess`) a `deploy/www.htaccess` jako `/www/.htaccess`; nemazat
+`api/limity/`.
 
 ## 3) Kontrola po nasazení
 

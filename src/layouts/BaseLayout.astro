@@ -147,6 +147,52 @@ const jsonLdGraph = {
         viewBoxObserver.observe(svg, { attributes: true, attributeFilter: ['viewBox'] });
         syncDots(svg);
       });
+
+      /*
+       * Čisté adresy bez kotvy (10. 10. 2026, přání uživatele): odkaz na kotvu
+       * (/#kontakt, #hero…) stránku posune na místo, ale v adresním řádku
+       * zůstane jen /, ne /#kontakt.
+       * - Kotva na téže stránce: posun bez zápisu do adresy (fokus přejde na
+       *   cíl kvůli čtečkám a klávesnici, stejně jako u výchozího skoku).
+       * - Příchod z jiné stránky (/#kontakt): prohlížeč na místo skočí sám,
+       *   po načtení se kotva z adresy smaže a posun se zopakuje (písmo
+       *   a obrázky mezitím mohly posunout obsah).
+       * Odkazy, které si kotvu obsluhují samy (preventDefault), nechává být.
+       */
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const cleanUrl = () => history.replaceState(history.state, '', location.pathname + location.search);
+      const goTo = (target: HTMLElement, smooth: boolean) => {
+        target.scrollIntoView({ behavior: smooth && !reduceMotion ? 'smooth' : 'auto', block: 'start' });
+        if (!target.matches('a, button, input, select, textarea, [tabindex]')) target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
+      };
+      document.addEventListener('click', (event) => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const link = (event.target as Element | null)?.closest?.('a[href*="#"]') as HTMLAnchorElement | null;
+        if (!link || link.target === '_blank') return;
+        const url = new URL(link.href, location.href);
+        if (url.origin !== location.origin || url.pathname !== location.pathname || url.hash.length < 2) return;
+        const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+        if (!target) return;
+        event.preventDefault();
+        goTo(target, true);
+        if (location.hash) cleanUrl();
+      });
+      if (location.hash.length > 1) {
+        const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        cleanUrl();
+        if (target) {
+          const settle = () => target.scrollIntoView({ block: 'start' });
+          if (document.readyState === 'complete') settle();
+          else window.addEventListener('load', settle, { once: true });
+        }
+      }
+      // Kotva změněná bez načtení stránky (ručně v adrese, zpět/vpřed).
+      window.addEventListener('hashchange', () => {
+        const target = location.hash.length > 1 ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+        if (target) target.scrollIntoView({ block: 'start' });
+        cleanUrl();
+      });
     </script>
   </body>
 </html>
