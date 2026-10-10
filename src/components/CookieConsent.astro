@@ -14,7 +14,7 @@
  *
  * §3 „Právní minimum" je dodrženo doslovně:
  * - žádná analytická/marketingová cookie se nenastavuje před souhlasem
- *   (`loadAnalytics()` se volá výhradně po Přijmout vše / uložení s analytics:true)
+ *   (`applyConsent()` načte Google až po Přijmout vše / uložení se zapnutou kategorií)
  * - analytický i marketingový přepínač jsou v DOM bez `checked` (výchozí off)
  * - Přijmout vše / Odmítnout mají v liště identické rozměry (`flex:1`, stejná
  *   výška/radius/písmo)
@@ -34,10 +34,8 @@ interface CookieCategory {
   description: string;
   mobileDescription: string;
   // `disabled` a `defaultChecked` jsou záměrně oddělené (ne jedno `locked`
-  // pole) — Nezbytné je uzamčené v ZAPNUTÉ poloze, Marketingové ve VYPNUTÉ
-  // poloze (marketing se zatím nepoužívá, schéma souhlasu ho natvrdo píše
-  // jako `false` — viz `finalizeConsent` ve <script> — přepínač by neměl jít
-  // ani vizuálně zapnout, aby nevznikl dojem funkční volby, která nic nedělá).
+  // pole) — Nezbytné je uzamčené v ZAPNUTÉ poloze. Analytické i Marketingové
+  // (od 10. 10. 2026 Google Ads) jsou volitelné a výchozí vypnuté.
   disabled: boolean;
   defaultChecked: boolean;
   status: string | null;
@@ -68,12 +66,12 @@ const categories: CookieCategory[] = [
   {
     key: 'marketing',
     name: 'Marketingové',
-    description: 'Zatím nepoužívám. Pokud to změním, zeptám se znovu.',
-    mobileDescription: 'Zatím nepoužívám.',
-    disabled: true,
+    description: 'Ukazují mi, jestli lidé přišli z reklamy na Googlu a ozvali se. Díky tomu neplatím reklamu zbytečně.',
+    mobileDescription: 'Měří, jestli funguje reklama na Googlu.',
+    disabled: false,
     defaultChecked: false,
-    status: 'Nepoužívám',
-    lockedNote: 'Zatím nelze zapnout',
+    status: null,
+    lockedNote: null,
   },
 ];
 ---
@@ -84,9 +82,9 @@ const categories: CookieCategory[] = [
     <p class="cookie-bar__text">
       <span class="cookie-text--full">
         Nezbytné cookies web potřebuje k&nbsp;provozu. Analytické mi pomáhají zjistit, co je pro&nbsp;vás
-        užitečné. Ty zapnu jen s&nbsp;vaším souhlasem.
+        užitečné, marketingové měří, jestli funguje reklama na&nbsp;Googlu. Ty zapnu jen s&nbsp;vaším souhlasem.
       </span>
-      <span class="cookie-text--short">Nezbytné cookies web potřebuje k&nbsp;provozu. Analytické zapnu jen s&nbsp;vaším souhlasem.</span>
+      <span class="cookie-text--short">Nezbytné cookies web potřebuje k&nbsp;provozu. Analytické a&nbsp;marketingové zapnu jen s&nbsp;vaším souhlasem.</span>
     </p>
 
     <div class="cookie-bar__actions">
@@ -163,7 +161,9 @@ const categories: CookieCategory[] = [
    * textů (§9 komentář ve schématu). Platnost 365 dní (~12 měsíců).
    */
   const STORAGE_KEY = 'pg-cookie-consent';
-  const CURRENT_VERSION = 1;
+  // 2 = od 10. 10. 2026 marketingové cookies (Google Ads). Dřívější souhlas
+  // se na ně nevztahoval, proto se lišta ukáže znovu.
+  const CURRENT_VERSION = 2;
   const MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
 
   interface Consent {
@@ -200,16 +200,11 @@ const categories: CookieCategory[] = [
   }
 
   function writeConsent(analytics: boolean, marketing: boolean): Consent {
-    // Obrana do hloubky: marketing se zatím nepoužívá (§4/§9) a jeho přepínač
-    // je v panelu `disabled`, takže by odsud nikdy neměl dorazit `true` — i
-    // kdyby se to stalo (např. budoucí úprava markupu), zapsaný souhlas ho
-    // vždy natvrdo přepíše na `false`, dokud marketing skutečně nezavedeme.
-    void marketing;
     const consent: Consent = {
       version: CURRENT_VERSION,
       timestamp: new Date().toISOString(),
       analytics,
-      marketing: false,
+      marketing,
     };
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
@@ -221,10 +216,35 @@ const categories: CookieCategory[] = [
     return consent;
   }
 
-  // [DOPLNIT] ID měřicího toku Google Analytics 4 (tvar G-XXXXXXXXXX) — bez
-  // skutečného ID `gtag('config', ...)` níže neodešle žádná data, jen si
-  // prohlížeč vyžádá `gtag/js?id=G-XXXXXXXXXX`, které Google nerozpozná.
-  const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+  /*
+   * Měření (10. 10. 2026): Google Analytics 4 + Google Ads, Consent Mode v2
+   * v základním režimu. Dokud návštěvník nesouhlasí, nenačte se od Googlu
+   * nic (žádný skript, žádná cookie). Po souhlasu se načte gtag.js, výchozí
+   * stav souhlasu je „odmítnuto“ a hned se přepne podle zvolených kategorií:
+   * analytické → analytics_storage, marketingové → ad_storage, ad_user_data,
+   * ad_personalization. GA4 i Ads se konfigurují jen s vlastním souhlasem.
+   *
+   * Konverze (strategie Google Ads, § 8): odeslání formuláře (událost
+   * `pg:lead` z ContactSection a nástroje Na kolik dosáhnete), klik na
+   * telefon, na rezervaci termínu a na WhatsApp. Hodnota podle stránky:
+   * hypotéky 4, pojištění 3, ostatní 2 (relativní body, CZK); WhatsApp bez
+   * hodnoty (sekundární).
+   */
+  const GA_MEASUREMENT_ID = 'G-8DFSTT56X1';
+  const ADS_ID = 'AW-18127073321';
+  const ADS_LABELS = {
+    lead: '2A4BCJLuj5gdEKng1MND',
+    tel: 'Um5yCP7liJgdEKng1MND',
+    booking: 'X2XGCITmiJgdEKng1MND',
+    whatsapp: 'LupDCIHmiJgdEKng1MND',
+  } as const;
+  const GA_EVENTS = {
+    lead: 'poptavka_odeslana',
+    tel: 'klik_telefon',
+    booking: 'klik_rezervace',
+    whatsapp: 'klik_whatsapp',
+  } as const;
+  type Conversion = keyof typeof ADS_LABELS;
 
   declare global {
     interface Window {
@@ -232,33 +252,99 @@ const categories: CookieCategory[] = [
     }
   }
 
-  /*
-   * §9 — dokud souhlas neexistuje, v <head> není žádný analytický skript.
-   * `loadAnalytics()` se volá VÝHRADNĚ z `finalizeConsent()` (Přijmout vše /
-   * Uložit volbu se zapnutými analytickými cookies) a z obnovení dřívějšího
-   * souhlasu při načtení stránky (`readConsent().analytics === true`) — nikdy
-   * dopředu. Vytváří `<script>` s `gtag/js` a inicializuje `dataLayer`/`gtag`
-   * až v tomto okamžiku, ne v `<head>` předem (ani zakomentovaně) — Google
-   * Analytics tak nemůže nastavit `_ga`/`_ga_<ID>` dřív, než uživatel souhlasí.
-   * Google Consent Mode se v tomto úkolu záměrně neimplementuje (viz souhrn
-   * úkolu „doplnění právních stránek“) — buď je souhlas, nebo se nenačte nic.
-   */
-  function loadAnalytics(): void {
-    if (document.documentElement.dataset.analyticsLoaded === 'true') return;
-    document.documentElement.dataset.analyticsLoaded = 'true';
+  const granted = { analytics: false, marketing: false };
+  const configured = { analytics: false, marketing: false };
+  let tagLoaded = false;
 
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    document.head.appendChild(script);
-
-    window.dataLayer = window.dataLayer || [];
-    function gtag(...args: unknown[]) {
-      window.dataLayer!.push(args);
-    }
-    gtag('js', new Date());
-    gtag('config', GA_MEASUREMENT_ID);
+  // gtag.js čte z dataLayer objekty `arguments`, ne pole, proto ne (...args).
+  function gtag(..._args: unknown[]): void {
+    // eslint-disable-next-line prefer-rest-params
+    (window.dataLayer = window.dataLayer || []).push(arguments);
   }
+
+  const toState = (on: boolean) => (on ? 'granted' : 'denied');
+
+  // Po odvolání souhlasu smaže cookies Googlu, které už vznikly (_ga, _gcl…).
+  function clearGoogleCookies(prefixes: string[]): void {
+    const host = location.hostname;
+    document.cookie.split(';').forEach((part) => {
+      const name = part.split('=')[0].trim();
+      if (!prefixes.some((prefix) => name.startsWith(prefix))) return;
+      [host, `.${host}`].forEach((domain) => {
+        document.cookie = `${name}=; Max-Age=0; path=/; domain=${domain}`;
+      });
+      document.cookie = `${name}=; Max-Age=0; path=/`;
+    });
+  }
+
+  function applyConsent(analytics: boolean, marketing: boolean): void {
+    const revokedAnalytics = granted.analytics && !analytics;
+    const revokedMarketing = granted.marketing && !marketing;
+    granted.analytics = analytics;
+    granted.marketing = marketing;
+    if (revokedAnalytics) clearGoogleCookies(['_ga']);
+    if (revokedMarketing) clearGoogleCookies(['_gcl']);
+
+    if (!tagLoaded) {
+      if (!analytics && !marketing) return;
+      tagLoaded = true;
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+      });
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${analytics ? GA_MEASUREMENT_ID : ADS_ID}`;
+      document.head.appendChild(script);
+      gtag('js', new Date());
+    }
+
+    gtag('consent', 'update', {
+      analytics_storage: toState(analytics),
+      ad_storage: toState(marketing),
+      ad_user_data: toState(marketing),
+      ad_personalization: toState(marketing),
+    });
+    if (analytics && !configured.analytics) {
+      configured.analytics = true;
+      gtag('config', GA_MEASUREMENT_ID);
+    }
+    if (marketing && !configured.marketing) {
+      configured.marketing = true;
+      gtag('config', ADS_ID);
+    }
+  }
+
+  const conversionValue = (): number => {
+    const path = location.pathname;
+    if (path.startsWith('/sluzby/hypoteky')) return 4;
+    if (path.startsWith('/sluzby/pojisteni')) return 3;
+    return 2;
+  };
+
+  function trackConversion(kind: Conversion): void {
+    if (!granted.analytics && !granted.marketing) return;
+    const params = kind === 'whatsapp' ? {} : { value: conversionValue(), currency: 'CZK' };
+    if (granted.marketing) gtag('event', 'conversion', { send_to: `${ADS_ID}/${ADS_LABELS[kind]}`, ...params });
+    if (granted.analytics) gtag('event', GA_EVENTS[kind], { send_to: GA_MEASUREMENT_ID, ...params });
+  }
+
+  document.addEventListener('pg:lead', () => trackConversion('lead'));
+  document.addEventListener(
+    'click',
+    (event) => {
+      const link = (event.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null;
+      if (!link) return;
+      const href = link.href;
+      if (href.startsWith('tel:')) trackConversion('tel');
+      else if (href.includes('calendar.app.google')) trackConversion('booking');
+      // Jen kontakt na mě (wa.me/420…), ne sdílení článku (wa.me/?text=…).
+      else if (/^https:\/\/wa\.me\/\d/.test(href)) trackConversion('whatsapp');
+    },
+    true
+  );
 
   const bar = document.getElementById('cookie-bar');
   const overlay = document.getElementById('cookie-settings-overlay');
@@ -374,7 +460,7 @@ const categories: CookieCategory[] = [
         if (announce && statusEl) statusEl.textContent = 'Volba byla uložena.';
         window.setTimeout(() => closeSettingsUI(), announce ? 700 : 0);
       }
-      if (analytics) loadAnalytics();
+      applyConsent(analytics, marketing);
     }
 
     bar.addEventListener('click', (event) => {
@@ -382,7 +468,7 @@ const categories: CookieCategory[] = [
       if (!target) return;
       switch (target.dataset.action) {
         case 'accept-all':
-          finalizeConsent(true, false, false);
+          finalizeConsent(true, true, false);
           break;
         case 'reject':
           finalizeConsent(false, false, false);
@@ -402,6 +488,7 @@ const categories: CookieCategory[] = [
         finalizeConsent(analytics, marketing, true);
       } else if (target.dataset.action === 'reject-all-settings') {
         writeConsent(false, false);
+        applyConsent(false, false);
         hideBar();
         if (statusEl) statusEl.textContent = 'Volba byla uložena.';
         window.setTimeout(() => closeSettingsUI(), 700);
@@ -416,7 +503,7 @@ const categories: CookieCategory[] = [
 
     const existing = readConsent();
     if (existing) {
-      if (existing.analytics) loadAnalytics();
+      applyConsent(existing.analytics, existing.marketing);
     } else {
       const path = window.location.pathname;
       const isExcluded = path.includes('/zpracovani-osobnich-udaju') || path.includes('/cookies');

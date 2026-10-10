@@ -15,6 +15,10 @@ import { type LegalPageData } from './types';
  * konfiguraci účtu. Nejde o ověřený fakt — MUSÍ projít právní kontrolou
  * a potvrzením Patrika před nasazením.
  *
+ * Od 10. 10. 2026 marketingové cookies: Google Ads (_gcl_*), měření
+ * konverzí z reklam, Consent Mode v2 (CookieConsent.astro). Doba 90 dnů
+ * je výchozí platnost cookie _gcl_au.
+ *
  * Tlačítko „Nastavení cookies“ (poslední sekce) otevírá STEJNÝ panel jako
  * tlačítko ve footeru — LegalLayout.astro mu jen simuluje klik na skutečný
  * spouštěč (`#footer-cookie-settings`), CookieConsent.astro se neupravuje.
@@ -63,7 +67,12 @@ export const cookiesPage: LegalPageData = {
                 'Google Analytics 4 (cookies _ga a _ga_<ID>): měření návštěvnosti a chování na webu v souhrnné podobě. Nastaví se jen s vaším souhlasem. Doba uložení: 2 roky. Poskytovatel: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irsko.',
               ],
             ],
-            [['Marketingové'], ['Zatím nepoužívám.']],
+            [
+              ['Marketingové'],
+              [
+                'Google Ads (cookies s předponou _gcl, např. _gcl_au): měří, jestli návštěvník přišel z mé reklamy na Googlu a potom se mi ozval (odeslal formulář, klikl na telefon, rezervaci termínu nebo WhatsApp). Google může tyto údaje použít i k přizpůsobení reklam. Nastaví se jen s vaším souhlasem. Doba uložení: 90 dnů. Poskytovatel: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irsko.',
+              ],
+            ],
           ],
         },
       ],
@@ -75,7 +84,7 @@ export const cookiesPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Při první návštěvě webu vás cookie lišta požádá o souhlas s analytickými cookies. Bez tohoto souhlasu se Google Analytics nespustí a žádná cookie _ga se nenastaví. Nezbytné cookies běží vždy, protože bez nich web nefunguje.',
+            'Při první návštěvě webu vás cookie lišta požádá o souhlas s analytickými a marketingovými cookies. Každou kategorii můžete povolit zvlášť. Bez souhlasu se Google Analytics ani Google Ads nespustí a žádná jejich cookie se nenastaví. Nezbytné cookies běží vždy, protože bez nich web nefunguje.',
           ],
         },
         {
@@ -93,7 +102,7 @@ export const cookiesPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Svou volbu ohledně analytických cookies můžete kdykoli upravit: tlačítko níže otevře stejný panel nastavení, jaký najdete v patičce webu.',
+            'Svou volbu ohledně analytických a marketingových cookies můžete kdykoli upravit: tlačítko níže otevře stejný panel nastavení, jaký najdete v patičce webu.',
           ],
         },
         { type: 'cookie-settings-button', label: 'Nastavení cookies' },

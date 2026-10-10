@@ -610,6 +610,8 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
         }
 
         if (sent) {
+          // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
+          document.dispatchEvent(new CustomEvent('pg:lead'));
           form.hidden = true;
           if (success) {
             success.hidden = false;

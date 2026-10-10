@@ -592,6 +592,8 @@ const bandDetails = [
 
         if (sent) {
           if (successStatus) successStatus.hidden = false;
+          // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
+          document.dispatchEvent(new CustomEvent('pg:lead'));
           form.reset();
           startedAt = null;
         } else if (errorStatus) {

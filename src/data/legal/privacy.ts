@@ -108,7 +108,7 @@ export const privacyPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Web používá Google Analytics 4 k měření návštěvnosti. Toto zpracování je založené výhradně na vašem souhlasu uděleném přes cookie lištu. Bez souhlasu se analytické cookies nenastaví. Podrobnosti jsou na stránce ',
+            'Web používá Google Analytics 4 k měření návštěvnosti a Google Ads k vyhodnocení, jestli funguje moje reklama na Googlu. Obojí je založené výhradně na vašem souhlasu uděleném přes cookie lištu (čl. 6 odst. 1 písm. a) GDPR) a souhlas můžete kdykoli odvolat. Bez souhlasu se tyto cookies nenastaví. Podrobnosti jsou na stránce ',
             link('/cookies', 'Cookies'),
             '.',
           ],
@@ -132,7 +132,7 @@ export const privacyPage: LegalPageData = {
             ['Poskytovatel e-mailové schránky, do které poptávky přicházejí (Google Workspace, Google Ireland Limited).'],
             ['Google Kalendář (Google Ireland Limited), pokud si termín rezervujete online.'],
             [
-              'Google Analytics, jen pokud udělíte souhlas s analytickými cookies.',
+              'Google Analytics a Google Ads (Google Ireland Limited), jen pokud udělíte souhlas s analytickými, případně marketingovými cookies. Google může údaje zpracovávat i v USA, a to na základě rámce EU–USA pro ochranu osobních údajů (Data Privacy Framework).',
             ],
           ],
         },
@@ -158,6 +158,7 @@ export const privacyPage: LegalPageData = {
             [
               'Data v Google Analytics: uchovávám po dobu 14 měsíců od vaší poslední interakce s webem, podle nastavení účtu Google Analytics.',
             ],
+            ['Cookies Google Ads: platí 90 dnů.'],
           ],
         },
       ],
