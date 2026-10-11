@@ -46,7 +46,7 @@
 import { Image } from 'astro:assets';
 import { BOOKING_URL, WHATSAPP_URL } from '../data/entity';
 // Testovací fotka (kolečko jako na /pristup a v check-upu) — vymění se s finálními fotkami.
-import personPhoto from '../assets/photos/patrik-pristup-pece.webp';
+import personPhoto from '../assets/photos/patrik-profilovka.jpg';
 
 const interestAreas = [
   'Finanční plán',
@@ -803,7 +803,7 @@ const bandDetails = [
     height: 64px;
     border-radius: 50%;
     overflow: hidden;
-    background: var(--about-photo-1);
+    background: var(--navy);
   }
 
   .kontakt__avatar :global(img) {
@@ -811,11 +811,7 @@ const bandDetails = [
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 50% 0;
-    /* Výřez jako kulatý portrét na /pristup (.pri-pece__photo): hlava posunutá
-       o 9 % dolů a přiblížená, aby obličej kruh vyplnil. */
-    transform: translateY(9%) scale(1.25);
-    transform-origin: 50% 0;
+    object-position: 50% 50%;
   }
 
   .kontakt__person-text {

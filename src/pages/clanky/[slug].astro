@@ -34,7 +34,7 @@ import { Image } from 'astro:assets';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { render } from 'astro:content';
-import personPhoto from '../../assets/photos/patrik-pristup-pece.webp';
+import personPhoto from '../../assets/photos/patrik-profilovka.jpg';
 import { BOOKING_URL, PERSON_ID, SITE_URL, breadcrumbList, faqPage } from '../../data/entity';
 import {
   SERVICE_BY_TOPIC,
@@ -661,7 +661,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     flex: none;
     overflow: hidden;
     border-radius: 50%;
-    background: var(--about-photo-1);
+    background: var(--navy);
   }
 
   .art-meta__avatar {
@@ -675,9 +675,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 50% 0;
-    transform: translateY(9%) scale(1.25);
-    transform-origin: 50% 0;
+    object-position: 50% 50%;
   }
 
   .art-meta__text {
