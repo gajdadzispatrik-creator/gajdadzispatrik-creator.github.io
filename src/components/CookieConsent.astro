@@ -18,7 +18,12 @@
  * - analytický i marketingový přepínač jsou v DOM bez `checked` (výchozí off);
  *   od 11. 10. 2026 má panel navíc hlavní tlačítko „Přijmout vše“ (jedno
  *   kliknutí místo zapínání přepínačů) — přepínače NEpředzaškrtávat, předem
- *   zaškrtnuté políčko není platný souhlas (SDEU C-673/17 Planet49)
+ *   zaškrtnuté políčko není platný souhlas (SDEU C-673/17 Planet49).
+ *   „Odmítnout vše“ v panelu není (přání uživatele 11. 10. 2026): odmítnutí
+ *   zůstává jako rovnocenné tlačítko „Odmítnout“ v liště a v panelu jde
+ *   přes „Uložit volbu“ s vypnutými přepínači. Tlačítko „Odmítnout“ z lišty
+ *   NEodebírat ani nezmenšovat na odkaz — první úroveň musí mít odmítnutí
+ *   stejně snadné jako souhlas (EDPB cookie banner taskforce 2023).
  * - Přijmout vše / Odmítnout mají v liště identické rozměry (`flex:1`, stejná
  *   výška/radius/písmo)
  * - lišta nemá křížek ani Esc na první úrovni (Esc handler je jen na panelu)
@@ -147,7 +152,6 @@ const categories: CookieCategory[] = [
   <div class="cookie-settings__actions">
     <button type="button" class="cookie-settings__btn cookie-settings__btn--accept" data-action="accept-all-settings">Přijmout vše</button>
     <button type="button" class="cookie-settings__btn cookie-settings__btn--save" data-action="save">Uložit volbu</button>
-    <button type="button" class="cookie-settings__btn cookie-settings__btn--reject" data-action="reject-all-settings">Odmítnout vše</button>
   </div>
 
   <p class="cookie-settings__status" role="status" aria-live="polite"></p>
@@ -437,7 +441,7 @@ const categories: CookieCategory[] = [
     }
 
     // Zavře panel BEZ obnovení lišty — použij vždy, když už padlo rozhodnutí
-    // (Přijmout vše / Odmítnout / Uložit volbu / Odmítnout vše), protože po
+    // (Přijmout vše / Odmítnout / Uložit volbu), protože po
     // uložení souhlasu se lišta znovu zobrazovat nemá, ať byla před otevřením
     // panelu viditelná, nebo ne.
     function closeSettingsUI() {
@@ -496,12 +500,6 @@ const categories: CookieCategory[] = [
         const analytics = getSwitches().find((i) => i.dataset.category === 'analytics')?.checked ?? false;
         const marketing = getSwitches().find((i) => i.dataset.category === 'marketing')?.checked ?? false;
         finalizeConsent(analytics, marketing, true);
-      } else if (target.dataset.action === 'reject-all-settings') {
-        writeConsent(false, false);
-        applyConsent(false, false);
-        hideBar();
-        if (statusEl) statusEl.textContent = 'Volba byla uložena.';
-        window.setTimeout(() => closeSettingsUI(), 700);
       }
     });
 
@@ -965,11 +963,6 @@ const categories: CookieCategory[] = [
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-    }
-
-    /* „Přijmout vše“ přes celou šířku, dvě vedlejší volby pod ním vedle sebe. */
-    .cookie-settings__btn--accept {
-      grid-column: 1 / -1;
     }
   }
 </style>
