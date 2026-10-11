@@ -88,7 +88,7 @@ import SiteFooter from '../components/SiteFooter.astro';
 import LineGradientDefs from '../components/LineGradientDefs.astro';
 import { getImage } from 'astro:assets';
 import heroPhoto from '../assets/photos/patrik-pristup.webp';
-import pecePhoto from '../assets/photos/patrik-pristup-pece.webp';
+import pecePhoto from '../assets/photos/patrik-profilovka.jpg';
 import { BOOKING_URL, faqPage } from '../data/entity';
 
 // Prázdné = placeholder. Jediné místo pro vložení skutečné fotografie —
@@ -385,7 +385,7 @@ const faqs: Faq[] = [
 
           <div class="pri-photo pri-pece__photo" data-reveal>
             {pecePhotoSrc ? (
-              <img src={pecePhotoSrc} alt="Patrik Gajdadzis" width="480" height="360" loading="lazy" decoding="async" />
+              <img src={pecePhotoSrc} alt="Patrik Gajdadzis" width="480" height="480" loading="lazy" decoding="async" />
             ) : (
               <div class="pri-photo__placeholder" aria-hidden="true">
                 <div class="pri-photo__figure">
@@ -1070,20 +1070,15 @@ const faqs: Faq[] = [
     display: none;
   }
 
-  /* Kulatý portrét: výřez bez pozadí → kruh dostane tón z palety
-     placeholderů (--about-photo-1); hlava a ramena přiblížené, aby
-     obličej portrét vyplnil. */
+  /* Kulatý portrét: profilovka na tmavě modrém pozadí (od 11. 10. 2026,
+     stejná jako na Googlu, v reklamách a v ostatních kolečkách na webu). */
   .pri-pece__photo:has(img) {
-    background: var(--about-photo-1);
+    background: var(--navy);
   }
 
   .pri-pece__photo img {
     object-fit: cover;
-    object-position: 50% 0;
-    /* Posun dolů o 9 % — nad vlasy zůstane vzduch, hlava se neřízne
-       o horní okraj kruhu. */
-    transform: translateY(9%) scale(1.25);
-    transform-origin: 50% 0;
+    object-position: 50% 50%;
   }
 
   /* ---------- Kapitoly — sdílené ---------- */
