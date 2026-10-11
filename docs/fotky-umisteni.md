@@ -107,7 +107,7 @@ Hodnoty jsou v CSS pixelech na webu, měřené od levého horního rohu rámu.
 Stejný soubor `src/assets/photos/patrik-profilovka.jpg` (600 × 600, snímek 330 z finalni-plne, hlava ~17 % od horního okraje kvůli kruhovému ořezu) používají
 všechna kulatá kolečka s fotkou: `ContactSection.astro`, `financni-check-up.astro`,
 `clanky/[slug].astro`, `article/Praxe.astro`. Nová profilovka = přepsat tenhle
-jeden soubor (čtverec, nos na svislé ose středu — hlava je natočená, takže silueta hlavy sedí mírně vpravo; nad hlavou vzduch ~17 %). `patrik-pristup-pece.webp` (snímek 312
+jeden soubor (čtverec; vodorovně napůl mezi středem siluety hlavy a nosem — hlava je natočená, střed hlavy působil vlevo a nos na středu vpravo, schváleno 11. 10. 2026; nad hlavou vzduch ~17 %). `patrik-pristup-pece.webp` (snímek 312
 pro kolečka do 11. 10. 2026) už se nepoužívá.
 
 Nad 1440 px se hodnoty nemění (rám má stejnou velikost, jen se posouvá
