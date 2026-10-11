@@ -104,10 +104,10 @@ Hodnoty jsou v CSS pixelech na webu, měřené od levého horního rohu rámu.
 | Přístup — Péče (kulatý portrét) | `patrik-profilovka.jpg` | 1300 | 220 × 220 | — | — | — | — | žádné; čtvercová profilovka (výřez z `Osobní značka/brand/foto/patrik-gajdadzis-profilovka.png`), `object-fit: cover` na střed, kruh s pozadím `--navy` |
 | | | 1440 | 240 × 240 | — | — | — | — | 〃 |
 
-Stejný soubor `src/assets/photos/patrik-profilovka.jpg` (480 × 480) používají
+Stejný soubor `src/assets/photos/patrik-profilovka.jpg` (600 × 600, snímek 330 z finalni-plne, hlava ~17 % od horního okraje kvůli kruhovému ořezu) používají
 všechna kulatá kolečka s fotkou: `ContactSection.astro`, `financni-check-up.astro`,
 `clanky/[slug].astro`, `article/Praxe.astro`. Nová profilovka = přepsat tenhle
-jeden soubor (čtverec, obličej na středu). `patrik-pristup-pece.webp` (snímek 312
+jeden soubor (čtverec, obličej na středu, nad hlavou vzduch ~17 %). `patrik-pristup-pece.webp` (snímek 312
 pro kolečka do 11. 10. 2026) už se nepoužívá.
 
 Nad 1440 px se hodnoty nemění (rám má stejnou velikost, jen se posouvá
