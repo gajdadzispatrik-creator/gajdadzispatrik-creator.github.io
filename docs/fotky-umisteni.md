@@ -62,7 +62,8 @@ se NEMĚNÍ.
 |---|---|
 | Homepage — hero | `…_330` |
 | Homepage — „Za každým doporučením…" | `…_252` |
-| O mně — hero; Přístup — Péče, avatary | `…_312` |
+| O mně — hero | `…_312` |
+| Kulaté fotky: Přístup — Péče, avatary (formulář, check-up, články) | `…_330` jako profilovka na tmavě modrém pozadí (od 11. 10. 2026, schválil Patrik — jednotně s Googlem, reklamami a profily) |
 | O mně — Důvěra | `…_259` |
 | Přístup — hero | `…_325` |
 
@@ -100,8 +101,14 @@ Hodnoty jsou v CSS pixelech na webu, měřené od levého horního rohu rámu.
 | | | 1440 | 586 × 887 | 121 | 19 | 288 | 800 | 〃 (~34 px prázdných) |
 | Přístup — hero | `patrik-pristup.png` | 1300 | 470 × 798 | 117 | 18 | 191 | 744 | od prstů do spodku rámu (~54 px) |
 | | | 1440 | 490 × 862 | 123 | 19 | 198 | 783 | od prstů do spodku rámu (~79 px) |
-| Přístup — Péče (kulatý portrét) | `patrik-pristup-pece.png` | 1300 | 220 × 220 | 82 | 30 | 108 | — | žádné, kruh s pozadím `--about-photo-1` |
-| | | 1440 | 240 × 240 | 90 | 33 | 118 | — | 〃 |
+| Přístup — Péče (kulatý portrét) | `patrik-profilovka.jpg` | 1300 | 220 × 220 | — | — | — | — | žádné; čtvercová profilovka (výřez z `Osobní značka/brand/foto/patrik-gajdadzis-profilovka.png`), `object-fit: cover` na střed, kruh s pozadím `--navy` |
+| | | 1440 | 240 × 240 | — | — | — | — | 〃 |
+
+Stejný soubor `src/assets/photos/patrik-profilovka.jpg` (480 × 480) používají
+všechna kulatá kolečka s fotkou: `ContactSection.astro`, `financni-check-up.astro`,
+`clanky/[slug].astro`, `article/Praxe.astro`. Nová profilovka = přepsat tenhle
+jeden soubor (čtverec, obličej na středu). `patrik-pristup-pece.webp` (snímek 312
+pro kolečka do 11. 10. 2026) už se nepoužívá.
 
 Nad 1440 px se hodnoty nemění (rám má stejnou velikost, jen se posouvá
 s pravou stranou obsahu).
