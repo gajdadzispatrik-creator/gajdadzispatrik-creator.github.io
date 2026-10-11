@@ -15,7 +15,10 @@
  * §3 „Právní minimum" je dodrženo doslovně:
  * - žádná analytická/marketingová cookie se nenastavuje před souhlasem
  *   (`applyConsent()` načte Google až po Přijmout vše / uložení se zapnutou kategorií)
- * - analytický i marketingový přepínač jsou v DOM bez `checked` (výchozí off)
+ * - analytický i marketingový přepínač jsou v DOM bez `checked` (výchozí off);
+ *   od 11. 10. 2026 má panel navíc hlavní tlačítko „Přijmout vše“ (jedno
+ *   kliknutí místo zapínání přepínačů) — přepínače NEpředzaškrtávat, předem
+ *   zaškrtnuté políčko není platný souhlas (SDEU C-673/17 Planet49)
  * - Přijmout vše / Odmítnout mají v liště identické rozměry (`flex:1`, stejná
  *   výška/radius/písmo)
  * - lišta nemá křížek ani Esc na první úrovni (Esc handler je jen na panelu)
@@ -142,6 +145,7 @@ const categories: CookieCategory[] = [
   </div>
 
   <div class="cookie-settings__actions">
+    <button type="button" class="cookie-settings__btn cookie-settings__btn--accept" data-action="accept-all-settings">Přijmout vše</button>
     <button type="button" class="cookie-settings__btn cookie-settings__btn--save" data-action="save">Uložit volbu</button>
     <button type="button" class="cookie-settings__btn cookie-settings__btn--reject" data-action="reject-all-settings">Odmítnout vše</button>
   </div>
@@ -482,7 +486,13 @@ const categories: CookieCategory[] = [
     panel.addEventListener('click', (event) => {
       const target = (event.target as HTMLElement).closest('[data-action]') as HTMLElement | null;
       if (!target) return;
-      if (target.dataset.action === 'save') {
+      if (target.dataset.action === 'accept-all-settings') {
+        // Jedno kliknutí místo zapínání přepínačů. Přepínače zůstávají ve
+        // výchozím stavu vypnuté — předzaškrtnutí by nebylo platným souhlasem
+        // (SDEU C-673/17 Planet49), viz hlavičkový komentář.
+        getSwitches().forEach((input) => { input.checked = true; });
+        finalizeConsent(true, true, true);
+      } else if (target.dataset.action === 'save') {
         const analytics = getSwitches().find((i) => i.dataset.category === 'analytics')?.checked ?? false;
         const marketing = getSwitches().find((i) => i.dataset.category === 'marketing')?.checked ?? false;
         finalizeConsent(analytics, marketing, true);
@@ -879,16 +889,17 @@ const categories: CookieCategory[] = [
     font-family: var(--font-sans);
   }
 
-  .cookie-settings__btn--save {
+  .cookie-settings__btn--accept {
     border: none;
     background: var(--emerald);
     color: #FFFFFF;
   }
 
-  .cookie-settings__btn--save:hover {
+  .cookie-settings__btn--accept:hover {
     background: var(--emerald-hover);
   }
 
+  .cookie-settings__btn--save,
   .cookie-settings__btn--reject {
     box-sizing: border-box;
     border: 1px solid rgba(15, 39, 71, .28);
@@ -954,6 +965,11 @@ const categories: CookieCategory[] = [
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
+    }
+
+    /* „Přijmout vše“ přes celou šířku, dvě vedlejší volby pod ním vedle sebe. */
+    .cookie-settings__btn--accept {
+      grid-column: 1 / -1;
     }
   }
 </style>
