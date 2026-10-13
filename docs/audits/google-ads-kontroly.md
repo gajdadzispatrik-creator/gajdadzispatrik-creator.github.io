@@ -47,3 +47,21 @@ jediné kliknutí (40 Kč) bylo na „profifp“.
    nic se nepřidávalo. Kampaň má 20 klíčových slov, z toho 3 neaktivní
    pro nízký objem vyhledávání („kontrola životního pojištění“, „revize
    životního pojištění“, „poradce na pojištění“).
+
+## 13. 10. 2026 — odvolání proti zamítnutému názvu firmy
+
+**Zjištění:** podklad „Název firmy: Patrik Gajdadzis“ zamítnutý v kampaních Finanční poradce,
+Životní pojištění, Značka a Refixace (důvod „Informace o firmě – nápadnost názvu“ = jméno
+není jasně vidět na vstupní stránce). Reklamy běžely bez jména. Hypotéky a Finanční plán se
+stejnou hlavičkou webu zamítnuté nejsou.
+
+**Změna (Patrik: „udělej to“):** podáno odvolání „Námitka proti rozhodnutí“ pro všechny názvy
+firem v účtu; Google potvrdil „Odvolání bylo přijato“. Výsledek zkontrolovat 15.–16. 10.
+Pokud ho zamítne, zvýraznit jméno na vstupních stránkách (chat Web, jen se souhlasem).
+
+**Ověřeno při tom:** podklad s adresou je propojený s Google profilem (17. listopadu 599/30,
+Ostrava-Poruba); automatické uplatňování doporučení vypnuté; přehled hovorů zapnutý.
+
+**Hlídat 19. 10.:** účet hypotekaostrava.cz nemá mít žádné reklamy (Patrik 13. 10.) —
+v Transparency Center byla jeho reklama naposledy zobrazena 11. 10. 2026; ověřit, že se
+datum neposunulo.

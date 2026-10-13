@@ -19,8 +19,8 @@ Zdroje Googlu a Seznamu otevřeny 13. 10. 2026.
    Příčiny podle váhy: (a) **úzké území** — 7 měst + „Přítomnost“; (b) **rozpočet rozdrobený do
    6 kampaní** (~55 Kč/den na kampaň při stropu 60 Kč za klik); (c) **možný souběh s druhým účtem
    hypotekaostrava.cz** (§ 2.2); (d) nový účet bez historie.
-2. **Dvě chyby v účtu, které jdou opravit hned** (§ 2.1, § 2.2): zamítnutý název firmy
-   „Patrik Gajdadzis“ a nevyjasněný druhý inzerentský účet na hypotéky.
+2. **Dvě věci v účtu** (§ 2.1, § 2.2): zamítnutý název firmy „Patrik Gajdadzis“ (odvolání
+   podáno 13. 10.) a druhý inzerentský účet na hypotéky (Patrik: nemá v něm běžet nic).
 3. **Ověření pro finanční služby není problém**: účet nemá žádné oznámení ani problém se zásadami
    a ukazuje „Díky za ověření“ (ověřeno v účtu). Tím jsem vyloučil příčinu, kterou rešerše
    považovala za nejpravděpodobnější.
@@ -50,17 +50,19 @@ Zdroje Googlu a Seznamu otevřeny 13. 10. 2026.
 | Doporučení Googlu | obrázky, síla reklam, popisky, 100 nových slov, **síť partnerů** | síť partnerů nezapínat (nekvalitní provoz, strategie § 4) |
 
 ### 2.1 Zamítnutý název firmy
-- Google u podkladů „název firmy“ vyžaduje shodu s **doménou** nebo se **jménem z ověření
-  inzerenta**; jinak podklad neschválí a reklama běží s doménou a zástupným logem.
-  Zdroj: [Business name requirements](https://support.google.com/adspolicy/answer/14847993).
-- Inzerent, který dřív inzeroval pafinga.cz (pravděpodobně tento účet), má v Transparency Center
-  **úřední název jen „Patrik“** ([AR04266568980828782593](https://adstransparency.google.com/advertiser/AR04266568980828782593?region=CZ),
-  13. 10. 2026). Druhý inzerent (hypotekaostrava.cz) má „Patrik Gajdadzis“.
-  **Hypotéza (neověřeno):** neúplné jméno v ověření je důvod zamítnutí. Ověřit v Administrátor →
-  Ověření inzerenta; případně požádat o opravu jména nebo podat odvolání (doména
-  patrikgajdadzis.cz jménu odpovídá).
-- Google doporučuje **jeden název a jedno logo na doménu ve všech účtech**
-  (zdroj výše). Dva účty pod různými jmény tomu odporují.
+- Důvod „Informace o firmě – nápadnost názvu“ (Name prominence) = jméno inzerenta **není
+  jasně vidět na vstupní stránce** reklamy. Zdroje: [Business name requirements](https://support.google.com/adspolicy/answer/14847993),
+  [brand verification](https://support.google.com/google-ads/answer/13819790), 13. 10. 2026.
+- Na webu jméno je: hlavička každé stránky „PATRIK GAJDADZIS“ (13 px, světlé, ověřeno na
+  /sluzby/pojisteni 13. 10. 2026). Hypotéky a Finanční plán se stejnou hlavičkou zamítnuté nejsou
+  → posouzení nebylo jednotné.
+- **13. 10. 2026 podáno odvolání** („Námitka proti rozhodnutí“, všechny názvy firem v účtu);
+  Google ho přijal ke kontrole (obvykle 24–48 h). Pokud ho zamítne: jméno na vstupních
+  stránkách zvýraznit (úkol pro chat Web, mění design → jen se souhlasem).
+- Dřívější domněnka, že vadí ověřené jméno „Patrik“ (Transparency Center u inzerenta pafinga.cz,
+  [AR04266568980828782593](https://adstransparency.google.com/advertiser/AR04266568980828782593?region=CZ)),
+  se **nepotvrdila** — důvod zamítnutí je jiný. Plátce v účtu je „PATRIK GAJDADZIS“.
+- Google doporučuje **jeden název a jedno logo na doménu ve všech účtech**.
 
 ### 2.2 Druhý účet: hypotekaostrava.cz
 - Transparency Center: inzerent „Patrik Gajdadzis“ (ověřený), 1 reklama „Hypotéka na byt Ostrava –
@@ -100,8 +102,8 @@ Relevance: V = vysoká, S = střední, N = nízká. Zdroje support.google.com, 1
   ale **rozšířit území** (okres/okruh místo 7 měst) — praxe oboru, Google to výslovně nepíše.
 - **Podklad s adresou propojený s Google profilem** → adresa a hodnocení v reklamě, zobrazení
   i **v Mapách Google** ([2404182](https://support.google.com/google-ads/answer/2404182)).
-  Strategie ho plánovala (§ 1 „Reklama i v Mapách“). **Neověřeno, jestli je v účtu propojený** —
-  v přehledu podkladů jsem ho nenašel. Pro Patrika **V** (46 recenzí 5,0 vs. konkurence).
+  **V účtu je propojený** („Patrik Gajdadzis | Hypotéky a finance“, 17. listopadu 599/30,
+  Ostrava-Poruba; 3 zobrazení — ověřeno v účtu 13. 10. 2026).
 
 ### 3.3 Podklady
 | Podklad | Stav v účtu | Poznámka |
@@ -255,10 +257,8 @@ Plný přehled je v `konkurence-ostrava-2026-10.md` (8. 10.). Ověřeno dnes:
    testy (Refixace, Plán) pozastavit nebo sloučit, území rozšířit z 7 měst na okresy
    Ostrava-město, Karviná, Frýdek-Místek, Opava a Nový Jičín (nebo okruh 30–40 km), „Přítomnost“
    ponechat. *Dopad:* hlavní páka na objem. *Mění strategii* (§ 3 a § 5 google-ads-strategie.md).
-3. **Opravit název firmy a propojit adresu s Google profilem (Mapy).** Zjistit jméno v Ověření
-   inzerenta (dnes „Patrik“), opravit nebo se odvolat. Ověřit nebo doplnit podklad s adresou,
-   aby reklama ukazovala adresu, hodnocení 5,0 a mohla se zobrazit i v Mapách. *Dopad:* důvěra
-   a míra prokliku; 46 recenzí je největší výhoda proti konkurenci.
+3. **Opravit název firmy v reklamách** — HOTOVO 13. 10.: odvolání podáno; adresa s Google
+   profilem už propojená byla. *Dopad:* důvěra a míra prokliku.
 4. **Měřit skutečné hovory a později podepsané smlouvy.** Na web dát přesměrovací číslo Googlu
    (hovor ≥60 s = konverze), to dělá chat Web. Až bude objem, nahrávat podepsané smlouvy
    z BEplanu přes Data Manager (do 63 dní od kliku). *Dopad:* Google se pak učí na klientech,
@@ -282,3 +282,12 @@ Account anomaly detector; síť partnerů nezapínat; lead form a remarketing a�
 - napoveda.sklik.cz, napoveda.firmy.cz, seznam.cz — odkazy u § 4 (13. 10. 2026).
 - StatCounter (září 2026), Lupa.cz (19. 1. 2026).
 - Dřívější podklady: `../Osobní značka/strategie/podklady/konkurence-ostrava-2026-10.md`.
+
+---
+
+## Rozhodnutí Patrika k § 7 (13. 10. 2026)
+1. Účet hypotekaostrava.cz: „nemají tam fungovat žádné reklamy“ → ověřit 19. 10. v Transparency
+   Center, že se po 11. 10. nezobrazuje.
+3. „Udělej to“ → odvolání podáno, adresa propojená.
+4. Ptá se na konkrétní návrh (čeká).
+5. „Zatím necháme Google Ads“ → Sklik odložen (`_spolecne/rozhodnuti.md`).
