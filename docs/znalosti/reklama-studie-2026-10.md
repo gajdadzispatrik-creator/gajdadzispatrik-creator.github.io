@@ -154,7 +154,12 @@ Relevance: V = vysoká, S = střední, N = nízká. Zdroje support.google.com, 1
 - Ověření finančních služeb pro ČR od 15. 9. 2026 (G2) ([12390454](https://support.google.com/adspolicy/answer/12390454),
   [17127726](https://support.google.com/adspolicy/answer/17127726)) — vyžaduje se jen od účtů,
   kterým přijde výzva ([blog](https://blog.google/products/ads-commerce/eu-financial-advertiser-verification/)).
-  **Tomuto účtu výzva nepřišla (ověřeno v účtu).** Kdyby přišla: vázaný zástupce nejspíš cestou
+  **Tomuto účtu výzva nepřišla (ověřeno v účtu).** Zásady → Účet → Ověření inzerenta
+  (13. 10. 2026): „Splněné úkoly“ — otázky o organizaci, dokumenty, politické reklamy, kdo platí
+  (vše 3. 5. 2026); karta „Advertiser identity verified — Patrik, CZ“. Úkol pro ověření
+  finančních služeb (G2) tam **není**; účet ani reklamy nemají problém se zásadami.
+  Drobnost: v „O tomto inzerentovi“ vidí lidé jen „Patrik“ — oprava přes „Resetovat ověření“
+  by znovu spustila ověřování → nedoporučuji bez důvodu. Kdyby přišla: vázaný zástupce nejspíš cestou
   „Approved Third Party“ přes BEplan ([15332527](https://support.google.com/adspolicy/answer/15332527)) — **ověřit u kvalifikované osoby / compliance BEplanu.**
 - Povinně: adresa, poplatky, odkazy na akreditace — na webu viditelně, ne jen po najetí myší
   ([2464998](https://support.google.com/adspolicy/answer/2464998)). „Bez poplatků“ a údaj
