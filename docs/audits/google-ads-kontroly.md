@@ -31,3 +31,19 @@ dotazy na konec fixace šly jen do Refixace (7 slov celkem).
 **Hlídat:** ve vyhledávaných výrazech hlavně Finanční plán (široké
 „investice“) a Hypotéky („hypotéka“ — kalkulačky, sazby, banky); nevhodné
 dotazy vyloučit.
+
+## 13. 10. 2026 — vyloučení konkurence a dluhového poradenství
+
+**Podnět:** reklama se ukazovala na dotazy na konkurenci a dluhovou poradnu;
+jediné kliknutí (40 Kč) bylo na „profifp“.
+
+**Změny (schválil Patrik):**
+1. Seznam „Vylučující – základ“ (Hypotéky, Finanční poradce, Životní
+   pojištění, Refixace, Finanční plán; ne Značka) doplněn ve volné shodě
+   o `profifp`, `masterfinance`, `koziel`, `dluhová` → 92 → 96 slov,
+   po uložení ověřeno.
+2. Klíčové slovo "životní pojištění" (frázová shoda) v kampani Životní
+   pojištění: ověřeno, že v kampani **je** (aktivní, přidané 12. 10.),
+   nic se nepřidávalo. Kampaň má 20 klíčových slov, z toho 3 neaktivní
+   pro nízký objem vyhledávání („kontrola životního pojištění“, „revize
+   životního pojištění“, „poradce na pojištění“).
