@@ -65,3 +65,25 @@ Ostrava-Poruba); automatické uplatňování doporučení vypnuté; přehled hov
 **Hlídat 19. 10.:** účet hypotekaostrava.cz nemá mít žádné reklamy (Patrik 13. 10.) —
 v Transparency Center byla jeho reklama naposledy zobrazena 11. 10. 2026; ověřit, že se
 datum neposunulo.
+
+## 13. 10. 2026 — připravená žádost o souhlas: přestavba (pro středu 14. 10.)
+
+Odesláno Asistentovi jako žádost o souhlas (Patrik schválil postup „rozhodnout už ve středu“,
+ne samotnou změnu). V účtu zatím nic nezměněno.
+
+**Data 11. 10. – 13. 10. (13 h):** 13 zobrazení, 1 klik (40,82 Kč), 0 poptávek; 5 z 6 kampaní
+0 zobrazení; utraceno 41 Kč z ~800 Kč možných → brzdou není rozpočet, ale málo hledání v území.
+
+**Návrh:**
+1. Lokalita 5 nebrandových kampaní: místo 7 měst **okruh 35 km kolem kanceláře**
+   (17. listopadu 599/30, Ostrava-Poruba), „Přítomnost“ ponechat. Okresy Ostrava-město a Opava
+   Google Ads nenabízí (seznam lokalit Google Ads 12. 8. 2026 — jako okres jen Frýdek-Místek,
+   Karviná, Nový Jičín). **Značka: celá ČR.**
+2. **Sdílený rozpočet 300 Kč/den** pro Hypotéky, Finanční poradce, Životní pojištění a Refixaci
+   (dnes 120 + 80 + 75 + 25 = 300).
+3. Finanční plán a investice (15 Kč) a Značka (10 Kč) zůstávají s vlastním rozpočtem.
+   Celkem beze změny 325 Kč/den ≈ 10 000 Kč/měs.
+4. Kampaně neslučovat ani nevypínat — mají jiné reklamy a cílové stránky; sloučení by
+   restartovalo učení a objem nezvedne. Stejný přínos jako „méně kampaní“ dá sdílený rozpočet.
+
+**Hlídat po změně:** vyhledávací výrazy z menších obcí, cena za klik.
