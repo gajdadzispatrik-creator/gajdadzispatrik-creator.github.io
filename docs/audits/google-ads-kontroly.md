@@ -87,3 +87,20 @@ ne samotnou změnu). V účtu zatím nic nezměněno.
    restartovalo učení a objem nezvedne. Stejný přínos jako „méně kampaní“ dá sdílený rozpočet.
 
 **Hlídat po změně:** vyhledávací výrazy z menších obcí, cena za klik.
+
+## 15. 10. 2026 — měření místo středeční kontroly (14. 10. neproběhla, vyčerpaný limit)
+
+**Stav 8.–14. 10. 2026 (účet, čteno 15. 10. 14:10):** 52 zobrazení, 1 klik (40,82 Kč), 0 poptávek.
+Finanční poradce 44 zobr. / 1 klik, Hypotéky 7 zobr. (první po přidání krátkých slov),
+Značka 1, Životní pojištění / Refixace / Finanční plán 0. Utraceno 41 Kč z ~2 275 Kč možných.
+Závěr: skoro nulový dosah trvá → přestavba podle souhlasu z 13. 10. je na místě.
+
+**Nové vyhledávací dotazy (pro pondělí, zatím nevyloučeno):** „profi fp“ (2 zobr. — vyloučení
+`profifp` bez mezery ho nechytí), „sms finanční poradenství a s“ (konkurent SMS finanční
+poradenství). Navrhnu přidat `"profi fp"` a `sms finanční` do „Vylučující – základ“.
+
+**Přestavba — pokus 15. 10. 14:15:** sdílený rozpočet „Nebrandové kampaně 300“ (Finanční
+poradce, Hypotéky, Refixace, Životní pojištění; 300 Kč/den) připraven ve formuláři, ale
+uložení zablokovala ochrana aplikace Claude („Modify Shared Resources“) — stejně jako 13. 10.
+u vylučujících slov. Formulář ponechán otevřený; ruční dokončení = 1 klik na Uložit.
+Lokality (okruh 35 km, Značka celá ČR) zatím nezměněny.
