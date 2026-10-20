@@ -18,6 +18,11 @@ DirectorySlash Off
 
 RewriteEngine On
 
+# 0) Stará adresa /poradce/ostrava (starší verze webu, Google ji ještě ukazuje)
+#    → úvodní stránka, jedním 301 (rozhodnutí Patrika 20. 10. 2026).
+RewriteCond %{THE_REQUEST} ^[A-Z]+\s/poradce/ostrava/?(\?[^\s]*)?\s [NC]
+RewriteRule ^ https://patrikgajdadzis.cz/ [R=301,L,QSD]
+
 # 1) /cokoli/index.html → /cokoli (duplicitní adresa obsahu)
 RewriteCond %{THE_REQUEST} ^[A-Z]+\s(/[^?\s]*?)/?index\.html(\?[^\s]*)?\s [NC]
 RewriteRule ^ https://patrikgajdadzis.cz%1%2 [R=301,L,NE,QSD]
