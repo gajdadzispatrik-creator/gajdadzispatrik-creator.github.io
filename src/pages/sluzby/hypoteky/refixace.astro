@@ -25,7 +25,10 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Header from '../../../components/Header.astro';
 import SiteFooter from '../../../components/SiteFooter.astro';
 import LineGradientDefs from '../../../components/LineGradientDefs.astro';
+import { Image } from 'astro:assets';
 import { BOOKING_URL } from '../../../data/entity';
+// Fotka u formuláře (jako kontaktní formulář a „Na kolik dosáhnete?“, Patrik 1. 11. 2026).
+import personPhoto from '../../../assets/photos/patrik-profilovka.jpg';
 import { czechNbsp } from '../../../lib/rehype-czech-nbsp.mjs';
 
 const steps = [
@@ -179,6 +182,16 @@ const fixation = [
           <input type="hidden" name="utm_source" value="" />
           <input type="hidden" name="utm_medium" value="" />
           <input type="hidden" name="utm_campaign" value="" />
+
+          <!-- Komu nabídku posíláte: fotka, jméno, kdy se ozve (jako u kontaktního formuláře). -->
+          <div class="ref-person">
+            <Image class="ref-person__photo" src={personPhoto} width={216} quality={92} alt="" loading="lazy" />
+            <p class="ref-person__text">
+              <strong>Patrik Gajdadzis</strong>
+              <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
+            </p>
+            <p class="ref-person__proof">5<span class="ref-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;· zdarma</p>
+          </div>
 
           <div class="ref-form__grid">
             <div class="ref-field">
@@ -1776,6 +1789,77 @@ const fixation = [
     .ref-form__submit {
       width: auto;
       align-self: flex-start;
+    }
+  }
+  /* Fotka, jméno a hodnocení u formuláře (hodnoty z `.nkd-person`,
+     písmo zvednuté na 16 px podle pravidla webu). */
+  .ref-person {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 12px;
+    align-items: center;
+  }
+
+  .ref-person__photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .ref-person__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+  }
+
+  .ref-person__text strong {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.4;
+    color: var(--navy);
+  }
+
+  .ref-person__text span {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .ref-person__proof {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: nowrap;
+    color: var(--text-quiet);
+  }
+
+  .ref-person__star {
+    color: var(--emerald);
+  }
+
+  @media (min-width: 768px) {
+    .ref-person {
+      grid-template-columns: 72px minmax(0, 1fr);
+      row-gap: 2px;
+    }
+
+    .ref-person__photo {
+      grid-row: 1 / span 2;
+      width: 72px;
+      height: 72px;
+    }
+
+    .ref-person__text {
+      align-self: end;
+    }
+
+    .ref-person__proof {
+      grid-column: 2;
+      align-self: start;
     }
   }
 </style>
