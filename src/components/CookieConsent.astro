@@ -285,6 +285,54 @@ const categories: CookieCategory[] = [
     });
   }
 
+  /*
+   * Zdroj kliknutí (schváleno Patrikem 1. 11. 2026, docs/navrhy/zdroj-kampan-navrh.md):
+   * gclid a UTM z adresy se po MARKETINGOVÉM souhlasu uloží do sessionStorage
+   * (jen tato karta prohlížeče, zmizí po jejím zavření) a formuláře je připojí
+   * k poptávce (src/scripts/attribution-fields.ts). Bez souhlasu se nic
+   * neukládá; odvolání souhlasu je smaže. Nová kampaň přepíše starou.
+   */
+  const ATTRIBUTION_KEY = 'pg-attribution';
+  const ATTRIBUTION_FIELDS = ['gclid', 'utm_source', 'utm_medium', 'utm_campaign'] as const;
+  type Attribution = Partial<Record<(typeof ATTRIBUTION_FIELDS)[number], string>>;
+
+  function readAttribution(): Attribution {
+    try {
+      const raw = window.sessionStorage.getItem(ATTRIBUTION_KEY);
+      return raw ? (JSON.parse(raw) as Attribution) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function captureAttribution(): void {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const found: Attribution = {};
+      ATTRIBUTION_FIELDS.forEach((key) => {
+        const value = params.get(key)?.trim();
+        if (value) found[key] = value.slice(0, 150);
+      });
+      if (Object.keys(found).length > 0) {
+        window.sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(found));
+      }
+    } catch {
+      // sessionStorage nemusí být dostupné — zdroj se pak k poptávce nepřipojí.
+    }
+  }
+
+  function clearAttribution(): void {
+    try {
+      window.sessionStorage.removeItem(ATTRIBUTION_KEY);
+    } catch {
+      // nic
+    }
+  }
+
+  // Zdroj kliknutí pro formuláře — jen při platném marketingovém souhlasu.
+  (window as unknown as { pgAttribution?: () => Attribution }).pgAttribution = () =>
+    granted.marketing ? readAttribution() : {};
+
   function applyConsent(analytics: boolean, marketing: boolean): void {
     const revokedAnalytics = granted.analytics && !analytics;
     const revokedMarketing = granted.marketing && !marketing;
@@ -292,6 +340,9 @@ const categories: CookieCategory[] = [
     granted.marketing = marketing;
     if (revokedAnalytics) clearGoogleCookies(['_ga']);
     if (revokedMarketing) clearGoogleCookies(['_gcl']);
+    // Bez marketingového souhlasu se zdroj kliknutí neuchovává vůbec.
+    if (marketing) captureAttribution();
+    else clearAttribution();
 
     if (!tagLoaded) {
       if (!analytics && !marketing) return;

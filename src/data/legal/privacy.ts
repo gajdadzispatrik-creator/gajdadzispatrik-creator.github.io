@@ -82,6 +82,14 @@ export const privacyPage: LegalPageData = {
             [['E-mail'], ['Písemné potvrzení termínu a navazující komunikace.']],
             [['Oblast zájmu'], ['Připravím se na konzultaci podle tématu, které vás zajímá.']],
             [
+              ['Kdy vám končí fixace (jen stránka Končí vám fixace?)'],
+              ['Vím, kdy je potřeba nabídky porovnat, a ozvu se včas.'],
+            ],
+            [
+              ['Zdroj kliknutí (jen se souhlasem s marketingovými cookies)'],
+              ['Zjišťuji, jestli poptávka přišla z mé reklamy na Googlu, abych věděl, které reklamy mají smysl.'],
+            ],
+            [
               ['Popis situace (nepovinné)'],
               ['Pomůže mi rychleji se zorientovat ještě před tím, než se poprvé ozvu.'],
             ],

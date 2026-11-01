@@ -71,6 +71,7 @@ export const cookiesPage: LegalPageData = {
               ['Marketingové'],
               [
                 'Google Ads (cookies s předponou _gcl, např. _gcl_au): měří, jestli návštěvník přišel z mé reklamy na Googlu a potom se mi ozval (odeslal formulář, klikl na telefon, rezervaci termínu nebo WhatsApp). Google může tyto údaje použít i k přizpůsobení reklam. Nastaví se jen s vaším souhlasem. Doba uložení: 90 dnů. Poskytovatel: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irsko.',
+                ' Označení reklamy a kampaně (pg-attribution, úložiště jen této karty prohlížeče): když přijdete z mé reklamy, zapamatuje si označení kliknutí (gclid) a kampaně (UTM), abych u poptávky věděl, ze které reklamy přišla. Uloží se jen s vaším souhlasem s marketingovými cookies a smaže se zavřením karty nebo odvoláním souhlasu. Poskytovatel: tento web.',
               ],
             ],
           ],

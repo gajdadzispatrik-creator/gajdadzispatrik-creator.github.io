@@ -1,0 +1,1781 @@
+---
+/**
+ * Vstupní stránka /sluzby/hypoteky/refixace — „Končí vám fixace?“
+ * (1. 11. 2026). Zadání: rozbor Reklamy `docs/znalosti/reklama-rozbor-a-navrh-2026-11-01.md`
+ * § 7 B1 + B3, schváleno Patrikem 1. 11. 2026 („udělej co doporučuješ“,
+ * `_spolecne/rozhodnuti.md`). Cíl: reklama Refixace vede sem místo obecné
+ * stránky hypoték.
+ *
+ * Kostra, osa, pruhy, tečky a typografie 1:1 z `src/pages/kariera.astro`
+ * (a ta z `/recenze`), tři markery: formulář / postup / fixace.
+ * Formulář má stejná pravidla jako „Na kolik dosáhnete?“ (honeypot, doba
+ * vyplnění, POST na /api/poptavka.php se zdrojem „refixace“, e-mail se
+ * nevyplňuje — Patrik se ozve telefonicky) a navíc skrytá pole zdroje
+ * kliknutí (gclid/UTM, `src/scripts/attribution-fields.ts`, jen se
+ * souhlasem s marketingovými cookies).
+ *
+ * TEXTY: žádné sazby, splátky ani RPSN (§ 91 ZSÚ). Zákonná ustanovení
+ * (§ 102 odst. 3 a § 117 odst. 3 písm. d) zák. 257/2016 Sb.) podle znění
+ * platného 1. 9. 2024 – 31. 12. 2026, čteno 15. 10. 2026. Všechny texty
+ * OVĚŘIT U KVALIFIKOVANÉ OSOBY / compliance BEplanu před nasazením.
+ * Slib odpovědi „do jednoho pracovního dne“ podle rozhodnutí V5 (klientovi
+ * 1 pracovní den, vnitřní cíl do hodiny).
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import SiteFooter from '../../../components/SiteFooter.astro';
+import LineGradientDefs from '../../../components/LineGradientDefs.astro';
+import { BOOKING_URL } from '../../../data/entity';
+import { czechNbsp } from '../../../lib/rehype-czech-nbsp.mjs';
+
+const steps = [
+  {
+    title: 'Pošlete mi nabídku od banky',
+    text: 'Dopis nebo e-mail, ve kterém vám banka oznamuje novou sazbu. Podle zákona ho musí poslat nejpozději 3 měsíce před koncem fixace. Když ještě nepřišel, nevadí, začneme bez něj.',
+  },
+  {
+    title: 'Porovnám ji s nabídkami jiných bank',
+    text: 'Dívám se na celkové náklady, ne jen na sazbu, a na podmínky, které banka k nabídce váže, třeba pojištění nebo vedení účtu.',
+  },
+  {
+    title: 'Do jednoho pracovního dne vám řeknu, co dál',
+    text: 'Jestli nabídku přijmout, co si u své banky vyjednat, nebo jestli se vyplatí přejít jinam. Po oznámení nové sazby můžete hypotéku 3 měsíce splatit bez poplatku za předčasné splacení.',
+  },
+  {
+    title: 'Rozhodnutí je vaše',
+    text: 'Doporučím, nic nevnucuji. Celá služba je pro vás bez poplatků.',
+  },
+];
+
+const fixation = [
+  {
+    title: 'Plánujete prodej nebo větší splátku?',
+    text: 'Na konci fixace můžete hypotéku splatit nebo přenést bez poplatku. Když v příštích letech počítáte s prodejem nemovitosti nebo s větší mimořádnou splátkou, hodí se fixace, která skončí ve správnou chvíli.',
+  },
+  {
+    title: 'Kolik jistoty potřebujete?',
+    text: 'Delší fixace znamená stejnou splátku na delší dobu. Kratší fixace dává dřív možnost změny, ale i riziko vyšší splátky.',
+  },
+  {
+    title: 'Jakou máte rezervu?',
+    text: 'Když by vás vyšší splátka finančně zaskočila, dává smysl jistota delší fixace.',
+  },
+  {
+    title: 'Porovnávejte stejné věci',
+    text: 'Banky mají pro různé délky fixace různé podmínky. Proto porovnávám nabídky pro více délek fixace najednou a ve stejném nastavení.',
+  },
+];
+---
+
+<BaseLayout
+  title="Končí vám fixace hypotéky? Zkontroluji nabídku banky | Patrik Gajdadzis"
+  description="Pošlete mi nabídku banky ke konci fixace. Do jednoho pracovního dne vám řeknu, jestli je dobrá a co vyjednat. Bez poplatků, Ostrava a online."
+>
+  <Header />
+  <main id="hero" class="rec">
+    <div class="rec__route" aria-hidden="true">
+      {
+        [
+          { tier: 'mobile', vb: 390, axis: 24, dotOffset: 22, hero: false, entry: 0, r: 0 },
+          // Tablet: nájezd shora v 90 % šířky (jako notebook), obloukem pod hero
+          // textem k ose — stejně jako /pristup a /o-mne (28. 9. 2026).
+          { tier: 'tablet', vb: 834, axis: 40, dotOffset: 44, hero: true, entry: 750, entryRatio: 0.9, r: 22 },
+          { tier: 'laptop', vb: 1366, axis: 96, dotOffset: 36, hero: true, entry: 1230, r: 28 },
+          { tier: 'desktop', vb: 1440, axis: 120, dotOffset: 36, hero: true, entry: 1300, r: 28 },
+        ].map((v) => (
+          <svg
+            class={`rec__route-svg rec__route-svg--${v.tier}`}
+            viewBox={`0 0 ${v.vb} 2600`}
+            preserveAspectRatio="none"
+            focusable="false"
+            data-vb={v.vb}
+            data-axis={v.axis}
+            data-dot-offset={v.dotOffset}
+            data-hero={String(v.hero)}
+            data-entry={v.entry}
+            data-entry-ratio={v.entryRatio}
+            data-radius={v.r}
+          >
+            {v.hero && (
+              <defs>
+                <LineGradientDefs id={`rec-line-entry-${v.tier}`} tier={v.tier === 'desktop' ? 'desktop' : v.tier === 'tablet' ? 'tablet' : 'laptop'} x1={v.entry} y1={40} x2={v.entry} y2={140} />
+              </defs>
+            )}
+            <path class="rec__route-path" d={`M ${v.axis} -20 V 2600`} fill="none" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {v.hero && (
+              <path
+                class="rec__route-path rec__route-entry"
+                d={`M ${v.entry} 40 L ${v.entry} 140`}
+                fill="none"
+                stroke={`url(#rec-line-entry-${v.tier})`}
+                stroke-width="1"
+                stroke-linecap="round"
+              />
+            )}
+            <path class="rec__route-path rec__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
+            {(['formular', 'postup', 'fixace'] as const).map((marker) => (
+              <g class="rec__marker" data-marker={marker}>
+                <line class="rec__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
+                <circle class="rec__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
+              </g>
+            ))}
+          </svg>
+        ))
+      }
+    </div>
+
+    <section class="rec-hero" aria-labelledby="rec-hero-heading">
+      <div class="rec-hero__text">
+        <h1 id="rec-hero-heading" data-reveal>Končí vám fixace? Pošlete mi nabídku od&nbsp;banky.</h1>
+        <p class="rec-hero__lead" data-reveal>
+          Do&nbsp;jednoho pracovního dne vám řeknu, jestli je dobrá a&nbsp;co se&nbsp;dá vyjednat. Porovnám ji s&nbsp;nabídkami
+          dalších bank a&nbsp;doporučím, co udělat. Bez poplatků.
+        </p>
+        <div class="rec-hero__actions" data-reveal>
+          <a class="rec-cta" href="#ref-formular" data-scroll-target>Nechat zkontrolovat nabídku</a>
+          <a class="rec-phone" href="tel:+420775217721">
+            <svg class="rec-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path
+                d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+            <span>Zavolat +420&nbsp;775&nbsp;217&nbsp;721</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="rec-chapter rec-chapter--lead" id="ref-formular" aria-labelledby="formular-heading">
+      <div class="rec-chapter__bar" data-reveal data-route-target="formular">
+        <p>Nabídka</p>
+      </div>
+
+      <div class="rec-chapter__content">
+        <div class="rec-chapter__top">
+          <div class="rec-chapter__lead-col" data-reveal>
+            <h2 id="formular-heading" class="rec-h2--dominant">Nechte mi kontakt, zbytek zařídím.</h2>
+          </div>
+          <div class="rec-chapter__support-col" data-reveal>
+            <p class="rec-support__text">
+              Ozvu se&nbsp;vám a&nbsp;domluvíme se, jak mi nabídku banky pošlete. Stačí ji vyfotit a&nbsp;poslat e-mailem.
+            </p>
+          </div>
+        </div>
+
+        <form class="ref-form" method="post" action="/api/poptavka.php" novalidate data-reveal>
+          <p class="ref-form__errors" role="alert" hidden></p>
+          <div class="ref-hp" aria-hidden="true">
+            <label for="ref-website">Nevyplňujte</label>
+            <input id="ref-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+          <input type="hidden" name="vyplneno-ms" value="" />
+          <input type="hidden" name="zdroj" value="refixace" />
+          <input type="hidden" name="oblast" value="Hypotéka a bydlení" />
+          <input type="hidden" name="gclid" value="" />
+          <input type="hidden" name="utm_source" value="" />
+          <input type="hidden" name="utm_medium" value="" />
+          <input type="hidden" name="utm_campaign" value="" />
+
+          <div class="ref-form__grid">
+            <div class="ref-field">
+              <label for="ref-jmeno">Jméno a&nbsp;příjmení <span class="ref-required" aria-hidden="true">*</span></label>
+              <input id="ref-jmeno" name="jmeno" type="text" autocomplete="name" required aria-describedby="ref-jmeno-chyba" />
+              <p class="ref-field__error" id="ref-jmeno-chyba" hidden></p>
+            </div>
+            <div class="ref-field">
+              <label for="ref-telefon">Telefon <span class="ref-required" aria-hidden="true">*</span></label>
+              <input id="ref-telefon" name="telefon" type="tel" autocomplete="tel" required aria-describedby="ref-telefon-chyba" />
+              <p class="ref-field__error" id="ref-telefon-chyba" hidden></p>
+            </div>
+            <div class="ref-field ref-field--wide">
+              <label for="ref-konec">Kdy vám končí fixace? <span class="ref-required" aria-hidden="true">*</span></label>
+              <input id="ref-konec" name="konec_fixace" type="text" inputmode="text" placeholder="například 03/2027" maxlength="40" required aria-describedby="ref-konec-chyba" />
+              <p class="ref-field__error" id="ref-konec-chyba" hidden></p>
+            </div>
+          </div>
+
+          <button class="rec-cta ref-form__submit" type="submit">Odeslat</button>
+
+          <p class="ref-status ref-status--error" role="alert" hidden>
+            Zprávu se&nbsp;nepodařilo odeslat. Zkuste to znovu nebo mi zavolejte na&nbsp;<a href="tel:+420775217721">+420&nbsp;775&nbsp;217&nbsp;721</a>.
+          </p>
+
+          <p class="ref-privacy">
+            Údaje použiji pouze pro&nbsp;vyřízení vaší poptávky a&nbsp;navazující komunikaci. <a href="/zpracovani-osobnich-udaju">Zásady zpracování osobních údajů</a>
+          </p>
+        </form>
+
+        <p class="ref-status ref-status--success" role="status" tabindex="-1" hidden>
+          Děkuji, ozvu se&nbsp;vám do&nbsp;jednoho pracovního dne.
+        </p>
+      </div>
+    </section>
+
+    <section class="rec-chapter rec-chapter--postup" aria-labelledby="postup-heading">
+      <div class="rec-chapter__bar" data-reveal data-route-target="postup">
+        <p>Jak to funguje</p>
+      </div>
+
+      <div class="rec-chapter__content">
+        <div class="rec-chapter__top">
+          <div class="rec-chapter__lead-col" data-reveal>
+            <h2 id="postup-heading" class="rec-h2--std">Konec fixace je nejlepší chvíle, kdy hypotéku přenést jinam.</h2>
+          </div>
+          <div class="rec-chapter__support-col" data-reveal>
+            <p class="rec-support__text">
+              Nabídka vaší banky často není to nejlepší, co můžete dostat. Stojí za&nbsp;to ji porovnat.
+            </p>
+          </div>
+        </div>
+
+        <div class="rec-reviews">
+          <ul class="rec-reviews__list">
+            {
+              steps.map((item) => (
+                <li class="rec-review">
+                  <div class="rec-review__quote">
+                    <h3 class="rec-review__title">{czechNbsp(item.title)}</h3>
+                    <p>{czechNbsp(item.text)}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="rec-chapter rec-chapter--fixace" aria-labelledby="fixace-heading">
+      <div class="rec-chapter__bar" data-reveal data-route-target="fixace">
+        <p>Délka fixace</p>
+      </div>
+
+      <div class="rec-chapter__content">
+        <div class="rec-chapter__top">
+          <div class="rec-chapter__lead-col" data-reveal>
+            <h2 id="fixace-heading" class="rec-h2--std">Na&nbsp;jak dlouho fixovat?</h2>
+          </div>
+          <div class="rec-chapter__support-col" data-reveal>
+            <p class="rec-support__text">
+              Jednu správnou odpověď pro&nbsp;všechny nemám a&nbsp;vývoj sazeb nikdo spolehlivě nepředpoví. Rozhoduje hlavně tohle:
+            </p>
+          </div>
+        </div>
+
+        <div class="rec-reviews">
+          <ul class="rec-reviews__list">
+            {
+              fixation.map((item) => (
+                <li class="rec-review">
+                  <div class="rec-review__quote">
+                    <h3 class="rec-review__title">{czechNbsp(item.title)}</h3>
+                    <p>{czechNbsp(item.text)}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="rec-closing" aria-labelledby="rec-closing-heading">
+      <div class="rec-closing__glow" aria-hidden="true"></div>
+
+      <div class="rec-closing__grid">
+        <h2 id="rec-closing-heading" data-reveal>Nečekejte na&nbsp;poslední chvíli.</h2>
+
+        <div class="rec-closing__body" data-reveal>
+          <p>
+            Čím dřív nabídky porovnáme, tím víc času máte na&nbsp;rozhodnutí. Zavolejte mi, nebo mi nechte kontakt.
+          </p>
+
+          <div class="rec-closing__actions">
+            <a class="rec-cta rec-cta--dark" href="#ref-formular">Nechat zkontrolovat nabídku</a>
+            <a class="rec-phone rec-phone--dark" href="tel:+420775217721">
+              <svg class="rec-phone__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path
+                  d="M6.5 3.5h3l1.5 4-2 1.5a11.5 11.5 0 0 0 5 5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10.2 18.5 5.5 13.8 5.5 6.5c0-1.1.9-2 1-3z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+              <span>+420&nbsp;775&nbsp;217&nbsp;721</span>
+            </a>
+          </div>
+
+          <a class="closing-booking" href={BOOKING_URL} target="_blank" rel="noopener">Nebo si rovnou vyberte termín online</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  import { firstLineCenterY } from '../../../scripts/first-line';
+  import { fillAttribution } from '../../../scripts/attribution-fields';
+  // Bez animací nástupu textu a linky — na přání uživatele 29. 9. 2026 se vše
+  // zobrazí hned (stejná cesta jako prefers-reduced-motion).
+  const reduceMotion = true;
+  const main = document.querySelector('.rec');
+  const routeWrap = document.querySelector('.rec__route');
+
+  if (main && routeWrap) {
+    const svgs = Array.from(routeWrap.querySelectorAll('.rec__route-svg')) as SVGSVGElement[];
+    const heroSection = main.querySelector('.rec-hero') as HTMLElement | null;
+    const heroTextEl = main.querySelector('.rec-hero__text') as HTMLElement | null;
+    const closingSection = main.querySelector('.rec-closing') as HTMLElement | null;
+    const closingHeading = main.querySelector('.rec-closing__grid h2') as HTMLElement | null;
+    const markerTargets = {
+      formular: main.querySelector('[data-route-target="formular"]'),
+      postup: main.querySelector('[data-route-target="postup"]'),
+      fixace: main.querySelector('[data-route-target="fixace"]'),
+    } as const;
+
+    const HERO_ENTRY_START_Y = 40;
+    const HERO_ENTRY_MAX_LENGTH = 100;
+    const HERO_ENTRY_MIN_LENGTH = 40;
+    const HERO_ENTRY_GAP_BEFORE_BEND = 20;
+
+    const heroArcPath = (entryX: number, axisX: number, r: number, bendY: number, totalHeight: number, entryEndY: number) => {
+      const y1 = bendY - r;
+      return `M ${entryX} ${entryEndY} V ${y1} A ${r} ${r} 0 0 1 ${entryX - r} ${y1 + r} H ${axisX + r} A ${r} ${r} 0 0 0 ${axisX} ${y1 + 2 * r} V ${totalHeight}`;
+    };
+
+    const syncRoute = () => {
+      if (!heroSection) return;
+      const mainRect = main.getBoundingClientRect();
+      if (mainRect.height === 0) return;
+      const totalHeight = Math.max(mainRect.height, 1);
+      const heroBottom = heroSection.getBoundingClientRect().bottom - mainRect.top;
+      const closingTop = closingSection ? closingSection.getBoundingClientRect().top - mainRect.top : totalHeight;
+
+      let bendY = 260;
+      if (heroTextEl) {
+        const textRect = heroTextEl.getBoundingClientRect();
+        const textBottom = textRect.bottom - mainRect.top;
+        bendY = Math.min(Math.max(textBottom + 40, 260), heroBottom - 20);
+      }
+
+      svgs.forEach((svg) => {
+        const isActive = getComputedStyle(svg).display !== 'none';
+        const nominalVb = parseFloat(svg.dataset.vb ?? '390');
+        const axis = parseFloat(svg.dataset.axis ?? '24');
+        const dotOffsetPx = parseFloat(svg.dataset.dotOffset ?? '16');
+        const isHero = svg.dataset.hero === 'true';
+        const r = parseFloat(svg.dataset.radius ?? '0');
+
+        if (!Number.isFinite(nominalVb) || nominalVb <= 0) return;
+
+        const realWidthNow = isActive ? svg.getBoundingClientRect().width : 0;
+        const vb = realWidthNow > 0 ? realWidthNow : nominalVb;
+        // Tablet: nájezd v poměru k šířce, jinak pevná tierová konstanta.
+        const entryRatio = parseFloat(svg.dataset.entryRatio ?? '');
+        const entryX = Number.isFinite(entryRatio) ? entryRatio * vb : parseFloat(svg.dataset.entry ?? '0');
+
+        svg.setAttribute('viewBox', `0 0 ${vb} ${totalHeight}`);
+
+        const lightPath = svg.querySelector('.rec__route-path:not(.rec__route-path--dark)') as SVGPathElement | null;
+        const darkPath = svg.querySelector('.rec__route-path--dark') as SVGPathElement | null;
+
+        const axisScaled = (axis / nominalVb) * vb;
+        const shift = axisScaled - axis;
+        // Mobil (28. 9. 2026): trasa jako na tabletu — od osy pod obsahem hero
+        // obloukem doprava, po pravé straně nahoru a pod záhlavím končí do
+        // ztracena nájezdovým gradientem (barvy LineGradientDefs tier „tablet").
+        // Je-li v hero fotka v pozadí (absolutně nahoře), vede linka ZA ní jako
+        // na homepage: nahoře vedle hlavy je vidět, za postavou schovaná a v místě,
+        // kde se fotka rozpouští, se plynule znovu objeví (úsek „mid" s vlastním
+        // gradientem — v průsvitné části fotky by jinak linka prosvítala).
+        // Gradienty a pomocné cesty se v mobilním SVG vytvoří jednou za běhu.
+        const mobileFramePath = (endY: number): string | null => {
+          if (!heroSection) return null;
+          const els = Array.from(heroSection.querySelectorAll('[class*="hero__text"], [class*="hero__photo"], [class*="hero__breadcrumb"], nav')) as HTMLElement[];
+          const rects = els.map((e) => e.getBoundingClientRect()).filter((r) => r.height > 0);
+          if (!rects.length) return null;
+          const bottom = Math.max(...rects.map((r) => r.bottom)) - mainRect.top;
+          const fr = 18;
+          const rightX = (378 / nominalVb) * vb;
+          const y0 = 40;
+          const yB = bottom + 28;
+          const yE = Math.min(140, yB - fr - 20);
+          const NS = 'http://www.w3.org/2000/svg';
+          const ensure = (cls: string, stops: [string, string, string][]) => {
+            let path = svg.querySelector(`path.${cls}`) as SVGPathElement | null;
+            let grad = svg.querySelector(`linearGradient.${cls}`) as SVGLinearGradientElement | null;
+            if (!path || !grad) {
+              const defs = document.createElementNS(NS, 'defs');
+              grad = document.createElementNS(NS, 'linearGradient') as SVGLinearGradientElement;
+              grad.id = `${cls}-${Math.random().toString(36).slice(2, 9)}`;
+              grad.setAttribute('class', cls);
+              grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+              stops.forEach(([o, c, op]) => {
+                const st = document.createElementNS(NS, 'stop');
+                st.setAttribute('offset', o);
+                st.setAttribute('stop-color', c);
+                st.setAttribute('stop-opacity', op);
+                grad!.appendChild(st);
+              });
+              defs.appendChild(grad);
+              svg.insertBefore(defs, svg.firstChild);
+              path = document.createElementNS(NS, 'path') as SVGPathElement;
+              path.setAttribute('class', cls);
+              path.setAttribute('fill', 'none');
+              path.setAttribute('stroke', `url(#${grad.id})`);
+              path.setAttribute('stroke-width', '1');
+              path.setAttribute('stroke-linecap', 'round');
+              svg.appendChild(path);
+            }
+            return { path, grad };
+          };
+          const entry = ensure('route-mobile-entry', [['0%', '#1E7A5C', '0'], ['34%', '#1E7A5C', '.36'], ['70%', '#255E77', '.24'], ['100%', '#1B4A8A', '.18']]);
+          entry.grad.setAttribute('x1', String(rightX));
+          entry.grad.setAttribute('x2', String(rightX));
+          entry.grad.setAttribute('y1', String(y0));
+          entry.grad.setAttribute('y2', String(yE));
+          entry.path.setAttribute('d', `M ${rightX} ${y0} L ${rightX} ${yE}`);
+          let mainStart = yE;
+          const bgPhoto = heroSection.querySelector('[class*="hero__photo"]') as HTMLElement | null;
+          if (bgPhoto && getComputedStyle(bgPhoto).position === 'absolute') {
+            const pr = bgPhoto.getBoundingClientRect();
+            const pTop = pr.top - mainRect.top;
+            const yA = pTop + pr.height * 0.44;
+            // Pod 72 % výšky fotky je postava už skoro rozpuštěná — linka je až do
+            // té výšky schovaná (i přes průsvitnou ruku) a objeví se až pod ní.
+            const yD = pTop + pr.height * 0.72;
+            const yF = Math.min(pTop + pr.height * 0.9, yB - fr - 1);
+            if (yF > yE + 20) {
+              const span = yF - yE;
+              const pA = Math.max(0, Math.min(1, (yA - yE) / span));
+              const pC = Math.max(pA, Math.min(1, pA + 12 / span));
+              const pD = Math.max(pC, Math.min(1, (yD - yE) / span));
+              const mid = ensure('route-mobile-mid', [['0%', '#1B4A8A', '.18'], ['0%', '#1B4A8A', '.18'], ['0%', '#1B4A8A', '0'], ['0%', '#1B4A8A', '0'], ['100%', '#1B4A8A', '.18']]);
+              const st = mid.grad.querySelectorAll('stop');
+              st[1].setAttribute('offset', String(pA));
+              st[2].setAttribute('offset', String(pC));
+              st[3].setAttribute('offset', String(pD));
+              mid.grad.setAttribute('x1', String(rightX));
+              mid.grad.setAttribute('x2', String(rightX));
+              mid.grad.setAttribute('y1', String(yE));
+              mid.grad.setAttribute('y2', String(yF));
+              mid.path.setAttribute('d', `M ${rightX} ${yE} L ${rightX} ${yF}`);
+              mainStart = yF;
+            }
+          }
+          return `M ${rightX} ${mainStart} V ${yB - fr} A ${fr} ${fr} 0 0 1 ${rightX - fr} ${yB} H ${axisScaled + fr} A ${fr} ${fr} 0 0 0 ${axisScaled} ${yB + fr} V ${endY}`;
+        };
+        if (isActive) {
+          (main as HTMLElement).style.setProperty('--rec-shift', `${shift}px`);
+        }
+
+        if (isHero) {
+          const available = bendY - r - HERO_ENTRY_START_Y - HERO_ENTRY_GAP_BEFORE_BEND;
+          const entryLength = Math.min(HERO_ENTRY_MAX_LENGTH, Math.max(HERO_ENTRY_MIN_LENGTH, available));
+          const entryEndY = HERO_ENTRY_START_Y + entryLength;
+
+          const gradient = svg.querySelector('linearGradient');
+          if (gradient) {
+            gradient.setAttribute('y1', String(HERO_ENTRY_START_Y));
+            gradient.setAttribute('y2', String(entryEndY));
+          }
+
+          const entryPath = svg.querySelector('.rec__route-entry') as SVGPathElement | null;
+          if (entryPath) entryPath.setAttribute('d', `M ${entryX} ${HERO_ENTRY_START_Y} L ${entryX} ${entryEndY}`);
+
+          if (lightPath) lightPath.setAttribute('d', heroArcPath(entryX, axisScaled, r, bendY, closingTop, entryEndY));
+        } else if (lightPath) {
+          lightPath.setAttribute('d', mobileFramePath(closingTop) ?? `M ${axisScaled} ${heroBottom - 20} V ${closingTop}`);
+        }
+
+        const gapBuffer = 20;
+        let darkD = `M ${axisScaled} ${closingTop - 20} V ${totalHeight}`;
+        if (darkPath && closingHeading) {
+          const hRect = closingHeading.getBoundingClientRect();
+          const svgRectNow = svg.getBoundingClientRect();
+          const axisRealX = svgRectNow.left + axisScaled * (svgRectNow.width / vb);
+          if (hRect.width > 0 && axisRealX >= hRect.left && axisRealX <= hRect.right) {
+            const gapTop = hRect.top - mainRect.top - gapBuffer;
+            const gapBottom = hRect.bottom - mainRect.top + gapBuffer;
+            darkD = `M ${axisScaled} ${closingTop - 20} V ${gapTop} M ${axisScaled} ${gapBottom} V ${totalHeight}`;
+          }
+        }
+        if (darkPath) darkPath.setAttribute('d', darkD);
+
+        if (!isActive) return;
+
+        const svgRect = svg.getBoundingClientRect();
+        if (svgRect.height === 0 || svgRect.width === 0) return;
+        const scaleY = svgRect.height / totalHeight;
+        const scaleX = svgRect.width / vb;
+
+        const axisRealX = svgRect.left + axisScaled * scaleX;
+        const targetLocalX = (axisRealX + dotOffsetPx - svgRect.left) / scaleX;
+
+        (Object.keys(markerTargets) as Array<keyof typeof markerTargets>).forEach((key) => {
+          const target = markerTargets[key];
+          const group = svg.querySelector(`[data-marker="${key}"]`);
+          if (!target || !group) return;
+          const centerY = firstLineCenterY(target);
+          const localY = (centerY - svgRect.top) / scaleY;
+          const notch = group.querySelector('.rec__notch');
+          const dot = group.querySelector('.rec__dot');
+          if (notch) {
+            notch.setAttribute('y1', String(localY));
+            notch.setAttribute('y2', String(localY));
+            notch.setAttribute('x1', String(axisScaled));
+            notch.setAttribute('x2', String(targetLocalX));
+          }
+          if (dot) {
+            dot.setAttribute('cy', String(localY));
+            dot.setAttribute('cx', String(targetLocalX));
+          }
+        });
+      });
+    };
+
+    syncRoute();
+    window.addEventListener('resize', syncRoute);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncRoute());
+    }
+
+    if ('ResizeObserver' in window) {
+      const resizeObserver = new ResizeObserver(() => syncRoute());
+      resizeObserver.observe(main);
+    }
+
+    if (!reduceMotion) {
+      const activeSvg = svgs.find((svg) => getComputedStyle(svg).display !== 'none');
+      const paths = activeSvg ? (Array.from(activeSvg.querySelectorAll('.rec__route-path')) as SVGPathElement[]) : [];
+      const dots = activeSvg ? (Array.from(activeSvg.querySelectorAll('.rec__dot')) as SVGCircleElement[]) : [];
+      paths.forEach((path) => {
+        const length = path.getTotalLength();
+        if (length === 0) return;
+        path.style.strokeDasharray = String(length);
+        path.style.strokeDashoffset = String(length);
+      });
+      dots.forEach((dot) => dot.classList.add('is-pending'));
+      window.setTimeout(() => {
+        paths.forEach((path) => {
+          path.style.transition = 'stroke-dashoffset var(--duration-line) var(--ease-out)';
+          path.style.strokeDashoffset = '0';
+        });
+        window.setTimeout(() => {
+          dots.forEach((dot) => {
+            dot.classList.remove('is-pending');
+            dot.classList.add('is-visible');
+          });
+        }, 450);
+      }, 20);
+    }
+
+    const revealEls = Array.from(main.querySelectorAll('[data-reveal]')) as HTMLElement[];
+
+    if (!reduceMotion && revealEls.length && 'IntersectionObserver' in window) {
+      revealEls.forEach((el) => el.classList.add('is-pending'));
+
+      const groups = new Map<Element | null, HTMLElement[]>();
+      revealEls.forEach((el) => {
+        const parent = el.closest('section');
+        const list = groups.get(parent) ?? [];
+        list.push(el);
+        groups.set(parent, list);
+      });
+
+      const revealGroup = (section: Element | null) => {
+        const els = groups.get(section) ?? [];
+        const lastDelay = (els.length - 1) * 70;
+        els.forEach((el, i) => {
+          window.setTimeout(() => {
+            el.classList.remove('is-pending');
+            el.classList.add('is-visible');
+          }, i * 70);
+        });
+        window.setTimeout(() => syncRoute(), lastDelay + 520);
+      };
+
+      /*
+       * OPRAVA (nahlásil uživatel): `threshold: 0.15` vyžaduje, aby bylo
+       * viditelných 15 % PLOCHY celé `<section>`, ne 15 % výšky viewportu.
+       * `.rec-chapter--lead` teď nese 42 plných recenzí a je mnohonásobně
+       * vyšší než viewport — jediná obrazovka pak nikdy nepokryje 15 % jejího
+       * celkového obsahu, takže `isIntersecting` u dlouhých sekcí nikdy
+       * nenastane a `[data-reveal]` děti (pruh, nadpis, text) zůstanou navždy
+       * `opacity: 0`. `threshold: 0` reaguje na PRVNÍ průnik se sekcí bez
+       * ohledu na její celkovou výšku — funguje stejně pro krátké i velmi
+       * dlouhé sekce.
+       */
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              revealGroup(entry.target);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0, rootMargin: '0px 0px -10% 0px' }
+      );
+
+      Array.from(main.querySelectorAll('section')).forEach((section) => observer.observe(section));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
+  }
+
+  // Hero CTA „Zobrazit recenze" — plynulý přesun na výpis na téže stránce.
+  const scrollCta = document.querySelector('[data-scroll-target]');
+  if (scrollCta) {
+    scrollCta.addEventListener('click', (e) => {
+      const href = scrollCta.getAttribute('href');
+      if (!href || !href.startsWith('#')) return;
+      const target = document.querySelector(href);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+  }
+
+  // --- Formulář „Končí vám fixace?“: stejná pravidla a cesta jako
+  // formulář „Na kolik dosáhnete?“ (honeypot, doba vyplnění, JSON odpověď),
+  // navíc skrytá pole zdroje kliknutí (jen se souhlasem s marketingem).
+  const refForm = document.querySelector<HTMLFormElement>('.ref-form');
+  if (refForm) {
+    const form = refForm;
+    let startedAt: number | null = null;
+    form.addEventListener('focusin', () => {
+      if (startedAt === null) startedAt = performance.now();
+    });
+    const messages: Record<string, string> = {
+      jmeno: 'Vyplňte prosím jméno a příjmení.',
+      telefon: 'Vyplňte prosím telefonní číslo.',
+      konec_fixace: 'Napište prosím, kdy vám fixace končí. Stačí přibližně.',
+    };
+    const fields = ['jmeno', 'telefon', 'konec_fixace'].map((n) => form.elements.namedItem(n) as HTMLInputElement);
+    const validate = (input: HTMLInputElement) => {
+      const ok = input.value.trim() !== '' && input.checkValidity();
+      const err = document.getElementById(`${input.id}-chyba`);
+      if (err) {
+        err.textContent = ok ? '' : messages[input.name];
+        err.hidden = ok;
+      }
+      if (ok) input.removeAttribute('aria-invalid');
+      else input.setAttribute('aria-invalid', 'true');
+      return ok;
+    };
+    fields.forEach((f) => f.addEventListener('blur', () => validate(f)));
+    const summaryEl = form.querySelector<HTMLElement>('.ref-form__errors');
+    const errorStatus = form.querySelector<HTMLElement>('.ref-status--error');
+    const success = document.querySelector<HTMLElement>('.ref-status--success');
+    const submit = form.querySelector<HTMLButtonElement>('.ref-form__submit');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (submit?.disabled) return;
+      if (errorStatus) errorStatus.hidden = true;
+      const allOk = fields.map(validate).every(Boolean);
+      if (summaryEl) {
+        summaryEl.hidden = allOk;
+        summaryEl.textContent = allOk ? '' : 'Zkontrolujte prosím zvýrazněná pole.';
+      }
+      if (!allOk) return;
+
+      const elapsed = form.elements.namedItem('vyplneno-ms') as HTMLInputElement;
+      elapsed.value = String(Math.round(performance.now() - (startedAt ?? 0)));
+      fillAttribution(form);
+
+      if (submit) submit.disabled = true;
+      form.setAttribute('aria-busy', 'true');
+      let sent = false;
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: new URLSearchParams(new FormData(form) as unknown as Record<string, string>),
+        });
+        const result = (await response.json().catch(() => null)) as { ok?: boolean } | null;
+        sent = response.ok && result?.ok === true;
+      } catch {
+        sent = false;
+      } finally {
+        if (submit) submit.disabled = false;
+        form.removeAttribute('aria-busy');
+      }
+
+      if (sent) {
+        // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
+        document.dispatchEvent(new CustomEvent('pg:lead'));
+        form.hidden = true;
+        if (success) {
+          success.hidden = false;
+          success.focus({ preventScroll: true });
+        }
+      } else if (errorStatus) {
+        errorStatus.hidden = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .rec {
+    position: relative;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  .rec__route {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .rec__route-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .rec__route-path--dark {
+    stroke: var(--line-on-dark);
+  }
+
+  .rec__notch {
+    stroke: var(--line);
+    stroke-opacity: .18;
+  }
+
+  .rec__dot {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .rec__dot.is-pending {
+    opacity: 0;
+    transform: scale(.4);
+  }
+
+  .rec__dot.is-visible {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+  }
+
+  .rec__route-svg--tablet,
+  .rec__route-svg--laptop,
+  .rec__route-svg--desktop {
+    display: none;
+  }
+
+  .rec :focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  [data-reveal].is-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-reveal) var(--ease-out), transform var(--duration-reveal) var(--ease-out);
+  }
+
+  [data-route-target].is-pending {
+    transform: none;
+  }
+
+  [data-route-target].is-visible {
+    transform: none;
+    transition: opacity var(--duration-reveal) var(--ease-out);
+  }
+
+  .rec-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding-inline: 30px;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color var(--duration-hover) var(--ease-out);
+  }
+
+  .rec-cta:hover {
+    background: var(--emerald-hover);
+  }
+
+  .rec-cta:active {
+    transform: translateY(1px);
+  }
+
+  .rec-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .rec-phone__icon {
+    width: 19px;
+    height: 19px;
+    flex: none;
+  }
+
+  .rec-phone:hover {
+    color: var(--emerald);
+  }
+
+  .rec-phone--dark {
+    color: var(--white);
+  }
+
+  .rec-phone--dark:hover {
+    color: var(--emerald-light);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .rec-hero {
+    padding: 64px 24px 0;
+  }
+
+  .rec-hero__text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 640px;
+  }
+
+  .rec-hero__text h1 {
+    margin: 0;
+    font-size: 38px;
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -.05em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .rec-hero__lead {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text);
+    max-width: 560px;
+  }
+
+  .rec-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rec-hero__actions .rec-cta {
+    width: 100%;
+  }
+
+  .rec-hero__actions .rec-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ---------- Kapitoly — sdílené ---------- */
+
+  .rec-chapter {
+    padding: 56px 24px;
+  }
+
+  .rec-chapter--lead {
+    margin-top: 64px;
+    background: var(--bg);
+  }
+
+  .rec-chapter__bar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .rec-chapter__bar p {
+    margin: 0;
+    padding-left: calc(36px + var(--rec-shift, 0px));
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+  }
+
+  .rec-chapter--lead .rec-chapter__bar p {
+    color: var(--emerald);
+  }
+
+  .rec-chapter__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .rec-chapter__top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .rec-chapter__lead-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .rec-chapter__support-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rec-chapter__lead-col h2,
+  .rec-h2--std {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .rec-h2--dominant {
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-wrap: pretty;
+    font-size: 34px;
+  }
+
+  .rec-h2--std {
+    font-size: 30px;
+  }
+
+  .rec-support__text {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .rec-google-link,
+  .rec-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: fit-content;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--emerald);
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .rec-google-link:hover,
+  .rec-text-link:hover {
+    color: var(--emerald-hover);
+  }
+
+  .rec-google-link__icon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+
+  /* ---------- Badge „k ověření" (sdíleno: souhrn i placeholder recenzí) ---------- */
+
+  .rec-verify-badge {
+    display: inline-block;
+    width: fit-content;
+    padding: 3px 8px;
+    border-radius: var(--radius-tag);
+    background: var(--pending-review-bg);
+    color: var(--pending-review);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Výpis recenzí ---------- */
+
+  .rec-reviews {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rec-reviews__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rec-review {
+    padding: 22px 0;
+    border-top: 1px solid rgba(27, 74, 138, .14);
+  }
+
+  .rec-review:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  /* Poslední řádek bez spodního odsazení — konec bloku určuje padding kapitoly. */
+  .rec-review:last-child {
+    padding-bottom: 0;
+  }
+
+  .rec-review__placeholder,
+  .rec-review__quote {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rec-review__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .rec-review__attribution {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .rec-review__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rec-review__line {
+    display: block;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--rule);
+  }
+
+  .rec-review__quote {
+    margin: 0;
+  }
+
+  .rec-review__title {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--navy);
+    text-wrap: pretty;
+  }
+
+  .rec-review__quote p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .rec-review__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .rec-review__footer cite {
+    font-style: normal;
+    color: var(--navy);
+  }
+
+  .rec-review__rating {
+    font-size: 13px;
+    letter-spacing: .15em;
+    color: var(--emerald);
+  }
+
+  .rec-reviews__more {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    /* Poslední recenze → tlačítko 32 px (8 gap rodiče + 24) jako seznam → odkaz
+       na homepage (CasesSection); poslední recenze nemá spodní padding. */
+    margin-top: 24px;
+    height: 48px;
+    padding-inline: 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-btn);
+    background: var(--white);
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: border-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+  }
+
+  .rec-reviews__more:hover {
+    border-color: var(--emerald);
+    color: var(--emerald);
+  }
+
+  /* ---------- Tmavé CTA ---------- */
+
+  .rec-closing {
+    position: relative;
+    margin-top: 64px;
+    padding-block: 56px;
+    overflow: hidden;
+    background: linear-gradient(168deg, var(--router-grad-1) 0%, var(--navy) 58%, var(--router-grad-2) 100%);
+  }
+
+  .rec-closing__glow {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 260px;
+    background: radial-gradient(44% 60% at 76% 24%, rgba(46, 152, 115, .13) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .rec-closing__grid {
+    position: relative;
+    z-index: 2;
+    padding-inline: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .rec-closing__grid h2 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--white);
+    text-wrap: pretty;
+  }
+
+  .rec-closing__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .rec-closing__body p {
+    margin: 0;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .rec-closing__actions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rec-closing__actions .rec-cta {
+    width: 100%;
+  }
+
+  .rec-closing__actions .rec-phone {
+    height: 48px;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  /* ============ Mobil (<768): obsah od popisku u tečky, ne na lince ============
+     Popisek kapitoly stojí 36 px od kraje sekce (osa 24 + zářez) — obsah
+     kapitol i závěrečné sekce začíná na stejné svislici, jako na tabletu
+     (28. 9. 2026, dřív nadpisy a text ležely přímo na lince). */
+  @media (max-width: 767px) {
+    .rec-chapter__content {
+      padding-left: calc(36px + var(--rec-shift, 0px));
+    }
+
+    .rec-closing__grid {
+      padding-left: calc(60px + var(--rec-shift, 0px));
+    }
+  }
+
+  /* ============ Tablet: 768–1199 (kalibrace 834) ============ */
+  @media (min-width: 768px) {
+    .rec__route-svg--mobile {
+      display: none;
+    }
+
+    .rec__route-svg--tablet {
+      display: block;
+    }
+
+    .rec-chapter__bar p {
+      padding-left: calc(64px + var(--rec-shift, 0px));
+    }
+
+    /* Obsah kapitol od popisku u tečky (osa 40 + 64 = 104 px), ne na ose —
+       dřív nadpisy a text ležely přímo na lince. Stejně jako /pristup
+       a /sluzby/hypoteky (28. 9. 2026). */
+    .rec-chapter__content {
+      padding-left: calc(64px + var(--rec-shift, 0px));
+    }
+
+    /* Na tabletu nadpis kapitoly NAD textem přes celou šířku (ne dva sloupce
+       vedle sebe) — stejně jako /o-mne (28. 9. 2026, přání uživatele).
+       Vedle sebe až od notebooku (pravidla přesunutá do bloku 1200+). */
+    .rec-chapter__top {
+      max-width: 640px;
+    }
+
+    .rec-hero {
+      padding: 88px 40px 0;
+    }
+
+    .rec-hero__text {
+      gap: 20px;
+    }
+
+    .rec-hero__text h1 {
+      font-size: 52px;
+      line-height: 1.04;
+    }
+
+    .rec-hero__lead {
+      font-size: 17.5px;
+      max-width: 600px;
+    }
+
+    .rec-hero__actions {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .rec-hero__actions .rec-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .rec-hero__actions .rec-phone {
+      height: auto;
+    }
+
+    .rec-chapter--lead {
+      margin-top: 80px;
+      padding: 72px 40px;
+    }
+
+    .rec-chapter {
+      padding: 72px 40px;
+    }
+
+    .rec-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .rec-h2--dominant {
+      font-size: 44px;
+    }
+
+    .rec-h2--std {
+      font-size: 40px;
+    }
+
+    .rec-support__text {
+      font-size: 18px;
+    }
+
+    .rec-google-link,
+    .rec-text-link {
+      font-size: 17px;
+    }
+
+    .rec-review__attribution {
+      font-size: 16.5px;
+    }
+
+    .rec-review__quote p {
+      font-size: 18px;
+    }
+
+    /* Úvodní text → první recenze: stejná mezera jako na notebooku/desktopu
+       (32 gap + 40 = 72 px) — po přeskládání pod sebe byla jen 32 px. */
+    .rec-reviews {
+      margin-top: 40px;
+    }
+
+    .rec-closing {
+      margin-top: 80px;
+      padding-block: 76px;
+    }
+
+    /* Text od linky odsazený stejně jako obsah kapitol (osa + 64 px). */
+    .rec-closing__grid {
+      padding-inline: 40px;
+      padding-left: calc(104px + var(--rec-shift, 0px));
+    }
+
+    .rec-closing__grid h2 {
+      font-size: 44px;
+    }
+
+    .rec-closing__body p {
+      font-size: 17px;
+    }
+
+    .rec-closing__actions {
+      flex-direction: row;
+      gap: 32px;
+    }
+
+    .rec-closing__actions .rec-cta {
+      width: auto;
+      padding-inline: 28px;
+    }
+
+    .rec-closing__actions .rec-phone {
+      height: auto;
+    }
+  }
+
+  /* ============ Jen tablet (768–1199): hero text jako homepage ============
+     Stejná velikost nadpisu, úvodního textu a odstupy jako Hero.astro,
+     /pristup a /o-mne na tabletu (28. 9. 2026, sjednocení na přání
+     uživatele). Bez fotky, proto nadpis širší (11em místo 490 px). */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .rec-hero {
+      padding-top: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      padding-inline-start: calc(40 * 100% / 834); /* logo, nadpis i linka na jedné svislé (4. 10. 2026) */
+      /* Místo pod tlačítky pro oblouk linky (ohyb 40 px pod textem). */
+      padding-bottom: 64px;
+    }
+
+    .rec-hero__text {
+      gap: 0;
+    }
+
+    .rec-hero__text h1 {
+      max-width: 11em;
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      line-height: .99;
+    }
+
+    .rec-hero__lead {
+      margin-top: 60px;
+      max-width: 520px;
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+
+    .rec-hero__actions {
+      margin-top: 46px;
+      gap: clamp(32px, calc(32px + 0.007519 * (100vw - 834px)), 36px);
+    }
+  }
+
+  /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
+  @media (min-width: 1200px) {
+    /*
+     * Kapitoly mají od 4. 10. 2026 na notebooku i desktopu STEJNÉ rozložení
+     * jako tablet (přání uživatele, vzor /sluzby): popisek u tečky nahoře,
+     * pod ním obsah pod sebou (nadpis → text → recenze/odkaz), jen
+     * s desktopovými velikostmi. Dřív byl popisek vlevo (240 px) a nadpis
+     * s textem ve dvou sloupcích vedle sebe, recenze jako mřížka
+     * jméno | text. Obsah začíná pod textem popisku, šířka omezená kvůli
+     * čitelnosti dlouhých řádků.
+     */
+    .rec-chapter__top {
+      max-width: none;
+    }
+
+    .rec-chapter__content {
+      padding-left: calc(56px + var(--rec-shift, 0px));
+      max-width: 880px;
+      /* Úvodní text → první recenze 72 px jako na tabletu (32 + 40), tady
+         jediným zdrojem — gap rodiče, `.rec-reviews` bez vlastního marginu. */
+      gap: 72px;
+    }
+
+    .rec-reviews {
+      margin-top: 0;
+      /* Poslední recenze → tlačítko 32 px, jediný zdroj (gap). */
+      gap: 32px;
+    }
+
+    .rec-reviews__more {
+      margin-top: 0;
+    }
+
+    .rec__route-svg--tablet {
+      display: none;
+    }
+
+    .rec__route-svg--laptop {
+      display: block;
+    }
+
+    /* 56 = (osa 96 + zářez 36 + mezera 20) − section padding 96. */
+    .rec-chapter__bar p {
+      padding-left: calc(56px + var(--rec-shift, 0px));
+    }
+
+    .rec-hero__text {
+      max-width: 640px;
+      gap: 18px;
+    }
+
+    .rec-hero__text h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .rec-hero__lead {
+      font-size: 19px;
+    }
+
+    .rec-hero__actions {
+      flex-direction: row;
+      margin-top: 4px;
+    }
+
+    .rec-hero {
+      padding: 112px 96px 90px;
+    }
+
+    .rec-chapter--lead {
+      margin-top: 100px;
+      padding: 88px 96px;
+    }
+
+    .rec-chapter {
+      padding: 88px 96px;
+    }
+
+    .rec-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .rec-h2--dominant {
+      font-size: 50px;
+    }
+
+    .rec-h2--std {
+      font-size: 44px;
+    }
+
+    .rec-closing {
+      margin-top: 100px;
+      padding-block: 88px;
+    }
+
+    .rec-closing__grid {
+      padding-inline: 96px;
+      flex-direction: row;
+      gap: 60px;
+    }
+
+    .rec-closing__glow {
+      height: 320px;
+    }
+
+    .rec-closing__grid h2 {
+      flex: none;
+      width: 460px;
+      font-size: 46px;
+    }
+
+    .rec-closing__body {
+      flex: 1;
+      max-width: 560px;
+    }
+  }
+
+  /* ============ Desktop: 1400+ (kalibrace 1440) ============ */
+  @media (min-width: 1400px) {
+    .rec__route-svg--laptop {
+      display: none;
+    }
+
+    .rec__route-svg--desktop {
+      display: block;
+    }
+
+    .rec__route {
+      left: 50%;
+      right: auto;
+      width: 100%;
+      max-width: var(--stage-max);
+      transform: translateX(-50%);
+    }
+
+    .rec-hero,
+    .rec-chapter,
+    .rec-closing__grid {
+      max-width: var(--stage-max);
+      margin-inline: auto;
+    }
+
+    /* 76 = (osa 120 + zářez 36 + mezera 20) − section padding 100. */
+    .rec-chapter__bar p {
+      padding-left: calc(76px + var(--rec-shift, 0px));
+    }
+
+    /* Obsah pod popiskem začíná na stejném místě jako jeho text. */
+    .rec-chapter__content {
+      padding-left: calc(76px + var(--rec-shift, 0px));
+    }
+
+    .rec-hero {
+      padding: 120px 100px 90px;
+    }
+
+    .rec-hero__text h1 {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .rec-hero__lead {
+      font-size: 19px;
+      max-width: 600px;
+    }
+
+    .rec-hero__actions {
+      margin-top: 14px;
+      gap: 32px;
+    }
+
+    .rec-hero__actions .rec-cta {
+      height: 56px;
+    }
+
+    .rec-chapter--lead {
+      margin-top: 120px;
+      padding: 88px 100px;
+    }
+
+    .rec-chapter {
+      padding: 88px 100px;
+    }
+
+    .rec-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .rec-h2--dominant {
+      font-size: 56px;
+    }
+
+    .rec-h2--std {
+      font-size: 48px;
+    }
+
+    .rec-closing {
+      padding-block: 96px;
+    }
+
+    .rec-closing__grid {
+      padding-inline: 100px;
+    }
+
+    .rec-closing__glow {
+      height: 340px;
+    }
+
+    .rec-closing__grid h2 {
+      width: 560px;
+      font-size: 52px;
+    }
+  }
+
+  /* ---------- Formulář „Končí vám fixace?“ (hodnoty 1:1 z formuláře
+     „Na kolik dosáhnete?“, sluzby/hypoteky/na-kolik-dosahnete.astro) ---------- */
+
+  /* Bez rámečku a vnitřního odsazení (jako kontaktní formulář na úvodní
+     stránce): konec sekce pak měří od posledního textu stejně jako ostatní
+     kapitoly (check:spacing). */
+  .ref-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-width: 640px;
+  }
+
+  .ref-form[hidden] {
+    display: none;
+  }
+
+  .ref-hp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ref-form__errors,
+  .ref-status {
+    margin: 0;
+    padding: 12px 16px;
+    border-radius: var(--radius-field);
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .ref-form__errors,
+  .ref-status--error {
+    background: rgba(197, 48, 48, .08);
+    color: #B3261E;
+  }
+
+  .ref-status--error a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .ref-status--success {
+    max-width: 640px;
+    padding: 18px 20px;
+    background: rgba(30, 122, 92, .1);
+    color: var(--emerald);
+  }
+
+  .ref-form__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .ref-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ref-field label {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--navy);
+  }
+
+  .ref-required {
+    color: var(--emerald);
+  }
+
+  .ref-field input {
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 10px 2px;
+    border: none;
+    border-bottom: 1px solid rgba(15, 39, 71, .28);
+    border-radius: 0;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    color: var(--navy);
+  }
+
+  .ref-field input[aria-invalid='true'] {
+    border-bottom-color: #B3261E;
+  }
+
+  .ref-field__error {
+    margin: 0;
+    font-weight: 500;
+    font-size: 16px;
+    color: #B3261E;
+  }
+
+  .ref-form__submit {
+    width: 100%;
+    margin-top: 4px;
+    border: none;
+    font-family: var(--font-sans);
+    cursor: pointer;
+  }
+
+  .ref-form__submit:disabled {
+    opacity: .6;
+    cursor: wait;
+  }
+
+  .ref-privacy {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .ref-privacy a {
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  @media (min-width: 768px) {
+    .ref-form__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 22px 32px;
+    }
+
+    .ref-field--wide {
+      grid-column: 1 / -1;
+    }
+
+    .ref-form__submit {
+      width: auto;
+      align-self: flex-start;
+    }
+  }
+</style>

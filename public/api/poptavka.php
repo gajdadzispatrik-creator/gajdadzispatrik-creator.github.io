@@ -166,13 +166,40 @@ $situation = field('situace', 3000);
 // e-mail nepovinný, ozývá se po telefonu.
 $source = oneLine(field('zdroj', 40));
 $isTool = $source === 'na-kolik-dosahnete';
+// Vstupní stránka „Končí vám fixace?“ (/sluzby/hypoteky/refixace, 1. 11. 2026):
+// jméno, telefon a měsíc konce fixace, e-mail se nevyplňuje.
+$isRefix = $source === 'refixace';
+$phoneOnly = $isTool || $isRefix;
+$fixationEnd = oneLine(field('konec_fixace', 40));
 $hasEmail = filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+
+/** Ověří pole o zdroji kliknutí přísným vzorem; cokoli jiného zahodí (bez chyby). */
+function trackingField(string $name, string $pattern, int $max): string
+{
+    $value = oneLine(field($name, $max));
+    return preg_match($pattern, $value) === 1 ? $value : '';
+}
+
+// Zdroj kliknutí (gclid, UTM) — formulář je pošle jen se souhlasem
+// s marketingovými cookies (CookieConsent.astro). Kód zdroje podle číselníku
+// Marketingu (Osobní značka/znalosti/zdroje-klientu-kody.md): google-ads / web.
+$gclid = trackingField('gclid', '/^[A-Za-z0-9_-]{10,150}$/', 150);
+$utmSource = trackingField('utm_source', '/^[A-Za-z0-9._ -]{1,60}$/', 60);
+$utmMedium = trackingField('utm_medium', '/^[A-Za-z0-9._ -]{1,60}$/', 60);
+$utmCampaign = trackingField('utm_campaign', '/^[A-Za-z0-9._ -]{1,60}$/', 60);
+$fromAds = $gclid !== '' || in_array(strtolower($utmMedium), ['cpc', 'ppc', 'paid', 'paidsearch'], true);
+$sourceCode = $fromAds ? 'google-ads' : 'web';
+$utmParts = array_filter([
+    $utmSource !== '' ? "zdroj={$utmSource}" : '',
+    $utmMedium !== '' ? "médium={$utmMedium}" : '',
+    $utmCampaign !== '' ? "kampaň={$utmCampaign}" : '',
+]);
 
 // Kontroly jsou záměrně stejně volné jako v prohlížeči (pole jen povinná) —
 // přísnější server by odmítl poptávku, kterou formulář pustil, a ta by se ztratila.
 $valid = $name !== ''
     && preg_match_all('/\d/', $phone) >= 6
-    && ($hasEmail || ($isTool && $email === ''))
+    && ($hasEmail || ($phoneOnly && $email === ''))
     && in_array($area, INTEREST_AREAS, true);
 
 if (!$valid) {
@@ -181,20 +208,31 @@ if (!$valid) {
 
 $encode = static fn (string $text): string => '=?UTF-8?B?' . base64_encode($text) . '?=';
 
-$subject = $encode($isTool
-    ? "Na kolik dosáhnu (web): {$name}"
-    : "Nová poptávka z webu: {$area} — {$name}");
+$subject = $encode(match (true) {
+    $isTool => "Na kolik dosáhnu (web): {$name}",
+    $isRefix => "Konec fixace (web): {$name}",
+    default => "Nová poptávka z webu: {$area} — {$name}",
+});
 
 $body = implode("\n", [
-    $isTool ? 'Nová poptávka z nástroje „Na kolik dosáhnete?“ na patrikgajdadzis.cz' : 'Nová poptávka z formuláře na patrikgajdadzis.cz',
+    match (true) {
+        $isTool => 'Nová poptávka z nástroje „Na kolik dosáhnete?“ na patrikgajdadzis.cz',
+        $isRefix => 'Nová poptávka ze stránky „Končí vám fixace?“ na patrikgajdadzis.cz',
+        default => 'Nová poptávka z formuláře na patrikgajdadzis.cz',
+    },
     '',
     "Jméno a příjmení: {$name}",
     "Telefon: {$phone}",
     'E-mail: ' . ($hasEmail ? $email : '(nevyplněno)'),
     "Oblast zájmu: {$area}",
+    ...($isRefix ? ['Konec fixace: ' . ($fixationEnd !== '' ? $fixationEnd : '(nevyplněno)')] : []),
     '',
     'Situace:',
     $situation !== '' ? $situation : '(nevyplněno)',
+    '',
+    "Zdroj z webu: {$sourceCode}",
+    ...($gclid !== '' ? ["gclid: {$gclid}"] : []),
+    ...($utmParts ? ['UTM: ' . implode(', ', $utmParts)] : []),
     '',
     '—',
     'Odesláno ' . (new DateTimeImmutable('now', new DateTimeZone('Europe/Prague')))->format('j. n. Y H:i'),
