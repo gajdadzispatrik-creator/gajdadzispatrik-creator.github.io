@@ -351,12 +351,7 @@ const faqs: Faq[] = [
                 <span class="hyp-areas__name">{row.name}</span>
                 <span class="hyp-areas__text">
                   {row.text}
-                  {row.link && (
-                    <>
-                      {' '}
-                      <a class="hyp-areas__link" href={row.link.href}>{row.link.text}</a>
-                    </>
-                  )}
+                  {row.link && <a class="hyp-areas__link" href={row.link.href}>{row.link.text}</a>}
                 </span>
               </li>
             ))
@@ -1308,6 +1303,9 @@ const faqs: Faq[] = [
   /* Odkaz za textem řádku (Refinancování → /sluzby/hypoteky/refixace),
      stejný styl jako odkaz na zásady u formuláře „Na kolik dosáhnete?“. */
   .hyp-areas__link {
+    /* Vždy na samostatném řádku pod textem (Patrik 1. 11. 2026). */
+    display: block;
+    width: fit-content;
     color: var(--navy);
     font-weight: 600;
     text-decoration: underline;
