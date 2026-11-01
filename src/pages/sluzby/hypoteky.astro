@@ -117,13 +117,19 @@ const decisionPoints: string[] = [
 interface AreaRow {
   name: string;
   text: string;
+  /** Volitelný odkaz za textem (1. 11. 2026: Refinancování → vstupní stránka „Končí vám fixace?“). */
+  link?: { href: string; text: string };
 }
 
 const areaRows: AreaRow[] = [
   { name: 'Koupě bytu nebo domu', text: 'Financování vlastní nemovitosti včetně nastavení vlastních zdrojů a výše úvěru.' },
   { name: 'Výstavba', text: 'Nastavení financování podle průběhu stavby a postupného čerpání.' },
   { name: 'Rekonstrukce', text: 'Hypotéka nebo jiné vhodné financování rekonstrukce podle jejího rozsahu.' },
-  { name: 'Refinancování', text: 'Posouzení stávající hypotéky a možností před koncem fixace nebo při jiné vhodné příležitosti.' },
+  {
+    name: 'Refinancování',
+    text: 'Posouzení stávající hypotéky a možností před koncem fixace nebo při jiné vhodné příležitosti.',
+    link: { href: '/sluzby/hypoteky/refixace', text: 'Končí vám fixace? Nechte si zkontrolovat nabídku banky' },
+  },
   { name: 'Změna nebo navýšení hypotéky', text: 'Pokud se od sjednání úvěru změnila vaše situace nebo potřebujete další prostředky.' },
 ];
 
@@ -343,7 +349,15 @@ const faqs: Faq[] = [
             areaRows.map((row) => (
               <li class="hyp-areas__row">
                 <span class="hyp-areas__name">{row.name}</span>
-                <span class="hyp-areas__text">{row.text}</span>
+                <span class="hyp-areas__text">
+                  {row.text}
+                  {row.link && (
+                    <>
+                      {' '}
+                      <a class="hyp-areas__link" href={row.link.href}>{row.link.text}</a>
+                    </>
+                  )}
+                </span>
               </li>
             ))
           }
@@ -1289,6 +1303,17 @@ const faqs: Faq[] = [
     font-size: 16px;
     line-height: 1.6;
     color: var(--text-muted);
+  }
+
+  /* Odkaz za textem řádku (Refinancování → /sluzby/hypoteky/refixace),
+     stejný styl jako odkaz na zásady u formuláře „Na kolik dosáhnete?“. */
+  .hyp-areas__link {
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
   }
 
   /* ---------- Průběh ---------- */
