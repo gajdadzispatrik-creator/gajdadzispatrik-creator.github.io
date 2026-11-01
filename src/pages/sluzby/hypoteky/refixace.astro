@@ -166,6 +166,15 @@ const fixation = [
             <p class="rec-support__text">
               Ozvu se&nbsp;vám a&nbsp;domluvíme se, jak mi nabídku banky pošlete. Stačí ji vyfotit a&nbsp;poslat e-mailem.
             </p>
+            <!-- Komu nabídku posíláte: fotka, jméno, kdy se ozve. Patří k úvodnímu textu (jako na úvodní stránce v kontaktu), ne do formuláře. -->
+            <div class="ref-person">
+              <Image class="ref-person__photo" src={personPhoto} width={216} quality={92} alt="" loading="lazy" />
+              <p class="ref-person__text">
+                <strong>Patrik Gajdadzis</strong>
+                <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
+              </p>
+              <p class="ref-person__proof">5<span class="ref-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;· zdarma</p>
+            </div>
           </div>
         </div>
 
@@ -183,15 +192,6 @@ const fixation = [
           <input type="hidden" name="utm_medium" value="" />
           <input type="hidden" name="utm_campaign" value="" />
 
-          <!-- Komu nabídku posíláte: fotka, jméno, kdy se ozve (jako u kontaktního formuláře). -->
-          <div class="ref-person">
-            <Image class="ref-person__photo" src={personPhoto} width={216} quality={92} alt="" loading="lazy" />
-            <p class="ref-person__text">
-              <strong>Patrik Gajdadzis</strong>
-              <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
-            </p>
-            <p class="ref-person__proof">5<span class="ref-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;· zdarma</p>
-          </div>
 
           <div class="ref-form__grid">
             <div class="ref-field">
