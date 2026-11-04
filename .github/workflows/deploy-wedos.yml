@@ -15,6 +15,12 @@
 # upravený hostingový /www/.htaccess (deploy/www.htaccess — bez pravidla
 # Wedosu, které přidává koncové lomítko a se stránkami bez lomítka dělalo
 # nekonečnou smyčku přesměrování).
+#
+# Pořadí (4. 11. 2026): nejdřív dist/_astro/ (styly, skripty, obrázky
+# s otiskem v názvu), až potom stránky. Nový soubor je na Wedosu chvíli
+# po nahrání nedostupný (403), a když nová stránka přišla dřív než její
+# styl, web se během nasazení ukázal bez vzhledu. Staré soubory zůstávají,
+# takže stará stránka funguje, dokud ji nepřepíše nová.
 name: Nasazení na Wedos
 
 on:
@@ -64,6 +70,7 @@ jobs:
             set net:timeout 30;
             debug 2;
             open -u \"$FTP_USER\",\"$FTP_PASSWORD\" ftp://$FTP_HOST;
+            mirror --reverse --verbose --parallel=4 dist/_astro/ /www/domains/patrikgajdadzis.cz/_astro/;
             mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ dist/ /www/domains/patrikgajdadzis.cz/;
             put deploy/www.htaccess -o /www/.htaccess
           "
