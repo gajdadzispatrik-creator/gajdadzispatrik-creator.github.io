@@ -10,6 +10,14 @@ export type Article = CollectionEntry<'clanky'>;
 
 export const SHOW_DRAFTS = import.meta.env.DEV || Boolean(import.meta.env.PUBLIC_PREVIEW);
 
+/**
+ * Vydání podle data (Patrik 4. 11. 2026: „ať se články publikují samy“):
+ * schválený článek (`draft: false`) s budoucím `publishedAt` se na ostrém
+ * webu objeví až v den vydání. Web se ten den ráno sám sestaví a nahraje
+ * (.github/workflows/deploy-wedos.yml, plán `schedule`).
+ */
+const isLive = (a: Article) => !a.data.draft && a.data.publishedAt.getTime() <= Date.now();
+
 // Nejnovější první; při stejném datu podle názvu souboru (stabilní pořadí).
 const byNewest = (a: Article, b: Article) =>
   b.data.publishedAt.getTime() - a.data.publishedAt.getTime() || a.id.localeCompare(b.id);
@@ -17,13 +25,13 @@ const byNewest = (a: Article, b: Article) =>
 /** Všechny články, které se mají sestavit jako stránka (vč. konceptů na náhledu). */
 export async function getBuildableArticles(): Promise<Article[]> {
   const all = await getCollection('clanky');
-  return all.filter((a) => SHOW_DRAFTS || !a.data.draft).sort(byNewest);
+  return all.filter((a) => SHOW_DRAFTS || isLive(a)).sort(byNewest);
 }
 
 /** Zveřejněné články pro výpisy — nejnovější první. */
 export async function getPublishedArticles(): Promise<Article[]> {
   const all = await getCollection('clanky');
-  return all.filter((a) => !a.data.draft).sort(byNewest);
+  return all.filter(isLive).sort(byNewest);
 }
 
 export const articleHref = (a: Article) => `/clanky/${a.id}`;

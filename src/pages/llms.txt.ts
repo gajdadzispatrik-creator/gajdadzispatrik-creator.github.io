@@ -1,4 +1,12 @@
-# Patrik Gajdadzis – finanční poradce, Ostrava
+/**
+ * /llms.txt – přehled webu pro AI vyhledávače. Do 4. 11. 2026 statický soubor
+ * v public/; teď se sekce Články skládá sama ze zveřejněných článků (shrnutí
+ * z pole `llms`, jinak `description`), aby se nový článek objevil i tady
+ * v den, kdy vyjde (vydávání podle data, src/data/articles.ts).
+ */
+import { getPublishedArticles } from '../data/articles';
+
+const HEAD = `# Patrik Gajdadzis – finanční poradce, Ostrava
 
 > Patrik Gajdadzis je osobní finanční poradce z Ostravy. Pomáhá s hypotékami a financováním bydlení, finančním plánem, pojištěním, investicemi a penzí. Finance neřeší po částech, ale v souvislostech: začíná tím, co klient právě potřebuje vyřešit, a další oblasti otevírá jen tehdy, když dávají smysl. Konzultace probíhají osobně v Ostravě-Porubě nebo online po celé ČR. Úvodní konzultace trvá přibližně 30 minut, je nezávazná a zdarma.
 
@@ -33,25 +41,25 @@ Základní fakta:
 - [Finanční check-up](https://patrikgajdadzis.cz/financni-check-up): 11 otázek, orientační přehled, kde ve financích máte základ a kde se vyplatí podívat
 - [Kontakt a nezávazná konzultace](https://patrikgajdadzis.cz/#kontakt): telefon, online rezervace, formulář
 
-## Články
+`;
+
+const ARTICLES_INTRO = `## Články
 
 - [Všechny články](https://patrikgajdadzis.cz/clanky) (RSS: https://patrikgajdadzis.cz/rss.xml)
-- [Finanční poradce, bankéř, nebo pojišťovák: v čem je rozdíl](https://patrikgajdadzis.cz/clanky/financni-poradce-bankar-nebo-pojistovak): z čeho kdo vybírá, jak je placený a jak poznat dobrého poradce
-- [Životní pojištění: za co lidé nejčastěji platí zbytečně](https://patrikgajdadzis.cz/clanky/zivotni-pojisteni-za-co-platite-zbytecne): kolik dá stát při nemoci a invaliditě, co má pojištění krýt a co je zbytečné
-- [Vyplatí se čekat s hypotékou na nižší úroky?](https://patrikgajdadzis.cz/clanky/vyplati-se-cekat-s-hypotekou-na-nizsi-urok): propočet na bytě za 4,5 milionu v Ostravě (2026), retence a bezpečná splátka
-- [Nejnižší sazba hypotéky není nejlevnější hypotéka](https://patrikgajdadzis.cz/clanky/nejnizsi-sazba-hypoteky-neni-nejlevnejsi): porovnání nabídek ve stejném nastavení, slevy za podmínky, mimořádné splátky, retence
-- [Nejdřív si ověřte hypotéku, až potom hledejte nemovitost](https://patrikgajdadzis.cz/clanky/nejdriv-hypoteka-potom-nemovitost): ověření bonity, skutečné měsíční a jednorázové náklady bydlení, rezervační poplatek a smlouva, investiční nemovitost
-- [Pojištění k hypotéce od banky, nebo od pojišťovny?](https://patrikgajdadzis.cz/clanky/pojisteni-k-hypotece-banka-nebo-pojistovna): co kryje pojištění schopnosti splácet, komu plní, dva žadatelé, proč životní pojištění u pojišťovny
-- [Kdy si sjednat životní pojištění?](https://patrikgajdadzis.cz/clanky/kdy-si-sjednat-zivotni-pojisteni): dokud jste mladí a zdraví, a nastavit ho kvalitně hned od začátku
-- [Jak vybrat pojišťovnu na životní pojištění?](https://patrikgajdadzis.cz/clanky/jak-vybrat-pojistovnu-zivotni-pojisteni): pojistné podmínky, cena za krytí, komunikace a plnění, srovnání minimálně tří pojišťoven
-- [Proč pravidelně aktualizovat životní pojištění?](https://patrikgajdadzis.cz/clanky/aktualizace-zivotniho-pojisteni): změny v životě, lepší podmínky, akce a slevy, inflace
-- [Hypotéka pro mladé do 36 let: 90 % je strop, ne nárok](https://patrikgajdadzis.cz/clanky/hypoteka-pro-mlade-do-36-let): kdo dosáhne na 90 %, kolik vlastních peněz je potřeba, dozajištění nemovitostí rodičů, úvěr ze stavebního spoření
-- [Hypotéka na družstevní byt](https://patrikgajdadzis.cz/clanky/hypoteka-na-druzstevni-byt): proč nejde běžná hypotéka, zástava jiné nemovitosti, předhypoteční úvěr a převod do osobního vlastnictví do 2 let, rizika družstva
-- [Končí vám fixace hypotéky? Co udělat a kdy začít](https://patrikgajdadzis.cz/clanky/konci-vam-fixace-hypoteky): tři možnosti na konci fixace, oznámení banky 3 měsíce předem, 3 měsíce na splacení bez poplatku, objem refixací podle ČNB, na jak dlouho fixovat
-- [Refinancování hypotéky: kdy se vyplatí a kolik stojí](https://patrikgajdadzis.cz/clanky/refinancovani-hypoteky): návratnost přechodu, zákonný strop poplatku za předčasné splacení (0,25 % za rok, max. 1 %), kdy splacení nestojí nic, refixace vs. refinancování
+`;
 
-## Právní informace
+const FOOT = `## Právní informace
 
 - [Regulatorní informace](https://patrikgajdadzis.cz/regulatorni-informace): registrace, oprávnění, odborná způsobilost, odměňování
 - [Zpracování osobních údajů](https://patrikgajdadzis.cz/zpracovani-osobnich-udaju)
 - [Cookies](https://patrikgajdadzis.cz/cookies)
+`;
+
+export async function GET() {
+  const articles = (await getPublishedArticles()).slice().reverse();
+  const lines = articles.map(
+    (a) => `- [${a.data.title}](https://patrikgajdadzis.cz/clanky/${a.id}): ${a.data.llms ?? a.data.description}`,
+  );
+  const body = HEAD + ARTICLES_INTRO + lines.join('\n') + '\n\n' + FOOT;
+  return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+}

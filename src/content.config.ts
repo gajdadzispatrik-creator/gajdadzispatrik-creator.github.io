@@ -23,6 +23,8 @@ const clanky = defineCollection({
       shareTitle: z.string().max(60).optional(),
       /** Perex pod nadpisem a zároveň popis pro Google a sdílení (do ~160 znaků). */
       description: z.string().max(200),
+      /** Krátké shrnutí obsahu pro /llms.txt (AI vyhledávače); chybí-li, použije se description. */
+      llms: z.string().optional(),
       category: z.enum(ARTICLE_TOPICS),
       publishedAt: z.coerce.date(),
       updatedAt: z.coerce.date().optional(),

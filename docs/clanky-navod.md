@@ -117,6 +117,27 @@ Text upozornění.
 Komponentu vždy na samostatný řádek s prázdným řádkem před i za
 (jinak MDX ohlásí chybu „Could not parse expression“).
 
+## Vydávání podle data (od 4. 11. 2026)
+
+Patrik: „ať se články vytvářejí a publikují samy, ať to nemusím řešit“.
+
+- **Kdy vychází:** 2. a 4. úterý v měsíci (v měsíci se 3 články i 1. nebo 3. úterý),
+  témata a měsíce podle `docs/clanky-plan-2026-11-az-2027-10.md`.
+- **Příprava (sama):** naplánovaná úloha „Články – příprava na další měsíc“
+  (Claude, 15. den v měsíci v 9:00) napíše koncepty na další měsíc
+  (`draft: true`, `publishedAt` = den vydání), ověří čísla, spustí kontroly,
+  vyrobí obrázek pro sdílení a do `_spolecne/ceka-na-patrika.md` zapíše,
+  co má Patrik přečíst a doplnit. Úloha běží, když je otevřená aplikace Claude.
+- **Schválení (Patrik, jednou měsíčně):** Patrik přečte, doplní praxi a řekne „ok“.
+  Chat Web pak u článku nastaví `draft: false` (datum nechá budoucí), doplní praxi
+  a nasadí štítkem `ostry-*`. **Bez Patrikova „ok“ se nic nezveřejní.**
+- **Zveřejnění (samo):** schválený článek s budoucím datem se na webu neukáže
+  (`src/data/articles.ts`). V den vydání ráno ho nahraje plán v
+  `.github/workflows/deploy-wedos.yml` (z posledního štítku `ostry-*`, jen když
+  ten den něco vychází). `/llms.txt`, RSS, sitemap, `/clanky` a homepage se
+  doplní samy. Kontrola, co je naplánované: `node scripts/clanky-k-vydani.mjs`.
+- Do starších (už vydaných) článků odkaz na nový článek přidávat až po jeho vydání.
+
 ## Obrázek pro sdílení
 
 Každý článek má vlastní obrázek s nadpisem (`public/og/<soubor>.png`).
@@ -141,7 +162,7 @@ nesedí ani při 36 px, generování skončí chybou — pak nadpis zkrátit.
 1. Čísla a pravidla (státní příspěvky, limity ČNB, daně) ověřit k datu vydání.
 2. `npm run check:typo` — koncept bez odkazu přidat: `EXTRA=/clanky/<soubor> npm run check:typo`.
 3. `ONLY=/clanky/<soubor> npm run check:dots`.
-4. Nový článek doplnit do `public/llms.txt` (sekce Články).
+4. `/llms.txt` se skládá sám (`src/pages/llms.txt.ts`); u článku stačí pole `llms:` s krátkým shrnutím.
 5. Psát Patrikovým hlasem jako odborník, propojovat souvislosti a odkazovat
    na související články přímo v textu.
 

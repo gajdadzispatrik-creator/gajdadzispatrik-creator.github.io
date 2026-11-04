@@ -26,12 +26,21 @@
 # každém nasazení přepsaly všechny a ~20 s vracely 403 i staré stránce).
 # xfer:use-temp-file: soubor se nahraje pod dočasným jménem a hotový se
 # přejmenuje, takže stránka není během nahrávání nedostupná.
+#
+# Vydávání článků podle data (Patrik 4. 11. 2026): každé ráno v 5:15 UTC
+# (6:15 / 7:15 českého času) se spustí plán `schedule`. Nahraje web jen
+# tehdy, když má ten den vyjít schválený článek (scripts/clanky-k-vydani.mjs),
+# a sestaví ho z POSLEDNÍHO štítku ostry-* (ne z main) – na web tak nikdy
+# nejde nic, co Patrik neschválil. Schválený článek s budoucím datem se na
+# webu do svého dne neukáže (src/data/articles.ts).
 name: Nasazení na Wedos
 
 on:
   workflow_dispatch:
   push:
     tags: ['ostry-*']
+  schedule:
+    - cron: '15 4 * * *'
 
 permissions:
   contents: read
@@ -45,21 +54,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Ranní plán – poslední schválená verze (štítek ostry-*)
+        if: github.event_name == 'schedule'
+        run: |
+          TAG=$(git tag -l 'ostry-*' --sort=-refname | head -1)
+          echo "Sestavuji z $TAG"
+          git checkout -q "$TAG"
+      - name: Vychází dnes článek?
+        id: clanky
+        run: node scripts/clanky-k-vydani.mjs
+      - name: Konec – dnes nic nevychází
+        if: github.event_name == 'schedule' && steps.clanky.outputs.due != 'true'
+        run: echo "Dnes žádný článek nevychází, web se nenahrává."
       - uses: actions/setup-node@v4
+        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
         with:
           node-version: 24
           cache: npm
       - run: npm ci
+        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
       - run: npm run build
+        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
       - name: Kontrola, že build obsahuje skryté soubory a PHP
+        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
         run: |
           test -f dist/.htaccess
           test -f dist/api/.htaccess
           test -f dist/api/poptavka.php
           ! grep -q 'noindex, nofollow' dist/index.html
       - name: Instalace lftp
+        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
       - name: Nahrání na Wedos (FTP s TLS)
+        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
         env:
           FTP_HOST: ${{ secrets.WEDOS_FTP_HOST }}
           FTP_USER: ${{ secrets.WEDOS_FTP_USER }}
