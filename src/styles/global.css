@@ -156,3 +156,71 @@ svg[preserveAspectRatio='none'] circle {
     scroll-behavior: auto !important;
   }
 }
+
+/* Rozbalená nabídka ve stylu webu (všechny výběry na webu – kontakt,
+   Na kolik dosáhnete?) místo šedého seznamu prohlížeče
+   (Patrik 4. 11. 2026). Prohlížeče bez podpory (Safari, Firefox)
+   zobrazí svou vlastní nabídku, výběr funguje stejně. */
+@supports (appearance: base-select) {
+  select,
+  select::picker(select) {
+    appearance: base-select;
+  }
+
+  select {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  select::picker-icon {
+    content: '';
+    width: 12px;
+    height: 8px;
+    margin-right: 4px;
+    background-color: var(--emerald);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+    transition: rotate var(--duration-hover) var(--ease-out);
+  }
+
+  select:open::picker-icon {
+    rotate: 180deg;
+  }
+
+  select::picker(select) {
+    margin-top: 8px;
+    padding: 6px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-field);
+    background: var(--white);
+    box-shadow: 0 18px 44px rgba(15, 39, 71, .14);
+  }
+
+  option {
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    color: var(--navy);
+    cursor: pointer;
+  }
+
+  option[value=''] {
+    display: none;
+  }
+
+  option::checkmark {
+    display: none;
+  }
+
+  option:hover,
+  option:focus-visible {
+    outline: none;
+    background: rgba(30, 122, 92, .08);
+    color: var(--emerald);
+  }
+
+  option:checked {
+    font-weight: 600;
+    color: var(--emerald);
+  }
+}

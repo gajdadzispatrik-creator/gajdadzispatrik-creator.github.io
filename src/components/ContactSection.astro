@@ -45,6 +45,7 @@
  */
 import { Image } from 'astro:assets';
 import { BOOKING_URL, WHATSAPP_URL } from '../data/entity';
+import { HEARD_FROM_OPTIONS } from '../data/formOptions';
 // Testovací fotka (kolečko jako na /pristup a v check-upu) — vymění se s finálními fotkami.
 import personPhoto from '../assets/photos/patrik-profilovka.jpg';
 
@@ -164,6 +165,16 @@ const bandDetails = [
             </select>
             <p class="kontakt__field-error" id="kontakt-oblast-chyba" hidden></p>
           </div>
+        </div>
+
+        <div class="kontakt__field">
+          <label for="kontakt-odkud">Jak jste se&nbsp;o&nbsp;mně dozvěděl/a?</label>
+          <select id="kontakt-odkud" name="odkud">
+            <option value="" selected>Vyberte</option>
+            {HEARD_FROM_OPTIONS.map((option) => (
+              <option value={option}>{option}</option>
+            ))}
+          </select>
         </div>
 
         <div class="kontakt__field">
@@ -576,6 +587,9 @@ const bandDetails = [
           elapsedInput.value = String(Math.round(performance.now() - (startedAt ?? 0)));
         }
 
+        // Odpověď „Jak jste se o mně dozvěděl/a?“ si pamatuju před form.reset().
+        const heardFrom = (form.elements.namedItem('odkud') as HTMLSelectElement | null)?.value ?? '';
+
         if (submitButton) submitButton.disabled = true;
         form.setAttribute('aria-busy', 'true');
         let sent = false;
@@ -598,7 +612,7 @@ const bandDetails = [
           // Poděkování uprostřed obrazovky (FormThanks.astro).
           document.dispatchEvent(new CustomEvent('pg:thanks', { detail: { text: 'Děkuji. Ozvu se vám co nejdříve.' } }));
           // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
-          document.dispatchEvent(new CustomEvent('pg:lead'));
+          document.dispatchEvent(new CustomEvent('pg:lead', { detail: { odkud: heardFrom } }));
           form.reset();
           startedAt = null;
         } else if (errorStatus) {
@@ -1031,72 +1045,6 @@ const bandDetails = [
     border-bottom-color: #B3261E;
   }
 
-  /* Rozbalená nabídka ve stylu webu místo šedého seznamu prohlížeče
-     (Patrik 4. 11. 2026). Prohlížeče bez podpory (Safari, Firefox)
-     zobrazí svou vlastní nabídku, výběr funguje stejně. */
-  @supports (appearance: base-select) {
-    .kontakt__field select,
-    .kontakt__field select::picker(select) {
-      appearance: base-select;
-    }
-
-    .kontakt__field select {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-    }
-
-    .kontakt__field select::picker-icon {
-      content: '';
-      width: 12px;
-      height: 8px;
-      margin-right: 4px;
-      background-color: var(--emerald);
-      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
-      transition: rotate var(--duration-hover) var(--ease-out);
-    }
-
-    .kontakt__field select:open::picker-icon {
-      rotate: 180deg;
-    }
-
-    .kontakt__field select::picker(select) {
-      margin-top: 8px;
-      padding: 6px;
-      border: 1px solid var(--rule);
-      border-radius: var(--radius-field);
-      background: var(--white);
-      box-shadow: 0 18px 44px rgba(15, 39, 71, .14);
-    }
-
-    .kontakt__field option {
-      padding: 11px 14px;
-      border-radius: 8px;
-      font-size: 16px;
-      color: var(--navy);
-      cursor: pointer;
-    }
-
-    .kontakt__field option[value=''] {
-      display: none;
-    }
-
-    .kontakt__field option::checkmark {
-      display: none;
-    }
-
-    .kontakt__field option:hover,
-    .kontakt__field option:focus-visible {
-      outline: none;
-      background: rgba(30, 122, 92, .08);
-      color: var(--emerald);
-    }
-
-    .kontakt__field option:checked {
-      font-weight: 600;
-      color: var(--emerald);
-    }
-  }
 
   /* Chybné pole má i při psaní červenou linku. */
   .kontakt__field input[aria-invalid='true']:focus-visible {

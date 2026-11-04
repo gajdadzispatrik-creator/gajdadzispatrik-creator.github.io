@@ -383,14 +383,25 @@ const categories: CookieCategory[] = [
     return 2;
   };
 
-  function trackConversion(kind: Conversion): void {
+  // `answer` = odpověď „Jak jste se o mně dozvěděl/a?“ (jen u formuláře); jde
+  // pouze do GA4 jako parametr `zdroj_odpoved`, do Google Ads ne.
+  function trackConversion(kind: Conversion, answer = ''): void {
     if (!granted.analytics && !granted.marketing) return;
     const params = kind === 'whatsapp' ? {} : { value: conversionValue(), currency: 'CZK' };
     if (granted.marketing) gtag('event', 'conversion', { send_to: `${ADS_ID}/${ADS_LABELS[kind]}`, ...params });
-    if (granted.analytics) gtag('event', GA_EVENTS[kind], { send_to: GA_MEASUREMENT_ID, ...params });
+    if (granted.analytics) {
+      gtag('event', GA_EVENTS[kind], {
+        send_to: GA_MEASUREMENT_ID,
+        ...params,
+        ...(answer ? { zdroj_odpoved: answer } : {}),
+      });
+    }
   }
 
-  document.addEventListener('pg:lead', () => trackConversion('lead'));
+  document.addEventListener('pg:lead', (event) => {
+    const detail = (event as CustomEvent<{ odkud?: string }>).detail;
+    trackConversion('lead', typeof detail?.odkud === 'string' ? detail.odkud : '');
+  });
   document.addEventListener(
     'click',
     (event) => {

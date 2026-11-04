@@ -44,6 +44,18 @@ const INTEREST_AREAS = [
     'Jiné',
 ];
 
+// Nepovinná odpověď „Jak jste se o mně dozvěděl/a?“ — whitelist, stejný seznam
+// jako HEARD_FROM_OPTIONS v src/data/formOptions.ts.
+const HEARD_FROM = [
+    'Google – vyhledávání',
+    'Google Mapy / profil',
+    'Reklama (Google)',
+    'Doporučení od známého nebo klienta',
+    'Seznam / Firmy.cz',
+    'Sociální sítě',
+    'Jiné',
+];
+
 $wantsJson = str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
 
 function respond(bool $ok, int $status, bool $wantsJson): never
@@ -161,6 +173,9 @@ $phone = oneLine(field('telefon', 60));
 $email = oneLine(field('email', 254));
 $area = oneLine(field('oblast', 60));
 $situation = field('situace', 3000);
+// Neznámá nebo prázdná hodnota poptávku nezamítá, jen se uvede „(neuvedeno)“.
+$heardFromRaw = oneLine(field('odkud', 60));
+$heardFrom = in_array($heardFromRaw, HEARD_FROM, true) ? $heardFromRaw : '';
 // Odkud poptávka je: kontaktní formulář (prázdné) nebo nástroj
 // „Na kolik dosáhnete?“ (/sluzby/hypoteky/na-kolik-dosahnete) — tam je
 // e-mail nepovinný, ozývá se po telefonu.
@@ -225,6 +240,8 @@ $body = implode("\n", [
     "Telefon: {$phone}",
     'E-mail: ' . ($hasEmail ? $email : '(nevyplněno)'),
     "Oblast zájmu: {$area}",
+    // Formulář Končí vám fixace? otázku nemá (zdroj je reklama/odkaz).
+    ...(!$isRefix ? ['Jak se o mně dozvěděl/a: ' . ($heardFrom !== '' ? $heardFrom : '(neuvedeno)')] : []),
     ...($isRefix ? ['Konec fixace: ' . ($fixationEnd !== '' ? $fixationEnd : '(nevyplněno)')] : []),
     '',
     'Situace:',

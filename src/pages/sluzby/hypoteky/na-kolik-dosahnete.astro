@@ -22,6 +22,7 @@ import Header from '../../../components/Header.astro';
 import SiteFooter from '../../../components/SiteFooter.astro';
 import StandaloneRoute from '../../../components/StandaloneRoute.astro';
 import { BOOKING_URL } from '../../../data/entity';
+import { HEARD_FROM_OPTIONS } from '../../../data/formOptions';
 
 // Nezlomitelná mezera (U+00A0) za krátkými předložkami/spojkami, za číslem
 // a mezi skupinami číslic (CLAUDE.md „Konvence: nezlomitelná mezera").
@@ -276,6 +277,15 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
                 <label for="nkd-email">E-mail <span class="nkd-optional">(nepovinný)</span></label>
                 <input id="nkd-email" name="email" type="email" autocomplete="email" aria-describedby="nkd-email-chyba" />
                 <p class="nkd-field__error" id="nkd-email-chyba" hidden></p>
+              </div>
+              <div class="nkd-field nkd-field--wide">
+                <label for="nkd-odkud">Jak jste se&nbsp;o&nbsp;mně dozvěděl/a?</label>
+                <select id="nkd-odkud" name="odkud">
+                  <option value="" selected>Vyberte</option>
+                  {HEARD_FROM_OPTIONS.map((option) => (
+                    <option value={option}>{option}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -588,6 +598,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
         }
         if (!allOk) return;
 
+        const heardFrom = (form.elements.namedItem('odkud') as HTMLSelectElement | null)?.value ?? '';
         const elapsed = form.elements.namedItem('vyplneno-ms') as HTMLInputElement;
         elapsed.value = String(Math.round(performance.now() - (startedAt ?? 0)));
 
@@ -611,7 +622,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
         if (sent) {
           // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
-          document.dispatchEvent(new CustomEvent('pg:lead'));
+          document.dispatchEvent(new CustomEvent('pg:lead', { detail: { odkud: heardFrom } }));
           form.reset();
           // Poděkování uprostřed obrazovky (FormThanks.astro), formulář zůstává.
           document.dispatchEvent(new CustomEvent('pg:thanks', { detail: { text: 'Díky, odpovědi mi dorazily. Spočítám to a ozvu se do jednoho pracovního dne.' } }));
@@ -1013,7 +1024,8 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
     color: var(--text-quiet);
   }
 
-  .nkd-field input {
+  .nkd-field input,
+  .nkd-field select {
     width: 100%;
     min-height: 48px;
     box-sizing: border-box;
@@ -1030,7 +1042,8 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
   /* Aktivní pole: místo hranatého rámečku zesílená zelená linka pod polem
      (Patrik 4. 11. 2026, stejné na všech formulářích). Druhý pixel linky
      dělá stín, ne silnější okraj, aby se pole neposunulo. */
-  .nkd-field input:focus-visible {
+  .nkd-field input:focus-visible,
+  .nkd-field select:focus-visible {
     outline: none;
     border-bottom-color: var(--emerald);
     box-shadow: 0 1px 0 0 var(--emerald);
