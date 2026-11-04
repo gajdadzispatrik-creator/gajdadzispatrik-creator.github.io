@@ -688,7 +688,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
   .nkd-meta {
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6;
     color: var(--text-muted);
   }
@@ -976,7 +976,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
     padding: 12px 16px;
     border-radius: var(--radius-field);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .nkd-form__errors,
@@ -1012,7 +1012,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
   .nkd-field label {
     font-weight: 600;
-    font-size: 13.5px;
+    font-size: 16px;
     color: var(--navy);
   }
 
@@ -1060,7 +1060,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
   .nkd-field__error {
     margin: 0;
     font-weight: 500;
-    font-size: 13px;
+    font-size: 16px;
     color: #B3261E;
   }
 
@@ -1070,7 +1070,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
   .nkd-privacy {
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6;
     color: var(--text-muted);
   }
@@ -1275,24 +1275,29 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
   .nkd-number__label {
     font-weight: 600;
-    font-size: 13.5px;
+    font-size: 16px;
     color: var(--navy);
   }
 
+  /* Podtržené pole jako všechny formuláře webu (ContactSection .kontakt__field
+     input) – žádná vlastní varianta (Patrik 4. 11. 2026). Jednotka „Kč“ / „let“
+     zůstává vpravo na stejné lince. */
   .nkd-number__field {
     display: flex;
     align-items: center;
     gap: 10px;
-    height: 56px;
-    padding: 0 18px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-field);
-    background: var(--white);
+    min-height: 48px;
+    padding: 0 2px;
+    border: none;
+    border-bottom: 1px solid rgba(15, 39, 71, .28);
+    border-radius: 0;
+    background: transparent;
     transition: border-color var(--duration-hover) var(--ease-out);
   }
 
   .nkd-number__field:focus-within {
-    border-color: var(--emerald);
+    border-bottom-color: var(--emerald);
+    box-shadow: 0 1px 0 0 var(--emerald);
   }
 
   .nkd-number__field--short {
@@ -1305,9 +1310,9 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
     height: 100%;
     border: none;
     background: transparent;
+    padding: 10px 0;
     font-family: var(--font-sans);
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 16px;
     color: var(--navy);
     font-variant-numeric: tabular-nums;
   }
@@ -1318,7 +1323,11 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
   }
 
   .nkd-number__field:has(input[aria-invalid='true']) {
-    border-color: #B3261E;
+    border-bottom-color: #B3261E;
+  }
+
+  .nkd-number__field:has(input[aria-invalid='true']):focus-within {
+    box-shadow: 0 1px 0 0 #B3261E;
   }
 
   .nkd-number__unit {
@@ -1329,7 +1338,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
   .nkd-number__error {
     margin: 0;
     font-weight: 500;
-    font-size: 13px;
+    font-size: 16px;
     color: #B3261E;
   }
 
@@ -1354,7 +1363,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
   .nkd-person__proof {
     grid-column: 1 / -1;
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.5;
     white-space: nowrap;
     color: var(--text-quiet);
@@ -1383,7 +1392,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
   }
 
   .nkd-person__text span {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.5;
     color: var(--text-muted);
   }

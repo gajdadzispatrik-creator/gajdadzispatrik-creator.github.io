@@ -653,8 +653,8 @@ const categories: CookieCategory[] = [
        border) i s `box-sizing:border-box` v praxi vyšel o pár px širší než
        plné („Přijmout vše“); grid se stejnou šířkou sloupců je spolehlivý
        — a přesně stejná šířka obou tlačítek je vyžadovaná v §3. */
-    height: 52px;
-    border-radius: 12px;
+    height: 56px;
+    border-radius: var(--radius-btn);
     font-weight: 600;
     font-size: 16px;
     font-family: var(--font-sans);
@@ -695,7 +695,7 @@ const categories: CookieCategory[] = [
     padding: 0;
     font-family: var(--font-sans);
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
     color: rgba(255, 255, 255, .82);
     text-decoration: underline;
     text-decoration-color: rgba(255, 255, 255, .34);
@@ -704,7 +704,7 @@ const categories: CookieCategory[] = [
 
   .cookie-bar__privacy-link {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
     color: rgba(255, 255, 255, .7);
     text-decoration: underline;
     text-decoration-color: rgba(255, 255, 255, .28);
@@ -867,7 +867,7 @@ const categories: CookieCategory[] = [
   .cookie-settings__category-desc {
     font-weight: 400;
     line-height: 1.5;
-    font-size: 14.5px;
+    font-size: 16px;
     max-width: 340px;
     color: var(--text-muted);
   }
@@ -875,7 +875,7 @@ const categories: CookieCategory[] = [
   .cookie-settings__category-status {
     margin-top: 2px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
     color: #52657D;
   }
 
@@ -931,10 +931,10 @@ const categories: CookieCategory[] = [
 
   .cookie-settings__btn {
     /* Viz komentář u `.cookie-bar__btn` — šířku dávají kontejnery. */
-    height: 52px;
-    border-radius: 12px;
+    height: 56px;
+    border-radius: var(--radius-btn);
     font-weight: 600;
-    font-size: 16.5px;
+    font-size: 16px;
     font-family: var(--font-sans);
   }
 
@@ -960,7 +960,7 @@ const categories: CookieCategory[] = [
     margin: 0;
     min-height: 1px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--emerald);
   }
 
@@ -972,7 +972,7 @@ const categories: CookieCategory[] = [
 
   .cookie-settings__links a {
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--navy);
     text-decoration: underline;
     text-decoration-color: var(--emerald);

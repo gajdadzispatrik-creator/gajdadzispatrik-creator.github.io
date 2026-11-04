@@ -682,7 +682,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     display: flex;
     flex-direction: column;
     margin: 0;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.45;
   }
 
@@ -890,11 +890,12 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
 
   .art-prose > :global(p) :global(a),
   .art-prose > :global(ul) :global(a) {
-    color: var(--emerald);
+    color: var(--navy);
     font-weight: 600;
     text-decoration: underline;
+    text-decoration-color: var(--emerald);
     text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
+    text-underline-offset: 4px;
     transition: color var(--duration-hover) var(--ease-out);
   }
 
@@ -920,7 +921,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
   /* Zdroje čísel pod článkem: <p class="art-sources">…</p> v MDX. */
   .art-prose > :global(.art-sources) {
     margin-top: 32px;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6;
     color: var(--text-quiet);
   }
@@ -935,7 +936,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
   .art-prose :global(table) {
     width: 100%;
     border-collapse: collapse;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.45;
   }
 
@@ -943,9 +944,9 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     padding: 0 12px 10px 0;
     text-align: left;
     font-weight: 700;
-    letter-spacing: .1em;
+    letter-spacing: .16em;
     text-transform: uppercase;
-    font-size: 11px;
+    font-size: 11.5px;
     color: var(--text-quiet);
     border-bottom: 1.5px solid var(--navy);
   }
@@ -1019,8 +1020,8 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
       content: attr(data-label);
       padding-top: 3px;
       font-weight: 700;
-      font-size: 11px;
-      letter-spacing: .1em;
+      font-size: 11.5px;
+      letter-spacing: .16em;
       text-transform: uppercase;
       color: var(--text-quiet);
     }
@@ -1173,7 +1174,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     color: var(--navy);
     font: inherit;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 16px;
     cursor: pointer;
     transition: border-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
   }
@@ -1185,7 +1186,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
 
   .art-updated {
     margin: 0;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--text-muted);
   }
 
@@ -1236,7 +1237,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     grid-column: 1 / -1;
     grid-row: 2;
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.5;
     color: var(--text-quiet);
   }
@@ -1644,7 +1645,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
       position: relative;
       display: block;
       padding: 6px 0 6px 18px;
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1.45;
       font-weight: 600;
       color: var(--text-quiet);
@@ -1688,13 +1689,13 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
 
     .art-aside__cta p {
       margin: 0;
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1.5;
       color: var(--text-muted);
     }
 
     .art-aside__cta .art-text-link {
-      font-size: 15px;
+      font-size: 16px;
     }
 
     .art-prose :global(h2),

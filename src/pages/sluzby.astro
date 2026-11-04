@@ -980,7 +980,7 @@ const areas: Area[] = [
   .sluzby-hero__actions .sluzby-phone {
     height: 48px;
     justify-content: center;
-    font-size: 16px;
+    font-size: 17px;
   }
 
   /* ---------- Rozcestník ---------- */
@@ -1056,7 +1056,7 @@ const areas: Area[] = [
   .sluzby-router__target {
     grid-area: target;
     font-weight: 600;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--emerald);
     transition: text-decoration-color var(--duration-hover) var(--ease-out);
     text-decoration: underline;
@@ -1183,15 +1183,17 @@ const areas: Area[] = [
     width: fit-content;
     font-weight: 600;
     font-size: 16px;
-    color: var(--emerald);
-    padding-bottom: 1px;
-    border-bottom: 1px solid var(--emerald);
-    transition: color var(--duration-hover) var(--ease-out), border-color var(--duration-hover) var(--ease-out);
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
   }
 
   .sluzby-chapter__link:hover {
     color: var(--emerald-hover);
-    border-color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
   }
 
   .sluzby-chapter__list-label {
@@ -1304,16 +1306,18 @@ const areas: Area[] = [
   .sluzby-areas__col a {
     width: fit-content;
     font-weight: 600;
-    font-size: 15px;
-    color: var(--emerald);
-    padding-bottom: 1px;
-    border-bottom: 1px solid var(--emerald);
-    transition: color var(--duration-hover) var(--ease-out), border-color var(--duration-hover) var(--ease-out);
+    font-size: 16px;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
   }
 
   .sluzby-areas__col a:hover {
     color: var(--emerald-hover);
-    border-color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
   }
 
   /* ---------- Závěr ---------- */
@@ -1408,7 +1412,7 @@ const areas: Area[] = [
   .sluzby-closing__actions .sluzby-phone {
     height: 48px;
     justify-content: center;
-    font-size: 16px;
+    font-size: 17px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1934,7 +1938,7 @@ const areas: Area[] = [
     }
 
     .sluzby-hero__actions .sluzby-cta {
-      height: 58px;
+      height: 56px;
     }
 
     .sluzby-router {

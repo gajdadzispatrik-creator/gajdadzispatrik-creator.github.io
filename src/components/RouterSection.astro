@@ -489,10 +489,15 @@ const areas = [
     transition: color var(--duration-hover) var(--ease-out);
   }
 
+  /* Odkaz na tmavém pozadí jako .router__extra a (žádná vlastní varianta, 4. 11. 2026). */
   .router__more {
     font-size: 16px;
     font-weight: 600;
-    color: var(--emerald-light);
+    color: var(--white);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald-light);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
     transition: color var(--duration-hover) var(--ease-out);
   }
 
@@ -572,9 +577,11 @@ const areas = [
     width: fit-content;
     font-size: 16px;
     color: var(--white);
-    padding-bottom: 3px;
-    border-bottom: 1px solid var(--emerald);
-    transition: color var(--duration-hover) var(--ease-out), border-color var(--duration-hover) var(--ease-out);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald-light);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out);
   }
 
   .router__area--dominant .router__link:hover .router__more {
