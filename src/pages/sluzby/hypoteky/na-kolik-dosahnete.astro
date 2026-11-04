@@ -296,9 +296,11 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
           <div class="nkd-alt">
             <p class="nkd-alt__label">Raději hned?</p>
+            <!-- Stejné odkazy jako v kontaktu na úvodní stránce (ContactSection.astro,
+                 .kontakt__booking-link) – žádná stránka nemá vlastní styl (Patrik 4. 11. 2026). -->
             <div class="nkd-alt__actions">
-              <a class="nkd-alt__btn" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat termín</a>
-              <a class="nkd-alt__btn" href="tel:+420775217721">Zavolat</a>
+              <a class="nkd-alt__link" href="tel:+420775217721">Zavolat +420&nbsp;775&nbsp;217&nbsp;721</a>
+              <a class="nkd-alt__link" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat volný termín v&nbsp;kalendáři</a>
             </div>
           </div>
 
@@ -1091,29 +1093,35 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
   .nkd-alt__actions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
   }
 
-  .nkd-alt__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 160px;
-    height: 52px;
-    padding-inline: 24px;
-    border: 1px solid var(--navy);
-    border-radius: var(--radius-btn);
+  /* 1:1 jako .kontakt__booking-link v ContactSection.astro. */
+  .nkd-alt__link {
+    position: relative;
     font-weight: 600;
     font-size: 16px;
+    line-height: 1.6;
     color: var(--navy);
-    text-decoration: none;
-    transition: border-color var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
   }
 
-  .nkd-alt__btn:hover {
-    border-color: var(--emerald);
-    color: var(--emerald);
+  /* Plocha pro dotyk jen do půlky mezery mezi odkazy. */
+  .nkd-alt__link::after {
+    content: '';
+    position: absolute;
+    inset: -9px 0;
+  }
+
+  .nkd-alt__link:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
   }
 
   .nkd-result > .nkd-back {
@@ -1172,10 +1180,6 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
     .nkd-form__submit {
       align-self: flex-start;
-    }
-
-    .nkd-alt__btn {
-      flex: 0 0 auto;
     }
   }
 
