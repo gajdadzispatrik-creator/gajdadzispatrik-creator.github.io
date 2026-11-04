@@ -1,0 +1,99 @@
+---
+/**
+ * Recenze klienta k dané službě (kapitola „Zkušenost“ na stránkách služeb,
+ * Patrik 4. 11. 2026). Jediný zdroj vzhledu pro všechny stránky – citace 1:1
+ * jako recenze na úvodní stránce (ReviewsSection.astro, .reviews__quote),
+ * odkaz jako .kontakt__booking-link.
+ *
+ * Texty jsou DOSLOVNÉ výňatky ze skutečných recenzí na Google profilu
+ * (vynechaná část = „…“, slova se nemění). Jméno jako na úvodní stránce:
+ * křestní + první písmeno příjmení.
+ */
+import { czechNbsp } from '../lib/rehype-czech-nbsp.mjs';
+
+interface Props {
+  author: string;
+  text: string;
+}
+
+const { author, text } = Astro.props;
+---
+
+<div class="service-review">
+  <blockquote class="service-review__quote">
+    <div class="service-review__meta">
+      <cite class="service-review__author">{author}</cite>
+      <div class="service-review__stars" aria-hidden="true">★★★★★</div>
+      <span class="sr-only">Hodnocení 5 z 5 na Googlu</span>
+    </div>
+    <p>{czechNbsp(text)}</p>
+  </blockquote>
+  <a class="service-review__more" href="/recenze">Další recenze klientů</a>
+</div>
+
+<style>
+  .service-review {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 720px;
+  }
+
+  .service-review__quote {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .service-review__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .service-review__stars {
+    font-size: 12px;
+    letter-spacing: .15em;
+    color: var(--emerald);
+  }
+
+  .service-review__author {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+
+  .service-review__quote p {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .service-review__more {
+    align-self: flex-start;
+    position: relative;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .service-review__more::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
+  .service-review__more:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+</style>

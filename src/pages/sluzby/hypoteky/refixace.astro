@@ -23,6 +23,7 @@
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Header from '../../../components/Header.astro';
+import ServiceReview from '../../../components/ServiceReview.astro';
 import SiteFooter from '../../../components/SiteFooter.astro';
 import LineGradientDefs from '../../../components/LineGradientDefs.astro';
 import { Image } from 'astro:assets';
@@ -116,7 +117,7 @@ const fixation = [
               />
             )}
             <path class="rec__route-path rec__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-            {(['formular', 'postup', 'fixace'] as const).map((marker) => (
+            {(['formular', 'postup', 'zkusenost', 'fixace'] as const).map((marker) => (
               <g class="rec__marker" data-marker={marker}>
                 <line class="rec__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
                 <circle class="rec__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
@@ -283,6 +284,19 @@ const fixation = [
       </div>
     </section>
 
+    <!-- Zkušenost klienta (Patrik 4. 11. 2026): doslovný výňatek ze skutečné recenze na Google profilu. -->
+    <section class="rec-chapter rec-chapter--zkusenost" aria-labelledby="zkusenost-heading">
+      <div class="rec-chapter__bar" data-reveal data-route-target="zkusenost">
+        <p id="zkusenost-heading">Zkušenost</p>
+      </div>
+
+      <div class="rec-chapter__content">
+        <div data-reveal>
+          <ServiceReview author="Stony K." text={'S panem Patrikem Gajdadzisem spolupracujeme už řadu let a jsme maximálně spokojeni. Dokázal nám pomoci i s vyvázáním člověka z hypotéky a následně zařídil novou s výhodnějším úrokem. … Je vidět, že svou práci dělá srdcem a opravdu mu záleží na lidech.'} />
+        </div>
+      </div>
+    </section>
+
     <section class="rec-chapter rec-chapter--fixace" aria-labelledby="fixace-heading">
       <div class="rec-chapter__bar" data-reveal data-route-target="fixace">
         <p>Délka fixace</p>
@@ -370,6 +384,7 @@ const fixation = [
     const markerTargets = {
       formular: main.querySelector('[data-route-target="formular"]'),
       postup: main.querySelector('[data-route-target="postup"]'),
+      zkusenost: main.querySelector('[data-route-target="zkusenost"]'),
       fixace: main.querySelector('[data-route-target="fixace"]'),
     } as const;
 
@@ -2003,6 +2018,45 @@ const fixation = [
     .ref-main {
       flex: 1;
       min-width: 0;
+    }
+  }
+
+  /* ===== Jednotné velikosti 2 (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Seznam bodů (název + text) jako řádky na stránkách služeb: název 18/20/22/24 px, text 16/16/17/17 px. ===== */
+  @media (max-width: 767px) {
+    .rec-review__title {
+      font-size: 18px;
+    }
+
+    .rec-review__quote p {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .rec-review__title {
+      font-size: 20px;
+    }
+
+    .rec-review__quote p {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .rec-review__title {
+      font-size: 22px;
+    }
+
+    .rec-review__quote p {
+      font-size: 17px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .rec-review__title {
+      font-size: 24px;
+    }
+
+    .rec-review__quote p {
+      font-size: 17px;
     }
   }
 </style>

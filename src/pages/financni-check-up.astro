@@ -1604,4 +1604,12 @@ const config = {
       max-width: 600px;
     }
   }
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Úvodní text na tabletu plynule 16,5–19 px jako ostatní stránky (hypoteky.astro). ===== */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .chk-hero__lead {
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+  }
 </style>

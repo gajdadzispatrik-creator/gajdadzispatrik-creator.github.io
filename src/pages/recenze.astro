@@ -70,9 +70,35 @@ const GOOGLE_PROFILE_URL = GOOGLE_REVIEWS_URL;
 // nepřesností/překlepů v originále (např. Kubis Kubanec „Dekuji“ bez
 // diakritiky) — jde o přímé citace zákazníků, ne o vlastní copy webu, proto
 // se NEOPRAVUJÍ. Jedna recenze („abhijith vincent“) je v angličtině —
-// ponechána nepřeložená, doslovná citace. Profil má celkem
-// 44 recenzí (5,0★); zbylé 2 čekají na doplnění, až je uživatel dodá.
+// ponechána nepřeložená, doslovná citace. Profil má 4. 11. 2026 celkem
+// 47 recenzí (5,0★); 3 nejnovější doplněné 4. 11. 2026, 2 starší chybí.
 const reviews: Review[] = [
+  // Nové recenze opsané z Google profilu 4. 11. 2026 (řazení „Nejnovější“),
+  // doslovně včetně odrážek v původním textu (zalomení drží white-space).
+  {
+    author: 'Michal Petrželka',
+    rating: 5,
+    date: 'před týdnem',
+    text: 'S Patrikem máme moc dobrou zkušenost a určitě ho můžeme doporučit. Pomohl nám dát do pořádku životní pojištění, které jsme měli od předchozího poradce špatně nastavené. Potom se nám snažil pomoct i s hypotékou, kterou jsme také neměli nastavenou zrovna výhodně.\n\nNejvíc oceňujeme jeho ochotu, trpělivost a to, že nám všechno vysvětlil a pomohl nám zorientovat se v celém procesu. Poradil nám i s věcmi, na které nás předchozí poradce vůbec neupozornil, a provedl nás vyřizováním potřebných podkladů, takže jsme v tom nemuseli tápat sami.\n\nJe vidět, že mu záleží na tom, aby člověk věděl, co podepisuje a jaké má možnosti. Za nás velká spokojenost a určitě doporučujeme dál!',
+    sourceUrl: GOOGLE_PROFILE_URL,
+    lineWidths: [],
+  },
+  {
+    author: 'Kateřina S',
+    rating: 5,
+    date: 'před měsícem',
+    text: 'Velmi profesionální pan poradce. I když nám vyřízení hypotéky nakonec nevyšlo z důvodů na mé straně, nesmírně si cením jeho přístupu, trpělivosti a ochoty hledat řešení do posledního momentu. Vše mi srozumitelně vysvětlil a po celou dobu byl skvělou oporou. Určitě jeho služby doporučuji všem, kteří hledají opravdového odborníka s lidským srdcem!',
+    sourceUrl: GOOGLE_PROFILE_URL,
+    lineWidths: [],
+  },
+  {
+    author: 'Jakub Dohnal',
+    rating: 5,
+    date: 'před měsícem',
+    text: 'Mohu zcela doporučit, Patrik Gajdadzis nás provedl celým procesem hypotéky skvěle a s obrovským ohledem na nás jako na klienta:\n- Dobře a srozumitelně vysvětluje všechny stránky procesu\n- Jeho doporučení a zkušenosti z finančního sektoru se i nám potvrdily jako spolehlivé\n- Velmi mě překvapilo, jak moc mi pomohla pravidelnost a četnost informací o stavu celého procesu, kde je jaký dokument a co nás bude čekat\n- Oceňuji ochotu brát telefony i v dost pozdnější časy\n- Velmi příjemné a profesionální vystupování\n\nTěšíme se na další spolupráci.',
+    sourceUrl: GOOGLE_PROFILE_URL,
+    lineWidths: [],
+  },
   {
     author: 'Stony Ka',
     rating: 5,
@@ -421,7 +447,25 @@ const reviews: Review[] = [
 // tak, aby každá ukázala něco jiného: poradce ≠ prodavač produktů, dlouhodobá
 // spolupráce a úspora, hypotéka i v těžké situaci, jeden člověk na všechno,
 // zajištění rodiny. Počet recenzí se nikde na webu neuvádí.
-const FEATURED_AUTHORS = ['Karel Valenta', 'Stony Ka', 'Sandra Kleiner', 'Denis Ilyushkov', 'Jakub Rychtecký'];
+// 4. 11. 2026 (Patrik: „dej tam recenze, které považuješ za nejlepší“): výběr
+// rozšířen na 8 – nejčerstvější hypotéka (Dohnal) a pojištění opravené po
+// předchozím poradci (Petrželka) na začátku, finanční plán na míru (Jedlička).
+const FEATURED_AUTHORS = [
+  'Jakub Dohnal',
+  'Michal Petrželka',
+  'Karel Valenta',
+  'Sandra Kleiner',
+  'Stony Ka',
+  'Jakub Rychtecký',
+  'Dominik Jedlička',
+  'Denis Ilyushkov',
+];
+// Jméno jako na úvodní stránce (ReviewsSection.astro): křestní + první písmeno příjmení.
+const shortName = (author: string | null) => {
+  if (!author) return '';
+  const parts = author.trim().split(/\s+/);
+  return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : author;
+};
 const shownReviews = FEATURED_AUTHORS.map((name) => {
   const review = reviews.find((r) => r.author === name);
   if (!review) throw new Error(`Recenze „${name}“ v poli reviews chybí.`);
@@ -543,16 +587,16 @@ const shownReviews = FEATURED_AUTHORS.map((name) => {
                 <li class="rec-review">
                   {review.text ? (
                     <blockquote class="rec-review__quote">
-                      <p>{czechNbsp(review.text)}</p>
-                      <footer class="rec-review__footer">
-                        <cite>{review.author}</cite>
+                      <div class="rec-review__quote-meta">
+                        <cite class="rec-review__author">{shortName(review.author)}</cite>
                         {review.rating != null && (
                           <>
-                            <span class="rec-review__rating" aria-hidden="true">{'★'.repeat(review.rating)}</span>
+                            <span class="rec-review__stars" aria-hidden="true">{'★'.repeat(review.rating)}</span>
                             <span class="sr-only">{`Hodnocení ${review.rating} z 5`}</span>
                           </>
                         )}
-                      </footer>
+                      </div>
+                      <p>{czechNbsp(review.text)}</p>
                     </blockquote>
                   ) : (
                     <div class="rec-review__placeholder">
@@ -1280,8 +1324,11 @@ const shownReviews = FEATURED_AUTHORS.map((name) => {
     flex-direction: column;
   }
 
+  /* Vzhled recenze 1:1 jako na úvodní stránce (ReviewsSection.astro):
+     mezery 30 / 34 / 40 / 44 px podle šířky, jméno a hvězdičky nad textem,
+     text 18 px (Patrik 4. 11. 2026). */
   .rec-review {
-    padding: 22px 0;
+    padding: 30px 0;
     border-top: 1px solid rgba(27, 74, 138, .14);
   }
 
@@ -1299,7 +1346,26 @@ const shownReviews = FEATURED_AUTHORS.map((name) => {
   .rec-review__quote {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+  }
+
+  .rec-review__quote-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .rec-review__author {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+
+  .rec-review__stars {
+    font-size: 12px;
+    letter-spacing: .15em;
+    color: var(--emerald);
   }
 
   .rec-review__meta {
@@ -1334,31 +1400,12 @@ const shownReviews = FEATURED_AUTHORS.map((name) => {
 
   .rec-review__quote p {
     margin: 0;
-    font-size: 17px;
-    line-height: 1.6;
+    white-space: pre-line;
+    font-size: 18px;
+    line-height: 1.7;
     color: var(--text);
   }
 
-  .rec-review__footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-muted);
-  }
-
-  .rec-review__footer cite {
-    font-style: normal;
-    color: var(--navy);
-  }
-
-  .rec-review__rating {
-    font-size: 13px;
-    letter-spacing: .15em;
-    color: var(--emerald);
-  }
 
   .rec-reviews__more {
     align-self: flex-start;
@@ -1860,6 +1907,51 @@ const shownReviews = FEATURED_AUTHORS.map((name) => {
     .rec-closing__grid h2 {
       width: 560px;
       font-size: 52px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .rec-review {
+      padding: 34px 0;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .rec-review {
+      padding: 40px 0;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .rec-review {
+      padding: 44px 0;
+    }
+  }
+
+  /* ===== Jednotné velikosti 2 (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Textové odkazy 16 px jako na celém webu. ===== */
+  @media (max-width: 767px) {
+    .rec-text-link,
+    .rec-google-link {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .rec-text-link,
+    .rec-google-link {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .rec-text-link,
+    .rec-google-link {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .rec-text-link,
+    .rec-google-link {
+      font-size: 16px;
     }
   }
 </style>

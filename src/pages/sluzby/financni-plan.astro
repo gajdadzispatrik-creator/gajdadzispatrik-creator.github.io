@@ -66,6 +66,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
+import ServiceReview from '../../components/ServiceReview.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
 import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
@@ -230,7 +231,7 @@ const faqs: Faq[] = [
               />
             )}
             <path class="fp__route-path fp__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-            {(['souvislosti', 'situace', 'priority', 'propojeni', 'prubeh', 'rozsah', 'otazky'] as const).map((marker) => (
+            {(['souvislosti', 'situace', 'priority', 'propojeni', 'prubeh', 'zkusenost', 'rozsah', 'otazky'] as const).map((marker) => (
               <g class="fp__marker" data-marker={marker}>
                 <line class="fp__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
                 <circle class="fp__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
@@ -397,6 +398,19 @@ const faqs: Faq[] = [
       </div>
     </section>
 
+    <!-- Zkušenost klienta (Patrik 4. 11. 2026): doslovný výňatek ze skutečné recenze na Google profilu. -->
+    <section class="fp-chapter fp-chapter--zkusenost" aria-labelledby="zkusenost-heading">
+      <div class="fp-chapter__bar" data-reveal data-route-target="zkusenost">
+        <p id="zkusenost-heading">Zkušenost</p>
+      </div>
+
+      <div class="fp-chapter__content fp-chapter__content--single">
+        <div data-reveal>
+          <ServiceReview author="Dominik J." text={'Rád bych tímto způsobem poděkoval panu Patrikovi za jeho pomoc s nastartováním našeho finančního života a ujasnění si důležitých kroků. … Největší přidanou hodnotou je pro nás finanční plán, který nám byl sestaven na míru (tudíž nebylo to jen o produktech, jak to bývá zvykem).'} />
+        </div>
+      </div>
+    </section>
+
     <section class="fp-chapter fp-chapter--rozsah" aria-labelledby="rozsah-heading">
       <div class="fp-chapter__bar fp-chapter__bar--muted" data-reveal data-route-target="rozsah">
         <p>Rozsah</p>
@@ -491,6 +505,7 @@ const faqs: Faq[] = [
       priority: main.querySelector('[data-route-target="priority"]'),
       propojeni: main.querySelector('[data-route-target="propojeni"]'),
       prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      zkusenost: main.querySelector('[data-route-target="zkusenost"]'),
       rozsah: main.querySelector('[data-route-target="rozsah"]'),
       otazky: main.querySelector('[data-route-target="otazky"]'),
     } as const;
@@ -1678,6 +1693,12 @@ const faqs: Faq[] = [
 
   /* ============ Notebook: 1200–1399 (kalibrace 1366) ============ */
   @media (min-width: 1200px) {
+    /* Text řádků 17 px od notebooku jako na ostatních stránkách služeb
+       (Pojištění, Investice, Penze) – žádná vlastní varianta, 4. 11. 2026. */
+    .fp-rows__text {
+      font-size: 17px;
+    }
+
     .fp__route-svg--tablet {
       display: none;
     }
@@ -1980,6 +2001,69 @@ const faqs: Faq[] = [
     .fp-closing__grid h2 {
       width: 520px;
       font-size: 52px;
+    }
+  }
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Popisek kapitoly 18/21/24/26 px (vedlejší kapitoly 18/18/19/21), výrazná věta 22/24/28/30 px. Hodnoty jsou na všech stránkách stejné. ===== */
+  @media (max-width: 767px) {
+    .fp-chapter__bar p {
+      font-size: 18px;
+    }
+
+    .fp-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .fp-chapter__statement,
+    .fp-chapter__statement--plain {
+      font-size: 22px;
+    }
+
+    .fp-rows--areas .fp-rows__name {
+      font-size: 18px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .fp-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .fp-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .fp-chapter__statement,
+    .fp-chapter__statement--plain {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .fp-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .fp-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .fp-chapter__statement,
+    .fp-chapter__statement--plain {
+      font-size: 28px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .fp-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .fp-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .fp-chapter__statement,
+    .fp-chapter__statement--plain {
+      font-size: 30px;
     }
   }
 </style>

@@ -2639,4 +2639,90 @@ const facts: FactRow[] = [
     }
   }
 
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Popisek kapitoly 18/21/24/26 px (vedlejší kapitoly 18/18/19/21), výrazná věta 22/24/28/30 px. Hodnoty jsou na všech stránkách stejné. ===== */
+  @media (max-width: 767px) {
+    .om-chapter__bar p {
+      font-size: 18px;
+    }
+
+    .om-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .om-chapter__statement,
+    .om-chapter__statement--dark {
+      font-size: 22px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .om-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .om-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .om-chapter__statement,
+    .om-chapter__statement--dark {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .om-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .om-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .om-chapter__statement,
+    .om-chapter__statement--dark {
+      font-size: 28px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .om-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .om-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .om-chapter__statement,
+    .om-chapter__statement--dark {
+      font-size: 30px;
+    }
+  }
+
+  /* ===== Jednotné velikosti 2 (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Textové odkazy 16 px jako na celém webu. ===== */
+  @media (max-width: 767px) {
+    .om-text-link,
+    .om-external-link {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .om-text-link,
+    .om-external-link {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .om-text-link,
+    .om-external-link {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .om-text-link,
+    .om-external-link {
+      font-size: 16px;
+    }
+  }
 </style>

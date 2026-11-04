@@ -2126,4 +2126,71 @@ const faqs: Faq[] = [
       font-size: 52px;
     }
   }
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Popisek kapitoly 18/21/24/26 px (vedlejší kapitoly 18/18/19/21), výrazná věta 22/24/28/30 px. Hodnoty jsou na všech stránkách stejné. ===== */
+  @media (max-width: 767px) {
+    .pri-chapter__bar p {
+      font-size: 18px;
+    }
+
+    .pri-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .pri-chapter__statement {
+      font-size: 22px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .pri-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .pri-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .pri-chapter__statement {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .pri-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .pri-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .pri-chapter__statement {
+      font-size: 28px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .pri-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .pri-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .pri-chapter__statement {
+      font-size: 30px;
+    }
+  }
+
+  /* ===== Jednotné velikosti 2 (4. 11. 2026): nadpisy kroků od tabletu
+     22 / první krok 24 px jako na stránkách služeb (hypoteky.astro). ===== */
+  @media (min-width: 768px) {
+    .pri-step h3 {
+      font-size: 22px;
+    }
+
+    .pri-step--first h3 {
+      font-size: 24px;
+    }
+  }
 </style>

@@ -49,6 +49,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
+import ServiceReview from '../../components/ServiceReview.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
 import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
@@ -229,7 +230,7 @@ const faqs: Faq[] = [
               />
             )}
             <path class="hyp__route-path hyp__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-            {(['faze', 'rozhodnuti', 'oblasti', 'prubeh', 'souvislosti', 'otazky'] as const).map((marker) => (
+            {(['faze', 'rozhodnuti', 'oblasti', 'prubeh', 'zkusenost', 'souvislosti', 'otazky'] as const).map((marker) => (
               <g class="hyp__marker" data-marker={marker}>
                 <line class="hyp__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
                 <circle class="hyp__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
@@ -389,8 +390,21 @@ const faqs: Faq[] = [
       </div>
     </section>
 
+    <!-- Zkušenost klienta (Patrik 4. 11. 2026): doslovný výňatek ze skutečné recenze na Google profilu. -->
+    <section class="hyp-chapter hyp-chapter--zkusenost" aria-labelledby="zkusenost-heading">
+      <div class="hyp-chapter__bar" data-reveal data-route-target="zkusenost">
+        <p id="zkusenost-heading">Zkušenost</p>
+      </div>
+
+      <div class="hyp-chapter__content hyp-chapter__content--single">
+        <div data-reveal>
+          <ServiceReview author="Jakub D." text={'Mohu zcela doporučit, Patrik Gajdadzis nás provedl celým procesem hypotéky skvěle a s obrovským ohledem na nás jako na klienta … Velmi mě překvapilo, jak moc mi pomohla pravidelnost a četnost informací o stavu celého procesu, kde je jaký dokument a co nás bude čekat.'} />
+        </div>
+      </div>
+    </section>
+
     <section class="hyp-chapter hyp-chapter--context" aria-labelledby="context-heading">
-      <div class="hyp-chapter__bar" data-reveal data-route-target="souvislosti">
+      <div class="hyp-chapter__bar hyp-chapter__bar--muted" data-reveal data-route-target="souvislosti">
         <p>Souvislosti</p>
       </div>
 
@@ -417,7 +431,7 @@ const faqs: Faq[] = [
     </section>
 
     <section class="hyp-chapter hyp-chapter--faq" aria-labelledby="otazky-heading">
-      <div class="hyp-chapter__bar" data-reveal data-route-target="otazky">
+      <div class="hyp-chapter__bar hyp-chapter__bar--muted" data-reveal data-route-target="otazky">
         <p id="otazky-heading">Otázky</p>
       </div>
 
@@ -491,6 +505,7 @@ const faqs: Faq[] = [
       rozhodnuti: main.querySelector('[data-route-target="rozhodnuti"]'),
       oblasti: main.querySelector('[data-route-target="oblasti"]'),
       prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      zkusenost: main.querySelector('[data-route-target="zkusenost"]'),
       souvislosti: main.querySelector('[data-route-target="souvislosti"]'),
       otazky: main.querySelector('[data-route-target="otazky"]'),
     } as const;
@@ -1031,6 +1046,13 @@ const faqs: Faq[] = [
      ani podtržení — jen barva textu/kotvy. */
   .hyp-chapter--faze .hyp-chapter__bar p {
     color: var(--emerald);
+  }
+
+  /* Vedlejší kapitoly (Souvislosti, Otázky) ztlumené jako na ostatních
+     stránkách služeb (.poj-chapter__bar--muted aj.), 4. 11. 2026. */
+  .hyp-chapter__bar--muted p {
+    font-weight: 700;
+    color: var(--text-nav);
   }
 
   .hyp-chapter__content {
@@ -2075,6 +2097,69 @@ const faqs: Faq[] = [
     .hyp-closing__grid h2 {
       width: 560px;
       font-size: 52px;
+    }
+  }
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Popisek kapitoly 18/21/24/26 px (vedlejší kapitoly 18/18/19/21), výrazná věta 22/24/28/30 px. Hodnoty jsou na všech stránkách stejné. ===== */
+  @media (max-width: 767px) {
+    .hyp-chapter__bar p {
+      font-size: 18px;
+    }
+
+    .hyp-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .hyp-chapter__statement {
+      font-size: 22px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .hyp-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .hyp-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .hyp-chapter__statement {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .hyp-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .hyp-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .hyp-chapter__statement {
+      font-size: 28px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .hyp-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .hyp-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .hyp-chapter__statement {
+      font-size: 30px;
+    }
+  }
+
+  /* ===== Jednotné velikosti 2 (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Názvy oblastí jako řádky na ostatních stránkách služeb: 18/20/22/24 px. ===== */
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .hyp-areas__name {
+      font-size: 22px;
     }
   }
 </style>

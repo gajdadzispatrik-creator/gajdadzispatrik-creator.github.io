@@ -53,6 +53,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
+import ServiceReview from '../../components/ServiceReview.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
 import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
@@ -186,7 +187,7 @@ const faqs: Faq[] = [
               />
             )}
             <path class="poj__route-path poj__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-            {(['dopad', 'prijem', 'majetek', 'kontrola', 'prubeh', 'pece', 'otazky'] as const).map((marker) => (
+            {(['dopad', 'prijem', 'majetek', 'kontrola', 'prubeh', 'zkusenost', 'pece', 'otazky'] as const).map((marker) => (
               <g class="poj__marker" data-marker={marker}>
                 <line class="poj__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
                 <circle class="poj__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
@@ -391,6 +392,19 @@ const faqs: Faq[] = [
       </div>
     </section>
 
+    <!-- Zkušenost klienta (Patrik 4. 11. 2026): doslovný výňatek ze skutečné recenze na Google profilu. -->
+    <section class="poj-chapter poj-chapter--zkusenost" aria-labelledby="zkusenost-heading">
+      <div class="poj-chapter__bar" data-reveal data-route-target="zkusenost">
+        <p id="zkusenost-heading">Zkušenost</p>
+      </div>
+
+      <div class="poj-chapter__content poj-chapter__content--single">
+        <div data-reveal>
+          <ServiceReview author="Michal P." text={'S Patrikem máme moc dobrou zkušenost a určitě ho můžeme doporučit. Pomohl nám dát do pořádku životní pojištění, které jsme měli od předchozího poradce špatně nastavené. … Je vidět, že mu záleží na tom, aby člověk věděl, co podepisuje a jaké má možnosti.'} />
+        </div>
+      </div>
+    </section>
+
     <section class="poj-chapter poj-chapter--pece" aria-labelledby="pece-heading">
       <div class="poj-chapter__bar poj-chapter__bar--muted" data-reveal data-route-target="pece">
         <p>Péče</p>
@@ -489,6 +503,7 @@ const faqs: Faq[] = [
       majetek: main.querySelector('[data-route-target="majetek"]'),
       kontrola: main.querySelector('[data-route-target="kontrola"]'),
       prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      zkusenost: main.querySelector('[data-route-target="zkusenost"]'),
       pece: main.querySelector('[data-route-target="pece"]'),
       otazky: main.querySelector('[data-route-target="otazky"]'),
     } as const;
@@ -1900,12 +1915,8 @@ const faqs: Faq[] = [
       font-size: 24px;
     }
 
-    /* Zadání: Dopad "název 26px" na desktopu — jiné číslo než Příjem
-       (24px, pokrývá základní škála výše), jediný rozdíl mezi kapitolami
-       v této třídě, proto řešeno modifikátorem jen na tomhle stupni. */
-    .poj-chapter--dopad .poj-rows__name {
-      font-size: 26px;
-    }
+    /* Dopad: dřív 26 px (výjimka ze zadání), od 4. 11. 2026 jako ostatní
+       řádky na všech stránkách služeb 24 px – žádná vlastní varianta. */
 
     .poj-rows__text {
       font-size: 17px;
@@ -1934,6 +1945,65 @@ const faqs: Faq[] = [
     .poj-closing__grid h2 {
       width: 560px;
       font-size: 52px;
+    }
+  }
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Popisek kapitoly 18/21/24/26 px (vedlejší kapitoly 18/18/19/21), výrazná věta 22/24/28/30 px. Hodnoty jsou na všech stránkách stejné. ===== */
+  @media (max-width: 767px) {
+    .poj-chapter__bar p {
+      font-size: 18px;
+    }
+
+    .poj-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .poj-chapter__statement,
+    .poj-chapter__statement--plain {
+      font-size: 22px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .poj-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .poj-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .poj-chapter__statement,
+    .poj-chapter__statement--plain {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .poj-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .poj-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .poj-chapter__statement,
+    .poj-chapter__statement--plain {
+      font-size: 28px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .poj-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .poj-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .poj-chapter__statement,
+    .poj-chapter__statement--plain {
+      font-size: 30px;
     }
   }
 </style>

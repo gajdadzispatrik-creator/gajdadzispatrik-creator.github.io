@@ -53,6 +53,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
+import ServiceReview from '../../components/ServiceReview.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
 import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
@@ -183,7 +184,7 @@ const faqs: Faq[] = [
               />
             )}
             <path class="inv__route-path inv__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-            {(['cil', 'rozpocet', 'riziko', 'portfolio', 'prubeh', 'souvislosti', 'otazky'] as const).map((marker) => (
+            {(['cil', 'rozpocet', 'riziko', 'portfolio', 'prubeh', 'zkusenost', 'souvislosti', 'otazky'] as const).map((marker) => (
               <g class="inv__marker" data-marker={marker}>
                 <line class="inv__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
                 <circle class="inv__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
@@ -384,6 +385,19 @@ const faqs: Faq[] = [
       </div>
     </section>
 
+    <!-- Zkušenost klienta (Patrik 4. 11. 2026): doslovný výňatek ze skutečné recenze na Google profilu. -->
+    <section class="inv-chapter inv-chapter--zkusenost" aria-labelledby="zkusenost-heading">
+      <div class="inv-chapter__bar" data-reveal data-route-target="zkusenost">
+        <p id="zkusenost-heading">Zkušenost</p>
+      </div>
+
+      <div class="inv-chapter__content inv-chapter__content--single">
+        <div data-reveal>
+          <ServiceReview author="Jonáš M." text={'Profesionální, zároveň milý a empatický pán. Důkladně vysvětlil, proč se oplatí investovat, sestavil bez delších průtahů efektivní investiční plán na míru a pomohl i s pojištěním. Doporučuji všem, kteří se chtějí finančně zaopatřit a nespoléhat jen na svůj důchod :-)'} />
+        </div>
+      </div>
+    </section>
+
     <section class="inv-chapter inv-chapter--souvislosti" aria-labelledby="souvislosti-heading">
       <div class="inv-chapter__bar inv-chapter__bar--muted" data-reveal data-route-target="souvislosti">
         <p>Souvislosti</p>
@@ -483,6 +497,7 @@ const faqs: Faq[] = [
       riziko: main.querySelector('[data-route-target="riziko"]'),
       portfolio: main.querySelector('[data-route-target="portfolio"]'),
       prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      zkusenost: main.querySelector('[data-route-target="zkusenost"]'),
       souvislosti: main.querySelector('[data-route-target="souvislosti"]'),
       otazky: main.querySelector('[data-route-target="otazky"]'),
     } as const;
@@ -1908,6 +1923,65 @@ const faqs: Faq[] = [
     .inv-closing__grid h2 {
       width: 560px;
       font-size: 52px;
+    }
+  }
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Popisek kapitoly 18/21/24/26 px (vedlejší kapitoly 18/18/19/21), výrazná věta 22/24/28/30 px. Hodnoty jsou na všech stránkách stejné. ===== */
+  @media (max-width: 767px) {
+    .inv-chapter__bar p {
+      font-size: 18px;
+    }
+
+    .inv-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .inv-chapter__statement,
+    .inv-chapter__statement--plain {
+      font-size: 22px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .inv-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .inv-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .inv-chapter__statement,
+    .inv-chapter__statement--plain {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .inv-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .inv-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .inv-chapter__statement,
+    .inv-chapter__statement--plain {
+      font-size: 28px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .inv-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .inv-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .inv-chapter__statement,
+    .inv-chapter__statement--plain {
+      font-size: 30px;
     }
   }
 </style>

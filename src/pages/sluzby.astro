@@ -1995,4 +1995,51 @@ const areas: Area[] = [
       max-width: 560px;
     }
   }
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Popisek kapitoly 18/21/24/26 px (vedlejší kapitoly 18/18/19/21), výrazná věta 22/24/28/30 px. Hodnoty jsou na všech stránkách stejné. ===== */
+  @media (max-width: 767px) {
+    .sluzby-chapter__bar p {
+      font-size: 18px;
+    }
+
+    .sluzby-chapter__statement {
+      font-size: 22px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .sluzby-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .sluzby-chapter__statement {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .sluzby-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .sluzby-chapter__statement {
+      font-size: 28px;
+    }
+
+    .sluzby-router__desc {
+      font-size: 16px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .sluzby-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .sluzby-chapter__statement {
+      font-size: 30px;
+    }
+
+    .sluzby-router__desc {
+      font-size: 16px;
+    }
+  }
 </style>

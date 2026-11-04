@@ -67,6 +67,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
+import ServiceReview from '../../components/ServiceReview.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
 import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
@@ -188,7 +189,7 @@ const faqs: Faq[] = [
               />
             )}
             <path class="pen__route-path pen__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-            {(['castka', 'prijem', 'zdroje', 'role', 'kontrola', 'prubeh', 'vyuziti', 'otazky'] as const).map((marker) => (
+            {(['castka', 'prijem', 'zdroje', 'role', 'kontrola', 'prubeh', 'zkusenost', 'vyuziti', 'otazky'] as const).map((marker) => (
               <g class="pen__marker" data-marker={marker}>
                 <line class="pen__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
                 <circle class="pen__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
@@ -420,6 +421,19 @@ const faqs: Faq[] = [
       </div>
     </section>
 
+    <!-- Zkušenost klienta (Patrik 4. 11. 2026): doslovný výňatek ze skutečné recenze na Google profilu. -->
+    <section class="pen-chapter pen-chapter--zkusenost" aria-labelledby="zkusenost-heading">
+      <div class="pen-chapter__bar" data-reveal data-route-target="zkusenost">
+        <p id="zkusenost-heading">Zkušenost</p>
+      </div>
+
+      <div class="pen-chapter__content pen-chapter__content--single">
+        <div data-reveal>
+          <ServiceReview author="Luboš N." text={'S Patrikem Gajdadzisem jsem řešil otázku životního pojištění a penzijního spoření a byl jsem velice spokojený, protože mi nejprve vysvětlil, jakým způsobem v této oblasti postupovat, aby to pro mne bylo co nejvýhodnější a zároveň dávalo pro mne smysl.'} />
+        </div>
+      </div>
+    </section>
+
     <section class="pen-chapter pen-chapter--vyuziti" aria-labelledby="vyuziti-heading">
       <div class="pen-chapter__bar" data-reveal data-route-target="vyuziti">
         <p>Využití</p>
@@ -525,6 +539,7 @@ const faqs: Faq[] = [
       role: main.querySelector('[data-route-target="role"]'),
       kontrola: main.querySelector('[data-route-target="kontrola"]'),
       prubeh: main.querySelector('[data-route-target="prubeh"]'),
+      zkusenost: main.querySelector('[data-route-target="zkusenost"]'),
       vyuziti: main.querySelector('[data-route-target="vyuziti"]'),
       otazky: main.querySelector('[data-route-target="otazky"]'),
     } as const;
@@ -1973,6 +1988,61 @@ const faqs: Faq[] = [
     .pen-closing__grid h2 {
       width: 560px;
       font-size: 52px;
+    }
+  }
+
+  /* ===== Jednotné velikosti (4. 11. 2026, Patrik: žádná stránka nemá vlastní styl).
+     Popisek kapitoly 18/21/24/26 px (vedlejší kapitoly 18/18/19/21), výrazná věta 22/24/28/30 px. Hodnoty jsou na všech stránkách stejné. ===== */
+  @media (max-width: 767px) {
+    .pen-chapter__bar p {
+      font-size: 18px;
+    }
+
+    .pen-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .pen-chapter__statement {
+      font-size: 22px;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .pen-chapter__bar p {
+      font-size: 21px;
+    }
+
+    .pen-chapter__bar--muted p {
+      font-size: 18px;
+    }
+
+    .pen-chapter__statement {
+      font-size: 24px;
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1399px) {
+    .pen-chapter__bar p {
+      font-size: 24px;
+    }
+
+    .pen-chapter__bar--muted p {
+      font-size: 19px;
+    }
+
+    .pen-chapter__statement {
+      font-size: 28px;
+    }
+  }
+  @media (min-width: 1400px) {
+    .pen-chapter__bar p {
+      font-size: 26px;
+    }
+
+    .pen-chapter__bar--muted p {
+      font-size: 21px;
+    }
+
+    .pen-chapter__statement {
+      font-size: 30px;
     }
   }
 </style>
