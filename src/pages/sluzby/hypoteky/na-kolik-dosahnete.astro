@@ -256,9 +256,9 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
               <img class="nkd-person__photo" src="/email/patrik-gajdadzis.jpg" width="64" height="64" alt="" loading="lazy" />
               <p class="nkd-person__text">
                 <strong>Patrik Gajdadzis</strong>
-                <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
+                <span>Ozvu se&nbsp;do&nbsp;1&nbsp;pracovního dne.</span>
               </p>
-              <p class="nkd-person__proof">5<span class="nkd-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;· zdarma</p>
+              <p class="nkd-person__proof">5<span class="nkd-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček</span> na&nbsp;Googlu&nbsp;· zdarma</p>
             </div>
 
             <div class="nkd-form__grid">
@@ -1420,6 +1420,41 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
   @media (min-width: 768px) and (max-width: 1199px) {
     .nkd-hero__lead {
       font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+  }
+
+  /* ===== Blok s fotkou jako kontakt na úvodní stránce (Patrik 4. 11. 2026):
+     každý údaj na jednom řádku; na mobilu fotka 56 px a oba řádky pod jménem
+     vedle ní. Pod 360 px se smí zalomit, aby nic nepřeteklo. ===== */
+  @media (max-width: 767px) {
+    .nkd-person {
+      grid-template-columns: 56px minmax(0, 1fr);
+      column-gap: 12px;
+      row-gap: 0;
+    }
+
+    .nkd-person__photo {
+      grid-row: 1 / span 2;
+      width: 56px;
+      height: 56px;
+    }
+
+    .nkd-person__proof {
+      grid-column: 2;
+      grid-row: 2;
+    }
+  }
+
+  @media (min-width: 360px) {
+    .nkd-person__text span,
+    .nkd-person__proof {
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .nkd-person__proof {
+      white-space: normal;
     }
   }
 </style>

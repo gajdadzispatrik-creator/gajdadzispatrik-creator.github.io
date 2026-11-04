@@ -190,9 +190,9 @@ const fixation = [
                 </span>
                 <p class="ref-person__text">
                   <strong>Patrik Gajdadzis</strong>
-                  <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
+                  <span>Ozvu se&nbsp;do&nbsp;1&nbsp;pracovního dne.</span>
                 </p>
-                <p class="ref-person__proof"><span class="ref-nowrap">5<span class="ref-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;·</span> <span class="ref-nowrap">zdarma</span></p>
+                <p class="ref-person__proof">5<span class="ref-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček</span> na&nbsp;Googlu&nbsp;· zdarma</p>
               </div>
             </div>
           </div>
@@ -1955,10 +1955,6 @@ const fixation = [
     color: var(--text-quiet);
   }
 
-  .ref-nowrap {
-    white-space: nowrap;
-  }
-
   .ref-person__star {
     color: var(--emerald);
   }
@@ -1991,7 +1987,7 @@ const fixation = [
 
   /* Notebook+: vedle sebe. Obsah kapitoly je tu užší než kontakt na úvodní
      stránce (max. 880 px), proto levý sloupec 360 px a fotka 72 px, aby se
-     „Ozvu se do jednoho pracovního dne.“ vešlo na jeden řádek. */
+     „Ozvu se do 1 pracovního dne.“ vešlo na jeden řádek. */
   @media (min-width: 1200px) {
     .ref-body {
       flex-direction: row;
@@ -2046,6 +2042,41 @@ const fixation = [
 
     .rec-review__quote p {
       font-size: 17px;
+    }
+  }
+
+  /* ===== Blok s fotkou jako kontakt na úvodní stránce (Patrik 4. 11. 2026):
+     každý údaj na jednom řádku; na mobilu fotka 56 px a oba řádky pod jménem
+     vedle ní. Pod 360 px se smí zalomit, aby nic nepřeteklo. ===== */
+  @media (max-width: 767px) {
+    .ref-person {
+      grid-template-columns: 56px minmax(0, 1fr);
+      column-gap: 12px;
+      row-gap: 0;
+    }
+
+    .ref-person__avatar {
+      grid-row: 1 / span 2;
+      width: 56px;
+      height: 56px;
+    }
+
+    .ref-person__proof {
+      grid-column: 2;
+      grid-row: 2;
+    }
+  }
+
+  @media (min-width: 360px) {
+    .ref-person__text span,
+    .ref-person__proof {
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 359px) {
+    .ref-person__proof {
+      white-space: normal;
     }
   }
 </style>

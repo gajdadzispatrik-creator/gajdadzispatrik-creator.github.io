@@ -118,9 +118,9 @@ const bandDetails = [
             </span>
             <p class="kontakt__person-text">
               <strong>Patrik Gajdadzis</strong>
-              <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
+              <span>Ozvu se&nbsp;do&nbsp;1&nbsp;pracovního dne.</span>
             </p>
-            <p class="kontakt__person-proof"><span class="kontakt__nowrap">5<span class="kontakt__person-star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;·</span> <span class="kontakt__nowrap">zdarma</span></p>
+            <p class="kontakt__person-proof">5<span class="kontakt__person-star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček</span> na&nbsp;Googlu&nbsp;· zdarma</p>
           </div>
         </div>
       </div>
@@ -850,8 +850,34 @@ const bandDetails = [
     color: var(--text-quiet);
   }
 
-  .kontakt__person-proof .kontakt__nowrap {
-    white-space: nowrap;
+  /* Každý údaj na jednom řádku (Patrik 4. 11. 2026). Pod 360 px (dnes
+     prakticky žádný telefon) se smí zalomit, aby nic nepřeteklo. */
+  @media (min-width: 360px) {
+    .kontakt__person-text span,
+    .kontakt__person-proof {
+      white-space: nowrap;
+    }
+  }
+
+  /* Mobil: fotka 56 px, aby se oba řádky vešly vedle ní pod jméno
+     i na telefonu široké 360 px (Patrik 4. 11. 2026). */
+  @media (max-width: 767px) {
+    .kontakt__person {
+      grid-template-columns: 56px minmax(0, 1fr);
+      column-gap: 12px;
+      row-gap: 0;
+    }
+
+    .kontakt__avatar {
+      grid-row: 1 / span 2;
+      width: 56px;
+      height: 56px;
+    }
+
+    .kontakt__person-proof {
+      grid-column: 2;
+      grid-row: 2;
+    }
   }
 
   .kontakt__person-star {
