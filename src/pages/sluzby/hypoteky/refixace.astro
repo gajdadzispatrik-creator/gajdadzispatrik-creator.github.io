@@ -716,7 +716,11 @@ const fixation = [
       else input.setAttribute('aria-invalid', 'true');
       return ok;
     };
-    fields.forEach((f) => f.addEventListener('blur', () => validate(f)));
+    // Chyba se ukáže až po kliknutí na odeslání (Patrik 4. 11. 2026); u pole,
+    // které už chybu ukazuje, zmizí hned po opravě.
+    fields.forEach((f) => f.addEventListener('input', () => {
+      if (f.getAttribute('aria-invalid') === 'true') validate(f);
+    }));
     const summaryEl = form.querySelector<HTMLElement>('.ref-form__errors');
     const errorStatus = form.querySelector<HTMLElement>('.ref-status--error');
     const submit = form.querySelector<HTMLButtonElement>('.ref-form__submit');

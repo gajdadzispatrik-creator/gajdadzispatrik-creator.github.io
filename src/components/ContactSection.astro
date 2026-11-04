@@ -535,10 +535,17 @@ const bandDetails = [
         return valid;
       };
 
+      // Chyba se ukáže až po kliknutí na odeslání (Patrik 4. 11. 2026); u pole,
+      // které už chybu ukazuje, zmizí hned po opravě.
       const namedFields = ['jmeno', 'telefon', 'email', 'oblast'] as const;
       namedFields.forEach((name) => {
         const input = form.elements.namedItem(name) as HTMLInputElement | HTMLSelectElement | null;
-        if (input) input.addEventListener('blur', () => validateField(input));
+        if (!input) return;
+        const recheck = () => {
+          if (input.getAttribute('aria-invalid') === 'true') validateField(input);
+        };
+        input.addEventListener('input', recheck);
+        input.addEventListener('change', recheck);
       });
 
       form.addEventListener('submit', async (event) => {
