@@ -747,6 +747,8 @@ const fixation = [
       if (sent) {
         // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
         document.dispatchEvent(new CustomEvent('pg:lead'));
+        // Vyplněné údaje po odeslání smazat (jako kontaktní formulář na úvodní stránce).
+        form.reset();
         form.hidden = true;
         if (success) {
           success.hidden = false;
@@ -1758,8 +1760,22 @@ const fixation = [
     color: var(--navy);
   }
 
+  /* Aktivní pole: místo hranatého rámečku zesílená zelená linka pod polem
+     (Patrik 4. 11. 2026, stejné na všech formulářích). Druhý pixel linky
+     dělá stín, ne silnější okraj, aby se pole neposunulo. */
+  .ref-field input:focus-visible {
+    outline: none;
+    border-bottom-color: var(--emerald);
+    box-shadow: 0 1px 0 0 var(--emerald);
+  }
+
   .ref-field input[aria-invalid='true'] {
     border-bottom-color: #B3261E;
+  }
+
+  /* Chybné pole má i při psaní červenou linku. */
+  .ref-field input[aria-invalid='true']:focus-visible {
+    box-shadow: 0 1px 0 0 #B3261E;
   }
 
   .ref-field__error {

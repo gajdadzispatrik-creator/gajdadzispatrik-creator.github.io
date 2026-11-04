@@ -984,16 +984,25 @@ const bandDetails = [
     resize: vertical;
   }
 
+  /* Aktivní pole: místo hranatého rámečku zesílená zelená linka pod polem
+     (Patrik 4. 11. 2026, stejné na všech formulářích). Druhý pixel linky
+     dělá stín, ne silnější okraj, aby se pole neposunulo. */
   .kontakt__field input:focus-visible,
   .kontakt__field select:focus-visible,
   .kontakt__field textarea:focus-visible {
-    outline: 2px solid var(--emerald);
-    outline-offset: 3px;
+    outline: none;
+    border-bottom-color: var(--emerald);
+    box-shadow: 0 1px 0 0 var(--emerald);
   }
 
   .kontakt__field input[aria-invalid='true'],
   .kontakt__field select[aria-invalid='true'] {
     border-bottom-color: #B3261E;
+  }
+
+  /* Chybné pole má i při psaní červenou linku. */
+  .kontakt__field input[aria-invalid='true']:focus-visible {
+    box-shadow: 0 1px 0 0 #B3261E;
   }
 
   .kontakt__field-error {

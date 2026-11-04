@@ -1037,8 +1037,22 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
     color: var(--navy);
   }
 
+  /* Aktivní pole: místo hranatého rámečku zesílená zelená linka pod polem
+     (Patrik 4. 11. 2026, stejné na všech formulářích). Druhý pixel linky
+     dělá stín, ne silnější okraj, aby se pole neposunulo. */
+  .nkd-field input:focus-visible {
+    outline: none;
+    border-bottom-color: var(--emerald);
+    box-shadow: 0 1px 0 0 var(--emerald);
+  }
+
   .nkd-field input[aria-invalid='true'] {
     border-bottom-color: #B3261E;
+  }
+
+  /* Chybné pole má i při psaní červenou linku. */
+  .nkd-field input[aria-invalid='true']:focus-visible {
+    box-shadow: 0 1px 0 0 #B3261E;
   }
 
   .nkd-field__error {
