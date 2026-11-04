@@ -21,6 +21,11 @@
 # po nahrání nedostupný (403), a když nová stránka přišla dřív než její
 # styl, web se během nasazení ukázal bez vzhledu. Staré soubory zůstávají,
 # takže stará stránka funguje, dokud ji nepřepíše nová.
+# _astro/ se porovnává jen podle velikosti (--ignore-time): soubory mají
+# otisk obsahu v názvu, nezměněné se tedy znovu nenahrávají (dřív se při
+# každém nasazení přepsaly všechny a ~20 s vracely 403 i staré stránce).
+# xfer:use-temp-file: soubor se nahraje pod dočasným jménem a hotový se
+# přejmenuje, takže stránka není během nahrávání nedostupná.
 name: Nasazení na Wedos
 
 on:
@@ -69,8 +74,9 @@ jobs:
             set net:max-retries 2;
             set net:timeout 30;
             debug 2;
+            set xfer:use-temp-file yes;
             open -u \"$FTP_USER\",\"$FTP_PASSWORD\" ftp://$FTP_HOST;
-            mirror --reverse --verbose --parallel=4 dist/_astro/ /www/domains/patrikgajdadzis.cz/_astro/;
-            mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ dist/ /www/domains/patrikgajdadzis.cz/;
+            mirror --reverse --verbose --parallel=4 --ignore-time dist/_astro/ /www/domains/patrikgajdadzis.cz/_astro/;
+            mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ --exclude-glob _astro/ dist/ /www/domains/patrikgajdadzis.cz/;
             put deploy/www.htaccess -o /www/.htaccess
           "
