@@ -166,65 +166,86 @@ const fixation = [
             <p class="rec-support__text">
               Ozvu se&nbsp;vám a&nbsp;domluvíme se, jak mi nabídku banky pošlete. Stačí ji vyfotit a&nbsp;poslat e-mailem.
             </p>
-            <!-- Komu nabídku posíláte: fotka, jméno, kdy se ozve. Patří k úvodnímu textu (jako na úvodní stránce v kontaktu), ne do formuláře. -->
-            <div class="ref-person">
-              <Image class="ref-person__photo" src={personPhoto} width={216} quality={92} alt="" loading="lazy" />
-              <p class="ref-person__text">
-                <strong>Patrik Gajdadzis</strong>
-                <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
-              </p>
-              <p class="ref-person__proof">5<span class="ref-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;· zdarma</p>
-            </div>
           </div>
         </div>
 
-        <form class="ref-form" method="post" action="/api/poptavka.php" novalidate data-reveal>
-          <p class="ref-form__errors" role="alert" hidden></p>
-          <div class="ref-hp" aria-hidden="true">
-            <label for="ref-website">Nevyplňujte</label>
-            <input id="ref-website" name="website" type="text" tabindex="-1" autocomplete="off" />
-          </div>
-          <input type="hidden" name="vyplneno-ms" value="" />
-          <input type="hidden" name="zdroj" value="refixace" />
-          <input type="hidden" name="oblast" value="Hypotéka a bydlení" />
-          <input type="hidden" name="gclid" value="" />
-          <input type="hidden" name="utm_source" value="" />
-          <input type="hidden" name="utm_medium" value="" />
-          <input type="hidden" name="utm_campaign" value="" />
-
-
-          <div class="ref-form__grid">
-            <div class="ref-field">
-              <label for="ref-jmeno">Jméno a&nbsp;příjmení <span class="ref-required" aria-hidden="true">*</span></label>
-              <input id="ref-jmeno" name="jmeno" type="text" autocomplete="name" required aria-describedby="ref-jmeno-chyba" />
-              <p class="ref-field__error" id="ref-jmeno-chyba" hidden></p>
+        <!-- Dva sloupce jako kontakt na úvodní stránce (ContactSection.astro):
+             vlevo rychlé cesty a komu píšete, vpravo formulář (Patrik 1. 11. 2026). -->
+        <div class="ref-body">
+          <div class="ref-side" data-reveal>
+            <div class="ref-side__group">
+              <p class="ref-side__label">Raději hned?</p>
+              <div class="ref-side__links">
+                <a class="ref-side__link" href="tel:+420775217721">Zavolat +420&nbsp;775&nbsp;217&nbsp;721</a>
+                <a class="ref-side__link" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat volný termín v&nbsp;kalendáři</a>
+              </div>
             </div>
-            <div class="ref-field">
-              <label for="ref-telefon">Telefon <span class="ref-required" aria-hidden="true">*</span></label>
-              <input id="ref-telefon" name="telefon" type="tel" autocomplete="tel" required aria-describedby="ref-telefon-chyba" />
-              <p class="ref-field__error" id="ref-telefon-chyba" hidden></p>
-            </div>
-            <div class="ref-field ref-field--wide">
-              <label for="ref-konec">Kdy vám končí fixace? <span class="ref-required" aria-hidden="true">*</span></label>
-              <input id="ref-konec" name="konec_fixace" type="text" inputmode="text" placeholder="například 03/2027" maxlength="40" required aria-describedby="ref-konec-chyba" />
-              <p class="ref-field__error" id="ref-konec-chyba" hidden></p>
+
+            <div class="ref-side__group">
+              <p class="ref-side__label">Nebo napište</p>
+              <div class="ref-person">
+                <span class="ref-person__avatar">
+                  <Image src={personPhoto} width={320} quality={92} alt="" loading="lazy" />
+                </span>
+                <p class="ref-person__text">
+                  <strong>Patrik Gajdadzis</strong>
+                  <span>Ozvu se&nbsp;do&nbsp;jednoho pracovního dne.</span>
+                </p>
+                <p class="ref-person__proof"><span class="ref-nowrap">5<span class="ref-person__star" aria-hidden="true">★</span><span class="sr-only"> hvězdiček,</span> hodnocení na&nbsp;Googlu&nbsp;·</span> <span class="ref-nowrap">zdarma</span></p>
+              </div>
             </div>
           </div>
 
-          <button class="rec-cta ref-form__submit" type="submit">Odeslat</button>
+          <div class="ref-main">
+            <form class="ref-form" method="post" action="/api/poptavka.php" novalidate data-reveal>
+              <p class="ref-form__errors" role="alert" hidden></p>
+              <div class="ref-hp" aria-hidden="true">
+                <label for="ref-website">Nevyplňujte</label>
+                <input id="ref-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+              </div>
+              <input type="hidden" name="vyplneno-ms" value="" />
+              <input type="hidden" name="zdroj" value="refixace" />
+              <input type="hidden" name="oblast" value="Hypotéka a bydlení" />
+              <input type="hidden" name="gclid" value="" />
+              <input type="hidden" name="utm_source" value="" />
+              <input type="hidden" name="utm_medium" value="" />
+              <input type="hidden" name="utm_campaign" value="" />
 
-          <p class="ref-status ref-status--error" role="alert" hidden>
-            Zprávu se&nbsp;nepodařilo odeslat. Zkuste to znovu nebo mi zavolejte na&nbsp;<a href="tel:+420775217721">+420&nbsp;775&nbsp;217&nbsp;721</a>.
-          </p>
 
-          <p class="ref-privacy">
-            Údaje použiji pouze pro&nbsp;vyřízení vaší poptávky a&nbsp;navazující komunikaci. <a href="/zpracovani-osobnich-udaju">Zásady zpracování osobních údajů</a>
-          </p>
-        </form>
+              <div class="ref-form__grid">
+                <div class="ref-field">
+                  <label for="ref-jmeno">Jméno a&nbsp;příjmení <span class="ref-required" aria-hidden="true">*</span></label>
+                  <input id="ref-jmeno" name="jmeno" type="text" autocomplete="name" required aria-describedby="ref-jmeno-chyba" />
+                  <p class="ref-field__error" id="ref-jmeno-chyba" hidden></p>
+                </div>
+                <div class="ref-field">
+                  <label for="ref-telefon">Telefon <span class="ref-required" aria-hidden="true">*</span></label>
+                  <input id="ref-telefon" name="telefon" type="tel" autocomplete="tel" required aria-describedby="ref-telefon-chyba" />
+                  <p class="ref-field__error" id="ref-telefon-chyba" hidden></p>
+                </div>
+                <div class="ref-field ref-field--wide">
+                  <label for="ref-konec">Kdy vám končí fixace? <span class="ref-required" aria-hidden="true">*</span></label>
+                  <input id="ref-konec" name="konec_fixace" type="text" inputmode="text" placeholder="například 03/2027" maxlength="40" required aria-describedby="ref-konec-chyba" />
+                  <p class="ref-field__error" id="ref-konec-chyba" hidden></p>
+                </div>
+              </div>
 
-        <p class="ref-status ref-status--success" role="status" tabindex="-1" hidden>
-          Děkuji, ozvu se&nbsp;vám do&nbsp;jednoho pracovního dne.
-        </p>
+              <button class="rec-cta ref-form__submit" type="submit">Odeslat</button>
+
+              <p class="ref-status ref-status--error" role="alert" hidden>
+                Zprávu se&nbsp;nepodařilo odeslat. Zkuste to znovu nebo mi zavolejte na&nbsp;<a href="tel:+420775217721">+420&nbsp;775&nbsp;217&nbsp;721</a>.
+              </p>
+
+              <p class="ref-privacy">
+                Údaje použiji pouze pro&nbsp;vyřízení vaší poptávky a&nbsp;navazující komunikaci. <a href="/zpracovani-osobnich-udaju">Zásady zpracování osobních údajů</a>
+              </p>
+            </form>
+
+            <p class="ref-status ref-status--success" role="status" tabindex="-1" hidden>
+              Děkuji, ozvu se&nbsp;vám do&nbsp;jednoho pracovního dne.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -968,6 +989,7 @@ const fixation = [
     flex-direction: column;
     gap: 12px;
   }
+
 
   .rec-chapter__lead-col h2,
   .rec-h2--std {
@@ -1791,24 +1813,99 @@ const fixation = [
       align-self: flex-start;
     }
   }
-  /* Fotka, jméno a hodnocení u formuláře (hodnoty z `.nkd-person`,
-     písmo zvednuté na 16 px podle pravidla webu). */
+  /* ---------- Dva sloupce u formuláře — hodnoty 1:1 z kontaktu na úvodní
+     stránce (ContactSection.astro: .kontakt__body / __side / __person) ---------- */
+
+  .ref-body {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .ref-side {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 420px;
+  }
+
+  .ref-side__group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ref-side__label {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    color: var(--navy);
+  }
+
+  .ref-side__links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .ref-side__link {
+    position: relative;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  /* Plocha pro dotyk jen do půlky mezery mezi odkazy. */
+  .ref-side__link::after {
+    content: '';
+    position: absolute;
+    inset: -9px 0;
+  }
+
+  .ref-side__link:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+
   .ref-person {
     display: grid;
     grid-template-columns: 64px minmax(0, 1fr);
     column-gap: 16px;
     row-gap: 12px;
     align-items: center;
+    margin-top: 6px;
   }
 
-  .ref-person__photo {
+  .ref-person__avatar {
+    grid-column: 1;
+    grid-row: 1;
     width: 64px;
     height: 64px;
     border-radius: 50%;
+    overflow: hidden;
+    background: var(--navy);
+  }
+
+  .ref-person__avatar :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: 50% 50%;
   }
 
   .ref-person__text {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1830,11 +1927,15 @@ const fixation = [
 
   .ref-person__proof {
     grid-column: 1 / -1;
+    grid-row: 2;
     margin: 0;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.5;
-    white-space: nowrap;
     color: var(--text-quiet);
+  }
+
+  .ref-nowrap {
+    white-space: nowrap;
   }
 
   .ref-person__star {
@@ -1842,12 +1943,16 @@ const fixation = [
   }
 
   @media (min-width: 768px) {
+    .ref-side {
+      max-width: none;
+    }
+
     .ref-person {
       grid-template-columns: 72px minmax(0, 1fr);
       row-gap: 2px;
     }
 
-    .ref-person__photo {
+    .ref-person__avatar {
       grid-row: 1 / span 2;
       width: 72px;
       height: 72px;
@@ -1860,6 +1965,27 @@ const fixation = [
     .ref-person__proof {
       grid-column: 2;
       align-self: start;
+    }
+  }
+
+  /* Notebook+: vedle sebe. Obsah kapitoly je tu užší než kontakt na úvodní
+     stránce (max. 880 px), proto levý sloupec 360 px a fotka 72 px, aby se
+     „Ozvu se do jednoho pracovního dne.“ vešlo na jeden řádek. */
+  @media (min-width: 1200px) {
+    .ref-body {
+      flex-direction: row;
+      gap: 56px;
+      align-items: flex-start;
+    }
+
+    .ref-side {
+      flex: none;
+      width: 360px;
+    }
+
+    .ref-main {
+      flex: 1;
+      min-width: 0;
     }
   }
 </style>
