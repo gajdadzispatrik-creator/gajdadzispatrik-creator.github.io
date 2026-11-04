@@ -241,12 +241,6 @@ const fixation = [
                 Údaje použiji pouze pro&nbsp;vyřízení vaší poptávky a&nbsp;navazující komunikaci. <a href="/zpracovani-osobnich-udaju">Zásady zpracování osobních údajů</a>
               </p>
             </form>
-
-            <!-- Po odeslání rovnou nabídnout termín, stejně jako kontakt na úvodní stránce. -->
-            <div class="ref-status ref-status--success" role="status" tabindex="-1" hidden>
-              <p>Děkuji, ozvu se&nbsp;vám do&nbsp;jednoho pracovního dne.</p>
-              <a class="ref-side__link" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat termín rovnou v&nbsp;kalendáři</a>
-            </div>
           </div>
         </div>
       </div>
@@ -725,7 +719,6 @@ const fixation = [
     fields.forEach((f) => f.addEventListener('blur', () => validate(f)));
     const summaryEl = form.querySelector<HTMLElement>('.ref-form__errors');
     const errorStatus = form.querySelector<HTMLElement>('.ref-status--error');
-    const success = document.querySelector<HTMLElement>('.ref-status--success');
     const submit = form.querySelector<HTMLButtonElement>('.ref-form__submit');
 
     form.addEventListener('submit', async (event) => {
@@ -766,11 +759,8 @@ const fixation = [
         document.dispatchEvent(new CustomEvent('pg:lead'));
         // Vyplněné údaje po odeslání smazat (jako kontaktní formulář na úvodní stránce).
         form.reset();
-        form.hidden = true;
-        if (success) {
-          success.hidden = false;
-          success.focus({ preventScroll: true });
-        }
+        // Poděkování uprostřed obrazovky (FormThanks.astro), formulář zůstává.
+        document.dispatchEvent(new CustomEvent('pg:thanks', { detail: { text: 'Děkuji, ozvu se vám do jednoho pracovního dne.' } }));
       } else if (errorStatus) {
         errorStatus.hidden = false;
       }
@@ -1733,25 +1723,6 @@ const fixation = [
   .ref-status--error a {
     color: inherit;
     text-decoration: underline;
-  }
-
-  .ref-status--success {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    max-width: 640px;
-    padding: 18px 20px;
-    background: rgba(30, 122, 92, .1);
-    color: var(--emerald);
-  }
-
-  .ref-status--success[hidden] {
-    display: none;
-  }
-
-  .ref-status--success p {
-    margin: 0;
   }
 
   .ref-form__grid {

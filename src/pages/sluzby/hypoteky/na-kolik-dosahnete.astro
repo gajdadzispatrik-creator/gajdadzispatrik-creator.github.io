@@ -290,10 +290,6 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
             </p>
           </form>
 
-          <p class="nkd-status nkd-status--success" role="status" tabindex="-1" hidden>
-            Díky, odpovědi mi dorazily. Spočítám to a&nbsp;ozvu se&nbsp;do&nbsp;jednoho pracovního dne.
-          </p>
-
           <div class="nkd-alt">
             <p class="nkd-alt__label">Raději hned?</p>
             <!-- Stejné odkazy jako v kontaktu na úvodní stránce (ContactSection.astro,
@@ -336,7 +332,6 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
     const totalEl = root.querySelector<HTMLElement>('[data-total]');
     const dotsG = root.querySelector<SVGGElement>('[data-dots]');
     const form = root.querySelector<HTMLFormElement>('.nkd-form');
-    const success = root.querySelector<HTMLElement>('.nkd-status--success');
 
     const two = () => answers.pocet === 1;
     // Obrazovka s částkou podle druhu příjmu (0 zaměstnanec, 1 OSVČ, jinak „kolik měsíčně“).
@@ -550,7 +545,6 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
         form.hidden = false;
         form.reset();
       }
-      if (success) success.hidden = true;
       showStep('quiz');
       show(0);
     });
@@ -614,11 +608,9 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
         if (sent) {
           // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
           document.dispatchEvent(new CustomEvent('pg:lead'));
-          form.hidden = true;
-          if (success) {
-            success.hidden = false;
-            success.focus({ preventScroll: true });
-          }
+          form.reset();
+          // Poděkování uprostřed obrazovky (FormThanks.astro), formulář zůstává.
+          document.dispatchEvent(new CustomEvent('pg:thanks', { detail: { text: 'Díky, odpovědi mi dorazily. Spočítám to a ozvu se do jednoho pracovního dne.' } }));
         } else if (errorStatus) {
           errorStatus.hidden = false;
         }
@@ -988,14 +980,6 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
   .nkd-status--error a {
     color: inherit;
     text-decoration: underline;
-  }
-
-  .nkd-status--success {
-    max-width: 640px;
-    padding: 18px 20px;
-    background: rgba(30, 122, 92, .1);
-    font-size: 16px;
-    color: var(--emerald);
   }
 
   .nkd-form__grid {
