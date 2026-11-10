@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{NADPIS}}</title>
+<style>
+  /* Najetí myší jako na webu (Gmail v počítači, Apple Mail; na telefonu hover není). */
+  .btn:hover, .btn:hover a { background-color: #155F47 !important; }
+  .btn-obrys:hover, .btn-obrys:hover a { background-color: #1E7A5C !important; color: #FFFFFF !important; }
+  a.odkaz:hover { color: #155F47 !important; text-decoration-color: #155F47 !important; }
+  /* Písmo webu (Manrope, self-hosted). Gmail ho nenačte a použije Arial;
+     Apple Mail, iOS a Outlook pro Mac ho zobrazí jako web. */
+  @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 200 800; font-display: swap;
+    src: url('https://patrikgajdadzis.cz/fonts/manrope/manrope-latin-ext.woff2') format('woff2'); unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 200 800; font-display: swap;
+    src: url('https://patrikgajdadzis.cz/fonts/manrope/manrope-latin.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @media (max-width: 480px) {
+    .obal { padding: 12px 6px !important; }
+    .karta { padding: 24px 18px !important; }
+    .jmeno { font-size: 22px !important; line-height: 28px !important; }
+  }
+</style>
+</head>
+<!--
+  Upozornění Patrikovi na novou poptávku / doporučení z webu (10. 11. 2026,
+  Patrik: „jednoduše přehledně, jen podstatné informace, ve vizuálu webu“).
+  Odesílá ho poptavka.php: doplní nadpis, jméno, řádky (jen vyplněné
+  údaje), tlačítka a patičku (zástupné značky NADPIS, JMENO, RADKY,
+  TLACITKA, PATA, NAHLED ve dvojitých složených závorkách). Textová verze (včetně bloku
+  „--- Pro CRM ---“ pro hlídač poptávek) je v poptavka.php.
+  Inline styly a tabulky kvůli e-mailovým programům; barvy webu (navy,
+  emerald) natvrdo, e-maily CSS proměnné neumí.
+-->
+<body style="margin:0;padding:0;background-color:#F8FAFC;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#F8FAFC;font-size:1px;line-height:1px;">{{NAHLED}}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F8FAFC;">
+  <tr>
+    <td class="obal" align="center" style="padding:28px 12px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background-color:#FFFFFF;border:1px solid #E4E9EF;border-radius:21px;">
+        <tr>
+          <td style="background-color:#0F2747;border-radius:21px 21px 0 0;padding:14px 24px;font-family:Manrope,Arial,Helvetica,sans-serif;font-size:11.5px;line-height:16px;font-weight:bold;letter-spacing:1.84px;text-transform:uppercase;color:#8FD3B9;">{{NADPIS}}</td>
+        </tr>
+        <tr>
+          <td class="karta" style="padding:28px 24px 26px;font-family:Manrope,Arial,Helvetica,sans-serif;font-size:16px;line-height:24px;color:#31445B;">
+            <p class="jmeno" style="margin:0 0 20px;font-size:26px;line-height:32px;font-weight:bold;letter-spacing:-0.01em;color:#0F2747;">{{JMENO}}</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;border-top:1px solid #E4E9EF;">
+              {{RADKY}}
+            </table>
+            {{TLACITKA}}
+          </td>
+        </tr>
+      </table>
+      <p style="margin:14px 0 0;max-width:560px;font-family:Manrope,Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;color:#7A8AA0;">{{PATA}}</p>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

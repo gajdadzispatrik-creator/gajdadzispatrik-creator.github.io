@@ -242,6 +242,8 @@ $subject = $encode(match (true) {
     default => "Nová poptávka z webu: {$area} — {$name}",
 });
 
+$sentAt = (new DateTimeImmutable('now', new DateTimeZone('Europe/Prague')))->format('j. n. Y H:i');
+
 $body = implode("\n", [
     match (true) {
         $isTool => 'Nová poptávka z nástroje „Na kolik dosáhnete?“ na patrikgajdadzis.cz',
@@ -277,22 +279,106 @@ $body = implode("\n", [
     "Téma: {$area}",
     '',
     '—',
-    'Odesláno ' . (new DateTimeImmutable('now', new DateTimeZone('Europe/Prague')))->format('j. n. Y H:i'),
+    'Odesláno ' . $sentAt,
     $hasEmail ? 'Odpovědí na tento e-mail napíšete přímo klientovi.' : 'Klient e-mail nevyplnil — ozvěte se mu telefonicky.',
 ]);
 
-$headers = implode("\r\n", array_filter([
+// Přehledná HTML verze pro Patrika (10. 11. 2026, šablona upozorneni-email.html):
+// jen vyplněné údaje, tlačítko Zavolat / Napsat e-mail. Textová verze ($body,
+// včetně bloku „--- Pro CRM ---“) jde v e-mailu jako alternativa – čte ji
+// hlídač poptávek. Když se šablona nenačte, odejde jen text jako dřív.
+$h = static fn (string $text): string => htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+$fontCss = 'font-family:Manrope,Arial,Helvetica,sans-serif;';
+$telHref = 'tel:' . preg_replace('/[^\d+]/', '', $phone);
+$rowHtml = static fn (string $label, string $valueHtml): string =>
+    '<tr><td style="' . $fontCss . 'padding:12px 12px 12px 0;border-bottom:1px solid #E4E9EF;width:34%;font-size:14px;line-height:22px;color:#7A8AA0;vertical-align:top;">' . $label . '</td>'
+    . '<td style="' . $fontCss . 'padding:12px 0;border-bottom:1px solid #E4E9EF;font-size:16px;line-height:22px;color:#0F2747;font-weight:bold;vertical-align:top;">' . $valueHtml . '</td></tr>';
+$linkHtml = static fn (string $href, string $text): string =>
+    '<a class="odkaz" href="' . $href . '" style="color:#0F2747;text-decoration:underline;text-decoration-color:#1E7A5C;">' . $text . '</a>';
+$buttonHtml = static fn (string $href, string $text, bool $fill): string =>
+    '<td style="padding:0 10px 0 0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>'
+    . '<td class="' . ($fill ? 'btn' : 'btn-obrys') . '" align="center" bgcolor="' . ($fill ? '#1E7A5C' : '#FFFFFF') . '" style="border-radius:14px;' . ($fill ? '' : 'border:1px solid #1E7A5C;') . '">'
+    . '<a href="' . $href . '" style="display:inline-block;padding:' . ($fill ? '18px 30px' : '17px 29px') . ';' . $fontCss . 'font-size:16px;line-height:20px;font-weight:bold;color:' . ($fill ? '#FFFFFF' : '#1E7A5C') . ';text-decoration:none;border-radius:14px;">' . $text . '</a>'
+    . '</td></tr></table></td>';
+
+$rows = [$rowHtml('Telefon', $linkHtml($h($telHref), $h($phone)))];
+if ($hasEmail) {
+    $rows[] = $rowHtml('E-mail', $linkHtml('mailto:' . $h($email), $h($email)));
+}
+if ($isReferral) {
+    if ($situation !== '') {
+        $rows[] = $rowHtml('S čím', nl2br($h($situation)));
+    }
+    $rows[] = $rowHtml('Doporučil/a', $h($referredBy));
+} else {
+    $rows[] = $rowHtml('Téma', $h($area));
+    if ($situation !== '') {
+        $rows[] = $rowHtml('Situace', nl2br($h($situation)));
+    }
+    if ($isRefix && $fixationEnd !== '') {
+        $rows[] = $rowHtml('Konec fixace', $h($fixationEnd));
+    }
+    if ($heardFrom !== '') {
+        $rows[] = $rowHtml('Dozvěděl/a se', $h($heardFrom));
+    }
+}
+$buttons = '<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>'
+    . $buttonHtml($h($telHref), 'Zavolat', true)
+    . ($hasEmail ? $buttonHtml('mailto:' . $h($email), 'Napsat e-mail', false) : '')
+    . '</tr></table>';
+$kind = match (true) {
+    $isTool => 'Na kolik dosáhnu',
+    $isRefix => 'Konec fixace',
+    $isReferral => 'Nové doporučení',
+    default => 'Nová poptávka',
+};
+$origin = match (true) {
+    $isTool => 'Nástroj Na kolik dosáhnete?',
+    $isRefix => 'Stránka Končí vám fixace?',
+    $isReferral => 'Stránka Děkuji',
+    default => 'Formulář na webu',
+};
+$preview = $isReferral ? 'Doporučil/a ' . $referredBy : $area . ' · ' . $phone;
+
+$notifyTemplate = @file_get_contents(__DIR__ . '/upozorneni-email.html');
+$headerLines = array_filter([
     'From: ' . $encode(SENDER_NAME) . ' <' . SENDER . '>',
     $hasEmail ? 'Reply-To: ' . $encode($name) . ' <' . $email . '>' : '',
     'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
-]));
+]);
+if ($notifyTemplate !== false) {
+    $notifyHtml = str_replace(
+        ['{{NADPIS}}', '{{NAHLED}}', '{{JMENO}}', '{{RADKY}}', '{{TLACITKA}}', '{{PATA}}'],
+        [$h($kind), $h($preview), $h($name), implode('', $rows), $buttons, $h($origin . ' · zdroj ' . $crmSource . ' · ' . $sentAt)],
+        $notifyTemplate
+    );
+    $notifyBoundary = 'pg-' . bin2hex(random_bytes(12));
+    $headerLines[] = 'Content-Type: multipart/alternative; boundary="' . $notifyBoundary . '"';
+    $mailBody = implode("\r\n", [
+        '--' . $notifyBoundary,
+        'Content-Type: text/plain; charset=UTF-8',
+        'Content-Transfer-Encoding: base64',
+        '',
+        chunk_split(base64_encode($body)),
+        '--' . $notifyBoundary,
+        'Content-Type: text/html; charset=UTF-8',
+        'Content-Transfer-Encoding: base64',
+        '',
+        chunk_split(base64_encode($notifyHtml)),
+        '--' . $notifyBoundary . '--',
+        '',
+    ]);
+} else {
+    $headerLines[] = 'Content-Type: text/plain; charset=UTF-8';
+    $headerLines[] = 'Content-Transfer-Encoding: 8bit';
+    $mailBody = $body;
+}
+$headers = implode("\r\n", $headerLines);
 
 // Dvě samostatná odeslání: selhání jednoho nesmí shodit druhé. Pro klienta
 // je poptávka odeslaná, pokud dorazila aspoň jedna kopie.
-$sentMain = mail(RECIPIENT, $subject, $body, $headers, '-f' . SENDER);
-$sentBackup = mail(BACKUP_RECIPIENT, $subject, $body, $headers, '-f' . SENDER);
+$sentMain = mail(RECIPIENT, $subject, $mailBody, $headers, '-f' . SENDER);
+$sentBackup = mail(BACKUP_RECIPIENT, $subject, $mailBody, $headers, '-f' . SENDER);
 $sent = $sentMain || $sentBackup;
 
 // Potvrzení klientovi (7.–8. 10. 2026, text i vzhled schválil uživatel).
@@ -311,7 +397,7 @@ if ($sent && $hasEmail) {
         '',
         "Téma: {$area}",
         '',
-        'Konzultace je nezávazná a zdarma, trvá zhruba 30 minut. Můžeme se potkat v kanceláři v Ostravě-Porubě, nebo online.',
+        'Konzultace je nezávazná a celá služba je bez poplatků. Schůzka trvá zhruba 30 minut. Můžeme se potkat v kanceláři v Ostravě-Porubě, nebo online.',
         '',
         'Pokud nechcete čekat, vyberte si termín rovnou tady: ' . BOOKING_URL,
         'nebo mi zavolejte na +420 775 217 721.',

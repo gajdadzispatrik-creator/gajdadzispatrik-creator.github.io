@@ -76,6 +76,8 @@ AddDefaultCharset UTF-8
   </If>
   <ElseIf "%{REQUEST_URI} =~ m#\.woff2$#">
     Header set Cache-Control "public, max-age=2592000"
+    # Písmo Manrope smějí načíst i e-maily z formuláře (api/*-email.html, 10. 11. 2026).
+    Header set Access-Control-Allow-Origin "*"
   </ElseIf>
   <Else>
     Header set Cache-Control "no-cache"
