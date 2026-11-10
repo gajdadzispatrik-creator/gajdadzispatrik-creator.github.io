@@ -235,11 +235,12 @@ if (!$valid) {
 
 $encode = static fn (string $text): string => '=?UTF-8?B?' . base64_encode($text) . '?=';
 
-// Jeden předmět pro všechny formuláře: „Nová poptávka – jméno“ (Patrik
-// 10. 11. 2026). Typ (doporučení, konec fixace…) je v pruhu nahoře v e-mailu.
+// Předmět (Patrik 10. 11. 2026): „Nová poptávka – jméno“ pro všechny formuláře,
+// jen doporučení ze stránky /dekuji má „Nové doporučení – jméno“. Typ formuláře
+// (konec fixace, Na kolik dosáhnete?) je v pruhu nahoře v e-mailu.
 // Jméno zůstává, jinak by Gmail slučoval různé poptávky do jedné konverzace.
 // Štítek Poptávka přiděluje filtr podle odesílatele, ne podle předmětu.
-$subject = $encode("Nová poptávka – {$name}");
+$subject = $encode($isReferral ? "Nové doporučení – {$name}" : "Nová poptávka – {$name}");
 
 $sentAt = (new DateTimeImmutable('now', new DateTimeZone('Europe/Prague')))->format('j. n. Y H:i');
 
