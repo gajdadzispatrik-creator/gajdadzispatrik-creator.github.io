@@ -5,7 +5,7 @@ import rehypeCzechNbsp from './src/lib/rehype-czech-nbsp.mjs';
 
 // Stránky mimo sitemap (cesty bez koncového lomítka) — např. stránka
 // s `noindex`. Od 5. 10. 2026 prázdné (`/clanky` zveřejněné s prvními články).
-const SITEMAP_EXCLUDE = [];
+const SITEMAP_EXCLUDE = ['/dekuji'];
 
 export default defineConfig({
   site: 'https://patrikgajdadzis.cz',

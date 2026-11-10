@@ -1,0 +1,906 @@
+---
+/**
+ * Stránka „Děkuji“ po dokončené spolupráci (Patrik 10. 11. 2026, NÁHLED).
+ * Neveřejná: není v menu ani v sitemap, má noindex. Odkaz posílá Patrik
+ * klientovi e-mailem po vyřízení hypotéky, pojištění, plánu apod.
+ *
+ * Obsah: poděkování → recenze (Google, Firmy.cz – jen odkazy, hodnocení
+ * klient vyplní tam; všem stejně, Google zakazuje filtrovat spokojené) →
+ * doporučení (klient vyplní kontakt a dá dotyčnému vědět, že se ozvu).
+ * Doporučení jde na /api/poptavka.php se `zdroj=doporuceni`.
+ *
+ * Záměrně výraznější než běžné podstránky (Patrik: „ať to není nudné“),
+ * ale jen z barev a prvků webu (tokeny, linka, fotka). Loga Google
+ * a Firmy.cz (oficiální ikona z firmy.cz, 10. 11. 2026) jsou soubory v public/img
+ * (barvy log nejsou tokeny webu).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import StandaloneRoute from '../components/StandaloneRoute.astro';
+import { Image } from 'astro:assets';
+import { czechNbsp } from '../lib/rehype-czech-nbsp.mjs';
+import photo from '../assets/photos/patrik-profilovka.jpg';
+
+const GOOGLE_WRITE_REVIEW_URL = 'https://g.page/r/CcBC-QIuaL4EEBM/review';
+// Profil na Firmy.cz (ověřeno 10. 11. 2026: „Patrik Gajdadzis | Hypotéky a finance“,
+// 17. listopadu 599/30). Přímý odkaz na formulář hodnocení Firmy.cz nemá
+// (tlačítko „Přidat hodnocení“ je jen v jejich stránce), proto rovnou sekce hodnocení.
+const FIRMY_REVIEW_URL = 'https://www.firmy.cz/detail/13779989-patrik-gajdadzis-hypoteky-a-finance-ostrava-poruba.html#hodnoceni';
+
+const situations = [
+  { id: 'bydleni', label: 'Kupuje bydlení', area: 'Hypotéka a bydlení', icon: 'M4 11.5 12 5l8 6.5M6.5 10v9h11v-9M10 19v-5h4v5' },
+  { id: 'fixace', label: 'Končí mu fixace', area: 'Hypotéka a bydlení', icon: 'M19 12a7 7 0 1 1-2.05-4.95M19 5v4h-4M12 8.5V12l2.5 1.5' },
+  { id: 'rodina', label: 'Zakládá rodinu', area: 'Pojištění', icon: 'M12 19s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 7.6a3.8 3.8 0 0 1 7 2.2C19 14.6 12 19 12 19z' },
+  { id: 'pujcky', label: 'Splácí víc půjček', area: 'Jiné', icon: 'M4 8h16v10H4zM4 11h16M8 15h3' },
+];
+---
+
+<BaseLayout
+  title="Děkuji za důvěru | Patrik Gajdadzis"
+  description="Poděkování klientům Patrika Gajdadzise."
+  robots="noindex, nofollow"
+>
+  <Header />
+  <main id="hero" class="dk">
+    <!-- Linka shora do patičky (jako /financni-check-up): bez ní by linka
+         v patičce začínala odnikud. Stáčí se pod formulářem doporučení;
+         v tmavém bloku ji překresluje světlá kopie (.dk-route-dark). -->
+    <StandaloneRoute />
+    <div class="dk-route-dark" aria-hidden="true">
+      <svg class="dk-route-dark__svg" preserveAspectRatio="none" focusable="false">
+        <defs>
+          <clipPath id="dk-route-dark-clip" clipPathUnits="userSpaceOnUse">
+            <rect x="0" y="0" width="0" height="0" />
+          </clipPath>
+        </defs>
+        <path d="M 0 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#dk-route-dark-clip)" />
+      </svg>
+    </div>
+
+    <section class="dk-hero" aria-labelledby="dk-heading">
+      <div class="dk-hero__inner">
+        <div class="dk-hero__text">
+          <p class="dk-hero__label">Hotovo</p>
+          <h1 id="dk-heading">Děkuji za&nbsp;důvěru.</h1>
+          <p class="dk-hero__lead" data-dk-lead>{czechNbsp('Jsem rád, že jsem vám mohl pomoct. Kdykoli se něco změní, stačí zavolat.')}</p>
+        </div>
+        <div class="dk-hero__photo">
+          <Image src={photo} widths={[300, 600]} sizes="(min-width: 1200px) 300px, (min-width: 768px) 240px, 200px" quality={92} alt="Patrik Gajdadzis" loading="eager" />
+        </div>
+      </div>
+    </section>
+
+    <section class="dk-reviews" aria-labelledby="dk-reviews-heading">
+      <div class="dk-wrap">
+        <h2 id="dk-reviews-heading">Napíšete pár slov o&nbsp;tom, jak to s&nbsp;vámi bylo?</h2>
+        <p class="dk-sub">{czechNbsp('Lidé, kteří poradce teprve hledají, se nejvíc řídí zkušenostmi druhých. Ta vaše jim pomůže.')}</p>
+        <div class="dk-tiles">
+          <a class="dk-tile" href={GOOGLE_WRITE_REVIEW_URL} target="_blank" rel="noopener" data-dk-review="google">
+            <img class="dk-tile__logo" src="/img/logo-google.svg" width="44" height="44" alt="" />
+            <span class="dk-tile__text">
+              <strong>Google</strong>
+              <span>Napsat recenzi</span>
+            </span>
+            <span class="dk-tile__stars" aria-hidden="true">★★★★★</span>
+            <span class="dk-tile__arrow" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11.5M11 5.5 15.5 10 11 14.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+          </a>
+          <a class="dk-tile" href={FIRMY_REVIEW_URL} target="_blank" rel="noopener" data-dk-review="firmy">
+            <img class="dk-tile__logo" src="/img/logo-firmy.svg" width="44" height="44" alt="" />
+            <span class="dk-tile__text">
+              <strong>Firmy.cz</strong>
+              <span>Napsat recenzi</span>
+            </span>
+            <span class="dk-tile__stars" aria-hidden="true">★★★★★</span>
+            <span class="dk-tile__arrow" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10h11.5M11 5.5 15.5 10 11 14.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="dk-ref" aria-labelledby="dk-ref-heading">
+      <div class="dk-ref__glow" aria-hidden="true"></div>
+      <div class="dk-wrap">
+      <div class="dk-ref__inner" data-route-content>
+        <div class="dk-ref__intro">
+          <p class="dk-ref__label">Doporučení</p>
+          <h2 id="dk-ref-heading">Znáte někoho, komu bych mohl pomoct?</h2>
+          <p>{czechNbsp('Většina mých klientů ke mně přichází na doporučení. Víte o někom, kdo řeší bydlení, pojištění nebo finance? Rád pomůžu i jemu. Napište mi na něj kontakt.')}</p>
+        </div>
+
+        <form class="dk-form" novalidate>
+          <fieldset class="dk-chips">
+            <legend>S&nbsp;čím by mohl potřebovat pomoct?</legend>
+            <div class="dk-chips__list">
+              {situations.map((s) => (
+                <label class="dk-chip">
+                  <input type="radio" name="situace_typ" value={s.id} data-area={s.area} data-label={s.label} />
+                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d={s.icon} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                  <span>{s.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div class="dk-grid">
+            <div class="dk-field">
+              <label for="dk-jmeno">Jeho jméno <span aria-hidden="true">*</span></label>
+              <input id="dk-jmeno" name="jmeno" type="text" autocomplete="off" required aria-describedby="dk-jmeno-chyba" />
+              <p class="dk-field__error" id="dk-jmeno-chyba" hidden></p>
+            </div>
+            <div class="dk-field">
+              <label for="dk-telefon">Jeho telefon <span aria-hidden="true">*</span></label>
+              <input id="dk-telefon" name="telefon" type="tel" autocomplete="off" required aria-describedby="dk-telefon-chyba" />
+              <p class="dk-field__error" id="dk-telefon-chyba" hidden></p>
+            </div>
+            <div class="dk-field">
+              <label for="dk-od">Vaše jméno <span aria-hidden="true">*</span></label>
+              <input id="dk-od" name="od" type="text" autocomplete="name" required aria-describedby="dk-od-chyba" />
+              <p class="dk-field__error" id="dk-od-chyba" hidden></p>
+            </div>
+            <div class="dk-field">
+              <label for="dk-poznamka">Co bych měl vědět?</label>
+              <input id="dk-poznamka" name="poznamka" type="text" autocomplete="off" />
+            </div>
+          </div>
+
+          <p class="dk-note">
+            <strong>Dejte mu prosím vědět, že se&nbsp;mu ozvu.</strong> Řeknu, že kontakt mám od&nbsp;vás, a&nbsp;bez jakéhokoli tlaku mu nabídnu, s&nbsp;čím můžu pomoct.
+          </p>
+
+          <div class="dk-form__hp" aria-hidden="true">
+            <label>Web <input name="website" tabindex="-1" autocomplete="off" /></label>
+          </div>
+          <input type="hidden" name="zdroj" value="doporuceni" />
+          <input type="hidden" name="vyplneno-ms" value="" />
+
+          <button class="dk-submit" type="submit">Předat kontakt</button>
+          <p class="dk-status" role="alert" hidden>
+            Kontakt se&nbsp;nepodařilo odeslat. Zkuste to znovu nebo mi zavolejte na&nbsp;<a href="tel:+420775217721">+420&nbsp;775&nbsp;217&nbsp;721</a>.
+          </p>
+        </form>
+      </div>
+      </div>
+    </section>
+
+  </main>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+
+<script>
+  // Světlá kopie linky v tmavém bloku: stejný tvar jako StandaloneRoute,
+  // oříznutý na plochu .dk-ref (aktualizuje se při každé změně linky).
+  const srcSvg = document.querySelector<SVGSVGElement>('.standalone-route__svg');
+  const srcPath = srcSvg?.querySelector<SVGPathElement>('.standalone-route__path');
+  const darkSvg = document.querySelector<SVGSVGElement>('.dk-route-dark__svg');
+  const darkPath = darkSvg?.querySelector<SVGPathElement>('path');
+  const clipRect = darkSvg?.querySelector<SVGRectElement>('clipPath rect');
+  const refSection = document.querySelector<HTMLElement>('.dk-ref');
+  const syncDark = () => {
+    if (!srcSvg || !srcPath || !darkSvg || !darkPath || !clipRect || !refSection) return;
+    const vb = srcSvg.getAttribute('viewBox');
+    if (vb) darkSvg.setAttribute('viewBox', vb);
+    darkPath.setAttribute('d', srcPath.getAttribute('d') ?? '');
+    const svgBox = darkSvg.getBoundingClientRect();
+    const refBox = refSection.getBoundingClientRect();
+    clipRect.setAttribute('y', String(refBox.top - svgBox.top));
+    clipRect.setAttribute('width', String(svgBox.width));
+    clipRect.setAttribute('height', String(refBox.height));
+  };
+  if (srcPath) new MutationObserver(syncDark).observe(srcPath, { attributes: true, attributeFilter: ['d'] });
+  window.addEventListener('resize', syncDark);
+  syncDark();
+
+  const form = document.querySelector<HTMLFormElement>('.dk-form');
+  if (form) {
+    let startedAt: number | null = null;
+    form.addEventListener('focusin', () => {
+      if (startedAt === null) startedAt = performance.now();
+    });
+    const messages: Record<string, string> = {
+      jmeno: 'Napište prosím jeho jméno.',
+      telefon: 'Napište prosím jeho telefon.',
+      telefonKratky: 'Zkontrolujte prosím telefon, číslo je moc krátké.',
+      od: 'Napište prosím své jméno.',
+    };
+    const fields = ['jmeno', 'telefon', 'od'].map((n) => form.elements.namedItem(n) as HTMLInputElement);
+    const validate = (input: HTMLInputElement) => {
+      const ok = input.name === 'telefon' ? (input.value.match(/\d/g) ?? []).length >= 6 : input.value.trim() !== '';
+      const err = document.getElementById(`${input.id}-chyba`);
+      if (err) {
+        const shortPhone = input.name === 'telefon' && input.value.trim() !== '';
+        err.textContent = ok ? '' : messages[shortPhone ? 'telefonKratky' : input.name];
+        err.hidden = ok;
+      }
+      if (ok) input.removeAttribute('aria-invalid');
+      else input.setAttribute('aria-invalid', 'true');
+      return ok;
+    };
+    // Chyba až po kliknutí na odeslání, po opravě hned zmizí (jako ostatní formuláře).
+    fields.forEach((f) => f.addEventListener('input', () => {
+      if (f.getAttribute('aria-invalid') === 'true') validate(f);
+    }));
+    const status = form.querySelector<HTMLElement>('.dk-status');
+    const submit = form.querySelector<HTMLButtonElement>('.dk-submit');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (submit?.disabled) return;
+      if (status) status.hidden = true;
+      const results = fields.map(validate);
+      if (!results.every(Boolean)) {
+        // Na mobilu by chyba mohla zůstat mimo obrazovku: fokus na první chybné pole.
+        fields[results.indexOf(false)].focus();
+        return;
+      }
+
+      const chosen = form.querySelector<HTMLInputElement>('input[name="situace_typ"]:checked');
+      const data = new FormData(form);
+      data.set('oblast', chosen?.dataset.area ?? 'Jiné');
+      data.set('situace', [chosen?.dataset.label, String(data.get('poznamka') ?? '').trim()].filter(Boolean).join(' – '));
+      data.set('vyplneno-ms', String(Math.round(performance.now() - (startedAt ?? 0))));
+
+      if (submit) submit.disabled = true;
+      let sent = false;
+      try {
+        const response = await fetch('/api/poptavka.php', { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+        const result = await response.json().catch(() => null);
+        sent = response.ok && result?.ok === true;
+      } catch {
+        sent = false;
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+      if (sent) {
+        // Další doporučení: jméno klienta zůstane, vymažou se jen údaje
+        // o doporučeném (Patrik 10. 11. 2026). Každé doporučení = vlastní e-mail.
+        const od = (form.elements.namedItem('od') as HTMLInputElement).value;
+        form.reset();
+        (form.elements.namedItem('od') as HTMLInputElement).value = od;
+        startedAt = null;
+        if (submit) submit.textContent = 'Předat další kontakt';
+        document.dispatchEvent(new CustomEvent('pg:thanks', {
+          detail: {
+            text: 'Děkuji! Kontakt mám a brzy se mu ozvu.',
+            note: 'Napadá vás ještě někdo? Formulář je připravený.',
+            booking: false,
+          },
+        }));
+      } else if (status) {
+        status.hidden = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .dk {
+    position: relative;
+    background: var(--bg);
+  }
+
+  /* Obsah nad linkou; tmavý blok doporučení ji překryje (linka „vede za ním“). */
+  .dk-hero,
+  .dk-reviews,
+  .dk-ref {
+    position: relative;
+  }
+
+  /* Okraje jako na ostatních stránkách (hypoteky.astro: 24 / 36 / 96 px). */
+  .dk-wrap,
+  .dk-hero__inner {
+    width: min(100% - 48px, 1174px);
+    margin: 0 auto;
+  }
+
+  /* ---------- Poděkování ---------- */
+  /* Sekce: mezera nahoře = dole (docs/konvence/mezery.md); úvod dole bez
+     paddingu, mezeru k recenzím dává horní padding recenzí. */
+  .dk-hero {
+    padding: 132px 0 0;
+  }
+
+  .dk-hero__inner {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 32px;
+    text-align: center;
+  }
+
+  .dk-hero__label,
+  .dk-ref__label {
+    margin: 0 0 14px;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--emerald);
+  }
+
+  .dk-hero h1 {
+    margin: 0;
+    text-wrap: balance;
+    font-size: 44px;
+    line-height: 1.05;
+    letter-spacing: -.04em;
+    color: var(--navy);
+  }
+
+  .dk-hero__lead,
+  .dk-sub,
+  .dk-ref__intro p,
+  .dk-note {
+    text-wrap: pretty;
+  }
+
+  .dk-hero__lead {
+    margin: 20px auto 0;
+    max-width: 520px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .dk-hero__photo {
+    position: relative;
+    width: 200px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--navy);
+    box-shadow: 0 0 0 10px var(--white), 0 0 0 11px var(--rule), var(--shadow-stats);
+  }
+
+  .dk-hero__photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 50%;
+  }
+
+  /* ---------- Recenze ---------- */
+  .dk-reviews {
+    padding: 72px 0;
+  }
+
+  .dk-reviews h2,
+  .dk-ref h2 {
+    margin: 0;
+    text-wrap: balance;
+    font-size: 30px;
+    line-height: 1.15;
+    letter-spacing: -.03em;
+    color: var(--navy);
+    text-align: center;
+  }
+
+  .dk-sub {
+    margin: 14px auto 0;
+    max-width: 520px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .dk-tiles {
+    margin-top: 36px;
+    display: grid;
+    gap: 16px;
+  }
+
+  .dk-tile {
+    position: relative;
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 18px;
+    padding: 24px 26px;
+    border-radius: var(--radius-panel);
+    background: var(--white);
+    border: 1px solid var(--rule);
+    box-shadow: 0 12px 30px rgba(15, 39, 71, .06);
+    text-decoration: none;
+    transition: transform var(--duration-hover) var(--ease-out), box-shadow var(--duration-hover) var(--ease-out), border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .dk-tile:hover {
+    transform: translateY(-3px);
+    border-color: var(--emerald-light);
+    box-shadow: 0 18px 40px rgba(15, 39, 71, .1);
+  }
+
+  .dk-tile:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+  }
+
+  .dk-tile__logo {
+    grid-row: 1 / span 2;
+    width: 44px;
+    height: 44px;
+    justify-self: center;
+  }
+
+
+  .dk-tile__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .dk-tile__text strong {
+    font-size: 20px;
+    color: var(--navy);
+  }
+
+  .dk-tile__text span {
+    font-size: 16px;
+    color: var(--text-muted);
+  }
+
+  .dk-tile__stars {
+    grid-column: 2;
+    margin-top: 6px;
+    font-size: 14px;
+    letter-spacing: .15em;
+    color: var(--emerald);
+  }
+
+  .dk-tile__arrow {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(30, 122, 92, .1);
+    color: var(--emerald);
+    transition: background var(--duration-hover) var(--ease-out), color var(--duration-hover) var(--ease-out);
+  }
+
+  .dk-tile:hover .dk-tile__arrow {
+    background: var(--emerald);
+    color: var(--white);
+  }
+
+  /* ---------- Doporučení (tmavý blok jako rozcestník na úvodní stránce) ---------- */
+  .dk-ref {
+    position: relative;
+    overflow: hidden;
+    padding: 72px 0;
+    background: linear-gradient(196deg, var(--router-grad-1) 0%, var(--navy) 52%, var(--router-grad-2) 100%);
+    color: var(--white);
+  }
+
+  /* Tablet: formulář o kus užší, aby linka (u pravého okraje) nevedla
+     přes čipy a pole. */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .dk-ref .dk-form {
+      max-width: min(760px, 100% - 64px);
+    }
+  }
+
+  /* Světlá kopie linky nad tmavým blokem doporučení (oříznutá na jeho plochu);
+     tvar a viewBox přebírá ze StandaloneRoute, SVG je umístěné stejně. */
+  .dk-route-dark {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .dk-route-dark__svg {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    max-width: var(--stage-max);
+    height: 100%;
+    transform: translateX(-50%);
+    overflow: visible;
+  }
+
+  .dk-ref__glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(60% 50% at 20% 30%, rgba(46, 152, 115, .16) 0%, rgba(46, 152, 115, 0) 74%);
+    pointer-events: none;
+  }
+
+  .dk-ref__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .dk-ref__label {
+    color: var(--emerald-light);
+    text-align: center;
+  }
+
+  .dk-ref h2 {
+    color: var(--white);
+  }
+
+  .dk-ref__intro p:not(.dk-ref__label) {
+    margin: 14px auto 0;
+    max-width: 560px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .72);
+    text-align: center;
+  }
+
+  .dk-form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .dk-chips {
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .dk-chips legend {
+    margin-bottom: 14px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--white);
+  }
+
+  /* Čtyři situace: na úzkém telefonu pod sebou, jinak 2 × 2 (žádný osamocený čip). */
+  .dk-chips__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  @media (min-width: 480px) {
+    .dk-chips__list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .dk-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 18px 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(156, 182, 212, .4);
+    color: var(--white);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background var(--duration-hover) var(--ease-out), border-color var(--duration-hover) var(--ease-out);
+  }
+
+  .dk-chip svg {
+    color: var(--emerald-light);
+    flex: none;
+  }
+
+  .dk-chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .dk-chip:hover {
+    border-color: var(--emerald-light);
+  }
+
+  .dk-chip:has(input:checked) {
+    background: var(--emerald);
+    border-color: var(--emerald);
+  }
+
+  .dk-chip:has(input:checked) svg {
+    color: var(--white);
+  }
+
+  .dk-chip:has(input:focus-visible) {
+    outline: 2px solid var(--emerald-light);
+    outline-offset: 3px;
+  }
+
+  .dk-grid {
+    display: grid;
+    gap: 22px;
+  }
+
+  .dk-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dk-field label {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--white);
+  }
+
+  .dk-field label span {
+    color: var(--emerald-light);
+  }
+
+  .dk-field input {
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 10px 2px;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, .32);
+    border-radius: 0;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    color: var(--white);
+  }
+
+  .dk-field input:focus-visible {
+    outline: none;
+    border-bottom-color: var(--emerald-light);
+    box-shadow: 0 1px 0 0 var(--emerald-light);
+  }
+
+  .dk-field input[aria-invalid='true'] {
+    border-bottom-color: var(--error-on-dark);
+  }
+
+  .dk-field__error {
+    margin: 0;
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--error-on-dark);
+  }
+
+  .dk-note {
+    margin: 0;
+    padding: 18px 20px;
+    border-left: 2px solid var(--emerald-light);
+    background: rgba(255, 255, 255, .06);
+    font-size: 16px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, .8);
+  }
+
+  .dk-note strong {
+    color: var(--white);
+  }
+
+  .dk-form__hp {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .dk-submit {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    padding: 0 34px;
+    border: none;
+    border-radius: var(--radius-btn);
+    background: var(--emerald);
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background var(--duration-hover) var(--ease-out);
+  }
+
+  .dk-submit:hover {
+    background: var(--emerald-hover);
+  }
+
+  .dk-submit:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 3px;
+  }
+
+  .dk-status {
+    margin: 0;
+    font-size: 16px;
+    color: var(--error-on-dark);
+    text-align: center;
+  }
+
+  .dk-status a {
+    color: inherit;
+  }
+
+
+  @media (min-width: 768px) {
+    .dk-wrap,
+    .dk-hero__inner {
+      width: min(100% - 72px, 1174px);
+    }
+
+    .dk-hero {
+      padding: 160px 0 0;
+    }
+
+    .dk-reviews,
+    .dk-ref {
+      padding: 88px 0;
+    }
+
+    .dk-hero h1 {
+      font-size: 60px;
+    }
+
+    .dk-hero__photo {
+      width: 240px;
+    }
+
+    .dk-reviews h2,
+    .dk-ref h2 {
+      font-size: 36px;
+    }
+
+    .dk-tiles {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .dk-grid {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 32px;
+    }
+  }
+
+  /* Mobil a tablet: linka webu vede u pravého okraje (StandaloneRoute:
+     x = 378/390 šířky na mobilu, šířka − 40/834 na tabletu). Obsah končí
+     16–20 px před ní, aby po ní linka neběžela těsně po okraji dlaždic. */
+  @media (max-width: 767px) {
+    .dk-wrap {
+      width: calc(100% * 378 / 390 - 24px - 16px);
+      margin-left: 24px;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .dk-wrap {
+      width: calc(100% * (1 - 40 / 834) - 36px - 20px);
+      margin-left: 36px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    /* Okraj 96 px vlevo; vpravo nejméně 24 px před linkou (x = šířka − 96/1366). */
+    .dk-wrap,
+    .dk-hero__inner {
+      width: min(100% - 192px, 100% * (1 - 96 / 1366) - 120px);
+    }
+
+    /* Obsah drží sloupec 1040 px u levého okraje (jako nadpisy webu), na velkých
+       monitorech se neroztahuje. */
+    .dk-tiles,
+    .dk-ref__inner {
+      max-width: 1040px;
+    }
+
+    .dk-hero {
+      padding: 176px 0 0;
+    }
+
+    .dk-reviews {
+      padding: 104px 0;
+    }
+
+    .dk-hero__inner {
+      flex-direction: row;
+      justify-content: flex-start;
+      text-align: left;
+      gap: 92px;
+    }
+
+    .dk-hero__text {
+      flex: 0 1 648px;
+    }
+
+    .dk-hero__lead {
+      margin-left: 0;
+    }
+
+    .dk-hero h1 {
+      font-size: 76px;
+    }
+
+    /* Fotka 600 px = ostrá do 300 px i na displejích s dvojnásobnou hustotou. */
+    .dk-hero__photo {
+      flex: none;
+      width: 300px;
+    }
+
+    /* Notebook+: vše zarovnané vlevo jako úvod (a jako zbytek webu). */
+    .dk-reviews h2,
+    .dk-ref h2,
+    .dk-sub,
+    .dk-ref__label,
+    .dk-ref__intro p:not(.dk-ref__label) {
+      text-align: left;
+      margin-left: 0;
+    }
+
+    /* Doporučení ve dvou sloupcích: úvod vlevo, formulář vpravo
+       (jinak by vpravo v tmavém bloku zůstalo prázdné místo). */
+    .dk-ref__inner {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 72px;
+    }
+
+    .dk-ref__intro {
+      flex: 0 0 360px;
+    }
+
+    .dk-form {
+      flex: 1;
+      margin: 0;
+    }
+
+    .dk-submit {
+      align-self: flex-start;
+    }
+
+    .dk-reviews h2,
+    .dk-ref h2 {
+      font-size: 42px;
+    }
+
+    .dk-ref {
+      padding: 104px 0;
+    }
+  }
+
+  /* Široké monitory: okraj jako stage webu (max. 1760 px + 100 px odsazení). */
+  @media (min-width: 1400px) {
+    .dk-wrap,
+    .dk-hero__inner {
+      width: min(100% - 200px, 1560px);
+    }
+  }
+
+  /* Nejmenší telefony: užší dlaždice, aby se „Napsat recenzi“ nezalomilo. */
+  @media (max-width: 389px) {
+    .dk-tile {
+      grid-template-columns: 44px 1fr auto;
+      column-gap: 14px;
+      padding: 20px 18px;
+    }
+
+    .dk-tile__arrow {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dk-tile,
+    .dk-tile__arrow,
+    .dk-chip {
+      transition: none;
+    }
+
+    .dk-tile:hover {
+      transform: none;
+    }
+  }
+</style>

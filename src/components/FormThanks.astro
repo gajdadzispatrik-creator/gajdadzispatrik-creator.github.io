@@ -27,6 +27,7 @@ import { BOOKING_URL } from '../data/entity';
       </svg>
     </span>
     <p class="thanks__text" data-thanks-text></p>
+    <p class="thanks__note" data-thanks-note hidden></p>
     <a class="thanks__link" href={BOOKING_URL} target="_blank" rel="noopener">Vybrat termín rovnou v&nbsp;kalendáři</a>
   </div>
 </div>
@@ -35,6 +36,8 @@ import { BOOKING_URL } from '../data/entity';
   const root = document.querySelector<HTMLElement>('[data-thanks]');
   const panel = root?.querySelector<HTMLElement>('.thanks__panel');
   const textEl = root?.querySelector<HTMLElement>('[data-thanks-text]');
+  const linkEl = root?.querySelector<HTMLElement>('.thanks__link');
+  const noteEl = root?.querySelector<HTMLElement>('[data-thanks-note]');
   const DURATION = 8000;
   let timer: number | undefined;
   let hovering = false;
@@ -58,7 +61,14 @@ import { BOOKING_URL } from '../data/entity';
 
   document.addEventListener('pg:thanks', (event) => {
     if (!root || !textEl) return;
-    const detail = (event as CustomEvent<{ text?: string }>).detail;
+    const detail = (event as CustomEvent<{ text?: string; note?: string; booking?: boolean }>).detail;
+    // Volitelný druhý, menší řádek pod poděkováním.
+    if (noteEl) {
+      noteEl.textContent = detail?.note ?? '';
+      noteEl.hidden = !detail?.note;
+    }
+    // Odkaz na rezervaci jen u poptávek (u doporučení z /dekuji ne).
+    if (linkEl) linkEl.hidden = detail?.booking === false;
     textEl.textContent = detail?.text ?? 'Děkuji. Ozvu se vám co nejdříve.';
     root.hidden = false;
     requestAnimationFrame(() => root.classList.add('is-open'));
@@ -136,6 +146,14 @@ import { BOOKING_URL } from '../data/entity';
     font-size: 18px;
     line-height: 1.5;
     color: var(--navy);
+    text-wrap: balance;
+  }
+
+  .thanks__note {
+    margin: -6px 0 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-muted);
     text-wrap: balance;
   }
 

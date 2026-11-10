@@ -63,6 +63,8 @@
      doslova chybějící fakt na právních stránkách — tohle je jiný stav:
      text existuje a je hotový, jen čeká na ověření). */
   --pending-review: #9A6B12;
+  /* Chybová hláška na tmavém pozadí (stránka /dekuji, 10. 11. 2026). */
+  --error-on-dark: #F2A79B;
   --pending-review-bg: rgba(154, 107, 18, .1);
 
   /* 2.5 Radiusy */

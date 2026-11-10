@@ -184,7 +184,11 @@ $isTool = $source === 'na-kolik-dosahnete';
 // Vstupní stránka „Končí vám fixace?“ (/sluzby/hypoteky/refixace, 1. 11. 2026):
 // jméno, telefon a měsíc konce fixace, e-mail se nevyplňuje.
 $isRefix = $source === 'refixace';
-$phoneOnly = $isTool || $isRefix;
+// Doporučení ze stránky „Děkuji“ (/dekuji, 10. 11. 2026): klient vyplní
+// kontakt na někoho ze svého okolí a své jméno; e-mail se nevyplňuje.
+$isReferral = $source === 'doporuceni';
+$referredBy = oneLine(field('od', 100));
+$phoneOnly = $isTool || $isRefix || $isReferral;
 $fixationEnd = oneLine(field('konec_fixace', 40));
 $hasEmail = filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 
@@ -215,7 +219,8 @@ $utmParts = array_filter([
 $valid = $name !== ''
     && preg_match_all('/\d/', $phone) >= 6
     && ($hasEmail || ($phoneOnly && $email === ''))
-    && in_array($area, INTEREST_AREAS, true);
+    && in_array($area, INTEREST_AREAS, true)
+    && (!$isReferral || $referredBy !== '');
 
 if (!$valid) {
     respond(false, 400, $wantsJson);
@@ -226,6 +231,7 @@ $encode = static fn (string $text): string => '=?UTF-8?B?' . base64_encode($text
 $subject = $encode(match (true) {
     $isTool => "Na kolik dosáhnu (web): {$name}",
     $isRefix => "Konec fixace (web): {$name}",
+    $isReferral => "Doporučení (web): {$name} od {$referredBy}",
     default => "Nová poptávka z webu: {$area} — {$name}",
 });
 
@@ -233,6 +239,7 @@ $body = implode("\n", [
     match (true) {
         $isTool => 'Nová poptávka z nástroje „Na kolik dosáhnete?“ na patrikgajdadzis.cz',
         $isRefix => 'Nová poptávka ze stránky „Končí vám fixace?“ na patrikgajdadzis.cz',
+        $isReferral => 'Nové doporučení ze stránky „Děkuji“ – klient byl požádán, ať dotyčnému dá vědět, že se ozvete.',
         default => 'Nová poptávka z formuláře na patrikgajdadzis.cz',
     },
     '',
@@ -240,8 +247,9 @@ $body = implode("\n", [
     "Telefon: {$phone}",
     'E-mail: ' . ($hasEmail ? $email : '(nevyplněno)'),
     "Oblast zájmu: {$area}",
+    ...($isReferral ? ["Doporučil/a: {$referredBy}"] : []),
     // Formulář Končí vám fixace? otázku nemá (zdroj je reklama/odkaz).
-    ...(!$isRefix ? ['Jak se o mně dozvěděl/a: ' . ($heardFrom !== '' ? $heardFrom : '(neuvedeno)')] : []),
+    ...(!$isRefix && !$isReferral ? ['Jak se o mně dozvěděl/a: ' . ($heardFrom !== '' ? $heardFrom : '(neuvedeno)')] : []),
     ...($isRefix ? ['Konec fixace: ' . ($fixationEnd !== '' ? $fixationEnd : '(nevyplněno)')] : []),
     '',
     'Situace:',

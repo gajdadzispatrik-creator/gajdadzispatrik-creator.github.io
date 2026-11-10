@@ -86,6 +86,10 @@ export const privacyPage: LegalPageData = {
               ['Zjišťuji, odkud klienti přicházejí, abych věděl, které způsoby, jak mě lidé najdou, mají smysl.'],
             ],
             [
+              ['Doporučení (jen stránka pro klienty po spolupráci): jméno a telefon doporučeného, vaše jméno, poznámka'],
+              ['Ozvu se člověku, kterého jste mi doporučili. Při prvním kontaktu mu řeknu, od koho kontakt mám, a když o spolupráci nestojí, jeho údaje smažu.'],
+            ],
+            [
               ['Kdy vám končí fixace (jen stránka Končí vám fixace?)'],
               ['Vím, kdy je potřeba nabídky porovnat, a ozvu se včas.'],
             ],
