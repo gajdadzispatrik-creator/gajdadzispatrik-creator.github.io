@@ -8,10 +8,7 @@ Filtry a telefon nastavuje Patrik.
 
 | Co | Od | Předmět |
 |---|---|---|
-| Poptávka z formuláře | poptavka@patrikgajdadzis.cz | „Nová poptávka – <jméno>“ (od 10. 11. 2026) |
-| „Na kolik dosáhnete?“ | poptavka@patrikgajdadzis.cz | „Na kolik dosáhnu – <jméno>“ |
-| „Končí vám fixace?“ | poptavka@patrikgajdadzis.cz | „Konec fixace – <jméno>“ |
-| Doporučení ze stránky /dekuji | poptavka@patrikgajdadzis.cz | „Nové doporučení – <jméno>“ |
+| Všechny formuláře (kontakt, Na kolik dosáhnete?, Končí vám fixace?, doporučení z /dekuji) | poptavka@patrikgajdadzis.cz | „Nová poptávka – <jméno a příjmení>“ (od 10. 11. 2026; typ je v pruhu nahoře v e-mailu) |
 | Odpověď klienta na potvrzení | e-mail klienta | „Re: Děkuji za zprávu, ozvu se do jednoho pracovního dne“ |
 | Online rezervace (Google Kalendář, stránka „Úvodní konzultace“) | calendar-notification@google.com (**neověřeno**: v Gmailu zatím žádná rezervace není) | obsahuje „Úvodní konzultace“ (**neověřeno**) |
 
