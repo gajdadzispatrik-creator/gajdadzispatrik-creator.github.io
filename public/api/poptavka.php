@@ -208,6 +208,13 @@ $utmMedium = trackingField('utm_medium', '/^[A-Za-z0-9._ -]{1,60}$/', 60);
 $utmCampaign = trackingField('utm_campaign', '/^[A-Za-z0-9._ -]{1,60}$/', 60);
 $fromAds = $gclid !== '' || in_array(strtolower($utmMedium), ['cpc', 'ppc', 'paid', 'paidsearch'], true);
 $sourceCode = $fromAds ? 'google-ads' : 'web';
+// Pro CRM (hlídač poptávek mozku v2, Mozek v2/smysly/poptavka.py, 10. 11. 2026):
+// zdroj jen z hodnot Web / Google Ads / Doporučení, jméno rozdělené na
+// křestní a příjmení (formulář má jedno pole: první slovo = jméno).
+$crmSource = $isReferral ? 'Doporučení' : ($fromAds ? 'Google Ads' : 'Web');
+$nameParts = preg_split('/\s+/u', trim($name), 2) ?: [''];
+$firstName = $nameParts[0] ?? '';
+$lastName = $nameParts[1] ?? '';
 $utmParts = array_filter([
     $utmSource !== '' ? "zdroj={$utmSource}" : '',
     $utmMedium !== '' ? "médium={$utmMedium}" : '',
@@ -258,6 +265,16 @@ $body = implode("\n", [
     "Zdroj z webu: {$sourceCode}",
     ...($gclid !== '' ? ["gclid: {$gclid}"] : []),
     ...($utmParts ? ['UTM: ' . implode(', ', $utmParts)] : []),
+    '',
+    // Strojově čitelný blok pro CRM: každý údaj na vlastním řádku s pevným popiskem.
+    '--- Pro CRM ---',
+    "Jméno: {$firstName}",
+    "Příjmení: {$lastName}",
+    'E-mail: ' . ($hasEmail ? $email : ''),
+    "Telefon: {$phone}",
+    "Zdroj: {$crmSource}",
+    ...($isReferral ? ["Doporučil: {$referredBy}"] : []),
+    "Téma: {$area}",
     '',
     '—',
     'Odesláno ' . (new DateTimeImmutable('now', new DateTimeZone('Europe/Prague')))->format('j. n. Y H:i'),
