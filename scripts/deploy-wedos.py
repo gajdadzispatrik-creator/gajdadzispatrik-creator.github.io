@@ -85,7 +85,15 @@ class Uploader:
             self.ftp.mkd(remote_dir)
         except ftplib.error_perm:
             pass  # už existuje
+        self.chmod('755', remote_dir)
         self.known_dirs.add(remote_dir)
+
+    def chmod(self, mode, remote_path):
+        # Práva čtení pro web server (lftp je nastavovalo samo; bez nich 403).
+        try:
+            self.ftp.sendcmd(f'SITE CHMOD {mode} {remote_path}')
+        except ftplib.all_errors as exc:
+            print(f'  chmod {mode} {remote_path}: {exc}')
 
     def remote_size(self, remote_path):
         try:
@@ -114,8 +122,12 @@ class Uploader:
             size = self.retry(self.remote_size, remote_path)
             if size == os.path.getsize(local_path):
                 self.skipped += 1
+                # i nezměněný soubor: srovnat práva (oprava po nasazení bez chmod)
+                self.ensure_dir(remote_path.rsplit('/', 1)[0])
+                self.chmod('644', remote_path)
                 return
         self.retry(self._put, local_path, remote_path, atomic)
+        self.chmod('644', remote_path)
         self.uploaded += 1
 
 
