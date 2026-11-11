@@ -8,7 +8,7 @@ export interface Faq {
 export const homeFaqs: Faq[] = [
   {
     q: 'Kolik stojí spolupráce se mnou?',
-    a: 'Konzultace jsou nezávazné a zdarma. Za mou práci mi nic přímo neplatíte.',
+    a: 'Celá služba je pro vás bez poplatků a konzultace jsou nezávazné. Za mou práci mi nic přímo neplatíte.',
   },
   { q: 'Jak dlouho konzultace trvá?', a: 'Úvodní konzultace trvá přibližně 30 minut.' },
   {

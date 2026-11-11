@@ -73,7 +73,7 @@ const situations = [
 
     <section class="dk-reviews" aria-labelledby="dk-reviews-heading">
       <div class="dk-wrap">
-        <h2 id="dk-reviews-heading">Napíšete pár slov o&nbsp;tom, jak to s&nbsp;vámi bylo?</h2>
+        <h2 id="dk-reviews-heading">Napíšete pár slov o&nbsp;naší spolupráci?</h2>
         <p class="dk-sub">{czechNbsp('Lidé, kteří poradce teprve hledají, se nejvíc řídí zkušenostmi druhých. Ta vaše jim pomůže.')}</p>
         <div class="dk-tiles">
           <a class="dk-tile" href={GOOGLE_WRITE_REVIEW_URL} target="_blank" rel="noopener" data-dk-review="google">
@@ -901,6 +901,47 @@ const situations = [
 
     .dk-tile:hover {
       transform: none;
+    }
+  }
+
+  /* ===== Jednotné velikosti (audit 11. 11. 2026): nadpis a úvodní text jako
+     ostatní samostatné stránky (/financni-check-up, Na kolik dosáhnete?). ===== */
+  .dk-hero h1 {
+    font-size: 38px;
+    line-height: 1.06;
+    letter-spacing: -.05em;
+  }
+
+  .dk-hero__lead {
+    font-size: 16.5px;
+  }
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .dk-hero h1 {
+      font-size: clamp(56px, calc(56px + 0.052632 * (100vw - 834px)), 84px);
+      line-height: .99;
+    }
+
+    .dk-hero__lead {
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .dk-hero h1 {
+      font-size: 64px;
+      line-height: 1.02;
+      letter-spacing: -.052em;
+    }
+
+    .dk-hero__lead {
+      font-size: 19px;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .dk-hero h1 {
+      font-size: 72px;
     }
   }
 </style>

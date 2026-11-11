@@ -8,7 +8,7 @@ import { getPublishedArticles } from '../data/articles';
 
 const HEAD = `# Patrik Gajdadzis – finanční poradce, Ostrava
 
-> Patrik Gajdadzis je osobní finanční poradce z Ostravy. Pomáhá s hypotékami a financováním bydlení, finančním plánem, pojištěním, investicemi a penzí. Finance neřeší po částech, ale v souvislostech: začíná tím, co klient právě potřebuje vyřešit, a další oblasti otevírá jen tehdy, když dávají smysl. Konzultace probíhají osobně v Ostravě-Porubě nebo online po celé ČR. Úvodní konzultace trvá přibližně 30 minut, je nezávazná a zdarma.
+> Patrik Gajdadzis je osobní finanční poradce z Ostravy. Pomáhá s hypotékami a financováním bydlení, finančním plánem, pojištěním, investicemi a penzí. Finance neřeší po částech, ale v souvislostech: začíná tím, co klient právě potřebuje vyřešit, a další oblasti otevírá jen tehdy, když dávají smysl. Konzultace probíhají osobně v Ostravě-Porubě nebo online po celé ČR. Úvodní konzultace trvá přibližně 30 minut, je nezávazná a celá služba je bez poplatků.
 
 Základní fakta:
 

@@ -37,7 +37,7 @@ import { type LegalPageData, link } from './types';
  * už neobsahuje `doplnit`. Stránka aktuálně nemá ŽÁDNÝ zbývající `[DOPLNIT]`.
  */
 export const regulatoryPage: LegalPageData = {
-  metaTitle: 'Regulatorní informace - Patrik Gajdadzis',
+  metaTitle: 'Regulatorní informace | Patrik Gajdadzis',
   metaDescription:
     'Informace o mé registraci a oprávnění ke zprostředkování finančních produktů, odměňování a mimosoudním řešení sporů.',
   heading: 'Regulatorní informace',
@@ -140,7 +140,7 @@ export const regulatoryPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Tato osvědčení dokládají odbornou způsobilost pro danou oblast; nejsou to registrační čísla v registru ČNB, ta jsou uvedená výše.',
+            'Tato osvědčení dokládají odbornou způsobilost pro danou oblast.',
           ],
         },
       ],
@@ -153,7 +153,7 @@ export const regulatoryPage: LegalPageData = {
           type: 'p',
           content: [
             'Registrované osoby v oblasti distribuce finančních produktů eviduje Česká národní banka ve svém veřejném registru ',
-            link('https://www.cnb.cz/cnb/jerrs', 'JERRS - Seznamy regulovaných a registrovaných subjektů finančního trhu', true),
+            link('https://www.cnb.cz/cnb/jerrs', 'JERRS – Seznamy regulovaných a registrovaných subjektů finančního trhu', true),
             '.',
           ],
         },
@@ -172,7 +172,7 @@ export const regulatoryPage: LegalPageData = {
         {
           type: 'p',
           content: [
-            'Za samotnou konzultaci neplatíte nic. Provize je součástí nákladů, které finanční instituci platí až za sjednaný produkt. Nejde o částku navíc nad rámec toho, co byste za produkt platili tak jako tak.',
+            'Za mou službu mi nic neplatíte. Provize je součástí nákladů, které finanční instituci platí až za sjednaný produkt. Nejde o částku navíc nad rámec toho, co byste za produkt platili tak jako tak.',
           ],
         },
       ],

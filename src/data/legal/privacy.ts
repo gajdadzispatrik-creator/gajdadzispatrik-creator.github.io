@@ -17,7 +17,7 @@ import { type LegalPageData, link } from './types';
  * úkol „právní podstránky“, §2).
  */
 export const privacyPage: LegalPageData = {
-  metaTitle: 'Zpracování osobních údajů - Patrik Gajdadzis',
+  metaTitle: 'Zpracování osobních údajů | Patrik Gajdadzis',
   metaDescription:
     'Jaké osobní údaje zpracovávám, proč, jak dlouho a jaká máte práva podle GDPR.',
   heading: 'Zpracování osobních údajů',

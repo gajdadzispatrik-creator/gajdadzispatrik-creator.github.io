@@ -24,7 +24,7 @@ import { type LegalPageData } from './types';
  * spouštěč (`#footer-cookie-settings`), CookieConsent.astro se neupravuje.
  */
 export const cookiesPage: LegalPageData = {
-  metaTitle: 'Cookies - Patrik Gajdadzis',
+  metaTitle: 'Cookies | Patrik Gajdadzis',
   metaDescription: 'Jaké cookies na webu používám, k čemu slouží a jak souhlas s nimi upravit nebo odvolat.',
   heading: 'Cookies',
   sections: [

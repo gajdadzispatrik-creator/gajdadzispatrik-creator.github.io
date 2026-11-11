@@ -309,7 +309,7 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
         <div class="art-closing__body">
           <p>
             Na&nbsp;úvodní konzultaci projdeme vaši situaci i&nbsp;smlouvy, které máte. Ukážu vám, co dává smysl nechat
-            a&nbsp;co upravit. 30&nbsp;minut, nezávazně a&nbsp;zdarma.
+            a&nbsp;co upravit. Trvá 30&nbsp;minut a&nbsp;je nezávazná, celá služba je pro&nbsp;vás bez poplatků.
           </p>
           <div class="art-closing__actions">
             <a class="art-cta" href="/#kontakt">Nezávazná konzultace</a>
@@ -1776,6 +1776,31 @@ const components = { Praxe, Upozorneni, Checklist, Priklad, CheckupOdkaz, GrafVy
     .art-closing__grid h2 {
       width: 480px;
       font-size: 52px;
+    }
+  }
+
+  /* ===== Jednotné velikosti (audit 11. 11. 2026, žádná stránka nemá vlastní styl):
+     telefon v tmavém závěru 17 px a úvodní text pod nadpisem 16,5 / plynule / 19 px
+     jako na ostatních stránkách. ===== */
+  .art-phone {
+    font-size: 17px;
+  }
+
+  @media (max-width: 767px) {
+    .art-hero__lead {
+      font-size: 16.5px;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .art-hero__lead {
+      font-size: clamp(16.5px, calc(16.5px + 0.004699 * (100vw - 834px)), 19px);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .art-hero__lead {
+      font-size: 19px;
     }
   }
 </style>
