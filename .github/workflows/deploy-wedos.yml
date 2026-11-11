@@ -51,7 +51,8 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    # Pevná verze systému (11. 11. 2026: ubuntu-latest dvakrát selhal na instalaci lftp).
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -86,7 +87,15 @@ jobs:
           ! grep -q 'noindex, nofollow' dist/index.html
       - name: Instalace lftp
         if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+        # Odolná instalace (11. 11. 2026): chyba v seznamu balíčků nezastaví
+        # nasazení, instalace se až 3× zopakuje.
+        run: |
+          for i in 1 2 3; do
+            sudo apt-get update -qq || true
+            if sudo apt-get install -y -qq --no-install-recommends lftp; then exit 0; fi
+            echo "Pokus $i selhal, zkouším znovu…"; sleep 10
+          done
+          exit 1
       - name: Nahrání na Wedos (FTP s TLS)
         if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
         env:
