@@ -46,13 +46,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: wedos
+  group: wedos-deploy
   cancel-in-progress: false
 
 jobs:
   deploy:
     # Pevná verze systému (11. 11. 2026: ubuntu-latest dvakrát selhal na instalaci lftp).
     runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -85,36 +86,14 @@ jobs:
           test -f dist/api/.htaccess
           test -f dist/api/poptavka.php
           ! grep -q 'noindex, nofollow' dist/index.html
-      - name: Instalace lftp
-        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
-        # Odolná instalace (11. 11. 2026): chyba v seznamu balíčků nezastaví
-        # nasazení, instalace se až 3× zopakuje.
-        run: |
-          for i in 1 2 3; do
-            sudo apt-get update -qq || true
-            if sudo apt-get install -y -qq --no-install-recommends lftp; then exit 0; fi
-            echo "Pokus $i selhal, zkouším znovu…"; sleep 10
-          done
-          exit 1
+      # 11. 11. 2026: místo lftp vlastní skript v Pythonu (instalace lftp přes apt
+      # na serverech GitHubu opakovaně selhávala/visela). Chování stejné:
+      # nejdřív _astro/ (jen nové), potom zbytek přes dočasný soubor a přejmenování,
+      # api/limity/ se nenahrává ani nemaže, nakonec deploy/www.htaccess → /www/.htaccess.
       - name: Nahrání na Wedos (FTP s TLS)
         if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
         env:
           FTP_HOST: ${{ secrets.WEDOS_FTP_HOST }}
           FTP_USER: ${{ secrets.WEDOS_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.WEDOS_FTP_PASSWORD }}
-        run: |
-          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$FTP_PASSWORD" || { echo "Chybí tajné údaje WEDOS_FTP_*"; exit 1; }
-          lftp -c "
-            set ftp:ssl-allow yes;
-            set ftp:ssl-force yes;
-            set ssl:verify-certificate no;
-            set ftp:passive-mode yes;
-            set net:max-retries 2;
-            set net:timeout 30;
-            debug 2;
-            set xfer:use-temp-file yes;
-            open -u \"$FTP_USER\",\"$FTP_PASSWORD\" ftp://$FTP_HOST;
-            mirror --reverse --verbose --parallel=4 --ignore-time dist/_astro/ /www/domains/patrikgajdadzis.cz/_astro/;
-            mirror --reverse --verbose --parallel=4 --exclude-glob api/limity/ --exclude-glob _astro/ dist/ /www/domains/patrikgajdadzis.cz/;
-            put deploy/www.htaccess -o /www/.htaccess
-          "
+        run: python3 scripts/deploy-wedos.py
