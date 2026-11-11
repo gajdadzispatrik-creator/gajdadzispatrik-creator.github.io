@@ -85,7 +85,8 @@ class Uploader:
             self.ftp.mkd(remote_dir)
         except ftplib.error_perm:
             pass  # už existuje
-        self.chmod('755', remote_dir)
+        if remote_dir.startswith(REMOTE_ROOT + '/'):  # jen složky webu, ne /www a výš
+            self.chmod('755', remote_dir)
         self.known_dirs.add(remote_dir)
 
     def chmod(self, mode, remote_path):
