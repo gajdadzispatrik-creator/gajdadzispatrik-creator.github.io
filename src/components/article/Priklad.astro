@@ -9,9 +9,11 @@ interface Props {
   title: string;
   rows: [string, string][];
   result?: [string, string];
+  /** Výsledek je záporný (chybí, platíte navíc, náklady): červeně, ne zeleně. */
+  negative?: boolean;
   note?: string;
 }
-const { title, rows, result, note } = Astro.props;
+const { title, rows, result, negative = false, note } = Astro.props;
 ---
 
 <figure class="priklad">
@@ -30,7 +32,7 @@ const { title, rows, result, note } = Astro.props;
     }
     {
       result && (
-        <div class="priklad__row priklad__row--result">
+        <div class:list={['priklad__row', 'priklad__row--result', { 'priklad__row--negative': negative }]}>
           <dt>{czechNbsp(result[0])}</dt>
           <dd>{czechNbsp(result[1])}</dd>
         </div>
@@ -116,6 +118,11 @@ const { title, rows, result, note } = Astro.props;
 
   .priklad__row--result dd {
     color: var(--emerald);
+  }
+
+  /* Zelená = dobré (úspora, výnos); co chybí nebo stojí navíc, je červeně. */
+  .priklad__row--negative dd {
+    color: var(--error);
   }
 
   .priklad__note {

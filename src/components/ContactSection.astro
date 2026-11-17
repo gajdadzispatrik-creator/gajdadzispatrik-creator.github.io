@@ -978,7 +978,7 @@ const bandDetails = [
     background: rgba(197, 48, 48, .08);
     font-weight: 600;
     font-size: 16px;
-    color: #B3261E;
+    color: var(--error);
   }
 
   .kontakt__grid {
@@ -1042,20 +1042,20 @@ const bandDetails = [
 
   .kontakt__field input[aria-invalid='true'],
   .kontakt__field select[aria-invalid='true'] {
-    border-bottom-color: #B3261E;
+    border-bottom-color: var(--error);
   }
 
 
   /* Chybné pole má i při psaní červenou linku. */
   .kontakt__field input[aria-invalid='true']:focus-visible {
-    box-shadow: 0 1px 0 0 #B3261E;
+    box-shadow: 0 1px 0 0 var(--error);
   }
 
   .kontakt__field-error {
     margin: 0;
     font-weight: 500;
     font-size: 16px;
-    color: #B3261E;
+    color: var(--error);
   }
 
   .kontakt__submit {
@@ -1099,7 +1099,7 @@ const bandDetails = [
 
   .kontakt__status--error {
     background: rgba(197, 48, 48, .08);
-    color: #B3261E;
+    color: var(--error);
   }
 
   .kontakt__status--error a {
