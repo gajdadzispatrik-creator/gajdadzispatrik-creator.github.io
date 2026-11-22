@@ -18,6 +18,10 @@ DirectorySlash Off
 
 RewriteEngine On
 
+# Metody TRACE/TRACK server vůbec nepotřebuje (bezpečnostní kontrola 22. 11. 2026).
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)$ [NC]
+RewriteRule ^ - [F,L]
+
 # 0) Stará adresa /poradce/ostrava (starší verze webu, Google ji ještě ukazuje)
 #    → úvodní stránka, jedním 301 (rozhodnutí Patrika 20. 10. 2026).
 RewriteCond %{THE_REQUEST} ^[A-Z]+\s/poradce/ostrava/?(\?[^\s]*)?\s [NC]
@@ -57,14 +61,15 @@ AddDefaultCharset UTF-8
 
 # Bezpečnostní hlavičky. CSP záměrně neomezuje skripty (web má inline
 # skripty a později přibude Google Analytics) — řeší jen vložení do cizího
-# rámu, podvržení <base> a pluginy. HSTS bez includeSubDomains/preload.
+# rámu, podvržení <base>, pluginy a odeslání formuláře mimo web.
+# HSTS bez includeSubDomains/preload.
 <IfModule mod_headers.c>
   Header always set Strict-Transport-Security "max-age=31536000"
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
-  Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
+  Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'"
 </IfModule>
 
 # Cache: soubory v /_astro/ mají v názvu otisk obsahu, takže je lze cachovat

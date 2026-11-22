@@ -33,6 +33,14 @@ const MIN_FILL_MS = 3000;
 // proxy, přísnější limit by blokoval skutečné klienty.
 const RATE_LIMIT = 8;
 const RATE_WINDOW_S = 3600;
+// Potvrzovací e-maily na adresu z formuláře (bezpečnostní kontrola 22. 11. 2026):
+// celkem nejvýš CONFIRM_LIMIT za hodinu a na jednu adresu nejvýš jedno za
+// CONFIRM_PER_ADDRESS_S. Robot tak nemůže web použít k rozesílání pošty pod
+// Patrikovým jménem. Poptávka Patrikovi odejde vždy, omezuje se jen potvrzení.
+const CONFIRM_LIMIT = 20;
+const CONFIRM_PER_ADDRESS_S = 86400;
+// Odeslání jen z vlastního webu (hlavička Origin, kterou posílá prohlížeč).
+const ALLOWED_ORIGINS = ['https://patrikgajdadzis.cz', 'https://www.patrikgajdadzis.cz'];
 
 const INTEREST_AREAS = [
     'Finanční plán',
@@ -108,10 +116,14 @@ function rateLimited(): bool
     if (!is_dir($dir) && !@mkdir($dir, 0700) && !is_dir($dir)) {
         return false;
     }
-    // Za proxy je skutečná IP v X-Forwarded-For; podvržení hlavičky limit jen
-    // obejde, nikoho nezablokuje.
-    $forwarded = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '')[0]);
-    $ip = $forwarded !== '' ? $forwarded : ($_SERVER['REMOTE_ADDR'] ?? '');
+    // Skutečná IP spojení (web na Wedosu neběží za proxy, ověřeno 22. 11. 2026).
+    // X-Forwarded-For si klient napíše sám, proto jen když je REMOTE_ADDR
+    // vnitřní adresa (kdyby Wedos někdy předřadil proxy).
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+        $forwarded = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '')[0]);
+        $ip = $forwarded !== '' ? $forwarded : $ip;
+    }
     $file = $dir . '/' . hash('sha256', $ip . '|' . __FILE__) . '.txt';
     $now = time();
 
@@ -141,13 +153,66 @@ function rateLimited(): bool
                 @unlink($old);
             }
         }
+        foreach (glob($dir . '/*.adr') ?: [] as $old) {
+            if (@filemtime($old) < $now - CONFIRM_PER_ADDRESS_S) {
+                @unlink($old);
+            }
+        }
     }
     return $limited;
+}
+
+/**
+ * Smí odejít potvrzení na tuhle adresu? Ne, když na ni už potvrzení šlo
+ * v posledních 24 h, nebo když web za poslední hodinu poslal CONFIRM_LIMIT
+ * potvrzení celkem. Při chybě souborového systému potvrzení neposílá
+ * (poptávka Patrikovi odejde tak jako tak).
+ */
+function confirmationAllowed(string $email): bool
+{
+    $dir = __DIR__ . '/limity';
+    if (!is_dir($dir) && !@mkdir($dir, 0700) && !is_dir($dir)) {
+        return false;
+    }
+    $now = time();
+    $addressFile = $dir . '/' . hash('sha256', strtolower($email) . '|' . __FILE__) . '.adr';
+    if (is_file($addressFile) && (int) @filemtime($addressFile) > $now - CONFIRM_PER_ADDRESS_S) {
+        return false;
+    }
+    $handle = @fopen($dir . '/potvrzeni-celkem.log', 'c+');
+    if ($handle === false) {
+        return false;
+    }
+    flock($handle, LOCK_EX);
+    $times = array_filter(
+        array_map('intval', explode("\n", (string) stream_get_contents($handle))),
+        static fn (int $t): bool => $t > $now - 3600
+    );
+    $allowed = count($times) < CONFIRM_LIMIT;
+    if ($allowed) {
+        $times[] = $now;
+    }
+    ftruncate($handle, 0);
+    rewind($handle);
+    fwrite($handle, implode("\n", $times));
+    flock($handle, LOCK_UN);
+    fclose($handle);
+    if ($allowed) {
+        @touch($addressFile);
+    }
+    return $allowed;
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     header('Allow: POST');
     respond(false, 405, $wantsJson);
+}
+
+// Cizí web nesmí nechat prohlížeče svých návštěvníků posílat poptávky sem.
+// Bez hlavičky Origin (starší prohlížeče) se poptávka nezamítá.
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin !== '' && !in_array($origin, ALLOWED_ORIGINS, true)) {
+    respond(false, 403, $wantsJson);
 }
 
 // Honeypot a příliš rychlé vyplnění → tváříme se, že je vše v pořádku.
@@ -163,9 +228,6 @@ if ($elapsed <= 0) {
 }
 if ($elapsed < MIN_FILL_MS) {
     respond(true, 200, $wantsJson);
-}
-if (rateLimited()) {
-    respond(false, 429, $wantsJson);
 }
 
 $name = oneLine(field('jmeno', 100));
@@ -232,6 +294,15 @@ $valid = $name !== ''
 if (!$valid) {
     respond(false, 400, $wantsJson);
 }
+// Limit až po kontrole údajů: neplatné pokusy nevytvářejí soubory v api/limity/.
+if (rateLimited()) {
+    respond(false, 429, $wantsJson);
+}
+
+// Text situace v textové verzi e-mailu: řádky začínající pomlčkami odsadit,
+// aby návštěvník nemohl podvrhnout vlastní blok „--- Pro CRM ---“ pro hlídač
+// poptávek (čte textovou verzi). V HTML verzi je text escapovaný.
+$situationText = preg_replace('/^(\s*)([-—–]{2,}|—)/mu', '$1> $2', $situation) ?? $situation;
 
 $encode = static fn (string $text): string => '=?UTF-8?B?' . base64_encode($text) . '?=';
 
@@ -262,7 +333,7 @@ $body = implode("\n", [
     ...($isRefix ? ['Konec fixace: ' . ($fixationEnd !== '' ? $fixationEnd : '(nevyplněno)')] : []),
     '',
     'Situace:',
-    $situation !== '' ? $situation : '(nevyplněno)',
+    $situationText !== '' ? $situationText : '(nevyplněno)',
     '',
     "Zdroj z webu: {$sourceCode}",
     ...($gclid !== '' ? ["gclid: {$gclid}"] : []),
@@ -389,7 +460,7 @@ $sent = $sentMain || $sentBackup;
 // HTML verze: potvrzeni-email.html + podpis-email.html (obojí v api/,
 // zvenku nedostupné). Textová verze níž je pro programy bez HTML —
 // při změně textu upravit obě.
-if ($sent && $hasEmail) {
+if ($sent && $hasEmail && confirmationAllowed($email)) {
     $clientText = implode("\n", [
         'Dobrý den,',
         '',

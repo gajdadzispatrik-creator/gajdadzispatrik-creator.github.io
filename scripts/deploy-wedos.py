@@ -42,9 +42,10 @@ def connect():
     host, user, password = (os.environ.get(k, '') for k in ('FTP_HOST', 'FTP_USER', 'FTP_PASSWORD'))
     if not (host and user and password):
         sys.exit('Chybí tajné údaje WEDOS_FTP_*')
+    # Certifikát serveru se ověřuje (bezpečnostní kontrola 22. 11. 2026): Wedos má
+    # platný certifikát Let's Encrypt na *.wNN.wedos.net, takže podvržený server
+    # mezi GitHubem a Wedosem by heslo k FTP nedostal.
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE  # jako dřív v lftp (ssl:verify-certificate no)
     ftp = SessionReuseFTP_TLS(context=ctx, timeout=60)
     ftp.connect(host, 21)
     ftp.login(user, password)

@@ -5,8 +5,8 @@
 #
 # Přístup k FTP je v tajných údajích repozitáře (Settings → Secrets and
 # variables → Actions), zadává je Patrik, v kódu ani v logu nejsou:
-#   WEDOS_FTP_HOST      např. 405333.w33.wedos.net
-#   WEDOS_FTP_USER      např. w405333
+#   WEDOS_FTP_HOST      adresa FTP serveru z administrace Wedosu
+#   WEDOS_FTP_USER      uživatel FTP z administrace Wedosu
 #   WEDOS_FTP_PASSWORD  heslo FTP účtu
 #
 # lftp nahraje celý dist/ včetně skrytých .htaccess a api/.htaccess

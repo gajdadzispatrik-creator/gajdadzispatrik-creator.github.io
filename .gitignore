@@ -22,3 +22,7 @@ npm-debug.log*
 
 # Originály fotek (velké, nejsou součástí webu)
 fotky-nove/
+
+# Interní dokumenty (strategie, reklamy, audity) – jen na disku, ne ve veřejném
+# úložišti (bezpečnostní kontrola 22. 11. 2026). Web je ke stavbě nepotřebuje.
+docs/
