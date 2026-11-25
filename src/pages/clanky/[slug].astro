@@ -84,7 +84,7 @@ const jsonLd: Record<string, unknown>[] = [
     dateModified: (data.updatedAt ?? data.publishedAt).toISOString(),
     author: { '@id': PERSON_ID },
     publisher: { '@id': PERSON_ID },
-    mainEntityOfPage: url,
+    mainEntityOfPage: { '@id': `${url}#webpage` },
     articleSection: data.category,
     inLanguage: 'cs-CZ',
     image: `${SITE_URL}${ogImage ?? '/og-image.png'}`,

@@ -16,6 +16,11 @@ export const PERSON_ID = `${SITE_URL}/#person`;
 export const PERSON_IMAGE = `${SITE_URL}/patrik-gajdadzis.jpg`;
 export const WEBSITE_ID = `${SITE_URL}/#website`;
 export const BUSINESS_ID = `${SITE_URL}/#business`;
+// MINT reality a finance s.r.o. – stálý identifikátor podle jejího webu, aby se
+// na stejný uzel mohl později napojit web Mintu i Hypotéky Ostrava
+// (implementační plán SEO 25. 11. 2026, A-1). Jen název a web, žádné další
+// údaje, které na tomto webu nejsou vidět.
+export const MINT_ID = 'https://www.mintreality.cz/#organization';
 
 // Kancelář, kde probíhají konzultace — potvrzeno uživatelem 24. 9. 2026 jako
 // jediná adresa pro web a Google Business Profile (ne registrované sídlo
@@ -75,13 +80,11 @@ export const personEntity = {
   image: PERSON_IMAGE,
   telephone: '+420775217721',
   email: 'patrik@mintfinance.cz',
-  jobTitle: 'Finanční poradce',
-  worksFor: {
-    '@type': 'Organization',
-    name: 'MINT reality a finance s.r.o.',
-    url: 'https://www.mintreality.cz/',
-  },
-  areaServed: { '@type': 'City', name: 'Ostrava' },
+  // Obě skutečné specializace (Patrik 25. 11. 2026): na osobním webu
+  // „Finanční poradce“, na Hypotéce Ostrava „Hypoteční specialista“.
+  jobTitle: ['Finanční poradce', 'Hypoteční specialista'],
+  worksFor: { '@id': MINT_ID },
+  // `areaServed` u Person schema.org nedefinuje – oblast nese firma níž.
   workLocation: { '@id': BUSINESS_ID },
   knowsAbout: ['Hypotéky', 'Finanční plánování', 'Pojištění', 'Investice', 'Penzijní plánování'],
   sameAs: [
@@ -107,9 +110,23 @@ export const businessEntity = {
   telephone: '+420775217721',
   email: 'patrik@mintfinance.cz',
   address: OFFICE_ADDRESS,
+  // Souřadnice = špendlík Google profilu (GOOGLE_REVIEWS_URL výš), mapa = CID.
+  geo: { '@type': 'GeoCoordinates', latitude: 49.8290121, longitude: 18.1635271 },
+  hasMap: GOOGLE_MAPS_CID_URL,
+  // IČO podnikatele (viditelné na /regulatorni-informace a na Firmy.cz) –
+  // jako `identifier`, ne `taxID` (to je DIČ).
+  identifier: { '@type': 'PropertyValue', propertyID: 'IČO', value: '09214526' },
   areaServed: { '@type': 'City', name: 'Ostrava' },
   founder: { '@id': PERSON_ID },
-  sameAs: [GOOGLE_MAPS_CID_URL],
+  // Tentýž podnik (název, IČO, adresa a telefon se shodují): Google profil a Firmy.cz.
+  sameAs: [GOOGLE_MAPS_CID_URL, 'https://www.firmy.cz/detail/13779989-patrik-gajdadzis-hypoteky-a-finance-ostrava-poruba.html'],
+};
+
+export const mintEntity = {
+  '@type': 'Organization',
+  '@id': MINT_ID,
+  name: 'MINT reality a finance s.r.o.',
+  url: 'https://www.mintreality.cz/',
 };
 
 export const websiteEntity = {

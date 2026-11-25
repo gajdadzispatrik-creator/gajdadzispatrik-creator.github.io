@@ -64,6 +64,7 @@ const SERVICE_DESCRIPTION =
 const investiceJsonLd = [
   {
     '@type': 'Service',
+    '@id': 'https://patrikgajdadzis.cz/sluzby/investice#service',
     name: SERVICE_NAME,
     description: SERVICE_DESCRIPTION,
     url: 'https://patrikgajdadzis.cz/sluzby/investice',
@@ -140,6 +141,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Investiční poradenství Ostrava | Patrik Gajdadzis"
   description="Začínáte investovat, nebo nerozumíte tomu, co máte? Vysvětlím to a nastavím investice podle vašich cílů. Ostrava i online, bez poplatků."
+  pageAbout="https://patrikgajdadzis.cz/sluzby/investice#service"
   jsonLd={[...investiceJsonLd, faqPage(faqs)]}
 >
   <Header />

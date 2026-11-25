@@ -77,6 +77,7 @@ const SERVICE_DESCRIPTION =
 const financniPlanJsonLd = [
   {
     '@type': 'Service',
+    '@id': 'https://patrikgajdadzis.cz/sluzby/financni-plan#service',
     name: SERVICE_NAME,
     description: SERVICE_DESCRIPTION,
     url: 'https://patrikgajdadzis.cz/sluzby/financni-plan',
@@ -187,6 +188,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Finanční plán Ostrava | Patrik Gajdadzis"
   description="Bydlení, děti, rezerva, penze. Spojím vaše cíle do jednoho plánu, kde jedno rozhodnutí nepoškodí druhé. Ostrava i online, bez poplatků."
+  pageAbout="https://patrikgajdadzis.cz/sluzby/financni-plan#service"
   jsonLd={[...financniPlanJsonLd, faqPage(faqs)]}
 >
   <Header />

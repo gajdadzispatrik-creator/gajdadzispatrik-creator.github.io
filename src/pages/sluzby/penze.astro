@@ -78,6 +78,7 @@ const SERVICE_DESCRIPTION =
 const penzeJsonLd = [
   {
     '@type': 'Service',
+    '@id': 'https://patrikgajdadzis.cz/sluzby/penze#service',
     name: SERVICE_NAME,
     description: SERVICE_DESCRIPTION,
     url: 'https://patrikgajdadzis.cz/sluzby/penze',
@@ -145,6 +146,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Plánování penze a důchodu | Patrik Gajdadzis"
   description="Spočítám, kolik budete na penzi potřebovat, kolik vám dá stát a kolik si měsíčně odkládat. Ostrava i online, bez poplatků, hodnocení 5,0 na Googlu."
+  pageAbout="https://patrikgajdadzis.cz/sluzby/penze#service"
   jsonLd={[...penzeJsonLd, faqPage(faqs)]}
 >
   <Header />

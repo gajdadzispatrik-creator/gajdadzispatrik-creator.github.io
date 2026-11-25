@@ -60,6 +60,7 @@ const SERVICE_DESCRIPTION =
 const hypotekyJsonLd = [
   {
     '@type': 'Service',
+    '@id': 'https://patrikgajdadzis.cz/sluzby/hypoteky#service',
     name: SERVICE_NAME,
     description: SERVICE_DESCRIPTION,
     url: 'https://patrikgajdadzis.cz/sluzby/hypoteky',
@@ -179,6 +180,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Hypoteční poradce Ostrava | Patrik Gajdadzis"
   description="Hypoteční poradce v Ostravě. Zjistím, na kolik dosáhnete, porovnám banky a najdu cestu i tam, kde vám banka řekla ne. Bez poplatků."
+  pageAbout="https://patrikgajdadzis.cz/sluzby/hypoteky#service"
   jsonLd={[...hypotekyJsonLd, faqPage(faqs)]}
 >
   <Header />

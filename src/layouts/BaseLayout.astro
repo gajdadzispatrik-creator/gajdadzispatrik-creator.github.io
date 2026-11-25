@@ -4,7 +4,7 @@ import '../styles/fonts.css';
 import '../styles/global.css';
 import CookieConsent from '../components/CookieConsent.astro';
 import FormThanks from '../components/FormThanks.astro';
-import { businessEntity, personEntity, websiteEntity } from '../data/entity';
+import { WEBSITE_ID, businessEntity, mintEntity, personEntity, websiteEntity } from '../data/entity';
 
 interface Props {
   title: string;
@@ -25,6 +25,13 @@ interface Props {
    *  (public/og/<soubor>.png, `npm run og`). Jinak výchozí /og-image.png. */
   ogImage?: string;
   ogImageAlt?: string;
+  /** Typ uzlu stránky ve strukturovaných datech (`{URL}#webpage`):
+   *  ProfilePage pro /o-mne, CollectionPage pro výpis článků, jinak WebPage. */
+  pageType?: 'WebPage' | 'ProfilePage' | 'CollectionPage';
+  /** `@id` toho, o čem stránka je (služba, osoba) → `about`. */
+  pageAbout?: string;
+  /** `@id` hlavní entity stránky (osoba na ProfilePage) → `mainEntity`. */
+  pageMainEntity?: string;
 }
 
 const {
@@ -36,6 +43,9 @@ const {
   canonical = true,
   ogImage = '/og-image.png',
   ogImageAlt = 'Patrik Gajdadzis, finanční poradce, Ostrava',
+  pageType = 'WebPage',
+  pageAbout,
+  pageMainEntity,
 } = Astro.props;
 const ogImageUrl = new URL(ogImage, Astro.site).href;
 
@@ -47,11 +57,44 @@ const rawPath = Astro.url.pathname;
 const normalizedPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, -1) : rawPath;
 const canonicalURL = new URL(normalizedPath || '/', Astro.site).toString();
 
+// Uzel stránky (implementační plán SEO 25. 11. 2026, A-1): každá stránka
+// s kanonickou adresou má `{URL}#webpage`, který patří k webu (`isPartOf`)
+// a odkazuje na svou drobečkovou navigaci a na to, o čem je.
+const breadcrumbId = `${canonicalURL}#breadcrumb`;
+const hasBreadcrumb = jsonLd.some((node) => node['@type'] === 'BreadcrumbList');
+const pageNodes = jsonLd.map((node) => {
+  if (node['@type'] === 'BreadcrumbList' && !node['@id']) return { '@id': breadcrumbId, ...node };
+  if (node['@type'] === 'FAQPage' && !node['@id']) return { '@id': `${canonicalURL}#faq`, ...node };
+  return node;
+});
+const webPageNode = canonical
+  ? {
+      '@type': pageType,
+      '@id': `${canonicalURL}#webpage`,
+      url: canonicalURL,
+      name: title,
+      description,
+      inLanguage: 'cs-CZ',
+      isPartOf: { '@id': WEBSITE_ID },
+      ...(hasBreadcrumb ? { breadcrumb: { '@id': breadcrumbId } } : {}),
+      ...(pageAbout ? { about: { '@id': pageAbout } } : {}),
+      ...(pageMainEntity ? { mainEntity: { '@id': pageMainEntity } } : {}),
+    }
+  : null;
+
 const jsonLdGraph = {
   '@context': 'https://schema.org',
   // Firma (Google Business Profile) je na každé stránce, protože na ni
   // Person odkazuje přes `workLocation` — bez ní by odkaz visel do prázdna.
-  '@graph': [websiteEntity, personEntity, businessEntity, ...jsonLd],
+  // Stejně MINT (`worksFor`).
+  '@graph': [
+    websiteEntity,
+    personEntity,
+    businessEntity,
+    mintEntity,
+    ...(webPageNode ? [webPageNode] : []),
+    ...pageNodes,
+  ],
 };
 ---
 

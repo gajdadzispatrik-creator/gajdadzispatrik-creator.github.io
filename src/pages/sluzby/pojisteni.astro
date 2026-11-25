@@ -64,6 +64,7 @@ const SERVICE_DESCRIPTION =
 const pojisteniJsonLd = [
   {
     '@type': 'Service',
+    '@id': 'https://patrikgajdadzis.cz/sluzby/pojisteni#service',
     name: SERVICE_NAME,
     description: SERVICE_DESCRIPTION,
     url: 'https://patrikgajdadzis.cz/sluzby/pojisteni',
@@ -143,6 +144,7 @@ const faqs: Faq[] = [
 <BaseLayout
   title="Pojištění příjmu, rodiny a majetku | Patrik Gajdadzis"
   description="Nastavím nové pojištění nebo zkontroluji stávající, aby vás podrželo při nemoci, výpadku příjmu či škodě. Ostrava i online, bez poplatků."
+  pageAbout="https://patrikgajdadzis.cz/sluzby/pojisteni#service"
   jsonLd={[...pojisteniJsonLd, faqPage(faqs)]}
 >
   <Header />

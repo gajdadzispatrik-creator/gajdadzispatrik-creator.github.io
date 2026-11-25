@@ -119,15 +119,9 @@ import heroPhoto from '../assets/photos/patrik-omne-hero-top.webp';
 
 // ProfilePage (ne AboutPage) + BreadcrumbList — viz úkol „Předspouštěcí P0
 // technické dotažení“, §12. `mainEntity` odkazuje na JEDINOU Person entitu
-// webu (`entity.ts`), žádná druhá Person entita se nevytváří.
+// webu (`entity.ts`), žádná druhá Person entita se nevytváří. Uzel ProfilePage
+// (`/o-mne#webpage`) skládá BaseLayout z `pageType` a `pageMainEntity`.
 const oMneJsonLd = [
-  {
-    '@type': 'ProfilePage',
-    '@id': `${SITE_URL}/o-mne#profilepage`,
-    url: `${SITE_URL}/o-mne`,
-    name: 'O mně | Patrik Gajdadzis',
-    mainEntity: { '@id': PERSON_ID },
-  },
   breadcrumbList([
     { name: 'Domů', path: '/' },
     { name: 'O mně', path: '/o-mne' },
@@ -198,6 +192,8 @@ const facts: FactRow[] = [
   description="Finanční poradce z Ostravy. Hypotéky, pojištění, investice a penze řeším s klienty osobně. Vedu finanční část Mint reality & finance."
   ogType="profile"
   jsonLd={oMneJsonLd}
+  pageType="ProfilePage"
+  pageMainEntity={PERSON_ID}
 >
   <Header />
   <main id="hero" class="om">
