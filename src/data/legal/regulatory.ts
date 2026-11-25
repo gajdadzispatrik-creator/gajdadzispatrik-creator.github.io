@@ -153,7 +153,7 @@ export const regulatoryPage: LegalPageData = {
           type: 'p',
           content: [
             'Registrované osoby v oblasti distribuce finančních produktů eviduje Česká národní banka ve svém veřejném registru ',
-            link('https://www.cnb.cz/cnb/jerrs', 'JERRS – Seznamy regulovaných a registrovaných subjektů finančního trhu', true),
+            link('https://jerrs.cnb.cz/apljerrsdad/JERRS.WEB07.INTRO_PAGE?p_lang=cz', 'JERRS – Seznamy regulovaných a registrovaných subjektů finančního trhu', true),
             '.',
           ],
         },

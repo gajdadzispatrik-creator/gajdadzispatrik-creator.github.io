@@ -167,6 +167,8 @@ const TIERS: Tier[] = [
 interface FactRow {
   heading: string;
   text: string;
+  /** Odkaz na celý text řádku (Odborná způsobilost → regulatorní informace, plán SEO 25. 11. 2026). */
+  href?: string;
   // Dvojice čísel, každé s vlastním popiskem (jako StatsBand na homepage).
   pair?: [{ value: string; label: string }, { value: string; label: string }];
 }
@@ -174,7 +176,7 @@ interface FactRow {
 const facts: FactRow[] = [
   { heading: 'Vedu finanční část Mint reality & finance', text: 'Vedle vedení týmu dál osobně pracuji se svými klienty.' },
   { heading: 'Stojím za projektem Hypotéka Ostrava', text: 'Články, kalkulačka a propojení s hypotečními specialisty.' },
-  { heading: 'Odborná způsobilost', text: 'Úvěry, pojištění a investice.' },
+  { heading: 'Odborná způsobilost', text: 'Úvěry, pojištění a investice.', href: '/regulatorni-informace' },
   { heading: '', text: '', pair: [{ value: '150+', label: 'osobních klientů' }, { value: '5,0', label: 'hodnocení na Googlu' }] },
 ];
 ---
@@ -527,7 +529,7 @@ const facts: FactRow[] = [
               zbytečně složitý a&nbsp;stresující. Cílem projektu je&nbsp;pomoct mu&nbsp;zorientovat se&nbsp;a&nbsp;dostat se&nbsp;k&nbsp;člověku, který mu&nbsp;jednotlivé možnosti vysvětlí a&nbsp;pomůže financování
               dotáhnout.
             </p>
-            <a class="om-external-link" href="https://www.hypotekaostrava.cz/" target="_blank" rel="noopener noreferrer">
+            <a class="om-external-link" href="https://hypotekaostrava.cz/" target="_blank" rel="noopener noreferrer">
               <span>Hypotéka Ostrava</span>
               <svg class="om-external-link__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -560,7 +562,7 @@ const facts: FactRow[] = [
                 ) : (
                   <>
                     <h3>{fact.heading}</h3>
-                    <p>{fact.text}</p>
+                    <p>{fact.href ? <a class="om-facts__link" href={fact.href}>{fact.text}</a> : fact.text}</p>
                   </>
                 )}
               </li>
@@ -1591,6 +1593,20 @@ const facts: FactRow[] = [
     font-size: 16px;
     line-height: 1.5;
     color: var(--text-muted);
+  }
+
+  .om-facts__link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .om-facts__link:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
   }
 
   .om-facts__pair {
