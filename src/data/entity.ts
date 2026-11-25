@@ -19,8 +19,9 @@ export const BUSINESS_ID = `${SITE_URL}/#business`;
 // MINT reality a finance s.r.o. – stálý identifikátor podle jejího webu, aby se
 // na stejný uzel mohl později napojit web Mintu i Hypotéky Ostrava
 // (implementační plán SEO 25. 11. 2026, A-1). Jen název a web, žádné další
-// údaje, které na tomto webu nejsou vidět.
-export const MINT_ID = 'https://www.mintreality.cz/#organization';
+// údaje, které na tomto webu nejsou vidět. `@id` přesně podle JSON-LD na
+// mintreality.cz (RealEstateAgent `…/#firma`, ověřeno 26. 11. 2026).
+export const MINT_ID = 'https://www.mintreality.cz/#firma';
 
 // Kancelář, kde probíhají konzultace — potvrzeno uživatelem 24. 9. 2026 jako
 // jediná adresa pro web a Google Business Profile (ne registrované sídlo
@@ -90,6 +91,8 @@ export const personEntity = {
   sameAs: [
     'https://www.facebook.com/patrik.gajdadzis/',
     'https://www.instagram.com/patrikgajdadzis/',
+    // Veřejný osobní profil (ověřeno 25. 11. 2026, SEO fáze 2).
+    'https://www.linkedin.com/in/patrik-gajdadzis-7310422a8',
   ],
 };
 
