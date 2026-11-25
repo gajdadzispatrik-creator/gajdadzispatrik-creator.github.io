@@ -250,6 +250,11 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
             <input type="hidden" name="vyplneno-ms" value="" />
             <input type="hidden" name="zdroj" value="na-kolik-dosahnete" />
             <input type="hidden" name="oblast" value="Hypotéka a bydlení" />
+            <!-- Zdroj kliknutí (gclid/UTM) – jen s marketingovým souhlasem, doplní fillAttribution (implementační plán SEO 25. 11. 2026, A-3a). -->
+            <input type="hidden" name="gclid" value="" />
+            <input type="hidden" name="utm_source" value="" />
+            <input type="hidden" name="utm_medium" value="" />
+            <input type="hidden" name="utm_campaign" value="" />
             <input type="hidden" name="situace" value="" />
 
             <!-- Komu výpočet posíláte: fotka, jméno, kdy se ozve (jako u kontaktního formuláře). -->
@@ -319,6 +324,8 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 </BaseLayout>
 
 <script>
+  import { fillAttribution } from '../../../scripts/attribution-fields';
+
   interface ScreenCfg {
     id: string;
     kind: 'choice' | 'money' | 'age';
@@ -599,6 +606,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
         if (!allOk) return;
 
         const heardFrom = (form.elements.namedItem('odkud') as HTMLSelectElement | null)?.value ?? '';
+        fillAttribution(form);
         const elapsed = form.elements.namedItem('vyplneno-ms') as HTMLInputElement;
         elapsed.value = String(Math.round(performance.now() - (startedAt ?? 0)));
 
@@ -622,7 +630,7 @@ const config = { screens: screens.map(({ id, kind, options }) => ({ id, kind, op
 
         if (sent) {
           // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
-          document.dispatchEvent(new CustomEvent('pg:lead', { detail: { odkud: heardFrom } }));
+          document.dispatchEvent(new CustomEvent('pg:lead', { detail: { odkud: heardFrom, oblast: 'Hypotéka a bydlení' } }));
           form.reset();
           // Poděkování uprostřed obrazovky (FormThanks.astro), formulář zůstává.
           document.dispatchEvent(new CustomEvent('pg:thanks', { detail: { text: 'Díky, odpovědi mi dorazily. Spočítám to a ozvu se do jednoho pracovního dne.' } }));

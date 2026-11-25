@@ -760,7 +760,7 @@ const fixation = [
 
       if (sent) {
         // Konverze „Odeslání formuláře“ (CookieConsent.astro, jen se souhlasem).
-        document.dispatchEvent(new CustomEvent('pg:lead'));
+        document.dispatchEvent(new CustomEvent('pg:lead', { detail: { oblast: 'Hypotéka a bydlení' } }));
         // Vyplněné údaje po odeslání smazat (jako kontaktní formulář na úvodní stránce).
         form.reset();
         // Poděkování uprostřed obrazovky (FormThanks.astro), formulář zůstává.

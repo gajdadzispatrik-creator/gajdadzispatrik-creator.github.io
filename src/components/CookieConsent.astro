@@ -234,10 +234,28 @@ const categories: CookieCategory[] = [
    *
    * Konverze (strategie Google Ads, § 8): odeslání formuláře (událost
    * `pg:lead` z ContactSection a nástroje Na kolik dosáhnete), klik na
-   * telefon, na rezervaci termínu a na WhatsApp. Hodnota podle stránky:
-   * hypotéky 4, pojištění 3, ostatní 2 (relativní body, CZK); WhatsApp bez
-   * hodnoty (sekundární).
+   * telefon, na rezervaci termínu a na WhatsApp.
+   *
+   * Hodnota konverze = RELATIVNÍ VÁHA poptávky (4 / 3 / 2), ne skutečné
+   * peníze. Google Ads vyžaduje měnu, proto „CZK“, ale číslo není částka
+   * v korunách. Od 25. 11. 2026 (implementační plán SEO, A-3b): u formuláře
+   * podle zvoleného tématu poptávky („Hypotéka a bydlení“ 4, „Pojištění“ 3,
+   * ostatní 2) – dřív podle adresy stránky, takže hypoteční poptávka odeslaná
+   * z úvodní stránky dostala 2. Klik na telefon a rezervaci beze změny podle
+   * stránky (hypotéky 4, pojištění 3, ostatní 2). WhatsApp bez hodnoty
+   * (sekundární). Názvy konverzí a štítky Ads se nemění (kontinuita měření).
+   * Změny: docs/mereni-konverzi.md.
+   *
+   * Další události jen do GA4 (nejsou konverze v Ads, jen s analytickým
+   * souhlasem, bez osobních údajů): klik na e-mail, odeslané doporučení
+   * (/dekuji) a průchod check-upem – posílá je stránka přes `pg:event`.
+   *
+   * Pojistka (25. 11. 2026): gtag.js se načte JEN na ostré doméně
+   * (LIVE_HOST). Lokálně a na náhledu se události jen zapíšou do dataLayer
+   * a nikam neodejdou – 15. 10. 2026 odešly z localhost omylem skutečné
+   * konverze do Ads (docs/audits/google-ads-kontroly.md).
    */
+  const LIVE_HOST = 'patrikgajdadzis.cz';
   const GA_MEASUREMENT_ID = 'G-8DFSTT56X1';
   const ADS_ID = 'AW-18127073321';
   const ADS_LABELS = {
@@ -353,10 +371,12 @@ const categories: CookieCategory[] = [
         ad_personalization: 'denied',
         analytics_storage: 'denied',
       });
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${analytics ? GA_MEASUREMENT_ID : ADS_ID}`;
-      document.head.appendChild(script);
+      if (location.hostname === LIVE_HOST) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${analytics ? GA_MEASUREMENT_ID : ADS_ID}`;
+        document.head.appendChild(script);
+      }
       gtag('js', new Date());
     }
 
@@ -376,7 +396,15 @@ const categories: CookieCategory[] = [
     }
   }
 
-  const conversionValue = (): number => {
+  // Relativní váha (viz komentář nahoře), ne částka v Kč.
+  const conversionValue = (kind: Conversion, oblast = ''): number => {
+    // Hodnoty ve formuláři mají kvůli typografii nezlomitelné mezery.
+    const topic = oblast.replace(/ /g, ' ').trim();
+    if (kind === 'lead' && topic) {
+      if (topic === 'Hypotéka a bydlení') return 4;
+      if (topic === 'Pojištění') return 3;
+      return 2;
+    }
     const path = location.pathname;
     if (path.startsWith('/sluzby/hypoteky')) return 4;
     if (path.startsWith('/sluzby/pojisteni')) return 3;
@@ -385,22 +413,46 @@ const categories: CookieCategory[] = [
 
   // `answer` = odpověď „Jak jste se o mně dozvěděl/a?“ (jen u formuláře); jde
   // pouze do GA4 jako parametr `zdroj_odpoved`, do Google Ads ne.
-  function trackConversion(kind: Conversion, answer = ''): void {
+  // `oblast` = téma poptávky ze seznamu formuláře (ne osobní údaj).
+  function trackConversion(kind: Conversion, answer = '', oblast = ''): void {
     if (!granted.analytics && !granted.marketing) return;
-    const params = kind === 'whatsapp' ? {} : { value: conversionValue(), currency: 'CZK' };
+    const params = kind === 'whatsapp' ? {} : { value: conversionValue(kind, oblast), currency: 'CZK' };
     if (granted.marketing) gtag('event', 'conversion', { send_to: `${ADS_ID}/${ADS_LABELS[kind]}`, ...params });
     if (granted.analytics) {
       gtag('event', GA_EVENTS[kind], {
         send_to: GA_MEASUREMENT_ID,
         ...params,
         ...(answer ? { zdroj_odpoved: answer } : {}),
+        ...(oblast ? { oblast: oblast.replace(/ /g, ' ').trim() } : {}),
       });
     }
   }
 
+  // Události jen do GA4 (ne konverze v Ads). Povolené názvy – nic jiného
+  // se neodešle, parametry žádné (žádné osobní údaje).
+  const GA_ONLY_EVENTS = new Set([
+    'klik_email',
+    'doporuceni_odeslano',
+    'checkup_zahajen',
+    'checkup_dokoncen',
+    'checkup_poslat_vysledek',
+  ]);
+  function trackEvent(name: string): void {
+    if (!granted.analytics || !GA_ONLY_EVENTS.has(name)) return;
+    gtag('event', name, { send_to: GA_MEASUREMENT_ID });
+  }
+  document.addEventListener('pg:event', (event) => {
+    const name = (event as CustomEvent<{ name?: string }>).detail?.name;
+    if (typeof name === 'string') trackEvent(name);
+  });
+
   document.addEventListener('pg:lead', (event) => {
-    const detail = (event as CustomEvent<{ odkud?: string }>).detail;
-    trackConversion('lead', typeof detail?.odkud === 'string' ? detail.odkud : '');
+    const detail = (event as CustomEvent<{ odkud?: string; oblast?: string }>).detail;
+    trackConversion(
+      'lead',
+      typeof detail?.odkud === 'string' ? detail.odkud : '',
+      typeof detail?.oblast === 'string' ? detail.oblast : ''
+    );
   });
   document.addEventListener(
     'click',
@@ -412,6 +464,7 @@ const categories: CookieCategory[] = [
       else if (href.includes('calendar.app.google')) trackConversion('booking');
       // Jen kontakt na mě (wa.me/420…), ne sdílení článku (wa.me/?text=…).
       else if (/^https:\/\/wa\.me\/\d/.test(href)) trackConversion('whatsapp');
+      else if (href.startsWith('mailto:')) trackEvent('klik_email');
     },
     true
   );

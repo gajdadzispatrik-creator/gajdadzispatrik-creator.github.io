@@ -707,6 +707,8 @@ const config = {
       ].join('\n');
 
       showStep('result');
+      // Měření průchodu check-upem – jen do GA4, bez odpovědí (CookieConsent.astro, `pg:event`).
+      document.dispatchEvent(new CustomEvent('pg:event', { detail: { name: 'checkup_dokoncen' } }));
       root.querySelector<HTMLElement>(`[data-verdict="${verdict}"] .chk-verdict__title`)?.focus({ preventScroll: true });
       root.scrollIntoView({ block: 'start' });
 
@@ -730,6 +732,7 @@ const config = {
     };
 
     root.querySelector('[data-start]')?.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('pg:event', { detail: { name: 'checkup_zahajen' } }));
       showStep('quiz');
       showQuestion(0);
     });
@@ -757,6 +760,7 @@ const config = {
 
     // Výsledek do kontaktního formuláře (ContactSection.astro si ho vyzvedne).
     root.querySelector('[data-send]')?.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('pg:event', { detail: { name: 'checkup_poslat_vysledek' } }));
       try {
         sessionStorage.setItem('checkup-vysledek', summaryText);
       } catch {

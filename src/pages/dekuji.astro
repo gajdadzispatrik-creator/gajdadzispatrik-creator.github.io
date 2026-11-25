@@ -259,6 +259,8 @@ const situations = [
         (form.elements.namedItem('od') as HTMLInputElement).value = od;
         startedAt = null;
         if (submit) submit.textContent = 'Předat další kontakt';
+        // Jen do GA4, bez údajů (CookieConsent.astro, `pg:event`). Konverze v Ads to není.
+        document.dispatchEvent(new CustomEvent('pg:event', { detail: { name: 'doporuceni_odeslano' } }));
         document.dispatchEvent(new CustomEvent('pg:thanks', {
           detail: {
             text: 'Děkuji! Kontakt mám a brzy se mu ozvu.',
