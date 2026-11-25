@@ -54,6 +54,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import ServiceReview from '../../components/ServiceReview.astro';
+import ServiceArticles from '../../components/ServiceArticles.astro';
+import { getServiceArticles } from '../../data/serviceArticles';
 import SiteFooter from '../../components/SiteFooter.astro';
 import LineGradientDefs from '../../components/LineGradientDefs.astro';
 import { BOOKING_URL, PERSON_ID, breadcrumbList, faqPage } from '../../data/entity';
@@ -139,6 +141,9 @@ const faqs: Faq[] = [
   { q: 'Co když jsem rekonstruoval nemovitost nebo se mi změnil příjem?', a: 'To jsou situace, kdy má smysl současné pojištění znovu zkontrolovat. Původní nastavení už nemusí odpovídat dnešní hodnotě majetku nebo finanční situaci.' },
   { q: 'Pomůžete mi i při pojistné události?', a: 'Ano. Pomohu vám zorientovat se v postupu, potřebných podkladech a komunikaci s pojišťovnou. Samotné posouzení a plnění se řídí pojistnou smlouvou a příslušnými podmínkami.' },
 ];
+
+// Kapitola „Články“ (implementační plán SEO 25. 11. 2026, A-2): výběr v src/data/serviceArticles.ts.
+const serviceArticles = await getServiceArticles('pojisteni');
 ---
 
 <BaseLayout
@@ -189,7 +194,7 @@ const faqs: Faq[] = [
               />
             )}
             <path class="poj__route-path poj__route-path--dark" d="M 0 0 V 0" fill="none" stroke="var(--line-on-dark)" stroke-opacity=".3" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" />
-            {(['dopad', 'prijem', 'majetek', 'kontrola', 'prubeh', 'zkusenost', 'pece', 'otazky'] as const).map((marker) => (
+            {(['dopad', 'prijem', 'majetek', 'kontrola', 'prubeh', 'zkusenost', 'pece', 'clanky', 'otazky'] as const).map((marker) => (
               <g class="poj__marker" data-marker={marker}>
                 <line class="poj__notch" x1={v.axis} y1="0" x2={v.axis} y2="0" stroke="var(--line)" stroke-opacity=".18" stroke-width="1" stroke-linecap="round" />
                 <circle class="poj__dot" cx={v.axis} cy="0" r={v.tier === 'mobile' || v.tier === 'tablet' ? 3.2 : 3.5} fill="var(--emerald)" />
@@ -430,6 +435,18 @@ const faqs: Faq[] = [
       </div>
     </section>
 
+    <section class="poj-chapter poj-chapter--clanky" aria-labelledby="clanky-heading">
+      <div class="poj-chapter__bar poj-chapter__bar--muted" data-reveal data-route-target="clanky">
+        <p id="clanky-heading">Články</p>
+      </div>
+
+      <div class="poj-chapter__content poj-chapter__content--single">
+        <div data-reveal>
+          <ServiceArticles articles={serviceArticles} />
+        </div>
+      </div>
+    </section>
+
     <section class="poj-chapter poj-chapter--faq" aria-labelledby="otazky-heading">
       <div class="poj-chapter__bar poj-chapter__bar--muted" data-reveal data-route-target="otazky">
         <p id="otazky-heading">Otázky</p>
@@ -507,6 +524,7 @@ const faqs: Faq[] = [
       prubeh: main.querySelector('[data-route-target="prubeh"]'),
       zkusenost: main.querySelector('[data-route-target="zkusenost"]'),
       pece: main.querySelector('[data-route-target="pece"]'),
+      clanky: main.querySelector('[data-route-target="clanky"]'),
       otazky: main.querySelector('[data-route-target="otazky"]'),
     } as const;
 

@@ -1,0 +1,125 @@
+---
+/**
+ * Seznam článků ke službě – kapitola „Články“ na stránkách služeb
+ * (implementační plán SEO 25. 11. 2026, A-2). Výběr: src/data/serviceArticles.ts.
+ * Položky 1:1 jako „Mohlo by vás zajímat“ na konci článku
+ * (src/pages/clanky/[slug].astro, .art-related): štítek tématu, nadpis
+ * s odkazem, perex, mezi položkami linka. Obal a odkaz „Všechny články“ 1:1
+ * jako kapitola Zkušenost (ServiceReview.astro). Jediný zdroj vzhledu pro
+ * všechny služby.
+ */
+import { czechNbsp } from '../lib/rehype-czech-nbsp.mjs';
+import { articleHref, type Article } from '../data/articles';
+
+interface Props {
+  articles: Article[];
+}
+
+const { articles } = Astro.props;
+---
+
+<div class="service-articles">
+  <ul class="service-articles__list">
+    {
+      articles.map((a) => (
+        <li class="service-articles__item">
+          <p class="service-articles__category">{czechNbsp(a.data.category)}</p>
+          <h3 class="service-articles__title">
+            <a href={articleHref(a)}>{czechNbsp(a.data.title)}</a>
+          </h3>
+          <p class="service-articles__excerpt">{czechNbsp(a.data.description)}</p>
+        </li>
+      ))
+    }
+  </ul>
+  <a class="service-articles__more" href="/clanky">Všechny články</a>
+</div>
+
+<style>
+  .service-articles {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 720px;
+  }
+
+  .service-articles__list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Nadpis → text 14 px jako ostatní podnadpisy kapitol na stránkách služeb
+     (check:spacing, role „sub chapter H3“). */
+  .service-articles__item {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .service-articles__item:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .service-articles__category {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    color: var(--emerald);
+  }
+
+  .service-articles__title {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .service-articles__title a {
+    transition: color var(--duration-hover) var(--ease-out);
+  }
+
+  .service-articles__title a:hover {
+    color: var(--emerald);
+  }
+
+  .service-articles__excerpt {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .service-articles__more {
+    align-self: flex-start;
+    position: relative;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: var(--emerald);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition: color var(--duration-hover) var(--ease-out), text-decoration-color var(--duration-hover) var(--ease-out);
+  }
+
+  .service-articles__more::after {
+    content: '';
+    position: absolute;
+    inset: -13px 0;
+  }
+
+  .service-articles__more:hover {
+    color: var(--emerald-hover);
+    text-decoration-color: var(--emerald-hover);
+  }
+</style>
