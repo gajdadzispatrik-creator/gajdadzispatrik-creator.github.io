@@ -4,11 +4,14 @@ import HeroPhoto from './HeroPhoto.astro';
 
 <section id="hero" class="hero">
   <div class="hero__inner">
-    <h1 class="hero__title">
-      <span class="hero__title-line hero__title-line--1">Finance</span> <br />
-      <span class="hero__title-line hero__title-line--2">se&nbsp;nemají řešit</span> <br />
-      <span class="hero__title-line hero__title-line--3">po&nbsp;částech.</span>
-    </h1>
+    <div class="hero__heading">
+      <p class="hero__eyebrow">Finanční poradce · Ostrava</p>
+      <h1 class="hero__title">
+        <span class="hero__title-line hero__title-line--1">Finance</span> <br />
+        <span class="hero__title-line hero__title-line--2">se&nbsp;nemají řešit</span> <br />
+        <span class="hero__title-line hero__title-line--3">po&nbsp;částech.</span>
+      </h1>
+    </div>
 
     <p class="hero__subhead">
       Bydlení, ochranu, investice a&nbsp;penzi propojuji do&nbsp;jednoho plánu. <br class="hero__subhead-break" />
@@ -55,6 +58,44 @@ import HeroPhoto from './HeroPhoto.astro';
   }
 
   /* --- Typografie --- */
+
+  /* Štítek nad sloganem (Patrik 25. 11. 2026, varianta B „Finanční poradce ·
+     Ostrava“, implementační plán SEO). Absolutně nad H1 – slogan, fotka ani
+     tlačítka se neposunou. Styl jako ostatní štítky webu (kapitálky, proklad
+     .16em, 700). Mobil: text leží na fotce s tmavým přechodem → bílá jako
+     slogan; od tabletu světlé pozadí → zelená značky. */
+  .hero__heading {
+    position: relative;
+  }
+
+  .hero__eyebrow {
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    margin: 0 0 14px;
+    font-weight: 700;
+    font-size: 11.5px;
+    line-height: 18px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--white);
+  }
+
+  @media (min-width: 768px) {
+    .hero__eyebrow {
+      margin-bottom: 16px;
+      font-size: 12.5px;
+      color: var(--emerald);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .hero__eyebrow {
+      margin-bottom: 22px;
+      font-size: 13px;
+    }
+  }
 
   .hero__title {
     font-weight: 700;
