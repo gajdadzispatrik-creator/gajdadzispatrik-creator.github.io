@@ -90,6 +90,13 @@ jobs:
       # na serverech GitHubu opakovaně selhávala/visela). Chování stejné:
       # nejdřív _astro/ (jen nové), potom zbytek přes dočasný soubor a přejmenování,
       # api/limity/ se nenahrává ani nemaže, nakonec deploy/www.htaccess → /www/.htaccess.
+      # IndexNow (implementační plán SEO 25. 11. 2026, A-3d): stav živé sitemapy
+      # před nahráním, po nahrání oznámit jen nové a změněné adresy. Chyba
+      # nasazení neshodí (skript i krok končí úspěchem).
+      - name: IndexNow – stav před nahráním
+        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
+        continue-on-error: true
+        run: node scripts/indexnow.mjs snapshot
       - name: Nahrání na Wedos (FTP s TLS)
         if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
         env:
@@ -97,3 +104,7 @@ jobs:
           FTP_USER: ${{ secrets.WEDOS_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.WEDOS_FTP_PASSWORD }}
         run: python3 scripts/deploy-wedos.py
+      - name: IndexNow – oznámit nové a změněné adresy
+        if: github.event_name != 'schedule' || steps.clanky.outputs.due == 'true'
+        continue-on-error: true
+        run: node scripts/indexnow.mjs submit
