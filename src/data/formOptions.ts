@@ -13,5 +13,7 @@ export const HEARD_FROM_OPTIONS = [
   'Doporučení od známého nebo klienta',
   'Seznam / Firmy.cz',
   'Sociální sítě',
+  // Patrik 25. 11. 2026 (implementační plán SEO): poptávky přes AI vyhledávače.
+  'AI asistent (ChatGPT, Gemini…)',
   'Jiné',
 ] as const;

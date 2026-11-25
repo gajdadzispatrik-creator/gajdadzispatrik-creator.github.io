@@ -61,6 +61,7 @@ const HEARD_FROM = [
     'Doporučení od známého nebo klienta',
     'Seznam / Firmy.cz',
     'Sociální sítě',
+    'AI asistent (ChatGPT, Gemini…)',
     'Jiné',
 ];
 
